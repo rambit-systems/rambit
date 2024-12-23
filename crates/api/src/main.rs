@@ -235,7 +235,10 @@ async fn main() -> Result<()> {
     Commands::Health => {
       let health_report = state.health_report().await;
       println!("{}", serde_json::to_string(&health_report).unwrap());
-      return Ok(());
+      match health_report.overall_status() {
+        health::HealthStatus::Ok => std::process::exit(0),
+        _ => std::process::exit(1),
+      };
     }
     Commands::Start {
       bind_address,
