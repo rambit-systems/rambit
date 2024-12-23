@@ -54,6 +54,15 @@ impl<T: DatabaseAdapter> Migratable for T {
       org:        org.id,
     };
 
+    let byron_cache = models::Cache {
+      id:         CacheRecordId::from_str("01JFTEBFJ55TVWC7Z4BMPBX8AP")
+        .unwrap(),
+      name:       EntityName::new(StrictSlug::confident("byron")),
+      visibility: models::Visibility::Public,
+      store:      local_file_store.id,
+      org:        org.id,
+    };
+
     let omnitoken_token = models::Token {
       id:       TokenRecordId::from_str("01J53ZA38PS1P5KWCE4FMG58F0").unwrap(),
       nickname: EntityNickname::new(StrictSlug::confident("omnitoken")),
@@ -70,6 +79,14 @@ impl<T: DatabaseAdapter> Migratable for T {
             cache_id:   albert_cache.id,
             permission: CachePermissionType::Write,
           },
+          Permission::CachePermission {
+            cache_id:   byron_cache.id,
+            permission: CachePermissionType::Read,
+          },
+          Permission::CachePermission {
+            cache_id:   byron_cache.id,
+            permission: CachePermissionType::Write,
+          },
         ]
         .into_iter()
         .collect(),
@@ -82,6 +99,7 @@ impl<T: DatabaseAdapter> Migratable for T {
     self.create_model(user).await?;
     self.create_model(local_file_store).await?;
     self.create_model(albert_cache).await?;
+    self.create_model(byron_cache).await?;
     self.create_model(omnitoken_token).await?;
 
     Ok(())

@@ -24,14 +24,16 @@ mod temp_storage_payload;
 use std::{sync::Arc, time::Duration};
 
 use axum::{
+  body::Body,
   extract::{FromRef, Path, State},
-  response::IntoResponse,
+  http::HeaderMap,
+  response::{IntoResponse, Response},
   routing::{get, post},
   Json, Router,
 };
 use clap::Parser;
-use cmd::Commands;
 use miette::{IntoDiagnostic, Result};
+use mollusk::ExternalApiError;
 use prime_domain::{
   hex::{
     health::{self, HealthAware},
@@ -44,31 +46,41 @@ use prime_domain::{
 use tasks::Task;
 use tracing_subscriber::prelude::*;
 
-use self::{cmd::RuntimeConfig, temp_storage_payload::TempStoragePayload};
+use self::{
+  cmd::{Commands, RuntimeConfig},
+  temp_storage_payload::TempStoragePayload,
+};
 
-#[tracing::instrument(skip(app_state))]
-async fn prepare_fetch_payload(
+async fn fetch_handler(
   State(app_state): State<AppState>,
-  Json((cache_name, path, token_id, token_secret)): Json<(
-    String,
-    String,
-    Option<String>,
-    Option<String>,
-  )>,
-) -> Result<Json<models::StorageCredentials>, mollusk::InternalApiError> {
-  Ok(
-    tasks::PrepareFetchPayloadTask {
-      cache_name:   models::StrictSlug::new(cache_name),
-      token_id:     token_id
-        .and_then(|s| models::TokenRecordId::try_from(s).ok()),
-      token_secret: token_secret
-        .map(|s| models::TokenSecret::new(models::StrictSlug::new(s))),
-      path:         models::LaxSlug::new(path),
-    }
-    .run(app_state.prime_domain_service.clone())
-    .await
-    .map(Json)?,
-  )
+  Path((cache_name, path)): Path<(String, String)>,
+  headers: HeaderMap,
+) -> Result<Response, ExternalApiError> {
+  let token_id_secret_pair = headers
+    .get("authorization")
+    .and_then(|value| value.to_str().ok())
+    .map(|value| value.to_string());
+  let token_id = token_id_secret_pair
+    .clone()
+    .and_then(|pair| pair.split(':').next().map(|s| s.to_string()))
+    .and_then(|s| models::TokenRecordId::try_from(s).ok());
+  let token_secret = token_id_secret_pair
+    .and_then(|pair| pair.split(':').nth(1).map(|s| s.to_string()))
+    .map(|s| models::TokenSecret::new(models::StrictSlug::new(s)));
+
+  let data = app_state
+    .prime_domain_service
+    .fetch_path(
+      models::StrictSlug::new(cache_name),
+      token_id,
+      token_secret,
+      models::LaxSlug::new(path),
+    )
+    .await?;
+
+  let data = data.adapt_to_no_comp();
+
+  Ok(Response::new(Body::from_stream(data)))
 }
 
 #[tracing::instrument(skip(app_state, payload))]
@@ -252,7 +264,7 @@ async fn main() -> Result<()> {
   let app = Router::new()
     .route("/health", get(health_handler))
     .route("/naive-upload/:name/*path", post(naive_upload))
-    .route("/fetch_payload", get(prepare_fetch_payload))
+    .route("/fetch/:name/*path", get(fetch_handler))
     .route("/", get(dummy_root_handler))
     .with_state(state);
 

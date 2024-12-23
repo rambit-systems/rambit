@@ -34,6 +34,5 @@ in [
     category = "[cart actions]";
   }
 ]
-  ++ perBinaryCommands "fetcher"
   ++ perBinaryCommands "api"
   ++ perBinaryCommands "daemon"

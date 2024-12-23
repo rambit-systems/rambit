@@ -74,7 +74,6 @@
     };
   in {
     packages = {
-      fetcher = build-crate "fetcher";
       api = build-crate "api";
       daemon = build-crate "daemon";
       migrator = build-crate "migrator";
