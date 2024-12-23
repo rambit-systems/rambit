@@ -20,7 +20,7 @@ use miette::Result;
 pub use models;
 use models::{
   Cache, CacheRecordId, Entry, EntryRecordId, LaxSlug, Store, StoreRecordId,
-  StrictSlug, Token, TokenRecordId,
+  StrictSlug, Token, TokenRecordId, TokenSecret,
 };
 pub use repos::{
   self, StorageReadError, StorageWriteError, TempStorageCreds,
@@ -109,6 +109,15 @@ pub trait PrimeDomainService: Hexagonal {
     &self,
     data: Belt,
   ) -> Result<models::TempStoragePath, StorageWriteError>;
+
+  /// Fetch a path from a cache.
+  async fn fetch_path(
+    &self,
+    cache_name: StrictSlug,
+    token_id: Option<TokenRecordId>,
+    token_secret: Option<TokenSecret>,
+    path: LaxSlug,
+  ) -> Result<Belt, mollusk::FetchPathError>;
 }
 
 /// The error type for token verification.

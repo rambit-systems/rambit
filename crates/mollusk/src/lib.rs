@@ -3,8 +3,7 @@
 mod axum_json;
 mod common;
 mod confirm_token_by_secret_has_permission_error;
-mod creds_fetching_error;
-mod prepare_fetch_payload_error;
+mod fetch_path_error;
 
 use axum_core::response::{IntoResponse, Response};
 use http::StatusCode;
@@ -15,8 +14,7 @@ use self::axum_json::Json;
 pub use self::{
   common::*,
   confirm_token_by_secret_has_permission_error::ConfirmTokenBySecretHasPermissionError,
-  creds_fetching_error::CredsFetchingError,
-  prepare_fetch_payload_error::PrepareFetchPayloadError,
+  fetch_path_error::FetchPathError,
 };
 
 /// An error that can be directly returned to a user from an API route.

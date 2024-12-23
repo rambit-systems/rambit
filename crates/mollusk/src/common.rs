@@ -34,20 +34,20 @@ impl MolluskError for NonExistentCacheError {
   }
 }
 
-/// An error that occurs when the store requires authentication but no token was
+/// An error that occurs when the cache requires authentication but no token was
 /// provided.
 #[derive(thiserror::Error, Diagnostic, Debug, Serialize, Deserialize)]
-#[error("The store requires authentication: {0:?}")]
-pub struct UnauthenticatedStoreAccessError(pub String);
+#[error("The cache requires authentication: {0:?}")]
+pub struct UnauthenticatedCacheAccessError(pub String);
 
-impl MolluskError for UnauthenticatedStoreAccessError {
+impl MolluskError for UnauthenticatedCacheAccessError {
   fn status_code(&self) -> StatusCode { StatusCode::UNAUTHORIZED }
-  fn slug(&self) -> &'static str { "unauthenticated-store-access" }
+  fn slug(&self) -> &'static str { "unauthenticated-cache-access" }
   fn description(&self) -> String {
-    format!("The store {:?} requires authentication.", self.0)
+    format!("The cache {:?} requires authentication.", self.0)
   }
   fn tracing(&self) {
-    tracing::warn!("requested store requires authentication: {:?}", self.0);
+    tracing::warn!("requested cache requires authentication: {:?}", self.0);
   }
 }
 
@@ -67,17 +67,17 @@ pub struct UnauthorizedCacheAccessError {
 
 impl MolluskError for UnauthorizedCacheAccessError {
   fn status_code(&self) -> StatusCode { StatusCode::FORBIDDEN }
-  fn slug(&self) -> &'static str { "unauthorized-store-access" }
+  fn slug(&self) -> &'static str { "unauthorized-cache-access" }
   fn description(&self) -> String {
     format!(
-      "The given token does not have access to the store {:?}; required \
+      "The given token does not have access to the cache {:?}; required \
        permission: {:?}",
       self.cache_name, self.permission
     )
   }
   fn tracing(&self) {
     tracing::warn!(
-      "access to requested store {:?} is unauthorized: requires {:?}",
+      "access to requested cache {:?} is unauthorized: requires {:?}",
       self.cache_name,
       self.permission
     );

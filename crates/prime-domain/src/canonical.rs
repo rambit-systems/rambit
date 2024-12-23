@@ -6,7 +6,11 @@ use miette::Result;
 pub use models;
 use models::{
   Cache, CacheRecordId, Entry, EntryCreateRequest, EntryRecordId, LaxSlug,
-  Store, StoreRecordId, StrictSlug, Token, TokenRecordId,
+  Store, StoreRecordId, StrictSlug, Token, TokenRecordId, TokenSecret,
+};
+use mollusk::{
+  FetchPathError, InternalError, MissingPathError, NonExistentCacheError,
+  UnauthenticatedCacheAccessError, UnauthorizedCacheAccessError,
 };
 pub use repos::{self, StorageReadError, StorageWriteError};
 use repos::{
@@ -324,6 +328,66 @@ where
     data: Belt,
   ) -> Result<models::TempStoragePath, StorageWriteError> {
     self.temp_storage_repo.store(data).await
+  }
+
+  async fn fetch_path(
+    &self,
+    cache_name: StrictSlug,
+    token_id: Option<TokenRecordId>,
+    token_secret: Option<TokenSecret>,
+    path: LaxSlug,
+  ) -> Result<Belt, mollusk::FetchPathError> {
+    let cache = self
+      .find_cache_by_name(cache_name.clone())
+      .await
+      .map_err(|e| {
+        FetchPathError::InternalError(InternalError(format!("{e:?}")))
+      })?
+      .ok_or(NonExistentCacheError(cache_name.to_string()))?;
+
+    if matches!(cache.visibility, models::Visibility::Private) {
+      // if the store is not public, we must have a token
+      let token_id = token_id
+        .ok_or(UnauthenticatedCacheAccessError(cache_name.to_string()))?;
+      let token_secret = token_secret
+        .ok_or(UnauthenticatedCacheAccessError(cache_name.to_string()))?;
+
+      let required_permission = models::Permission::CachePermission {
+        cache_id:   cache.id,
+        permission: models::CachePermissionType::Read,
+      };
+      let required_permission_set =
+        models::PermissionSet::from_iter(vec![required_permission.clone()]);
+
+      let token = self
+        .verify_token_id_and_secret(token_id, token_secret.clone())
+        .await
+        .map_err(|e| {
+          FetchPathError::InternalError(InternalError(format!("{e:?}")))
+        })?;
+      let authorized = token.authorized(&required_permission_set);
+
+      if !authorized {
+        Err(UnauthorizedCacheAccessError {
+          cache_name: cache.name.clone().into_inner().into_inner(),
+          permission: models::CachePermissionType::Read,
+        })?;
+      }
+    }
+
+    let entry = self
+      .find_entry_by_id_and_path(cache.id, path.clone())
+      .await
+      .map_err(|e| InternalError(format!("{e:?}")))?
+      .ok_or(MissingPathError {
+        path: path.to_string(),
+      })?;
+
+    let belt = self.read_from_entry(entry.id).await.map_err(|e| {
+      FetchPathError::InternalError(InternalError(format!("{e:?}")))
+    })?;
+
+    Ok(belt)
   }
 }
 

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
   common::{
-    NonExistentCacheError, UnauthenticatedStoreAccessError,
+    NonExistentCacheError, UnauthenticatedCacheAccessError,
     UnauthorizedCacheAccessError,
   },
   InternalError, MalformedTokenSecretError, MissingPathError, MolluskError,
@@ -13,16 +13,16 @@ use crate::{
 
 /// An error that occurs when preparing to fetch a payload.
 #[derive(thiserror::Error, Diagnostic, Debug, Serialize, Deserialize)]
-pub enum PrepareFetchPayloadError {
-  /// No matching store was found.
+pub enum FetchPathError {
+  /// No matching cache was found.
   #[error(transparent)]
-  NoMatchingStore(#[from] NonExistentCacheError),
-  /// The store access was unauthenticated (no token supplied).
+  NoMatchingCache(#[from] NonExistentCacheError),
+  /// The cache access was unauthenticated (no token supplied).
   #[error(transparent)]
-  UnauthenticatedStoreAccess(#[from] UnauthenticatedStoreAccessError),
-  /// The store access was unauthorized (token supplied but insufficient).
+  UnauthenticatedCacheAccess(#[from] UnauthenticatedCacheAccessError),
+  /// The cache access was unauthorized (token supplied but insufficient).
   #[error(transparent)]
-  UnauthorizedStoreAccess(#[from] UnauthorizedCacheAccessError),
+  UnauthorizedCacheAccess(#[from] UnauthorizedCacheAccessError),
   /// The supplied token does not exist.
   #[error(transparent)]
   NonExistentToken(#[from] NonExistentTokenError),
@@ -38,10 +38,10 @@ pub enum PrepareFetchPayloadError {
 }
 
 crate::delegate_mollusk_error!(
-  PrepareFetchPayloadError,
-  NoMatchingStore,
-  UnauthenticatedStoreAccess,
-  UnauthorizedStoreAccess,
+  FetchPathError,
+  NoMatchingCache,
+  UnauthenticatedCacheAccess,
+  UnauthorizedCacheAccess,
   NonExistentToken,
   MalformedTokenSecret,
   MissingPath,

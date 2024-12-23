@@ -23,7 +23,7 @@ impl rope::Task for PrepareFetchPayloadTask {
   const NAME: &'static str = "PrepareFetchPayload";
 
   type Response = models::StorageCredentials;
-  type Error = PrepareFetchPayloadError;
+  type Error = FetchPathError;
   type State = DynPrimeDomainService;
 
   async fn run(
@@ -43,7 +43,7 @@ impl rope::Task for PrepareFetchPayloadTask {
       .find_cache_by_name(cache_name.clone())
       .await
       .map_err(|e| {
-        PrepareFetchPayloadError::InternalError(InternalError(format!("{e:?}")))
+        FetchPathError::InternalError(InternalError(format!("{e:?}")))
       })?
       .ok_or(NonExistentCacheError(cache_name.to_string()))?;
 
@@ -57,9 +57,9 @@ impl rope::Task for PrepareFetchPayloadTask {
     if matches!(cache.visibility, models::Visibility::Private) {
       // if the store is not public, we must have a token
       let token_id = token_id
-        .ok_or(UnauthenticatedStoreAccessError(cache_name.to_string()))?;
+        .ok_or(UnauthenticatedCacheAccessError(cache_name.to_string()))?;
       let token_secret = token_secret
-        .ok_or(UnauthenticatedStoreAccessError(cache_name.to_string()))?;
+        .ok_or(UnauthenticatedCacheAccessError(cache_name.to_string()))?;
 
       let required_permission = models::Permission::CachePermission {
         cache_id:   cache.id,
@@ -72,9 +72,7 @@ impl rope::Task for PrepareFetchPayloadTask {
         .verify_token_id_and_secret(token_id, token_secret.clone())
         .await
         .map_err(|e| {
-          PrepareFetchPayloadError::InternalError(InternalError(format!(
-            "{e:?}"
-          )))
+          FetchPathError::InternalError(InternalError(format!("{e:?}")))
         })?;
       let authorized = token.authorized(&required_permission_set);
 

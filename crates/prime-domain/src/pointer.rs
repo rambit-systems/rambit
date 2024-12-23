@@ -1,8 +1,9 @@
 use miette::Result;
 use models::{
   CacheRecordId, EntryRecordId, LaxSlug, StoreRecordId, StrictSlug,
-  TokenRecordId,
+  TokenRecordId, TokenSecret,
 };
+use mollusk::FetchPathError;
 use repos::{
   belt::Belt,
   db::{FetchModelByIndexError, FetchModelError},
@@ -104,5 +105,18 @@ where
     data: Belt,
   ) -> Result<models::TempStoragePath, StorageWriteError> {
     self.deref().write_to_temp_storage(data).await
+  }
+
+  async fn fetch_path(
+    &self,
+    cache_name: StrictSlug,
+    token_id: Option<TokenRecordId>,
+    token_secret: Option<TokenSecret>,
+    path: LaxSlug,
+  ) -> Result<Belt, FetchPathError> {
+    self
+      .deref()
+      .fetch_path(cache_name, token_id, token_secret, path)
+      .await
   }
 }

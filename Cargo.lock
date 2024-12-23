@@ -2918,6 +2918,7 @@ dependencies = [
  "hex",
  "miette",
  "models",
+ "mollusk",
  "repos",
  "thiserror 1.0.69",
  "tracing",
