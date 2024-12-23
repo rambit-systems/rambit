@@ -8,13 +8,13 @@
   }
   {
     name = "stack";
-    command = "mprocs \"run-tikv\" \"run-pd\" \"redis-server\" \"fetcher\" \"api start\"";
+    command = "mprocs \"run-tikv\" \"run-pd\" \"redis-server\" \"api start\"";
     help = "Run the whole stack";
     category = "[stack actions]";
   }
   {
     name = "stack-release";
-    command = "mprocs \"run-tikv\" \"run-pd\" \"redis-server\" \"fetcher-release\" \"api-release start\"";
+    command = "mprocs \"run-tikv\" \"run-pd\" \"redis-server\" \"api-release start\"";
     help = "Run the whole stack in release mode";
     category = "[stack actions]";
   }
