@@ -13,6 +13,19 @@ pub struct LocalStorageClient(PathBuf);
 
 impl LocalStorageClient {
   pub async fn new(creds: LocalStorageCredentials) -> miette::Result<Self> {
+    if !creds.0.exists() {
+      tracing::warn!(
+        "LocalStorageClient storage path doesn't exist, creating: {}",
+        creds.0.display()
+      );
+      std::fs::create_dir_all(&creds.0)
+        .into_diagnostic()
+        .wrap_err(
+          "failed to create parent directory for non-existent \
+           `LocalStorageClient` path",
+        )?;
+    }
+
     Ok(Self(
       creds
         .0
