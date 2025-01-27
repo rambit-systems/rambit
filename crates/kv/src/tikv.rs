@@ -6,7 +6,8 @@ use hex::health;
 use miette::{Context, IntoDiagnostic};
 
 use crate::{
-  key::Key, value::Value, KvPrimitive, KvResult, KvTransaction, KvTransactional,
+  key::Key, value::Value, DynTransaction, KvPrimitive, KvResult, KvTransaction,
+  KvTransactional,
 };
 
 impl From<Key> for tikv_client::Key {
@@ -14,7 +15,7 @@ impl From<Key> for tikv_client::Key {
 }
 
 /// TiKV client.
-pub struct TikvClient(tikv_client::TransactionClient);
+pub(crate) struct TikvClient(tikv_client::TransactionClient);
 
 impl TikvClient {
   /// Create a new TiKV client.
@@ -46,26 +47,24 @@ impl health::HealthReporter for TikvClient {
   }
 }
 
+#[async_trait::async_trait]
 impl KvTransactional for TikvClient {
-  type OptimisticTransaction = TikvTransaction;
-  type PessimisticTransaction = TikvTransaction;
-
-  async fn begin_optimistic_transaction(
-    &self,
-  ) -> KvResult<Self::OptimisticTransaction> {
-    Ok(TikvTransaction(self.0.begin_optimistic().await?))
+  async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
+    Ok(DynTransaction::new(TikvTransaction(
+      self.0.begin_optimistic().await?,
+    )))
   }
-
-  async fn begin_pessimistic_transaction(
-    &self,
-  ) -> KvResult<Self::PessimisticTransaction> {
-    Ok(TikvTransaction(self.0.begin_pessimistic().await?))
+  async fn begin_pessimistic_transaction(&self) -> KvResult<DynTransaction> {
+    Ok(DynTransaction::new(TikvTransaction(
+      self.0.begin_pessimistic().await?,
+    )))
   }
 }
 
 /// TiKV transaction.
 pub struct TikvTransaction(tikv_client::Transaction);
 
+#[async_trait::async_trait]
 impl KvPrimitive for TikvTransaction {
   async fn get(&mut self, key: &Key) -> KvResult<Option<Value>> {
     Ok(self.0.get(key.clone()).await?.map(Value::from))
@@ -103,6 +102,7 @@ impl KvPrimitive for TikvTransaction {
   }
 }
 
+#[async_trait::async_trait]
 impl KvTransaction for TikvTransaction {
   async fn commit(&mut self) -> KvResult<()> {
     self.0.commit().await?;

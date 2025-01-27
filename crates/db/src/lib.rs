@@ -25,8 +25,7 @@
 //!
 //! # Implementers
 //! The [`KvDatabaseAdapter`] is the only implementer of the [`DatabaseAdapter`]
-//! trait. It's generic on a [`KvTransactional`](kv::prelude::KvTransactional)
-//! implementation.
+//! trait.
 
 mod adapter;
 mod kv_impl;

@@ -7,8 +7,8 @@ mod tests;
 
 use std::ops::Bound;
 
-use hex::health;
-use kv::prelude::*;
+use hex::health::{self, HealthAware};
+use kv::*;
 use miette::{Context, IntoDiagnostic, Result};
 use tracing::instrument;
 
@@ -20,18 +20,18 @@ use crate::{
 
 /// A TiKV-based database adapter.
 #[derive(Clone)]
-pub struct KvDatabaseAdapter<KV: KvTransactional>(KV);
+pub struct KvDatabaseAdapter(KeyValueStore);
 
-impl<KV: KvTransactional> KvDatabaseAdapter<KV> {
+impl KvDatabaseAdapter {
   /// Creates a new TiKV adapter.
-  pub fn new(kv_store: KV) -> Self {
+  pub fn new(kv_store: KeyValueStore) -> Self {
     tracing::info!("creating new `KvDatabaseAdapter` instance");
     Self(kv_store)
   }
 }
 
 #[async_trait::async_trait]
-impl<KV: KvTransactional> DatabaseAdapter for KvDatabaseAdapter<KV> {
+impl DatabaseAdapter for KvDatabaseAdapter {
   #[instrument(skip(self, model), fields(id = model.id().to_string(), table = M::TABLE_NAME))]
   async fn create_model<M: model::Model>(
     &self,
@@ -48,13 +48,13 @@ impl<KV: KvTransactional> DatabaseAdapter for KvDatabaseAdapter<KV> {
     let id_ulid: model::Ulid = model.id().into();
 
     // serialize the model into bytes
-    let model_value = kv::value::Value::serialize(&model)
+    let model_value = Value::serialize(&model)
       .into_diagnostic()
       .context("failed to serialize model")
       .map_err(CreateModelError::Serde)?;
 
     // serialize the id into bytes
-    let id_value = kv::value::Value::serialize(&id_ulid)
+    let id_value = Value::serialize(&id_ulid)
       .into_diagnostic()
       .context("failed to serialize id")
       .map_err(CreateModelError::Serde)?;
@@ -153,7 +153,7 @@ impl<KV: KvTransactional> DatabaseAdapter for KvDatabaseAdapter<KV> {
       .map_err(FetchModelError::RetryableTransaction)?;
 
     model_value
-      .map(|value| kv::value::Value::deserialize(value))
+      .map(|value| Value::deserialize(value))
       .transpose()
       .into_diagnostic()
       .context("failed to deserialize model")
@@ -198,7 +198,7 @@ impl<KV: KvTransactional> DatabaseAdapter for KvDatabaseAdapter<KV> {
       .map_err(FetchModelByIndexError::RetryableTransaction)?;
 
     let id = id_value
-      .map(kv::value::Value::deserialize::<model::RecordId<M>>)
+      .map(Value::deserialize::<model::RecordId<M>>)
       .transpose()
       .into_diagnostic()
       .context("failed to deserialize id")
@@ -264,7 +264,7 @@ impl<KV: KvTransactional> DatabaseAdapter for KvDatabaseAdapter<KV> {
 }
 
 #[async_trait::async_trait]
-impl<KV: KvTransactional> health::HealthReporter for KvDatabaseAdapter<KV> {
+impl health::HealthReporter for KvDatabaseAdapter {
   fn name(&self) -> &'static str { stringify!(TikvAdapter) }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(Some(self.0.health_report()))

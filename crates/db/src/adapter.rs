@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use hex::Hexagonal;
-use kv::prelude::*;
+use kv::*;
 use miette::Result;
 
 /// An adapter for a model-based database.

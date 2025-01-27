@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use kv::prelude::*;
+use kv::*;
 
 static INDEX_NS_SEGMENT: LazyLock<StrictSlug> =
   LazyLock::new(|| StrictSlug::new("index".to_string()));

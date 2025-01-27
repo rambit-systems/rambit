@@ -1,4 +1,4 @@
-use kv::mock::MockStore;
+use kv::MockStore;
 use model::Model;
 use serde::{Deserialize, Serialize};
 
@@ -21,7 +21,7 @@ impl Model for TestModel {
 
 #[tokio::test]
 async fn test_create_model() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -42,7 +42,7 @@ async fn test_create_model() {
 
 #[tokio::test]
 async fn test_fetch_model_by_index() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -65,7 +65,7 @@ async fn test_fetch_model_by_index() {
 
 #[tokio::test]
 async fn test_enumerate_models() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model1 = TestModel {
@@ -88,7 +88,7 @@ async fn test_enumerate_models() {
 
 #[tokio::test]
 async fn test_fetch_model_by_id_not_found() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -105,7 +105,7 @@ async fn test_fetch_model_by_id_not_found() {
 
 #[tokio::test]
 async fn test_fetch_model_by_index_not_found() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -127,7 +127,7 @@ async fn test_fetch_model_by_index_not_found() {
 
 #[tokio::test]
 async fn test_fetch_model_by_index_does_not_exist() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -156,15 +156,16 @@ async fn test_fetch_model_by_index_malformed() {
     name: StrictSlug::new("test"),
   };
 
-  let store = MockStore::new();
+  let mock_store = MockStore::new();
 
   // manually insert the index for a model that doesn't exist
-  store.screw_with_internal_data().write().await.insert(
+  mock_store.screw_with_internal_data().write().await.insert(
     index_base_key::<TestModel>("name")
       .with_either(EitherSlug::Strict(StrictSlug::new("not_test"))),
-    kv::value::Value::serialize(&model.id()).unwrap(),
+    Value::serialize(&model.id()).unwrap(),
   );
 
+  let store = KeyValueStore::from_mock(mock_store);
   let adapter = KvDatabaseAdapter::new(store);
 
   let result = adapter
@@ -181,7 +182,7 @@ async fn test_fetch_model_by_index_malformed() {
 
 #[tokio::test]
 async fn test_create_model_already_exists() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {
@@ -197,7 +198,7 @@ async fn test_create_model_already_exists() {
 
 #[tokio::test]
 async fn test_create_model_index_already_exists() {
-  let store = MockStore::new();
+  let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
   let model = TestModel {

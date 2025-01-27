@@ -35,10 +35,7 @@ use clap::Parser;
 use miette::{IntoDiagnostic, Result};
 use mollusk::ExternalApiError;
 use prime_domain::{
-  hex::{
-    health::{self, HealthAware},
-    retryable::Retryable,
-  },
+  hex::health::{self, HealthAware},
   models,
   repos::TempStorageRepository,
   DynPrimeDomainService,
@@ -135,13 +132,14 @@ struct AppState {
 
 impl AppState {
   async fn build(config: &RuntimeConfig) -> Result<Self> {
-    let tikv_store_init = move || async move {
-      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await
-    };
-    let retryable_tikv_store =
-      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await;
+    let retryable_kv_store =
+      prime_domain::repos::db::kv::KeyValueStore::new_retryable_tikv_from_env(
+        5,
+        Duration::from_secs(2),
+      )
+      .await;
     let kv_db_adapter = Arc::new(
-      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
+      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_kv_store),
     );
     let cache_repo =
       prime_domain::repos::CacheRepositoryCanonical::new(kv_db_adapter.clone());

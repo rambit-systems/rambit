@@ -11,8 +11,8 @@ use hex::health;
 use tokio::sync::{Mutex, RwLock};
 
 use crate::{
-  key::Key, value::Value, KvError, KvPrimitive, KvResult, KvTransaction,
-  KvTransactional,
+  key::Key, value::Value, DynTransaction, KvError, KvPrimitive, KvResult,
+  KvTransaction, KvTransactional,
 };
 
 /// A mock key-value store.
@@ -32,33 +32,28 @@ impl MockStore {
   }
 
   /// Screw with the internal data of the store. This is useful for testing.
+  #[allow(dead_code)]
   pub fn screw_with_internal_data(&self) -> &RwLock<HashMap<Key, Value>> {
     &self.data
   }
 }
 
+#[async_trait::async_trait]
 impl KvTransactional for MockStore {
-  type OptimisticTransaction = OptimisticTransaction;
-  type PessimisticTransaction = PessimisticTransaction;
-
-  async fn begin_optimistic_transaction(
-    &self,
-  ) -> KvResult<Self::OptimisticTransaction> {
-    Ok(OptimisticTransaction {
+  async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
+    Ok(DynTransaction::new(OptimisticTransaction {
       store:     self.clone(),
       read_set:  HashMap::new(),
       write_set: HashMap::new(),
-    })
+    }))
   }
 
-  async fn begin_pessimistic_transaction(
-    &self,
-  ) -> KvResult<Self::PessimisticTransaction> {
-    Ok(PessimisticTransaction {
+  async fn begin_pessimistic_transaction(&self) -> KvResult<DynTransaction> {
+    Ok(DynTransaction::new(PessimisticTransaction {
       store:       self.clone(),
       locked_keys: HashSet::new(),
       write_set:   HashMap::new(),
-    })
+    }))
   }
 }
 
@@ -120,6 +115,7 @@ impl OptimisticTransaction {
   }
 }
 
+#[async_trait::async_trait]
 impl KvPrimitive for OptimisticTransaction {
   async fn get(&mut self, key: &Key) -> KvResult<Option<Value>> {
     let data = self.store.data.read().await;
@@ -183,6 +179,7 @@ impl KvPrimitive for OptimisticTransaction {
   }
 }
 
+#[async_trait::async_trait]
 impl KvTransaction for OptimisticTransaction {
   async fn commit(&mut self) -> KvResult<()> {
     self.check_conflicts().await?;
@@ -242,6 +239,7 @@ impl PessimisticTransaction {
   }
 }
 
+#[async_trait::async_trait]
 impl KvPrimitive for PessimisticTransaction {
   async fn get(&mut self, key: &Key) -> KvResult<Option<Value>> {
     self.lock_key(key).await?;
@@ -298,6 +296,7 @@ impl KvPrimitive for PessimisticTransaction {
   }
 }
 
+#[async_trait::async_trait]
 impl KvTransaction for PessimisticTransaction {
   async fn commit(&mut self) -> KvResult<()> {
     let mut data = self.store.data.write().await;
