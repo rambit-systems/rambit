@@ -2,35 +2,55 @@ use std::{path::PathBuf, str::FromStr};
 
 use miette::Result;
 use models::{
-  CachePermissionType, CacheRecordId, EntityName, EntityNickname, HumanName,
-  LocalStorageCredentials, Org, Permission, PermissionSet, RecordId,
-  StorageCredentials, StoreRecordId, StrictSlug, TokenRecordId, TokenSecret,
-  UserRecordId,
+  Cache, CachePermissionType, CacheRecordId, EntityName, EntityNickname,
+  HumanName, LocalStorageCredentials, Org, Permission, PermissionSet, RecordId,
+  StorageCredentials, Store, StoreRecordId, StrictSlug, Token, TokenRecordId,
+  TokenSecret, User, UserRecordId,
 };
 
-use crate::DatabaseAdapter;
+use crate::Database;
 
-/// A trait for migrating the database.
-pub trait Migratable {
-  /// Migrates the database.
-  fn migrate(&self) -> impl std::future::Future<Output = Result<()>> + Send;
+/// A migrator for the database.
+pub struct Migrator {
+  org_db:   Database<Org>,
+  user_db:  Database<User>,
+  store_db: Database<Store>,
+  cache_db: Database<Cache>,
+  token_db: Database<Token>,
 }
 
-impl<T: DatabaseAdapter> Migratable for T {
+impl Migrator {
+  /// Creates a new migrator.
+  pub fn new(
+    org_db: Database<Org>,
+    user_db: Database<User>,
+    store_db: Database<Store>,
+    cache_db: Database<Cache>,
+    token_db: Database<Token>,
+  ) -> Self {
+    Self {
+      org_db,
+      user_db,
+      store_db,
+      cache_db,
+      token_db,
+    }
+  }
+
   /// Applies test data to the database.
-  async fn migrate(&self) -> Result<()> {
+  pub async fn migrate(&self) -> Result<()> {
     let org = Org {
       id:   RecordId::<Org>::from_str("01J53FHN8TQXTQ2JEHNX56GCTN").unwrap(),
       name: EntityName::new(StrictSlug::confident("dev-org")),
     };
 
-    let user = models::User {
+    let user = User {
       id:   UserRecordId::from_str("01J53N6ARQGFTBQ41T25TAJ949").unwrap(),
       name: HumanName::try_new("John Lewis".to_string()).unwrap(),
       org:  org.id,
     };
 
-    let local_file_store = models::Store {
+    let local_file_store = Store {
       id:                 StoreRecordId::from_str("01J53YYCCJW4B4QBM1CG0CHAMP")
         .unwrap(),
       nickname:           EntityNickname::new(StrictSlug::confident(
@@ -45,7 +65,7 @@ impl<T: DatabaseAdapter> Migratable for T {
       org:                org.id,
     };
 
-    let albert_cache = models::Cache {
+    let albert_cache = Cache {
       id:         CacheRecordId::from_str("01J799MSHXPPY5RJ8KGHVR9GWQ")
         .unwrap(),
       name:       EntityName::new(StrictSlug::confident("albert")),
@@ -54,7 +74,7 @@ impl<T: DatabaseAdapter> Migratable for T {
       org:        org.id,
     };
 
-    let byron_cache = models::Cache {
+    let byron_cache = Cache {
       id:         CacheRecordId::from_str("01JFTEBFJ55TVWC7Z4BMPBX8AP")
         .unwrap(),
       name:       EntityName::new(StrictSlug::confident("byron")),
@@ -63,7 +83,7 @@ impl<T: DatabaseAdapter> Migratable for T {
       org:        org.id,
     };
 
-    let omnitoken_token = models::Token {
+    let omnitoken_token = Token {
       id:       TokenRecordId::from_str("01J53ZA38PS1P5KWCE4FMG58F0").unwrap(),
       nickname: EntityNickname::new(StrictSlug::confident("omnitoken")),
       secret:   TokenSecret::new(StrictSlug::confident(
@@ -95,12 +115,12 @@ impl<T: DatabaseAdapter> Migratable for T {
       org:      org.id,
     };
 
-    self.create_model(org).await?;
-    self.create_model(user).await?;
-    self.create_model(local_file_store).await?;
-    self.create_model(albert_cache).await?;
-    self.create_model(byron_cache).await?;
-    self.create_model(omnitoken_token).await?;
+    self.org_db.create_model(org).await?;
+    self.user_db.create_model(user).await?;
+    self.store_db.create_model(local_file_store).await?;
+    self.cache_db.create_model(albert_cache).await?;
+    self.cache_db.create_model(byron_cache).await?;
+    self.token_db.create_model(omnitoken_token).await?;
 
     Ok(())
   }

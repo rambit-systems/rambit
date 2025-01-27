@@ -37,7 +37,7 @@ use mollusk::ExternalApiError;
 use prime_domain::{
   hex::health::{self, HealthAware},
   models,
-  repos::TempStorageRepository,
+  repos::{db::Database, TempStorageRepository},
   DynPrimeDomainService,
 };
 use tasks::Task;
@@ -138,17 +138,18 @@ impl AppState {
         Duration::from_secs(2),
       )
       .await;
-    let kv_db_adapter = Arc::new(
-      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_kv_store),
+    let cache_repo = prime_domain::repos::CacheRepositoryCanonical::new(
+      Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let cache_repo =
-      prime_domain::repos::CacheRepositoryCanonical::new(kv_db_adapter.clone());
-    let store_repo =
-      prime_domain::repos::StoreRepositoryCanonical::new(kv_db_adapter.clone());
-    let token_repo =
-      prime_domain::repos::TokenRepositoryCanonical::new(kv_db_adapter.clone());
-    let entry_repo =
-      prime_domain::repos::EntryRepositoryCanonical::new(kv_db_adapter.clone());
+    let store_repo = prime_domain::repos::StoreRepositoryCanonical::new(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let token_repo = prime_domain::repos::TokenRepositoryCanonical::new(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let entry_repo = prime_domain::repos::EntryRepositoryCanonical::new(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
     let temp_storage_repo: Box<dyn TempStorageRepository> = if config
       .mock_temp_storage
     {

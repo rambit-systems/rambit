@@ -1,14 +1,11 @@
-use std::sync::Arc;
-
 use hex::{
-  health::{self},
+  health::{self, HealthAware},
   Hexagonal,
 };
 use models::TempStoragePath;
-use storage::{belt::Belt, temp::TempStorageCreds};
+use storage::{belt::Belt, temp::TempStorageCreds, StorageClient};
 pub use storage::{
-  ReadError as StorageReadError, StorageClientGenerator,
-  WriteError as StorageWriteError,
+  ReadError as StorageReadError, WriteError as StorageWriteError,
 };
 
 pub use self::mock::TempStorageRepositoryMock;
@@ -49,7 +46,7 @@ where
 /// The repository for temp storage.
 #[derive(Clone)]
 pub struct TempStorageRepositoryCanonical {
-  client: Arc<storage::DynStorageClient>,
+  client: StorageClient,
 }
 
 impl TempStorageRepositoryCanonical {
@@ -57,7 +54,7 @@ impl TempStorageRepositoryCanonical {
   pub async fn new(creds: TempStorageCreds) -> miette::Result<Self> {
     tracing::info!("creating new `TempStorageRepositoryCanonical` instance");
     Ok(Self {
-      client: Arc::new(creds.as_creds().client().await?),
+      client: StorageClient::new_from_storage_creds(creds.as_creds()).await?,
     })
   }
 }

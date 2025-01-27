@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use hex::{health, Hexagonal};
-use storage::{belt::Belt, ReadError, StorageClientGenerator, WriteError};
+use storage::{belt::Belt, ReadError, StorageClient, WriteError};
 
 /// The definition for the user storage service.
 #[async_trait::async_trait]
@@ -49,10 +49,10 @@ where
 }
 
 /// The canonical user storage client.
-pub struct UserStorageClientCanonical(Box<dyn storage::StorageClient>);
+pub struct UserStorageClientCanonical(StorageClient);
 
 impl UserStorageClientCanonical {
-  fn new(client: Box<dyn storage::StorageClient>) -> Self { Self(client) }
+  fn new(client: StorageClient) -> Self { Self(client) }
 }
 
 #[async_trait::async_trait]
@@ -109,8 +109,8 @@ impl UserStorageRepository for UserStorageRepositoryCanonical {
     &self,
     creds: models::StorageCredentials,
   ) -> miette::Result<Self::Client> {
-    Ok(UserStorageClientCanonical::new(Box::new(
-      creds.client().await?,
-    )))
+    Ok(UserStorageClientCanonical::new(
+      StorageClient::new_from_storage_creds(creds).await?,
+    ))
   }
 }

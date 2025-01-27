@@ -6,7 +6,7 @@ use tracing::instrument;
 
 use super::*;
 pub use crate::base::CreateModelError;
-use crate::base::{BaseRepository, DatabaseAdapter};
+use crate::base::{BaseRepository, Database};
 
 /// Descriptor trait for repositories that handle [`Token`] domain model.
 #[async_trait::async_trait]
@@ -29,24 +29,17 @@ impl<T> TokenRepository for T where
 }
 
 /// The repository for the [`Token`] domain model.
-pub struct TokenRepositoryCanonical<DB: DatabaseAdapter> {
-  base_repo: BaseRepository<Token, DB>,
+#[derive(Clone)]
+pub struct TokenRepositoryCanonical {
+  base_repo: BaseRepository<Token>,
 }
 
-impl<DB: DatabaseAdapter + Clone> Clone for TokenRepositoryCanonical<DB> {
-  fn clone(&self) -> Self {
-    Self {
-      base_repo: self.base_repo.clone(),
-    }
-  }
-}
-
-impl<DB: DatabaseAdapter> TokenRepositoryCanonical<DB> {
+impl TokenRepositoryCanonical {
   /// Create a new instance of the [`Token`] repository.
-  pub fn new(db_adapter: DB) -> Self {
+  pub fn new(db: Database<Token>) -> Self {
     tracing::info!("creating new `TokenRepositoryCanonical` instance");
     Self {
-      base_repo: BaseRepository::new(db_adapter),
+      base_repo: BaseRepository::new(db),
     }
   }
 }

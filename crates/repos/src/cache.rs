@@ -8,7 +8,7 @@ use tracing::instrument;
 
 use super::*;
 pub use crate::base::CreateModelError;
-use crate::base::{BaseRepository, DatabaseAdapter};
+use crate::base::{BaseRepository, Database};
 
 /// Descriptor trait for repositories that handle [`Cache`] domain model.
 #[async_trait::async_trait]
@@ -42,24 +42,17 @@ impl<T> CacheRepository for T where
 }
 
 /// The repository for the [`Cache`] domain model.
-pub struct CacheRepositoryCanonical<DB: DatabaseAdapter> {
-  base_repo: BaseRepository<Cache, DB>,
+#[derive(Clone)]
+pub struct CacheRepositoryCanonical {
+  base_repo: BaseRepository<Cache>,
 }
 
-impl<DB: DatabaseAdapter + Clone> Clone for CacheRepositoryCanonical<DB> {
-  fn clone(&self) -> Self {
-    Self {
-      base_repo: self.base_repo.clone(),
-    }
-  }
-}
-
-impl<DB: DatabaseAdapter> CacheRepositoryCanonical<DB> {
+impl CacheRepositoryCanonical {
   /// Create a new instance of the [`Cache`] repository.
-  pub fn new(db_adapter: DB) -> Self {
+  pub fn new(db: Database<Cache>) -> Self {
     tracing::info!("creating new `CacheRepositoryCanonical` instance");
     Self {
-      base_repo: BaseRepository::new(db_adapter),
+      base_repo: BaseRepository::new(db),
     }
   }
 }

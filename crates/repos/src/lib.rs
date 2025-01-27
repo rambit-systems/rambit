@@ -194,7 +194,7 @@ where
 macro_rules! impl_repository_on_base {
   ($canonical:ident, $model:ty, $create_request:ty, $create_error:ty) => {
     #[async_trait::async_trait]
-    impl<DB: DatabaseAdapter> health::HealthReporter for $canonical<DB> {
+    impl health::HealthReporter for $canonical {
       fn name(&self) -> &'static str { stringify!($canonical<DB>) }
       async fn health_check(&self) -> health::ComponentHealth {
         health::AdditiveComponentHealth::from_futures(Some(
@@ -206,7 +206,7 @@ macro_rules! impl_repository_on_base {
     }
 
     #[async_trait::async_trait]
-    impl<DB: DatabaseAdapter> ModelRepository for $canonical<DB> {
+    impl ModelRepository for $canonical {
       type Model = $model;
       type ModelCreateRequest = $create_request;
       type CreateError = $create_error;

@@ -1,8 +1,8 @@
 //! Applies migrations to the database.
 
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
-use db::Migratable;
+use db::Migrator;
 use miette::Result;
 
 #[tokio::main]
@@ -16,8 +16,15 @@ async fn main() -> Result<()> {
     Duration::from_secs(2),
   )
   .await;
-  let db = Arc::new(db::KvDatabaseAdapter::new(retryable_kv_store));
-  db.migrate().await?;
+
+  let org_db = db::Database::new_from_kv(retryable_kv_store.clone());
+  let user_db = db::Database::new_from_kv(retryable_kv_store.clone());
+  let store_db = db::Database::new_from_kv(retryable_kv_store.clone());
+  let cache_db = db::Database::new_from_kv(retryable_kv_store.clone());
+  let token_db = db::Database::new_from_kv(retryable_kv_store.clone());
+
+  let migrator = Migrator::new(org_db, user_db, store_db, cache_db, token_db);
+  migrator.migrate().await?;
 
   tokio::time::sleep(std::time::Duration::from_secs(1)).await;
 

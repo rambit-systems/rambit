@@ -31,12 +31,9 @@ impl KvDatabaseAdapter {
 }
 
 #[async_trait::async_trait]
-impl DatabaseAdapter for KvDatabaseAdapter {
+impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
   #[instrument(skip(self, model), fields(id = model.id().to_string(), table = M::TABLE_NAME))]
-  async fn create_model<M: model::Model>(
-    &self,
-    model: M,
-  ) -> Result<M, CreateModelError> {
+  async fn create_model(&self, model: M) -> Result<M, CreateModelError> {
     tracing::info!("creating model");
 
     // the model itself will be stored under [model_name]:[id] -> model
@@ -129,7 +126,7 @@ impl DatabaseAdapter for KvDatabaseAdapter {
   }
 
   #[instrument(skip(self), fields(table = M::TABLE_NAME))]
-  async fn fetch_model_by_id<M: model::Model>(
+  async fn fetch_model_by_id(
     &self,
     id: model::RecordId<M>,
   ) -> Result<Option<M>, FetchModelError> {
@@ -161,7 +158,7 @@ impl DatabaseAdapter for KvDatabaseAdapter {
   }
 
   #[instrument(skip(self), fields(table = M::TABLE_NAME))]
-  async fn fetch_model_by_index<M: model::Model>(
+  async fn fetch_model_by_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
@@ -210,7 +207,7 @@ impl DatabaseAdapter for KvDatabaseAdapter {
     };
 
     let model = match self
-      .fetch_model_by_id::<M>(id)
+      .fetch_model_by_id(id)
       .await
       .map_err(FetchModelByIndexError::from)?
     {
@@ -227,7 +224,7 @@ impl DatabaseAdapter for KvDatabaseAdapter {
   }
 
   #[instrument(skip(self), fields(table = M::TABLE_NAME))]
-  async fn enumerate_models<M: model::Model>(&self) -> Result<Vec<M>> {
+  async fn enumerate_models(&self) -> Result<Vec<M>> {
     let first_key = model_base_key::<M>(&model::RecordId::<M>::MIN());
     let last_key = model_base_key::<M>(&model::RecordId::<M>::MAX());
 

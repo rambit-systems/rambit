@@ -8,7 +8,7 @@ use tracing::instrument;
 
 use super::*;
 pub use crate::base::CreateModelError;
-use crate::base::{BaseRepository, DatabaseAdapter};
+use crate::base::{BaseRepository, Database};
 
 /// Descriptor trait for repositories that handle [`Entry`] domain model.
 #[async_trait::async_trait]
@@ -43,24 +43,17 @@ impl<T> EntryRepository for T where
 }
 
 /// The repository for the [`Entry`] domain model.
-pub struct EntryRepositoryCanonical<DB: DatabaseAdapter> {
-  base_repo: BaseRepository<Entry, DB>,
+#[derive(Clone)]
+pub struct EntryRepositoryCanonical {
+  base_repo: BaseRepository<Entry>,
 }
 
-impl<DB: DatabaseAdapter + Clone> Clone for EntryRepositoryCanonical<DB> {
-  fn clone(&self) -> Self {
-    Self {
-      base_repo: self.base_repo.clone(),
-    }
-  }
-}
-
-impl<DB: DatabaseAdapter> EntryRepositoryCanonical<DB> {
+impl EntryRepositoryCanonical {
   /// Create a new instance of the [`Entry`] repository.
-  pub fn new(db_adapter: DB) -> Self {
+  pub fn new(db: Database<Entry>) -> Self {
     tracing::info!("creating new `EntryRepositoryCanonical` instance");
     Self {
-      base_repo: BaseRepository::new(db_adapter),
+      base_repo: BaseRepository::new(db),
     }
   }
 }

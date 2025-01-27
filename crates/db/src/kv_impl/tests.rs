@@ -33,7 +33,7 @@ async fn test_create_model() {
   assert_eq!(model, created_model);
 
   let fetched_model = adapter
-    .fetch_model_by_id::<TestModel>(model.id())
+    .fetch_model_by_id(model.id())
     .await
     .unwrap()
     .unwrap();
@@ -53,7 +53,7 @@ async fn test_fetch_model_by_index() {
   adapter.create_model(model.clone()).await.unwrap();
 
   let fetched_model = adapter
-    .fetch_model_by_index::<TestModel>(
+    .fetch_model_by_index(
       "name".to_string(),
       EitherSlug::Strict(model.name.clone()),
     )
@@ -80,7 +80,7 @@ async fn test_enumerate_models() {
   adapter.create_model(model1.clone()).await.unwrap();
   adapter.create_model(model2.clone()).await.unwrap();
 
-  let models = adapter.enumerate_models::<TestModel>().await.unwrap();
+  let models = adapter.enumerate_models().await.unwrap();
   assert_eq!(models.len(), 2);
   assert!(models.contains(&model1));
   assert!(models.contains(&model2));
@@ -96,10 +96,7 @@ async fn test_fetch_model_by_id_not_found() {
     name: StrictSlug::new("test"),
   };
 
-  let fetched_model = adapter
-    .fetch_model_by_id::<TestModel>(model.id())
-    .await
-    .unwrap();
+  let fetched_model = adapter.fetch_model_by_id(model.id()).await.unwrap();
   assert!(fetched_model.is_none());
 }
 
@@ -115,8 +112,8 @@ async fn test_fetch_model_by_index_not_found() {
 
   adapter.create_model(model.clone()).await.unwrap();
 
-  let fetched_model = adapter
-    .fetch_model_by_index::<TestModel>(
+  let fetched_model: Option<TestModel> = adapter
+    .fetch_model_by_index(
       "name".to_string(),
       EitherSlug::Strict(StrictSlug::new("not_test")),
     )
@@ -137,8 +134,8 @@ async fn test_fetch_model_by_index_does_not_exist() {
 
   adapter.create_model(model.clone()).await.unwrap();
 
-  let result = adapter
-    .fetch_model_by_index::<TestModel>(
+  let result: Result<Option<TestModel>, _> = adapter
+    .fetch_model_by_index(
       "not_name".to_string(),
       EitherSlug::Strict(StrictSlug::new("test")),
     )
@@ -168,8 +165,8 @@ async fn test_fetch_model_by_index_malformed() {
   let store = KeyValueStore::from_mock(mock_store);
   let adapter = KvDatabaseAdapter::new(store);
 
-  let result = adapter
-    .fetch_model_by_index::<TestModel>(
+  let result: Result<Option<TestModel>, _> = adapter
+    .fetch_model_by_index(
       "name".to_string(),
       EitherSlug::Strict(StrictSlug::new("not_test")),
     )

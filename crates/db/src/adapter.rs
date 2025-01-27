@@ -1,19 +1,14 @@
-use std::ops::Deref;
-
 use hex::Hexagonal;
 use kv::*;
 use miette::Result;
 
 /// An adapter for a model-based database.
 #[async_trait::async_trait]
-pub trait DatabaseAdapter: Hexagonal {
+pub(crate) trait DatabaseAdapter<M: model::Model>: Hexagonal {
   /// Creates a new model.
-  async fn create_model<M: model::Model>(
-    &self,
-    model: M,
-  ) -> Result<M, CreateModelError>;
+  async fn create_model(&self, model: M) -> Result<M, CreateModelError>;
   /// Fetches a model by its ID.
-  async fn fetch_model_by_id<M: model::Model>(
+  async fn fetch_model_by_id(
     &self,
     id: model::RecordId<M>,
   ) -> Result<Option<M>, FetchModelError>;
@@ -21,47 +16,13 @@ pub trait DatabaseAdapter: Hexagonal {
   ///
   /// Must be a valid index, defined in the model's
   /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
-  async fn fetch_model_by_index<M: model::Model>(
+  async fn fetch_model_by_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Option<M>, FetchModelByIndexError>;
   /// Produces a list of all model IDs.
-  async fn enumerate_models<M: model::Model>(&self) -> Result<Vec<M>>;
-}
-
-// impl for Arc
-#[async_trait::async_trait]
-impl<
-    T: Deref<Target = I> + hex::health::HealthReporter + Send + Sync + 'static,
-    I: DatabaseAdapter,
-  > DatabaseAdapter for T
-{
-  async fn create_model<M: model::Model>(
-    &self,
-    model: M,
-  ) -> Result<M, CreateModelError> {
-    (**self).create_model(model).await
-  }
-
-  async fn fetch_model_by_id<M: model::Model>(
-    &self,
-    id: model::RecordId<M>,
-  ) -> Result<Option<M>, FetchModelError> {
-    (**self).fetch_model_by_id(id).await
-  }
-
-  async fn fetch_model_by_index<M: model::Model>(
-    &self,
-    index_name: String,
-    index_value: EitherSlug,
-  ) -> Result<Option<M>, FetchModelByIndexError> {
-    (**self).fetch_model_by_index(index_name, index_value).await
-  }
-
-  async fn enumerate_models<M: model::Model>(&self) -> Result<Vec<M>> {
-    (**self).enumerate_models().await
-  }
+  async fn enumerate_models(&self) -> Result<Vec<M>>;
 }
 
 /// Errors that can occur when creating a model.

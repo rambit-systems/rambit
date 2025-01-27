@@ -6,7 +6,7 @@ use axum::{extract::FromRef, Router};
 use cart_app::*;
 use leptos::{logging::log, prelude::*};
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use prime_domain::DynPrimeDomainService;
+use prime_domain::{repos::db::Database, DynPrimeDomainService};
 
 #[derive(Clone, FromRef)]
 struct AppState {
@@ -30,17 +30,18 @@ async fn main() -> miette::Result<()> {
       Duration::from_secs(2),
     )
     .await;
-  let kv_db_adapter = Arc::new(
-    prime_domain::repos::db::KvDatabaseAdapter::new(retryable_kv_store),
+  let cache_repo = prime_domain::repos::CacheRepositoryCanonical::new(
+    Database::new_from_kv(retryable_kv_store.clone()),
   );
-  let cache_repo =
-    prime_domain::repos::CacheRepositoryCanonical::new(kv_db_adapter.clone());
-  let entry_repo =
-    prime_domain::repos::EntryRepositoryCanonical::new(kv_db_adapter.clone());
-  let store_repo =
-    prime_domain::repos::StoreRepositoryCanonical::new(kv_db_adapter.clone());
-  let token_repo =
-    prime_domain::repos::TokenRepositoryCanonical::new(kv_db_adapter.clone());
+  let entry_repo = prime_domain::repos::EntryRepositoryCanonical::new(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
+  let store_repo = prime_domain::repos::StoreRepositoryCanonical::new(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
+  let token_repo = prime_domain::repos::TokenRepositoryCanonical::new(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
   let temp_storage_repo = prime_domain::repos::TempStorageRepositoryMock::new(
     std::path::PathBuf::from("/tmp/rambit-temp-storage"),
   );

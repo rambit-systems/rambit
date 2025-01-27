@@ -32,8 +32,71 @@ mod kv_impl;
 #[cfg(feature = "migrate")]
 mod migrate;
 
-pub use kv;
+use std::sync::Arc;
 
+use hex::health;
+pub use kv;
+use kv::EitherSlug;
+use miette::Result;
+
+pub use self::adapter::*;
+use self::kv_impl::KvDatabaseAdapter;
 #[cfg(feature = "migrate")]
-pub use self::migrate::Migratable;
-pub use self::{adapter::*, kv_impl::KvDatabaseAdapter};
+pub use self::migrate::Migrator;
+
+/// A database.
+#[derive(Clone)]
+pub struct Database<M: model::Model> {
+  inner: Arc<dyn DatabaseAdapter<M>>,
+}
+
+impl<M: model::Model> Database<M> {
+  /// Creates a new database.
+  pub fn new_from_kv(kv_store: kv::KeyValueStore) -> Self {
+    Self {
+      inner: Arc::new(KvDatabaseAdapter::new(kv_store)),
+    }
+  }
+
+  /// Creates a new model.
+  pub async fn create_model(&self, model: M) -> Result<M, CreateModelError> {
+    self.inner.create_model(model).await
+  }
+  /// Fetches a model by its ID.
+  pub async fn fetch_model_by_id(
+    &self,
+    id: model::RecordId<M>,
+  ) -> Result<Option<M>, FetchModelError> {
+    self.inner.fetch_model_by_id(id).await
+  }
+  /// Fetches a model by an index.
+  ///
+  /// Must be a valid index, defined in the model's
+  /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
+  pub async fn fetch_model_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Option<M>, FetchModelByIndexError> {
+    self
+      .inner
+      .fetch_model_by_index(index_name, index_value)
+      .await
+  }
+  /// Produces a list of all model IDs.
+  pub async fn enumerate_models(&self) -> Result<Vec<M>> {
+    self.inner.enumerate_models().await
+  }
+}
+
+#[async_trait::async_trait]
+impl<M: model::Model> health::HealthReporter for Database<M> {
+  fn name(&self) -> &'static str { stringify!(Database<M>) }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
+  }
+}
