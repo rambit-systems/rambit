@@ -35,4 +35,5 @@ in [
   }
 ]
   ++ perBinaryCommands "api"
+  ++ perBinaryCommands "cli"
   ++ perBinaryCommands "daemon"

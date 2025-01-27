@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 
-/// Parsed CLI args.
+/// The Rambit CLI.
 #[derive(Parser, Debug)]
 struct Cli {
   #[command(subcommand)]
