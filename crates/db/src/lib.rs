@@ -1,16 +1,15 @@
 //! Provides access to the database.
 //!
-//! This is a hexagonal crate. It provides a [`DatabaseAdapter`] trait, and
-//! implementers.
+//! This is a hexagonal crate. It provides a [`Database`] struct.
 //!
-//! # [`DatabaseAdapter`]
-//! The [`DatabaseAdapter`] trait provides a **tabular** database interface. It
+//! # [`Database`]
+//! The [`Database`] struct provides a **tabular** database interface. It
 //! provides CRUD operations for a generic item, using the
 //! [`Model`](models::Model) trait to carry the table information.
 //!
-//! The implementation of the [`DatabaseAdapter`] trait is responsible for
-//! organizing the database, and for bridging the gap between raw data in the kv
-//! store and the model data.
+//! The implementation of the internal `DatabaseAdapter` trait is responsible
+//! for organizing the database, and for bridging the gap between raw data in
+//! the kv store and the model data.
 //!
 //! Admittedly, this is a little bit of a leaky abstraction. It
 //! makes use of the [`Model`](models::Model) trait, which ideally would not be
@@ -18,14 +17,10 @@
 //! [`db`](crate) crate is not.
 //!
 //! # Errors
-//! Ideally, each method in [`DatabaseAdapter`] should return a specific,
+//! Ideally, each method in [`Database`] should return a specific,
 //! concrete error. This is the case for all but
-//! [`enumerate_models`](DatabaseAdapter::enumerate_models), which returns a
+//! [`enumerate_models`](Database::enumerate_models), which returns a
 //! [`miette::Report`].
-//!
-//! # Implementers
-//! The [`KvDatabaseAdapter`] is the only implementer of the [`DatabaseAdapter`]
-//! trait.
 
 mod adapter;
 mod kv_impl;
