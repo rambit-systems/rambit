@@ -33,21 +33,17 @@ use crate::{
 };
 
 /// The canonical implementation of [`PrimeDomainService`].
-pub struct PrimeDomainServiceCanonical<
-  TSR: TempStorageRepository,
-  USR: repos::UserStorageRepository,
-> {
+pub struct PrimeDomainServiceCanonical<USR: repos::UserStorageRepository> {
   cache_repo:        CacheRepository,
   entry_repo:        EntryRepository,
   store_repo:        StoreRepository,
   token_repo:        TokenRepository,
-  temp_storage_repo: TSR,
+  temp_storage_repo: TempStorageRepository,
   user_storage_repo: USR,
 }
 
-impl<TSR, USR> PrimeDomainServiceCanonical<TSR, USR>
+impl<USR> PrimeDomainServiceCanonical<USR>
 where
-  TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
   /// Create a new instance of the canonical prime domain service.
@@ -56,7 +52,7 @@ where
     entry_repo: EntryRepository,
     store_repo: StoreRepository,
     token_repo: TokenRepository,
-    temp_storage_repo: TSR,
+    temp_storage_repo: TempStorageRepository,
     user_storage_repo: USR,
   ) -> Self {
     tracing::info!("creating new `PrimeDomainServiceCanonical` instance");
@@ -136,9 +132,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<TSR, USR> PrimeDomainService for PrimeDomainServiceCanonical<TSR, USR>
+impl<USR> PrimeDomainService for PrimeDomainServiceCanonical<USR>
 where
-  TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
   async fn fetch_cache_by_id(
@@ -378,9 +373,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<TSR, USR> health::HealthReporter for PrimeDomainServiceCanonical<TSR, USR>
+impl<USR> health::HealthReporter for PrimeDomainServiceCanonical<USR>
 where
-  TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
   fn name(&self) -> &'static str { stringify!(PrimeDomainServiceCanonical) }
