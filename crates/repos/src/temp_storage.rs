@@ -115,6 +115,18 @@ impl TempStorageRepository {
   }
 }
 
+#[async_trait::async_trait]
+impl health::HealthReporter for TempStorageRepository {
+  fn name(&self) -> &'static str { stringify!(TempStorageRepository) }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
+  }
+}
+
 mod mock {
   use storage::belt;
 
