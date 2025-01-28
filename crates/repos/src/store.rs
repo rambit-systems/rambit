@@ -31,7 +31,7 @@ impl StoreRepository {
 
   /// Creates a new model.
   #[instrument(skip(self))]
-  async fn create_model(
+  pub async fn create_model(
     &self,
     input: StoreCreateRequest,
   ) -> Result<Store, CreateModelError> {
@@ -40,7 +40,7 @@ impl StoreRepository {
 
   /// Fetches a model by its ID.
   #[instrument(skip(self))]
-  async fn fetch_model_by_id(
+  pub async fn fetch_model_by_id(
     &self,
     id: models::RecordId<Store>,
   ) -> Result<Option<Store>, FetchModelError> {
@@ -51,7 +51,7 @@ impl StoreRepository {
   ///
   /// Must be a valid index, defined in the model's `INDICES` constant.
   #[instrument(skip(self))]
-  async fn fetch_model_by_index(
+  pub async fn fetch_model_by_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
@@ -64,7 +64,7 @@ impl StoreRepository {
 
   /// Produces a list of all model IDs.
   #[instrument(skip(self))]
-  async fn enumerate_models(&self) -> Result<Vec<Store>> {
+  pub async fn enumerate_models(&self) -> Result<Vec<Store>> {
     self.inner.enumerate_models().await
   }
 }

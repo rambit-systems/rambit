@@ -33,7 +33,7 @@ impl CacheRepository {
 
   /// Creates a new model.
   #[instrument(skip(self))]
-  async fn create_model(
+  pub async fn create_model(
     &self,
     input: CacheCreateRequest,
   ) -> Result<Cache, CreateModelError> {
@@ -42,7 +42,7 @@ impl CacheRepository {
 
   /// Fetches a model by its ID.
   #[instrument(skip(self))]
-  async fn fetch_model_by_id(
+  pub async fn fetch_model_by_id(
     &self,
     id: models::RecordId<Cache>,
   ) -> Result<Option<Cache>, FetchModelError> {
@@ -53,7 +53,7 @@ impl CacheRepository {
   ///
   /// Must be a valid index, defined in the model's `INDICES` constant.
   #[instrument(skip(self))]
-  async fn fetch_model_by_index(
+  pub async fn fetch_model_by_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
@@ -66,13 +66,13 @@ impl CacheRepository {
 
   /// Produces a list of all model IDs.
   #[instrument(skip(self))]
-  async fn enumerate_models(&self) -> Result<Vec<Cache>> {
+  pub async fn enumerate_models(&self) -> Result<Vec<Cache>> {
     self.inner.enumerate_models().await
   }
 
   /// Find a [`Cache`] by its name.
   #[instrument(skip(self))]
-  async fn find_by_name(
+  pub async fn find_by_name(
     &self,
     name: StrictSlug,
   ) -> Result<Option<Cache>, FetchModelByIndexError> {
