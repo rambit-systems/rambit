@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use hex::{
   health::{self, HealthAware},
   Hexagonal,
@@ -12,7 +14,7 @@ pub use self::mock::TempStorageRepositoryMock;
 
 /// Descriptor trait for repositories that handle temp storage.
 #[async_trait::async_trait]
-pub trait TempStorageRepository: Hexagonal {
+pub(crate) trait TempStorageRepositoryLike: Hexagonal {
   /// Read data from the storage.
   async fn read(&self, path: TempStoragePath)
     -> Result<Belt, StorageReadError>;
@@ -23,33 +25,13 @@ pub trait TempStorageRepository: Hexagonal {
   ) -> Result<TempStoragePath, StorageWriteError>;
 }
 
-#[async_trait::async_trait]
-impl<T, I> TempStorageRepository for T
-where
-  T: std::ops::Deref<Target = I> + Send + Sync + 'static,
-  I: TempStorageRepository + ?Sized,
-{
-  async fn read(
-    &self,
-    path: TempStoragePath,
-  ) -> Result<Belt, StorageReadError> {
-    self.deref().read(path).await
-  }
-  async fn store(
-    &self,
-    data: Belt,
-  ) -> Result<TempStoragePath, StorageWriteError> {
-    self.deref().store(data).await
-  }
-}
-
 /// The repository for temp storage.
 #[derive(Clone)]
-pub struct TempStorageRepositoryCanonical {
+pub(crate) struct TempStorageRepositoryStorageImpl {
   client: StorageClient,
 }
 
-impl TempStorageRepositoryCanonical {
+impl TempStorageRepositoryStorageImpl {
   /// Create a new instance of the temp storage repository.
   pub async fn new(creds: TempStorageCreds) -> miette::Result<Self> {
     tracing::info!("creating new `TempStorageRepositoryCanonical` instance");
@@ -60,8 +42,10 @@ impl TempStorageRepositoryCanonical {
 }
 
 #[async_trait::async_trait]
-impl health::HealthReporter for TempStorageRepositoryCanonical {
-  fn name(&self) -> &'static str { stringify!(TempStorageRepositoryCanonical) }
+impl health::HealthReporter for TempStorageRepositoryStorageImpl {
+  fn name(&self) -> &'static str {
+    stringify!(TempStorageRepositoryStorageImpl)
+  }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(Some(
       self.client.health_report(),
@@ -72,7 +56,7 @@ impl health::HealthReporter for TempStorageRepositoryCanonical {
 }
 
 #[async_trait::async_trait]
-impl TempStorageRepository for TempStorageRepositoryCanonical {
+impl TempStorageRepositoryLike for TempStorageRepositoryStorageImpl {
   #[tracing::instrument(skip(self))]
   async fn read(
     &self,
@@ -91,6 +75,43 @@ impl TempStorageRepository for TempStorageRepositoryCanonical {
     self.client.write(path.path(), data).await?;
     path.set_size(models::FileSize::new(counter.current()));
     Ok(path)
+  }
+}
+
+#[derive(Clone)]
+/// The repository for temp storage.
+pub struct TempStorageRepository {
+  inner: Arc<dyn TempStorageRepositoryLike>,
+}
+
+impl TempStorageRepository {
+  /// Create a new instance of the temp storage repository from
+  /// [`TempStorageCreds`].
+  pub async fn new_from_creds(inner: TempStorageCreds) -> miette::Result<Self> {
+    Ok(Self {
+      inner: Arc::new(TempStorageRepositoryStorageImpl::new(inner).await?),
+    })
+  }
+  /// Create a new instance of the temp storage repository from a mock.
+  pub async fn new_from_mock(fs_root: std::path::PathBuf) -> Self {
+    Self {
+      inner: Arc::new(TempStorageRepositoryMock::new(fs_root)),
+    }
+  }
+
+  /// Read data from the storage.
+  pub async fn read(
+    &self,
+    path: TempStoragePath,
+  ) -> Result<Belt, StorageReadError> {
+    self.inner.read(path).await
+  }
+  /// Store data in the storage.
+  pub async fn store(
+    &self,
+    data: Belt,
+  ) -> Result<TempStoragePath, StorageWriteError> {
+    self.inner.store(data).await
   }
 }
 
@@ -123,7 +144,7 @@ mod mock {
   }
 
   #[async_trait::async_trait]
-  impl TempStorageRepository for TempStorageRepositoryMock {
+  impl TempStorageRepositoryLike for TempStorageRepositoryMock {
     #[tracing::instrument(skip(self))]
     async fn read(
       &self,
