@@ -138,16 +138,16 @@ impl AppState {
         Duration::from_secs(2),
       )
       .await;
-    let cache_repo = prime_domain::repos::CacheRepositoryCanonical::new(
+    let cache_repo = prime_domain::repos::CacheRepository::new_from_base(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let store_repo = prime_domain::repos::StoreRepositoryCanonical::new(
+    let store_repo = prime_domain::repos::StoreRepository::new_from_base(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let token_repo = prime_domain::repos::TokenRepositoryCanonical::new(
+    let token_repo = prime_domain::repos::TokenRepository::new_from_base(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let entry_repo = prime_domain::repos::EntryRepositoryCanonical::new(
+    let entry_repo = prime_domain::repos::EntryRepository::new_from_base(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
     let temp_storage_repo: Box<dyn TempStorageRepository> = if config
