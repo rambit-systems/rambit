@@ -37,7 +37,7 @@ use mollusk::ExternalApiError;
 use prime_domain::{
   hex::health::{self, HealthAware},
   models,
-  repos::{db::Database, TempStorageRepository},
+  repos::db::Database,
   DynPrimeDomainService,
 };
 use tasks::Task;
@@ -150,20 +150,16 @@ impl AppState {
     let entry_repo = prime_domain::repos::EntryRepository::new_from_base(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let temp_storage_repo: Box<dyn TempStorageRepository> = if config
-      .mock_temp_storage
-    {
-      Box::new(prime_domain::repos::TempStorageRepositoryMock::new(
+    let temp_storage_repo = if config.mock_temp_storage {
+      prime_domain::repos::TempStorageRepository::new_from_mock(
         std::path::PathBuf::from("/tmp/rambit-temp-storage"),
-      ))
+      )
     } else {
       let temp_storage_creds = prime_domain::TempStorageCreds::new_from_env()?;
-      Box::new(
-        prime_domain::repos::TempStorageRepositoryCanonical::new(
-          temp_storage_creds,
-        )
-        .await?,
+      prime_domain::repos::TempStorageRepository::new_from_creds(
+        temp_storage_creds,
       )
+      .await?
     };
     let user_storage_repo =
       prime_domain::repos::UserStorageRepositoryCanonical::new();

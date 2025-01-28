@@ -42,9 +42,10 @@ async fn main() -> miette::Result<()> {
   let token_repo = prime_domain::repos::TokenRepository::new_from_base(
     Database::new_from_kv(retryable_kv_store.clone()),
   );
-  let temp_storage_repo = prime_domain::repos::TempStorageRepositoryMock::new(
-    std::path::PathBuf::from("/tmp/rambit-temp-storage"),
-  );
+  let temp_storage_repo =
+    prime_domain::repos::TempStorageRepository::new_from_mock(
+      std::path::PathBuf::from("/tmp/rambit-temp-storage"),
+    );
   let user_storage_repo =
     prime_domain::repos::UserStorageRepositoryCanonical::new();
   let prime_domain_service = prime_domain::PrimeDomainServiceCanonical::new(
