@@ -10,7 +10,7 @@ pub use storage::{
   ReadError as StorageReadError, WriteError as StorageWriteError,
 };
 
-pub use self::mock::TempStorageRepositoryMock;
+use self::mock::TempStorageRepositoryMock;
 
 /// Descriptor trait for repositories that handle temp storage.
 #[async_trait::async_trait]
@@ -134,7 +134,7 @@ mod mock {
 
   /// A mock repository for temp storage.
   #[derive(Clone)]
-  pub struct TempStorageRepositoryMock {
+  pub(crate) struct TempStorageRepositoryMock {
     fs_root: std::path::PathBuf,
   }
 
