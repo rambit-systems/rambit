@@ -1,7 +1,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 pub use hex;
-use hex::health;
+use hex::health::{self, HealthAware};
 use miette::Result;
 pub use models;
 use models::{
@@ -34,37 +34,28 @@ use crate::{
 
 /// The canonical implementation of [`PrimeDomainService`].
 pub struct PrimeDomainServiceCanonical<
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
   TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 > {
-  cache_repo:        CR,
-  entry_repo:        ER,
-  store_repo:        SR,
-  token_repo:        TR,
+  cache_repo:        CacheRepository,
+  entry_repo:        EntryRepository,
+  store_repo:        StoreRepository,
+  token_repo:        TokenRepository,
   temp_storage_repo: TSR,
   user_storage_repo: USR,
 }
 
-impl<CR, ER, SR, TR, TSR, USR>
-  PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
+impl<TSR, USR> PrimeDomainServiceCanonical<TSR, USR>
 where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
   TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
   /// Create a new instance of the canonical prime domain service.
   pub fn new(
-    cache_repo: CR,
-    entry_repo: ER,
-    store_repo: SR,
-    token_repo: TR,
+    cache_repo: CacheRepository,
+    entry_repo: EntryRepository,
+    store_repo: StoreRepository,
+    token_repo: TokenRepository,
     temp_storage_repo: TSR,
     user_storage_repo: USR,
   ) -> Self {
@@ -145,13 +136,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<CR, ER, SR, TR, TSR, USR> PrimeDomainService
-  for PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
+impl<TSR, USR> PrimeDomainService for PrimeDomainServiceCanonical<TSR, USR>
 where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
   TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
@@ -392,13 +378,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<CR, ER, SR, TR, TSR, USR> health::HealthReporter
-  for PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
+impl<TSR, USR> health::HealthReporter for PrimeDomainServiceCanonical<TSR, USR>
 where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
   TSR: TempStorageRepository,
   USR: repos::UserStorageRepository,
 {
