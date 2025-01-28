@@ -93,7 +93,7 @@ impl TempStorageRepository {
     })
   }
   /// Create a new instance of the temp storage repository from a mock.
-  pub async fn new_from_mock(fs_root: std::path::PathBuf) -> Self {
+  pub fn new_from_mock(fs_root: std::path::PathBuf) -> Self {
     Self {
       inner: Arc::new(TempStorageRepositoryMock::new(fs_root)),
     }
