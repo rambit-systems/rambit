@@ -11,7 +11,7 @@ use crate::base::{BaseRepository, Database};
 /// Descriptor trait for repositories that handle [`Token`] domain model.
 #[async_trait::async_trait]
 pub trait TokenRepository:
-  ModelRepository<
+  ModelRepositoryLike<
   Model = Token,
   ModelCreateRequest = TokenCreateRequest,
   CreateError = CreateModelError,
@@ -20,7 +20,7 @@ pub trait TokenRepository:
 }
 
 impl<T> TokenRepository for T where
-  T: ModelRepository<
+  T: ModelRepositoryLike<
     Model = Token,
     ModelCreateRequest = TokenCreateRequest,
     CreateError = CreateModelError,

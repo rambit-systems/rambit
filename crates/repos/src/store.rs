@@ -11,7 +11,7 @@ use crate::base::{BaseRepository, Database};
 /// Descriptor trait for repositories that handle [`Store`] domain model.
 #[async_trait::async_trait]
 pub trait StoreRepository:
-  ModelRepository<
+  ModelRepositoryLike<
   Model = Store,
   ModelCreateRequest = StoreCreateRequest,
   CreateError = CreateModelError,
@@ -20,7 +20,7 @@ pub trait StoreRepository:
 }
 
 impl<T> StoreRepository for T where
-  T: ModelRepository<
+  T: ModelRepositoryLike<
     Model = Store,
     ModelCreateRequest = StoreCreateRequest,
     CreateError = CreateModelError,

@@ -28,7 +28,7 @@ pub use self::{
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
-pub trait ModelRepository: Hexagonal {
+pub(crate) trait ModelRepositoryLike: Hexagonal {
   /// The model type.
   type Model: models::Model;
   /// The request type for creating a model.
@@ -62,10 +62,10 @@ pub trait ModelRepository: Hexagonal {
 }
 
 #[async_trait::async_trait]
-impl<T, I> ModelRepository for T
+impl<T, I> ModelRepositoryLike for T
 where
   T: std::ops::Deref<Target = I> + Hexagonal + Sized,
-  I: ModelRepository + ?Sized,
+  I: ModelRepositoryLike + ?Sized,
 {
   type Model = I::Model;
   type ModelCreateRequest = I::ModelCreateRequest;
@@ -95,100 +95,6 @@ where
   }
 }
 
-/// Defines a repository fetcher interface for models.
-#[async_trait::async_trait]
-pub trait ModelRepositoryFetcher: Hexagonal {
-  /// The model type.
-  type Model: models::Model;
-
-  /// Fetches a model by its ID.
-  async fn fetch(
-    &self,
-    id: models::RecordId<Self::Model>,
-  ) -> Result<Option<Self::Model>, FetchModelError>;
-  /// Fetches a model by an index.
-  ///
-  /// Must be a valid index, defined in the model's `INDICES` constant.
-  async fn fetch_model_by_index(
-    &self,
-    index_name: String,
-    index_value: EitherSlug,
-  ) -> Result<Option<Self::Model>, FetchModelByIndexError>;
-  /// Produces a list of all model IDs.
-  async fn enumerate_models(&self) -> Result<Vec<Self::Model>>;
-}
-
-// impl for smart pointer to dyn ModelRepositoryFetcher
-#[async_trait::async_trait]
-impl<T, I, M> ModelRepositoryFetcher for T
-where
-  T: std::ops::Deref<Target = I> + Hexagonal + Sized,
-  I: ModelRepositoryFetcher<Model = M> + ?Sized,
-  M: models::Model,
-{
-  type Model = M;
-
-  async fn fetch(
-    &self,
-    id: models::RecordId<Self::Model>,
-  ) -> Result<Option<Self::Model>, FetchModelError> {
-    I::fetch(self, id).await
-  }
-  async fn fetch_model_by_index(
-    &self,
-    index_name: String,
-    index_value: EitherSlug,
-  ) -> Result<Option<Self::Model>, FetchModelByIndexError> {
-    I::fetch_model_by_index(self, index_name, index_value).await
-  }
-  async fn enumerate_models(&self) -> Result<Vec<Self::Model>> {
-    I::enumerate_models(self).await
-  }
-}
-
-/// Defines a repository interface for creating models.
-#[async_trait::async_trait]
-pub trait ModelRepositoryCreator: Hexagonal {
-  /// The model type.
-  type Model: models::Model;
-  /// The request type for creating a model.
-  type ModelCreateRequest: std::fmt::Debug + Send + Sync + 'static;
-  /// The error type for creating a model.
-  type CreateError: std::error::Error + Send + Sync + 'static;
-
-  /// Creates a new model.
-  async fn create_model(
-    &self,
-    input: Self::ModelCreateRequest,
-  ) -> Result<(), Self::CreateError>;
-}
-
-// impl for smart pointer to dyn ModelRepositoryCreator
-#[async_trait::async_trait]
-impl<T, I, M, Mcr, Ce> ModelRepositoryCreator for T
-where
-  T: std::ops::Deref<Target = I> + Hexagonal + Sized,
-  I: ModelRepositoryCreator<
-      Model = M,
-      ModelCreateRequest = Mcr,
-      CreateError = Ce,
-    > + ?Sized,
-  M: models::Model,
-  Mcr: std::fmt::Debug + Send + Sync + 'static,
-  Ce: std::error::Error + Send + Sync + 'static,
-{
-  type Model = M;
-  type ModelCreateRequest = Mcr;
-  type CreateError = Ce;
-
-  async fn create_model(
-    &self,
-    input: Self::ModelCreateRequest,
-  ) -> Result<(), Self::CreateError> {
-    I::create_model(self, input).await
-  }
-}
-
 /// Macro to implement the `ModelRepository` trait for a given repository.
 #[macro_export]
 macro_rules! impl_repository_on_base {
@@ -206,7 +112,7 @@ macro_rules! impl_repository_on_base {
     }
 
     #[async_trait::async_trait]
-    impl ModelRepository for $canonical {
+    impl ModelRepositoryLike for $canonical {
       type Model = $model;
       type ModelCreateRequest = $create_request;
       type CreateError = $create_error;

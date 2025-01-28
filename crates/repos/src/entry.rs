@@ -13,7 +13,7 @@ use crate::base::{BaseRepository, Database};
 /// Descriptor trait for repositories that handle [`Entry`] domain model.
 #[async_trait::async_trait]
 pub trait EntryRepository:
-  ModelRepository<
+  ModelRepositoryLike<
   Model = Entry,
   ModelCreateRequest = EntryCreateRequest,
   CreateError = CreateModelError,
@@ -34,7 +34,7 @@ pub trait EntryRepository:
 }
 
 impl<T> EntryRepository for T where
-  T: ModelRepository<
+  T: ModelRepositoryLike<
     Model = Entry,
     ModelCreateRequest = EntryCreateRequest,
     CreateError = CreateModelError,

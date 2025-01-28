@@ -13,7 +13,7 @@ use crate::base::{BaseRepository, Database};
 /// Descriptor trait for repositories that handle [`Cache`] domain model.
 #[async_trait::async_trait]
 pub trait CacheRepository:
-  ModelRepository<
+  ModelRepositoryLike<
   Model = Cache,
   ModelCreateRequest = CacheCreateRequest,
   CreateError = CreateModelError,
@@ -33,7 +33,7 @@ pub trait CacheRepository:
 
 #[async_trait::async_trait]
 impl<T> CacheRepository for T where
-  T: ModelRepository<
+  T: ModelRepositoryLike<
     Model = Cache,
     ModelCreateRequest = CacheCreateRequest,
     CreateError = CreateModelError,

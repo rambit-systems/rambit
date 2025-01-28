@@ -4,7 +4,7 @@ use hex::health::{self, HealthAware};
 use miette::Result;
 use tracing::instrument;
 
-use crate::ModelRepository;
+use crate::ModelRepositoryLike;
 
 /// Provides a base repository implementation for any model.
 ///
@@ -45,7 +45,7 @@ impl<M: models::Model> health::HealthReporter for BaseRepository<M> {
 }
 
 #[async_trait::async_trait]
-impl<M: models::Model> ModelRepository for BaseRepository<M> {
+impl<M: models::Model> ModelRepositoryLike for BaseRepository<M> {
   type Model = M;
   type ModelCreateRequest = M;
   type CreateError = CreateModelError;
