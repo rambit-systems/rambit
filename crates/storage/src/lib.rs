@@ -15,28 +15,29 @@ use hex::{health, Hexagonal};
 
 use self::{local::LocalStorageClient, s3_compat::S3CompatStorageClient};
 
-/// Trait alias for `Box<dyn StorageClient + ...>`
-pub(crate) type DynStorageClient =
-  Arc<dyn StorageClientLike + Send + Sync + 'static>;
-
-/// Extension trait that allows generating a dynamic client from
-/// `StorageCredentials`.
+/// Trait that allows generating a dynamic client from storage credentials.
+#[async_trait::async_trait]
 pub(crate) trait StorageClientGenerator {
-  /// Generates a dynamic client from `StorageCredentials`.
-  fn client(
+  /// Generates a dynamic client from storage credentials.
+  async fn client(
     &self,
-  ) -> impl std::future::Future<Output = miette::Result<DynStorageClient>> + Send;
+  ) -> miette::Result<Arc<dyn StorageClientLike + Send + Sync + 'static>>;
 }
 
+#[async_trait::async_trait]
 impl StorageClientGenerator for dvf::StorageCredentials {
-  async fn client(&self) -> miette::Result<DynStorageClient> {
+  async fn client(
+    &self,
+  ) -> miette::Result<Arc<dyn StorageClientLike + Send + Sync + 'static>> {
     match self {
       Self::Local(local_storage_creds) => Ok(Arc::new(
         LocalStorageClient::new(local_storage_creds.clone()).await?,
-      ) as DynStorageClient),
+      )
+        as Arc<dyn StorageClientLike + Send + Sync + 'static>),
       Self::R2(r2_storage_creds) => Ok(Arc::new(
         S3CompatStorageClient::new_r2(r2_storage_creds.clone()).await?,
-      ) as DynStorageClient),
+      )
+        as Arc<dyn StorageClientLike + Send + Sync + 'static>),
     }
   }
 }
