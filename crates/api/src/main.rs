@@ -161,8 +161,7 @@ impl AppState {
       )
       .await?
     };
-    let user_storage_repo =
-      prime_domain::repos::UserStorageRepositoryCanonical::new();
+    let user_storage_repo = prime_domain::repos::UserStorageRepository::new();
 
     let prime_domain_service = prime_domain::PrimeDomainServiceCanonical::new(
       cache_repo,

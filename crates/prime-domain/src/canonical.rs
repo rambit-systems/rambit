@@ -17,7 +17,7 @@ use repos::{
   belt::{self, Belt},
   db::{FetchModelByIndexError, FetchModelError},
   CacheRepository, EntryRepository, StoreRepository, TempStorageRepository,
-  TokenRepository, UserStorageClient,
+  TokenRepository, UserStorageRepository,
 };
 use tracing::instrument;
 
@@ -33,19 +33,16 @@ use crate::{
 };
 
 /// The canonical implementation of [`PrimeDomainService`].
-pub struct PrimeDomainServiceCanonical<USR: repos::UserStorageRepository> {
+pub struct PrimeDomainServiceCanonical {
   cache_repo:        CacheRepository,
   entry_repo:        EntryRepository,
   store_repo:        StoreRepository,
   token_repo:        TokenRepository,
   temp_storage_repo: TempStorageRepository,
-  user_storage_repo: USR,
+  user_storage_repo: UserStorageRepository,
 }
 
-impl<USR> PrimeDomainServiceCanonical<USR>
-where
-  USR: repos::UserStorageRepository,
-{
+impl PrimeDomainServiceCanonical {
   /// Create a new instance of the canonical prime domain service.
   pub fn new(
     cache_repo: CacheRepository,
@@ -53,7 +50,7 @@ where
     store_repo: StoreRepository,
     token_repo: TokenRepository,
     temp_storage_repo: TempStorageRepository,
-    user_storage_repo: USR,
+    user_storage_repo: UserStorageRepository,
   ) -> Self {
     tracing::info!("creating new `PrimeDomainServiceCanonical` instance");
     Self {
@@ -132,10 +129,7 @@ where
 }
 
 #[async_trait::async_trait]
-impl<USR> PrimeDomainService for PrimeDomainServiceCanonical<USR>
-where
-  USR: repos::UserStorageRepository,
-{
+impl PrimeDomainService for PrimeDomainServiceCanonical {
   async fn fetch_cache_by_id(
     &self,
     id: CacheRecordId,
@@ -373,10 +367,7 @@ where
 }
 
 #[async_trait::async_trait]
-impl<USR> health::HealthReporter for PrimeDomainServiceCanonical<USR>
-where
-  USR: repos::UserStorageRepository,
-{
+impl health::HealthReporter for PrimeDomainServiceCanonical {
   fn name(&self) -> &'static str { stringify!(PrimeDomainServiceCanonical) }
   #[instrument(skip(self))]
   async fn health_check(&self) -> health::ComponentHealth {

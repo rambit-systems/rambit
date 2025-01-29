@@ -46,8 +46,7 @@ async fn main() -> miette::Result<()> {
     prime_domain::repos::TempStorageRepository::new_from_mock(
       std::path::PathBuf::from("/tmp/rambit-temp-storage"),
     );
-  let user_storage_repo =
-    prime_domain::repos::UserStorageRepositoryCanonical::new();
+  let user_storage_repo = prime_domain::repos::UserStorageRepository::new();
   let prime_domain_service = prime_domain::PrimeDomainServiceCanonical::new(
     cache_repo,
     entry_repo,
