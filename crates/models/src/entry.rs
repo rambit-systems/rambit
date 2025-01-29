@@ -1,5 +1,8 @@
+mod narinfo;
+
 use serde::{Deserialize, Serialize};
 
+pub use self::narinfo::*;
 use crate::{CacheRecordId, LaxSlug, Model, OrgRecordId, RecordId};
 
 /// The [`Entry`] table name.
