@@ -1,7 +1,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 pub use hex;
-use hex::health;
+use hex::health::{self, HealthAware};
 use miette::Result;
 pub use models;
 use models::{
@@ -17,7 +17,7 @@ use repos::{
   belt::{self, Belt},
   db::{FetchModelByIndexError, FetchModelError},
   CacheRepository, EntryRepository, StoreRepository, TempStorageRepository,
-  TokenRepository, UserStorageClient,
+  TokenRepository, UserStorageRepository,
 };
 use tracing::instrument;
 
@@ -33,40 +33,24 @@ use crate::{
 };
 
 /// The canonical implementation of [`PrimeDomainService`].
-pub struct PrimeDomainServiceCanonical<
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
-  TSR: TempStorageRepository,
-  USR: repos::UserStorageRepository,
-> {
-  cache_repo:        CR,
-  entry_repo:        ER,
-  store_repo:        SR,
-  token_repo:        TR,
-  temp_storage_repo: TSR,
-  user_storage_repo: USR,
+pub struct PrimeDomainServiceCanonical {
+  cache_repo:        CacheRepository,
+  entry_repo:        EntryRepository,
+  store_repo:        StoreRepository,
+  token_repo:        TokenRepository,
+  temp_storage_repo: TempStorageRepository,
+  user_storage_repo: UserStorageRepository,
 }
 
-impl<CR, ER, SR, TR, TSR, USR>
-  PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
-where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
-  TSR: TempStorageRepository,
-  USR: repos::UserStorageRepository,
-{
+impl PrimeDomainServiceCanonical {
   /// Create a new instance of the canonical prime domain service.
   pub fn new(
-    cache_repo: CR,
-    entry_repo: ER,
-    store_repo: SR,
-    token_repo: TR,
-    temp_storage_repo: TSR,
-    user_storage_repo: USR,
+    cache_repo: CacheRepository,
+    entry_repo: EntryRepository,
+    store_repo: StoreRepository,
+    token_repo: TokenRepository,
+    temp_storage_repo: TempStorageRepository,
+    user_storage_repo: UserStorageRepository,
   ) -> Self {
     tracing::info!("creating new `PrimeDomainServiceCanonical` instance");
     Self {
@@ -145,16 +129,7 @@ where
 }
 
 #[async_trait::async_trait]
-impl<CR, ER, SR, TR, TSR, USR> PrimeDomainService
-  for PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
-where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
-  TSR: TempStorageRepository,
-  USR: repos::UserStorageRepository,
-{
+impl PrimeDomainService for PrimeDomainServiceCanonical {
   async fn fetch_cache_by_id(
     &self,
     id: CacheRecordId,
@@ -392,16 +367,7 @@ where
 }
 
 #[async_trait::async_trait]
-impl<CR, ER, SR, TR, TSR, USR> health::HealthReporter
-  for PrimeDomainServiceCanonical<CR, ER, SR, TR, TSR, USR>
-where
-  CR: CacheRepository,
-  ER: EntryRepository,
-  SR: StoreRepository,
-  TR: TokenRepository,
-  TSR: TempStorageRepository,
-  USR: repos::UserStorageRepository,
-{
+impl health::HealthReporter for PrimeDomainServiceCanonical {
   fn name(&self) -> &'static str { stringify!(PrimeDomainServiceCanonical) }
   #[instrument(skip(self))]
   async fn health_check(&self) -> health::ComponentHealth {

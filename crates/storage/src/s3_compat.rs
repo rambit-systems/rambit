@@ -12,7 +12,7 @@ use object_store::{
 };
 use tokio::sync::Mutex;
 
-use super::{ReadError, StorageClient};
+use super::{ReadError, StorageClientLike};
 use crate::WriteError;
 
 pub struct S3CompatStorageClient {
@@ -69,7 +69,7 @@ impl health::HealthReporter for S3CompatStorageClient {
 }
 
 #[async_trait::async_trait]
-impl StorageClient for S3CompatStorageClient {
+impl StorageClientLike for S3CompatStorageClient {
   #[tracing::instrument(skip(self))]
   async fn read(&self, input_path: &Path) -> Result<Belt, ReadError> {
     let input_path_string = input_path.to_str().unwrap().to_string();

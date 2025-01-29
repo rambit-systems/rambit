@@ -35,12 +35,9 @@ use clap::Parser;
 use miette::{IntoDiagnostic, Result};
 use mollusk::ExternalApiError;
 use prime_domain::{
-  hex::{
-    health::{self, HealthAware},
-    retryable::Retryable,
-  },
+  hex::health::{self, HealthAware},
   models,
-  repos::TempStorageRepository,
+  repos::db::Database,
   DynPrimeDomainService,
 };
 use tasks::Task;
@@ -135,39 +132,36 @@ struct AppState {
 
 impl AppState {
   async fn build(config: &RuntimeConfig) -> Result<Self> {
-    let tikv_store_init = move || async move {
-      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await
-    };
-    let retryable_tikv_store =
-      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await;
-    let kv_db_adapter = Arc::new(
-      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
+    let retryable_kv_store =
+      prime_domain::repos::db::kv::KeyValueStore::new_retryable_tikv_from_env(
+        5,
+        Duration::from_secs(2),
+      )
+      .await;
+    let cache_repo = prime_domain::repos::CacheRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let cache_repo =
-      prime_domain::repos::CacheRepositoryCanonical::new(kv_db_adapter.clone());
-    let store_repo =
-      prime_domain::repos::StoreRepositoryCanonical::new(kv_db_adapter.clone());
-    let token_repo =
-      prime_domain::repos::TokenRepositoryCanonical::new(kv_db_adapter.clone());
-    let entry_repo =
-      prime_domain::repos::EntryRepositoryCanonical::new(kv_db_adapter.clone());
-    let temp_storage_repo: Box<dyn TempStorageRepository> = if config
-      .mock_temp_storage
-    {
-      Box::new(prime_domain::repos::TempStorageRepositoryMock::new(
+    let store_repo = prime_domain::repos::StoreRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let token_repo = prime_domain::repos::TokenRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let entry_repo = prime_domain::repos::EntryRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let temp_storage_repo = if config.mock_temp_storage {
+      prime_domain::repos::TempStorageRepository::new_from_mock(
         std::path::PathBuf::from("/tmp/rambit-temp-storage"),
-      ))
+      )
     } else {
       let temp_storage_creds = prime_domain::TempStorageCreds::new_from_env()?;
-      Box::new(
-        prime_domain::repos::TempStorageRepositoryCanonical::new(
-          temp_storage_creds,
-        )
-        .await?,
+      prime_domain::repos::TempStorageRepository::new_from_creds(
+        temp_storage_creds,
       )
+      .await?
     };
-    let user_storage_repo =
-      prime_domain::repos::UserStorageRepositoryCanonical::new();
+    let user_storage_repo = prime_domain::repos::UserStorageRepository::new();
 
     let prime_domain_service = prime_domain::PrimeDomainServiceCanonical::new(
       cache_repo,

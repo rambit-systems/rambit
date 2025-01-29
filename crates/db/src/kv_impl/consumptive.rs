@@ -1,6 +1,6 @@
 use std::ops::Bound;
 
-use kv::{prelude::*, txn_ext::KvTransactionExt};
+use kv::*;
 use miette::Result;
 
 pub trait ConsumptiveTransaction:

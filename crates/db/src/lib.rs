@@ -1,16 +1,15 @@
 //! Provides access to the database.
 //!
-//! This is a hexagonal crate. It provides a [`DatabaseAdapter`] trait, and
-//! implementers.
+//! This is a hexagonal crate. It provides a [`Database`] struct.
 //!
-//! # [`DatabaseAdapter`]
-//! The [`DatabaseAdapter`] trait provides a **tabular** database interface. It
+//! # [`Database`]
+//! The [`Database`] struct provides a **tabular** database interface. It
 //! provides CRUD operations for a generic item, using the
 //! [`Model`](models::Model) trait to carry the table information.
 //!
-//! The implementation of the [`DatabaseAdapter`] trait is responsible for
-//! organizing the database, and for bridging the gap between raw data in the kv
-//! store and the model data.
+//! The implementation of the internal `DatabaseAdapter` trait is responsible
+//! for organizing the database, and for bridging the gap between raw data in
+//! the kv store and the model data.
 //!
 //! Admittedly, this is a little bit of a leaky abstraction. It
 //! makes use of the [`Model`](models::Model) trait, which ideally would not be
@@ -18,23 +17,81 @@
 //! [`db`](crate) crate is not.
 //!
 //! # Errors
-//! Ideally, each method in [`DatabaseAdapter`] should return a specific,
+//! Ideally, each method in [`Database`] should return a specific,
 //! concrete error. This is the case for all but
-//! [`enumerate_models`](DatabaseAdapter::enumerate_models), which returns a
+//! [`enumerate_models`](Database::enumerate_models), which returns a
 //! [`miette::Report`].
-//!
-//! # Implementers
-//! The [`KvDatabaseAdapter`] is the only implementer of the [`DatabaseAdapter`]
-//! trait. It's generic on a [`KvTransactional`](kv::prelude::KvTransactional)
-//! implementation.
 
 mod adapter;
 mod kv_impl;
 #[cfg(feature = "migrate")]
 mod migrate;
 
-pub use kv;
+use std::sync::Arc;
 
+use hex::health;
+pub use kv;
+use kv::EitherSlug;
+use miette::Result;
+
+pub use self::adapter::*;
+use self::kv_impl::KvDatabaseAdapter;
 #[cfg(feature = "migrate")]
-pub use self::migrate::Migratable;
-pub use self::{adapter::*, kv_impl::KvDatabaseAdapter};
+pub use self::migrate::Migrator;
+
+/// A database.
+#[derive(Clone)]
+pub struct Database<M: model::Model> {
+  inner: Arc<dyn DatabaseAdapter<M>>,
+}
+
+impl<M: model::Model> Database<M> {
+  /// Creates a new database.
+  pub fn new_from_kv(kv_store: kv::KeyValueStore) -> Self {
+    Self {
+      inner: Arc::new(KvDatabaseAdapter::new(kv_store)),
+    }
+  }
+
+  /// Creates a new model.
+  pub async fn create_model(&self, model: M) -> Result<M, CreateModelError> {
+    self.inner.create_model(model).await
+  }
+  /// Fetches a model by its ID.
+  pub async fn fetch_model_by_id(
+    &self,
+    id: model::RecordId<M>,
+  ) -> Result<Option<M>, FetchModelError> {
+    self.inner.fetch_model_by_id(id).await
+  }
+  /// Fetches a model by an index.
+  ///
+  /// Must be a valid index, defined in the model's
+  /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
+  pub async fn fetch_model_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Option<M>, FetchModelByIndexError> {
+    self
+      .inner
+      .fetch_model_by_index(index_name, index_value)
+      .await
+  }
+  /// Produces a list of all model IDs.
+  pub async fn enumerate_models(&self) -> Result<Vec<M>> {
+    self.inner.enumerate_models().await
+  }
+}
+
+#[async_trait::async_trait]
+impl<M: model::Model> health::HealthReporter for Database<M> {
+  fn name(&self) -> &'static str { stringify!(Database<M>) }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
+  }
+}

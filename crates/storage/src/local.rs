@@ -6,7 +6,7 @@ use hex::health;
 use miette::{Context, IntoDiagnostic};
 use tokio::io::{AsyncWriteExt, BufReader, BufWriter};
 
-use super::{ReadError, StorageClient};
+use super::{ReadError, StorageClientLike};
 use crate::WriteError;
 
 pub struct LocalStorageClient(PathBuf);
@@ -46,7 +46,7 @@ impl health::HealthReporter for LocalStorageClient {
 }
 
 #[async_trait::async_trait]
-impl StorageClient for LocalStorageClient {
+impl StorageClientLike for LocalStorageClient {
   #[tracing::instrument(skip(self))]
   async fn read(&self, input_path: &Path) -> Result<Belt, ReadError> {
     let path = self.0.as_path().join(input_path);

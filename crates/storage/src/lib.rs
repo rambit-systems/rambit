@@ -4,35 +4,40 @@ mod local;
 mod s3_compat;
 pub mod temp;
 
-use std::path::{Path, PathBuf};
+use std::{
+  path::{Path, PathBuf},
+  sync::Arc,
+};
 
 pub use belt;
 use belt::Belt;
-use hex::Hexagonal;
+use hex::{health, Hexagonal};
 
 use self::{local::LocalStorageClient, s3_compat::S3CompatStorageClient};
 
-/// Trait alias for `Box<dyn StorageClient + ...>`
-pub type DynStorageClient = Box<dyn StorageClient + Send + Sync + 'static>;
-
-/// Extension trait that allows generating a dynamic client from
-/// `StorageCredentials`.
-pub trait StorageClientGenerator {
-  /// Generates a dynamic client from `StorageCredentials`.
-  fn client(
+/// Trait that allows generating a dynamic client from storage credentials.
+#[async_trait::async_trait]
+pub(crate) trait StorageClientGenerator {
+  /// Generates a dynamic client from storage credentials.
+  async fn client(
     &self,
-  ) -> impl std::future::Future<Output = miette::Result<DynStorageClient>> + Send;
+  ) -> miette::Result<Arc<dyn StorageClientLike + Send + Sync + 'static>>;
 }
 
+#[async_trait::async_trait]
 impl StorageClientGenerator for dvf::StorageCredentials {
-  async fn client(&self) -> miette::Result<DynStorageClient> {
+  async fn client(
+    &self,
+  ) -> miette::Result<Arc<dyn StorageClientLike + Send + Sync + 'static>> {
     match self {
-      Self::Local(local_storage_creds) => Ok(Box::new(
+      Self::Local(local_storage_creds) => Ok(Arc::new(
         LocalStorageClient::new(local_storage_creds.clone()).await?,
-      ) as DynStorageClient),
-      Self::R2(r2_storage_creds) => Ok(Box::new(
+      )
+        as Arc<dyn StorageClientLike + Send + Sync + 'static>),
+      Self::R2(r2_storage_creds) => Ok(Arc::new(
         S3CompatStorageClient::new_r2(r2_storage_creds.clone()).await?,
-      ) as DynStorageClient),
+      )
+        as Arc<dyn StorageClientLike + Send + Sync + 'static>),
     }
   }
 }
@@ -67,7 +72,7 @@ pub enum WriteError {
 
 /// The main storage trait. Allows reading to or writing from a stream of bytes.
 #[async_trait::async_trait]
-pub trait StorageClient: Hexagonal {
+pub(crate) trait StorageClientLike: Hexagonal {
   /// Reads a file. Returns a [`Belt`].
   async fn read(&self, path: &Path) -> Result<Belt, ReadError>;
   /// Writes a file. Consumes a [`Belt`].
@@ -78,20 +83,44 @@ pub trait StorageClient: Hexagonal {
   ) -> Result<dvf::FileSize, WriteError>;
 }
 
-#[async_trait::async_trait]
-impl<T, I> StorageClient for T
-where
-  T: std::ops::Deref<Target = I> + Send + Sync + 'static,
-  I: StorageClient + ?Sized,
-{
-  async fn read(&self, path: &Path) -> Result<Belt, ReadError> {
-    self.deref().read(path).await
+/// A client for interacting with a storage backend.
+#[derive(Clone)]
+pub struct StorageClient {
+  inner: Arc<dyn StorageClientLike>,
+}
+
+impl StorageClient {
+  /// Creates a new `StorageClient` from `StorageCredentials`.
+  pub async fn new_from_storage_creds(
+    creds: dvf::StorageCredentials,
+  ) -> miette::Result<Self> {
+    let inner = creds.client().await?;
+    Ok(Self { inner })
   }
-  async fn write(
+
+  /// Reads from a path.
+  pub async fn read(&self, path: &Path) -> Result<Belt, ReadError> {
+    self.inner.read(path).await
+  }
+
+  /// Writes to a path.
+  pub async fn write(
     &self,
     path: &Path,
     data: Belt,
   ) -> Result<dvf::FileSize, WriteError> {
-    self.deref().write(path, data).await
+    self.inner.write(path, data).await
+  }
+}
+
+#[async_trait::async_trait]
+impl health::HealthReporter for StorageClient {
+  fn name(&self) -> &'static str { self.inner.name() }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
   }
 }

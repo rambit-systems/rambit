@@ -2,17 +2,13 @@ use std::fmt::Debug;
 
 use hex::retryable::Retryable;
 
-use crate::prelude::*;
+use crate::*;
 
+#[async_trait::async_trait]
 impl<KV: KvTransactional, E: Debug + Send + Sync + 'static> KvTransactional
   for Retryable<KV, E>
 {
-  type OptimisticTransaction = KV::OptimisticTransaction;
-  type PessimisticTransaction = KV::PessimisticTransaction;
-
-  async fn begin_optimistic_transaction(
-    &self,
-  ) -> KvResult<Self::OptimisticTransaction> {
+  async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
     let result = self.inner();
     match result {
       Ok(kv) => kv.begin_optimistic_transaction().await,
@@ -21,9 +17,7 @@ impl<KV: KvTransactional, E: Debug + Send + Sync + 'static> KvTransactional
       ))),
     }
   }
-  async fn begin_pessimistic_transaction(
-    &self,
-  ) -> KvResult<Self::PessimisticTransaction> {
+  async fn begin_pessimistic_transaction(&self) -> KvResult<DynTransaction> {
     let result = self.inner();
     match result {
       Ok(kv) => kv.begin_pessimistic_transaction().await,

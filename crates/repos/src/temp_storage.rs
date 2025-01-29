@@ -1,21 +1,22 @@
+mod mock;
+
 use std::sync::Arc;
 
 use hex::{
-  health::{self},
+  health::{self, HealthAware},
   Hexagonal,
 };
 use models::TempStoragePath;
-use storage::{belt::Belt, temp::TempStorageCreds};
+use storage::{belt::Belt, temp::TempStorageCreds, StorageClient};
 pub use storage::{
-  ReadError as StorageReadError, StorageClientGenerator,
-  WriteError as StorageWriteError,
+  ReadError as StorageReadError, WriteError as StorageWriteError,
 };
 
-pub use self::mock::TempStorageRepositoryMock;
+use self::mock::TempStorageRepositoryMock;
 
 /// Descriptor trait for repositories that handle temp storage.
 #[async_trait::async_trait]
-pub trait TempStorageRepository: Hexagonal {
+pub(crate) trait TempStorageRepositoryLike: Hexagonal {
   /// Read data from the storage.
   async fn read(&self, path: TempStoragePath)
     -> Result<Belt, StorageReadError>;
@@ -26,45 +27,27 @@ pub trait TempStorageRepository: Hexagonal {
   ) -> Result<TempStoragePath, StorageWriteError>;
 }
 
-#[async_trait::async_trait]
-impl<T, I> TempStorageRepository for T
-where
-  T: std::ops::Deref<Target = I> + Send + Sync + 'static,
-  I: TempStorageRepository + ?Sized,
-{
-  async fn read(
-    &self,
-    path: TempStoragePath,
-  ) -> Result<Belt, StorageReadError> {
-    self.deref().read(path).await
-  }
-  async fn store(
-    &self,
-    data: Belt,
-  ) -> Result<TempStoragePath, StorageWriteError> {
-    self.deref().store(data).await
-  }
-}
-
 /// The repository for temp storage.
 #[derive(Clone)]
-pub struct TempStorageRepositoryCanonical {
-  client: Arc<storage::DynStorageClient>,
+pub(crate) struct TempStorageRepositoryStorageImpl {
+  client: StorageClient,
 }
 
-impl TempStorageRepositoryCanonical {
+impl TempStorageRepositoryStorageImpl {
   /// Create a new instance of the temp storage repository.
   pub async fn new(creds: TempStorageCreds) -> miette::Result<Self> {
     tracing::info!("creating new `TempStorageRepositoryCanonical` instance");
     Ok(Self {
-      client: Arc::new(creds.as_creds().client().await?),
+      client: StorageClient::new_from_storage_creds(creds.as_creds()).await?,
     })
   }
 }
 
 #[async_trait::async_trait]
-impl health::HealthReporter for TempStorageRepositoryCanonical {
-  fn name(&self) -> &'static str { stringify!(TempStorageRepositoryCanonical) }
+impl health::HealthReporter for TempStorageRepositoryStorageImpl {
+  fn name(&self) -> &'static str {
+    stringify!(TempStorageRepositoryStorageImpl)
+  }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(Some(
       self.client.health_report(),
@@ -75,7 +58,7 @@ impl health::HealthReporter for TempStorageRepositoryCanonical {
 }
 
 #[async_trait::async_trait]
-impl TempStorageRepository for TempStorageRepositoryCanonical {
+impl TempStorageRepositoryLike for TempStorageRepositoryStorageImpl {
   #[tracing::instrument(skip(self))]
   async fn read(
     &self,
@@ -97,62 +80,51 @@ impl TempStorageRepository for TempStorageRepositoryCanonical {
   }
 }
 
-mod mock {
-  use storage::belt;
+#[derive(Clone)]
+/// The repository for temp storage.
+pub struct TempStorageRepository {
+  inner: Arc<dyn TempStorageRepositoryLike>,
+}
 
-  use super::*;
-
-  /// A mock repository for temp storage.
-  #[derive(Clone)]
-  pub struct TempStorageRepositoryMock {
-    fs_root: std::path::PathBuf,
+impl TempStorageRepository {
+  /// Create a new instance of the temp storage repository from
+  /// [`TempStorageCreds`].
+  pub async fn new_from_creds(inner: TempStorageCreds) -> miette::Result<Self> {
+    Ok(Self {
+      inner: Arc::new(TempStorageRepositoryStorageImpl::new(inner).await?),
+    })
   }
-
-  impl TempStorageRepositoryMock {
-    /// Create a new instance of the temp storage repository.
-    pub fn new(fs_root: std::path::PathBuf) -> Self {
-      tracing::info!("creating new `TempStorageRepositoryMock` instance");
-      Self { fs_root }
-    }
-  }
-
-  #[async_trait::async_trait]
-  impl health::HealthReporter for TempStorageRepositoryMock {
-    fn name(&self) -> &'static str { stringify!(TempStorageRepositoryMock) }
-
-    async fn health_check(&self) -> health::ComponentHealth {
-      health::IntrensicallyUp.into()
+  /// Create a new instance of the temp storage repository from a mock.
+  pub fn new_from_mock(fs_root: std::path::PathBuf) -> Self {
+    Self {
+      inner: Arc::new(TempStorageRepositoryMock::new(fs_root)),
     }
   }
 
-  #[async_trait::async_trait]
-  impl TempStorageRepository for TempStorageRepositoryMock {
-    #[tracing::instrument(skip(self))]
-    async fn read(
-      &self,
-      path: TempStoragePath,
-    ) -> Result<Belt, StorageReadError> {
-      let path = self.fs_root.join(path.path());
-      let file = tokio::fs::File::open(path).await?;
-      Ok(Belt::from_async_read(file, Some(belt::DEFAULT_CHUNK_SIZE)))
-    }
+  /// Read data from the storage.
+  pub async fn read(
+    &self,
+    path: TempStoragePath,
+  ) -> Result<Belt, StorageReadError> {
+    self.inner.read(path).await
+  }
+  /// Store data in the storage.
+  pub async fn store(
+    &self,
+    data: Belt,
+  ) -> Result<TempStoragePath, StorageWriteError> {
+    self.inner.store(data).await
+  }
+}
 
-    #[tracing::instrument(skip(self, data))]
-    async fn store(
-      &self,
-      data: Belt,
-    ) -> Result<TempStoragePath, StorageWriteError> {
-      // create fs_root if it doesn't exist
-      tokio::fs::create_dir_all(&self.fs_root).await?;
-
-      let mut path = TempStoragePath::new_random(models::FileSize::new(0));
-      let real_path = self.fs_root.join(path.path());
-
-      let counter = data.counter();
-      let mut file = tokio::fs::File::create(real_path).await?;
-      tokio::io::copy(&mut data.to_async_buf_read(), &mut file).await?;
-      path.set_size(models::FileSize::new(counter.current()));
-      Ok(path)
-    }
+#[async_trait::async_trait]
+impl health::HealthReporter for TempStorageRepository {
+  fn name(&self) -> &'static str { stringify!(TempStorageRepository) }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
   }
 }

@@ -1,12 +1,12 @@
 //! The leptos server crate for the Cartographer app.
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use axum::{extract::FromRef, Router};
 use cart_app::*;
 use leptos::{logging::log, prelude::*};
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use prime_domain::DynPrimeDomainService;
+use prime_domain::{repos::db::Database, DynPrimeDomainService};
 
 #[derive(Clone, FromRef)]
 struct AppState {
@@ -24,23 +24,29 @@ async fn main() -> miette::Result<()> {
   let leptos_options = conf.leptos_options;
   let routes = generate_route_list(App);
 
-  let tikv_store =
-    prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await?;
-  let kv_db_adapter =
-    Arc::new(prime_domain::repos::db::KvDatabaseAdapter::new(tikv_store));
-  let cache_repo =
-    prime_domain::repos::CacheRepositoryCanonical::new(kv_db_adapter.clone());
-  let entry_repo =
-    prime_domain::repos::EntryRepositoryCanonical::new(kv_db_adapter.clone());
-  let store_repo =
-    prime_domain::repos::StoreRepositoryCanonical::new(kv_db_adapter.clone());
-  let token_repo =
-    prime_domain::repos::TokenRepositoryCanonical::new(kv_db_adapter.clone());
-  let temp_storage_repo = prime_domain::repos::TempStorageRepositoryMock::new(
-    std::path::PathBuf::from("/tmp/rambit-temp-storage"),
+  let retryable_kv_store =
+    prime_domain::repos::db::kv::KeyValueStore::new_retryable_tikv_from_env(
+      5,
+      Duration::from_secs(2),
+    )
+    .await;
+  let cache_repo = prime_domain::repos::CacheRepository::new_from_base(
+    Database::new_from_kv(retryable_kv_store.clone()),
   );
-  let user_storage_repo =
-    prime_domain::repos::UserStorageRepositoryCanonical::new();
+  let entry_repo = prime_domain::repos::EntryRepository::new_from_base(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
+  let store_repo = prime_domain::repos::StoreRepository::new_from_base(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
+  let token_repo = prime_domain::repos::TokenRepository::new_from_base(
+    Database::new_from_kv(retryable_kv_store.clone()),
+  );
+  let temp_storage_repo =
+    prime_domain::repos::TempStorageRepository::new_from_mock(
+      std::path::PathBuf::from("/tmp/rambit-temp-storage"),
+    );
+  let user_storage_repo = prime_domain::repos::UserStorageRepository::new();
   let prime_domain_service = prime_domain::PrimeDomainServiceCanonical::new(
     cache_repo,
     entry_repo,

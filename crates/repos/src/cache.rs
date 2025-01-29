@@ -1,5 +1,7 @@
 //! Provides a repository for the [`Cache`] domain model.
 
+use std::sync::Arc;
+
 use db::{FetchModelByIndexError, FetchModelError};
 use hex::health::{self, HealthAware};
 use models::StrictSlug;
@@ -8,20 +10,69 @@ use tracing::instrument;
 
 use super::*;
 pub use crate::base::CreateModelError;
-use crate::base::{BaseRepository, DatabaseAdapter};
+use crate::base::{BaseRepository, Database};
 
-/// Descriptor trait for repositories that handle [`Cache`] domain model.
-#[async_trait::async_trait]
-pub trait CacheRepository:
-  ModelRepository<
-  Model = Cache,
-  ModelCreateRequest = CacheCreateRequest,
-  CreateError = CreateModelError,
->
-{
+/// The repository for the [`Cache`] domain model.
+pub struct CacheRepository {
+  inner: Arc<
+    dyn ModelRepositoryLike<
+      Model = Cache,
+      ModelCreateRequest = Cache,
+      CreateError = CreateModelError,
+    >,
+  >,
+}
+
+impl CacheRepository {
+  /// Creates a new instance of the [`Cache`] repository using `BaseRepository`.
+  pub fn new_from_base(db: Database<Cache>) -> Self {
+    Self {
+      inner: Arc::new(BaseRepository::new(db)),
+    }
+  }
+
+  /// Creates a new model.
+  #[instrument(skip(self))]
+  pub async fn create_model(
+    &self,
+    input: CacheCreateRequest,
+  ) -> Result<Cache, CreateModelError> {
+    self.inner.create_model(input.into()).await
+  }
+
+  /// Fetches a model by its ID.
+  #[instrument(skip(self))]
+  pub async fn fetch_model_by_id(
+    &self,
+    id: models::RecordId<Cache>,
+  ) -> Result<Option<Cache>, FetchModelError> {
+    self.inner.fetch_model_by_id(id).await
+  }
+
+  /// Fetches a model by an index.
+  ///
+  /// Must be a valid index, defined in the model's `INDICES` constant.
+  #[instrument(skip(self))]
+  pub async fn fetch_model_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Option<Cache>, FetchModelByIndexError> {
+    self
+      .inner
+      .fetch_model_by_index(index_name, index_value)
+      .await
+  }
+
+  /// Produces a list of all model IDs.
+  #[instrument(skip(self))]
+  pub async fn enumerate_models(&self) -> Result<Vec<Cache>> {
+    self.inner.enumerate_models().await
+  }
+
   /// Find a [`Cache`] by its name.
   #[instrument(skip(self))]
-  async fn find_by_name(
+  pub async fn find_by_name(
     &self,
     name: StrictSlug,
   ) -> Result<Option<Cache>, FetchModelByIndexError> {
@@ -32,41 +83,13 @@ pub trait CacheRepository:
 }
 
 #[async_trait::async_trait]
-impl<T> CacheRepository for T where
-  T: ModelRepository<
-    Model = Cache,
-    ModelCreateRequest = CacheCreateRequest,
-    CreateError = CreateModelError,
-  >
-{
-}
-
-/// The repository for the [`Cache`] domain model.
-pub struct CacheRepositoryCanonical<DB: DatabaseAdapter> {
-  base_repo: BaseRepository<Cache, DB>,
-}
-
-impl<DB: DatabaseAdapter + Clone> Clone for CacheRepositoryCanonical<DB> {
-  fn clone(&self) -> Self {
-    Self {
-      base_repo: self.base_repo.clone(),
-    }
+impl health::HealthReporter for CacheRepository {
+  fn name(&self) -> &'static str { stringify!(CacheRepository) }
+  async fn health_check(&self) -> health::ComponentHealth {
+    health::AdditiveComponentHealth::from_futures(Some(
+      self.inner.health_report(),
+    ))
+    .await
+    .into()
   }
 }
-
-impl<DB: DatabaseAdapter> CacheRepositoryCanonical<DB> {
-  /// Create a new instance of the [`Cache`] repository.
-  pub fn new(db_adapter: DB) -> Self {
-    tracing::info!("creating new `CacheRepositoryCanonical` instance");
-    Self {
-      base_repo: BaseRepository::new(db_adapter),
-    }
-  }
-}
-
-crate::impl_repository_on_base!(
-  CacheRepositoryCanonical,
-  Cache,
-  CacheCreateRequest,
-  CreateModelError
-);
