@@ -90,6 +90,7 @@ pub(crate) trait KvTransactional: hex::Hexagonal {
 }
 
 /// A dynamic transaction type.
+#[must_use]
 pub struct DynTransaction(Box<dyn KvTransaction + Send + Sync + 'static>);
 
 impl DynTransaction {

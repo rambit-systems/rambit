@@ -62,6 +62,7 @@ impl KvTransactional for TikvClient {
 }
 
 /// TiKV transaction.
+#[must_use]
 pub struct TikvTransaction(tikv_client::Transaction);
 
 #[async_trait::async_trait]
