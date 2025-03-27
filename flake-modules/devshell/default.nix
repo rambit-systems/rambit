@@ -76,7 +76,12 @@
 
         {
           name = "update-crate-graph";
-          command = "cp $(nix build .#crate-graph-image --print-out-paths --no-link)/crate-graph.svg $PRJ_ROOT/media/crate-graph.svg --no-preserve=mode";
+          command = ''
+            echo "building crate graph image"
+            CRATE_GRAPH_IMAGE_PATH=$(nix build .#crate-graph-image --print-out-paths --no-link)
+            echo "updating crate graph image in repo ($PRJ_ROOT/media/crate-graph.svg)"
+            cp $CRATE_GRAPH_IMAGE_PATH/crate-graph.svg $PRJ_ROOT/media/crate-graph.svg --no-preserve=mode
+          '';
           help = "Update the crate graph";
           category = "[repo actions]";
         }
