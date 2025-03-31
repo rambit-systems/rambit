@@ -53,16 +53,32 @@
     };
     build-crate = name: craneLib.buildPackage (individual-crate-args name);
 
-    crate-graph-image = craneLib.mkCargoDerivation {
+    crate-graph = craneLib.mkCargoDerivation {
+      inherit src;
+      cargoArtifacts = null;
+      pname = "crate-graph";
+      version = "0.1";
+      buildPhaseCargoCommand = ''
+        cargo depgraph --workspace-only > crate-graph.dot
+      '';
+      installPhaseCommand = ''
+        mkdir $out
+        cp crate-graph.dot $out
+      '';
+      doInstallCargoArtifacts = false;
+      nativeBuildInputs = with pkgs; [ cargo-depgraph ];
+    };
+
+    crate-graph-image = pkgs.stdenv.mkDerivation {
       inherit src;
       cargoArtifacts = null;
       pname = "crate-graph-image";
       version = "0.1";
-      buildPhaseCargoCommand = ''
+      buildPhase = ''
         export XDG_CACHE_HOME="$(mktemp -d)"
-        cargo depgraph --workspace-only | dot -Tsvg > crate-graph.svg
+        dot -Tsvg ${crate-graph}/crate-graph.dot > crate-graph.svg
       '';
-      installPhaseCommand = ''
+      installPhase = ''
         mkdir $out
         cp crate-graph.svg $out
       '';
@@ -79,7 +95,7 @@
       migrator = build-crate "migrator";
       toolchain = toolchain pkgs;
       dev-toolchain = dev-toolchain pkgs;
-      inherit crate-graph-image;
+      inherit crate-graph crate-graph-image;
     };
     checks = {
       # run clippy, denying warnings

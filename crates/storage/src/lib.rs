@@ -5,6 +5,7 @@ mod s3_compat;
 pub mod temp;
 
 use std::{
+  fmt,
   path::{Path, PathBuf},
   sync::Arc,
 };
@@ -87,6 +88,14 @@ pub(crate) trait StorageClientLike: Hexagonal {
 #[derive(Clone)]
 pub struct StorageClient {
   inner: Arc<dyn StorageClientLike>,
+}
+
+impl fmt::Debug for StorageClient {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("StorageClient")
+      .field("inner", &stringify!(Arc<dyn StorageClientLike>))
+      .finish()
+  }
 }
 
 impl StorageClient {
