@@ -11,7 +11,11 @@ serde.workspace = true
 nutype = { workspace = true, features = [ "serde" ] }
 ulid.workspace = true
 email_address = "0.2"
-regex = { version = "1", default-features = false, features = [ "std" ] }
+regex = { version = "1", default-features = false, features = [ "std" ], optional = true }
+
+[features]
+default = []
+reasonable-email = ["dep:regex"]
 
 [package.metadata.cargo-machete]
 # `serde` only gets used in `nutype` macros
