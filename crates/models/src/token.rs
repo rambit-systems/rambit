@@ -31,6 +31,7 @@ impl Model for Token {
     &'static str,
     crate::SlugFieldGetter<Self>,
   )] = &[("secret", |t| t.secret.clone().into_inner().into())];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> TokenRecordId { self.id }
 }

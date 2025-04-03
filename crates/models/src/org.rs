@@ -23,6 +23,7 @@ impl Model for Org {
     &'static str,
     crate::SlugFieldGetter<Self>,
   )] = &[("name", |org| org.name.clone().into_inner().into())];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> OrgRecordId { self.id }
 }

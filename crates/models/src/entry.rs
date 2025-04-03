@@ -34,6 +34,7 @@ impl Model for Entry {
   )] = &[("cache-id-path", |s| {
     LaxSlug::new(format!("{}-{}", s.cache, s.path)).into()
   })];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> EntryRecordId { self.id }
 }

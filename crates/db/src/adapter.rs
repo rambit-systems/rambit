@@ -21,6 +21,15 @@ pub(crate) trait DatabaseAdapter<M: model::Model>: Hexagonal {
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Option<M>, FetchModelByIndexError>;
+  /// Fetches the models that match the index value.
+  ///
+  /// Must be a valid index, defined in the model's
+  /// [`INDICES`](model::Model::INDICES) constant.
+  async fn fetch_models_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Vec<M>, FetchModelByIndexError>;
   /// Produces a list of all model IDs.
   async fn enumerate_models(&self) -> Result<Vec<M>>;
 }
@@ -42,7 +51,7 @@ pub enum CreateModelError {
   /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant, already
   /// exists in the database.
   #[error("index {index_name:?} with value \"{index_value}\" already exists")]
-  IndexAlreadyExists {
+  UniqueIndexAlreadyExists {
     /// The name of the index.
     index_name:  String,
     /// The value of the index.

@@ -25,6 +25,7 @@ impl Model for User {
     &'static str,
     crate::SlugFieldGetter<Self>,
   )] = &[];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> RecordId<User> { self.id }
 }

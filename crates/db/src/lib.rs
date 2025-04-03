@@ -1,3 +1,5 @@
+#![feature(iterator_try_collect)]
+
 //! Provides access to the database.
 //!
 //! This is a hexagonal crate. It provides a [`Database`] struct.

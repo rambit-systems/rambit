@@ -29,6 +29,7 @@ impl Model for Store {
     &'static str,
     crate::SlugFieldGetter<Self>,
   )] = &[];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> StoreRecordId { self.id }
 }

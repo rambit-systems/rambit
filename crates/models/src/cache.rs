@@ -29,6 +29,7 @@ impl Model for Cache {
     &'static str,
     crate::SlugFieldGetter<Self>,
   )] = &[("name", |s| s.name.clone().into_inner().into())];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> CacheRecordId { self.id }
 }

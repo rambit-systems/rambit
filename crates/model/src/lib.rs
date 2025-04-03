@@ -26,6 +26,12 @@ pub trait Model:
   /// the index value. The produced value must be unique for each record.
   const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)];
 
+  /// The model's indices.
+  ///
+  /// An array of tuples containing the index name and a function that returns
+  /// the index value.
+  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)];
+
   /// Returns the model's ID.
   fn id(&self) -> dvf::RecordId<Self>;
 }

@@ -85,17 +85,17 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
       .context("failed to insert model")
       .map_err(CreateModelError::Db)?;
 
-    // insert the indexes
-    for (index_name, index_fn) in M::UNIQUE_INDICES.iter() {
+    // insert the unique indexes
+    for (u_index_name, u_index_fn) in M::UNIQUE_INDICES.iter() {
       // calculate the key for the index
-      let index_key =
-        index_base_key::<M>(index_name).with_either(index_fn(&model));
+      let u_index_key = unique_index_base_key::<M>(u_index_name)
+        .with_either(u_index_fn(&model));
 
       // check if the index exists already
       let (_txn, exists) = txn
-        .csm_exists(&index_key)
+        .csm_exists(&u_index_key)
         .await
-        .context("failed to check if index exists")
+        .context("failed to check if unique index exists")
         .map_err(CreateModelError::Db)?;
       txn = _txn;
       if exists {
@@ -103,11 +103,27 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
           .to_rollback()
           .await
           .map_err(CreateModelError::RetryableTransaction)?;
-        return Err(CreateModelError::IndexAlreadyExists {
-          index_name:  index_name.to_string(),
-          index_value: index_fn(&model),
+        return Err(CreateModelError::UniqueIndexAlreadyExists {
+          index_name:  u_index_name.to_string(),
+          index_value: u_index_fn(&model),
         });
       }
+
+      // insert the index
+      txn = txn
+        .csm_insert(&u_index_key, id_value.clone())
+        .await
+        .context("failed to insert unique index")
+        .map_err(CreateModelError::Db)?;
+    }
+
+    // insert the regular indexes
+    for (index_name, index_fn) in M::INDICES.iter() {
+      // calculate the key for the index
+      // same as the unique index keys, but with the ID on the end
+      let index_key = index_base_key::<M>(index_name)
+        .with_either(index_fn(&model))
+        .with(StrictSlug::new(id_ulid));
 
       // insert the index
       txn = txn
@@ -175,7 +191,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
     }
 
     let index_key =
-      index_base_key::<M>(&index_name).with_either(index_value.clone());
+      unique_index_base_key::<M>(&index_name).with_either(index_value.clone());
 
     let txn = self
       .0
@@ -224,6 +240,75 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
   }
 
   #[instrument(skip(self), fields(table = M::TABLE_NAME))]
+  async fn fetch_models_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Vec<M>, FetchModelByIndexError> {
+    let first_key = index_base_key::<M>(&index_name)
+      .with_either(index_value.clone())
+      .with(StrictSlug::new(model::RecordId::<M>::MIN().to_string()));
+    let last_key = index_base_key::<M>(&index_name)
+      .with_either(index_value)
+      .with(StrictSlug::new(model::RecordId::<M>::MAX().to_string()));
+
+    let txn = self
+      .0
+      .begin_optimistic_transaction()
+      .await
+      .context("failed to begin optimistic transaction")
+      .map_err(FetchModelError::RetryableTransaction)?;
+
+    let (txn, scan_results) = txn
+      .csm_scan(Bound::Included(first_key), Bound::Included(last_key), None)
+      .await
+      .map_err(FetchModelError::Db)?;
+
+    let ids = scan_results
+      .into_iter()
+      .map(|(_, value)| {
+        Value::deserialize::<model::RecordId<M>>(value)
+          .into_diagnostic()
+          .context("failed to deserialize value into id")
+          .map_err(FetchModelByIndexError::Serde)
+      })
+      .try_collect::<Vec<_>>()?;
+
+    let mut model_values = Vec::with_capacity(ids.len());
+    let mut txn = Some(txn);
+    for id in ids {
+      let model_key = model_base_key::<M>(&id);
+      let (_txn, model_value) = txn
+        .take()
+        .expect("txn wasn't put back in the option, for some reason")
+        .csm_get(&model_key)
+        .await
+        .map_err(FetchModelError::Db)?;
+      txn = Some(_txn);
+      model_values.push(model_value);
+    }
+
+    txn
+      .expect("txn wasn't put back in the option, for some reason")
+      .to_commit()
+      .await
+      .map_err(FetchModelByIndexError::RetryableTransaction)?;
+
+    let models = model_values
+      .into_iter()
+      .filter_map(|v| v)
+      .map(|value| {
+        Value::deserialize::<M>(value)
+          .into_diagnostic()
+          .context("failed to deserialize value into model")
+          .map_err(FetchModelByIndexError::Serde)
+      })
+      .try_collect::<Vec<_>>()?;
+
+    Ok(models)
+  }
+
+  #[instrument(skip(self), fields(table = M::TABLE_NAME))]
   async fn enumerate_models(&self) -> Result<Vec<M>> {
     let first_key = model_base_key::<M>(&model::RecordId::<M>::MIN());
     let last_key = model_base_key::<M>(&model::RecordId::<M>::MAX());
@@ -245,7 +330,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
       .await
       .map_err(FetchModelError::RetryableTransaction)?;
 
-    let ids = scan_results
+    let models = scan_results
       .into_iter()
       .map(|(_, value)| {
         Value::deserialize::<M>(value)
@@ -256,7 +341,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
       })
       .collect::<Result<Vec<M>>>()?;
 
-    Ok(ids)
+    Ok(models)
   }
 }
 
