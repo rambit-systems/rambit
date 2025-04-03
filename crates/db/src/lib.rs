@@ -27,7 +27,7 @@ mod kv_impl;
 #[cfg(feature = "migrate")]
 mod migrate;
 
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use hex::health;
 pub use kv;
@@ -43,6 +43,14 @@ pub use self::migrate::Migrator;
 #[derive(Clone)]
 pub struct Database<M: model::Model> {
   inner: Arc<dyn DatabaseAdapter<M>>,
+}
+
+impl<M: model::Model + fmt::Debug> fmt::Debug for Database<M> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct(stringify!(Database))
+      .field("inner", &stringify!(Arc<dyn DatabaseAdapter<M>>))
+      .finish()
+  }
 }
 
 impl<M: model::Model> Database<M> {
