@@ -51,7 +51,7 @@ pub(crate) trait ModelRepositoryLike: Hexagonal {
   /// Fetches a model by an index.
   ///
   /// Must be a valid index, defined in the model's `INDICES` constant.
-  async fn fetch_model_by_index(
+  async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,

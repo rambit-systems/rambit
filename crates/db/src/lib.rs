@@ -84,14 +84,14 @@ impl<M: model::Model> Database<M> {
   ///
   /// Must be a valid index, defined in the model's
   /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
-  pub async fn fetch_model_by_index(
+  pub async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Option<M>, FetchModelByIndexError> {
     self
       .inner
-      .fetch_model_by_index(index_name, index_value)
+      .fetch_model_by_unique_index(index_name, index_value)
       .await
   }
   /// Produces a list of all model IDs.

@@ -41,7 +41,7 @@ async fn test_create_model() {
 }
 
 #[tokio::test]
-async fn test_fetch_model_by_index() {
+async fn test_fetch_model_by_unique_index() {
   let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
@@ -53,7 +53,7 @@ async fn test_fetch_model_by_index() {
   adapter.create_model(model.clone()).await.unwrap();
 
   let fetched_model = adapter
-    .fetch_model_by_index(
+    .fetch_model_by_unique_index(
       "name".to_string(),
       EitherSlug::Strict(model.name.clone()),
     )
@@ -101,7 +101,7 @@ async fn test_fetch_model_by_id_not_found() {
 }
 
 #[tokio::test]
-async fn test_fetch_model_by_index_not_found() {
+async fn test_fetch_model_by_unique_index_not_found() {
   let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
@@ -113,7 +113,7 @@ async fn test_fetch_model_by_index_not_found() {
   adapter.create_model(model.clone()).await.unwrap();
 
   let fetched_model: Option<TestModel> = adapter
-    .fetch_model_by_index(
+    .fetch_model_by_unique_index(
       "name".to_string(),
       EitherSlug::Strict(StrictSlug::new("not_test")),
     )
@@ -123,7 +123,7 @@ async fn test_fetch_model_by_index_not_found() {
 }
 
 #[tokio::test]
-async fn test_fetch_model_by_index_does_not_exist() {
+async fn test_fetch_model_by_unique_index_does_not_exist() {
   let store = KeyValueStore::new_mock();
   let adapter = KvDatabaseAdapter::new(store);
 
@@ -135,7 +135,7 @@ async fn test_fetch_model_by_index_does_not_exist() {
   adapter.create_model(model.clone()).await.unwrap();
 
   let result: Result<Option<TestModel>, _> = adapter
-    .fetch_model_by_index(
+    .fetch_model_by_unique_index(
       "not_name".to_string(),
       EitherSlug::Strict(StrictSlug::new("test")),
     )
@@ -147,7 +147,7 @@ async fn test_fetch_model_by_index_does_not_exist() {
 }
 
 #[tokio::test]
-async fn test_fetch_model_by_index_malformed() {
+async fn test_fetch_model_by_unique_index_malformed() {
   let model = TestModel {
     id:   model::RecordId::new(),
     name: StrictSlug::new("test"),
@@ -166,7 +166,7 @@ async fn test_fetch_model_by_index_malformed() {
   let adapter = KvDatabaseAdapter::new(store);
 
   let result: Result<Option<TestModel>, _> = adapter
-    .fetch_model_by_index(
+    .fetch_model_by_unique_index(
       "name".to_string(),
       EitherSlug::Strict(StrictSlug::new("not_test")),
     )

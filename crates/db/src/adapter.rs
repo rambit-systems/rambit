@@ -16,7 +16,7 @@ pub(crate) trait DatabaseAdapter<M: model::Model>: Hexagonal {
   ///
   /// Must be a valid index, defined in the model's
   /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
-  async fn fetch_model_by_index(
+  async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,

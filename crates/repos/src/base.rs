@@ -67,12 +67,15 @@ impl<M: models::Model> ModelRepositoryLike for BaseRepository<M> {
   }
 
   #[instrument(skip(self))]
-  async fn fetch_model_by_index(
+  async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: models::EitherSlug,
   ) -> Result<Option<Self::Model>, FetchModelByIndexError> {
-    self.db.fetch_model_by_index(index_name, index_value).await
+    self
+      .db
+      .fetch_model_by_unique_index(index_name, index_value)
+      .await
   }
 
   #[instrument(skip(self))]

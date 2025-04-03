@@ -62,7 +62,7 @@ impl<M: Model> DatabaseAdapter<M> for MockDatabaseAdapter<M> {
     Ok(self.0.models.lock().await.get(&id).cloned())
   }
 
-  async fn fetch_model_by_index(
+  async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,

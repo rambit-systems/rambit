@@ -158,7 +158,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
   }
 
   #[instrument(skip(self), fields(table = M::TABLE_NAME))]
-  async fn fetch_model_by_index(
+  async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,

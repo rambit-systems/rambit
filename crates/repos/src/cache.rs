@@ -53,14 +53,14 @@ impl CacheRepository {
   ///
   /// Must be a valid index, defined in the model's `INDICES` constant.
   #[instrument(skip(self))]
-  pub async fn fetch_model_by_index(
+  pub async fn fetch_model_by_unique_index(
     &self,
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Option<Cache>, FetchModelByIndexError> {
     self
       .inner
-      .fetch_model_by_index(index_name, index_value)
+      .fetch_model_by_unique_index(index_name, index_value)
       .await
   }
 
@@ -77,7 +77,7 @@ impl CacheRepository {
     name: StrictSlug,
   ) -> Result<Option<Cache>, FetchModelByIndexError> {
     self
-      .fetch_model_by_index("name".to_string(), EitherSlug::Strict(name))
+      .fetch_model_by_unique_index("name".to_string(), EitherSlug::Strict(name))
       .await
   }
 }
