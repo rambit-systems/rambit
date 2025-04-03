@@ -5,14 +5,14 @@
 //! # [`Database`]
 //! The [`Database`] struct provides a **tabular** database interface. It
 //! provides CRUD operations for a generic item, using the
-//! [`Model`](models::Model) trait to carry the table information.
+//! [`Model`](model::Model) trait to carry the table information.
 //!
 //! The implementation of the internal `DatabaseAdapter` trait is responsible
 //! for organizing the database, and for bridging the gap between raw data in
 //! the kv store and the model data.
 //!
 //! Admittedly, this is a little bit of a leaky abstraction. It
-//! makes use of the [`Model`](models::Model) trait, which ideally would not be
+//! makes use of the [`Model`](model::Model) trait, which ideally would not be
 //! involved at this level, since it's involved in the domain and the
 //! [`db`](crate) crate is not.
 //!
@@ -26,6 +26,7 @@ mod adapter;
 mod kv_impl;
 #[cfg(feature = "migrate")]
 mod migrate;
+mod mock_impl;
 
 use std::{fmt, sync::Arc};
 
@@ -54,10 +55,17 @@ impl<M: model::Model + fmt::Debug> fmt::Debug for Database<M> {
 }
 
 impl<M: model::Model> Database<M> {
-  /// Creates a new database.
+  /// Creates a new database based on a key-value store.
   pub fn new_from_kv(kv_store: kv::KeyValueStore) -> Self {
     Self {
       inner: Arc::new(KvDatabaseAdapter::new(kv_store)),
+    }
+  }
+
+  /// Creates a new database based on a mocked store.
+  pub fn new_mock() -> Self {
+    Self {
+      inner: Arc::new(self::mock_impl::MockDatabaseAdapter::default()),
     }
   }
 
