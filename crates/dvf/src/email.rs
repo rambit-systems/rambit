@@ -1,4 +1,6 @@
-use std::{str::FromStr, sync::LazyLock};
+use std::str::FromStr;
+#[cfg(feature = "reasonable-email")]
+use std::sync::LazyLock;
 
 #[cfg(feature = "reasonable-email")]
 /// Our "reasonable" email regex is significantly more restrictive than the
