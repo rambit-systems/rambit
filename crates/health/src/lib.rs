@@ -87,7 +87,7 @@ pub enum ComponentHealth {
 
 impl ComponentHealth {
   /// Recursively calculate the [`HealthStatus`] of this [`ComponentHealth`].
-  fn recursive_status(&self) -> HealthStatus {
+  pub fn recursive_status(&self) -> HealthStatus {
     match self {
       ComponentHealth::Composite(health) => {
         let mut status = HealthStatus::Ok;
@@ -200,6 +200,9 @@ pub enum HealthStatus {
 }
 
 impl HealthStatus {
+  /// Whether the heath status is `Ok`.
+  pub fn is_ok(&self) -> bool { matches!(self, HealthStatus::Ok) }
+
   /// Merge two health statuses.
   pub fn merge(&self, other: &HealthStatus) -> HealthStatus {
     match (self, other) {
