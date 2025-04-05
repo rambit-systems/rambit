@@ -2,8 +2,6 @@
 
 mod consumptive;
 mod keys;
-#[cfg(test)]
-mod tests;
 
 use std::ops::Bound;
 

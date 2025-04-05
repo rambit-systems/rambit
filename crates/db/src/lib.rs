@@ -29,6 +29,8 @@ mod kv_impl;
 #[cfg(feature = "migrate")]
 mod migrate;
 mod mock_impl;
+#[cfg(test)]
+mod tests;
 
 use std::{fmt, sync::Arc};
 
