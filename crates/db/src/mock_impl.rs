@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{
+  collections::{hash_map::Entry, HashMap},
+  sync::Arc,
+};
 
 use hex::health;
 use kv::*;
@@ -47,13 +50,30 @@ impl<M: Send + Sync + 'static> health::HealthReporter
 #[async_trait::async_trait]
 impl<M: Model> DatabaseAdapter<M> for MockDatabaseAdapter<M> {
   async fn create_model(&self, model: M) -> Result<M, CreateModelError> {
-    self.0.models.lock().await.insert(model.id(), model.clone());
+    let mut models = self.0.models.lock().await;
+    match models.entry(model.id()) {
+      Entry::Occupied(_) => return Err(CreateModelError::ModelAlreadyExists),
+      Entry::Vacant(vacant_entry) => {
+        vacant_entry.insert(model.clone());
+      }
+    }
 
     let mut u_indices = self.0.u_indices.lock().await;
     for (u_index_name, u_index_getter) in M::UNIQUE_INDICES.iter() {
       let u_index = u_indices.entry(u_index_name.to_string()).or_default();
       let u_index_value = u_index_getter(&model);
-      u_index.insert(u_index_value, model.id());
+
+      match u_index.entry(u_index_value.clone()) {
+        Entry::Occupied(_) => {
+          return Err(CreateModelError::UniqueIndexAlreadyExists {
+            index_name:  (*u_index_name).to_owned(),
+            index_value: u_index_value,
+          })
+        }
+        Entry::Vacant(vacant_entry) => {
+          vacant_entry.insert(model.id());
+        }
+      }
     }
 
     let mut indices = self.0.indices.lock().await;
