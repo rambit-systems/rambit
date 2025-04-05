@@ -84,7 +84,7 @@ impl<M: model::Model> Database<M> {
   ) -> Result<Option<M>, FetchModelError> {
     self.inner.fetch_model_by_id(id).await
   }
-  /// Fetches a model by an index.
+  /// Fetches a model by a unique index.
   ///
   /// Must be a valid index, defined in the model's
   /// [`UNIQUE_INDICES`](model::Model::UNIQUE_INDICES) constant.
@@ -96,6 +96,20 @@ impl<M: model::Model> Database<M> {
     self
       .inner
       .fetch_model_by_unique_index(index_name, index_value)
+      .await
+  }
+  /// Fetches a model by an index.
+  ///
+  /// Must be a valid index, defined in the model's
+  /// [`INDICES`](model::Model::INDICES) constant.
+  pub async fn fetch_model_by_index(
+    &self,
+    index_name: String,
+    index_value: EitherSlug,
+  ) -> Result<Vec<M>, FetchModelByIndexError> {
+    self
+      .inner
+      .fetch_models_by_index(index_name, index_value)
       .await
   }
   /// Produces a list of all model IDs.
