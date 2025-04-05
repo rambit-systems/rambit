@@ -216,6 +216,57 @@ mod generic_testing {
   // }
 
   #[tokio::test]
+  async fn test_fetch_model_by_index<I: DbInstantiator>() {
+    let db = I::init();
+
+    let owner = Ulid::new();
+    let second_owner = Ulid::new();
+    let model = TestModel {
+      id: model::RecordId::new(),
+      name: StrictSlug::new("test"),
+      owner,
+    };
+    let model2 = TestModel {
+      id: model::RecordId::new(),
+      name: StrictSlug::new("test2"),
+      owner,
+    };
+    let model3 = TestModel {
+      id:    model::RecordId::new(),
+      name:  StrictSlug::new("test3"),
+      owner: second_owner,
+    };
+
+    db.create_model(model.clone()).await.unwrap();
+    db.create_model(model2.clone()).await.unwrap();
+    db.create_model(model3.clone()).await.unwrap();
+
+    let fetched_models = db
+      .fetch_model_by_index(
+        "owner".to_string(),
+        EitherSlug::Strict(StrictSlug::new(owner)),
+      )
+      .await
+      .unwrap();
+
+    assert!(fetched_models.contains(&model));
+    assert!(fetched_models.contains(&model2));
+    assert!(!fetched_models.contains(&model3));
+
+    let fetched_models = db
+      .fetch_model_by_index(
+        "owner".to_string(),
+        EitherSlug::Strict(StrictSlug::new(second_owner)),
+      )
+      .await
+      .unwrap();
+
+    assert!(!fetched_models.contains(&model));
+    assert!(!fetched_models.contains(&model2));
+    assert!(fetched_models.contains(&model3));
+  }
+
+  #[tokio::test]
   async fn test_create_model_already_exists<I: DbInstantiator>() {
     let db = I::init();
 
