@@ -95,11 +95,8 @@ impl KvPrimitive for RedbTransaction {
     let txn = self.unpack()?;
     let mut table = txn.open_table(TABLE)?;
     let populated = table.get(key)?.is_some();
-    match populated {
-      false => {
-        table.insert(key, value)?;
-      }
-      _ => (),
+    if !populated {
+      table.insert(key, value)?;
     }
     Ok(())
   }

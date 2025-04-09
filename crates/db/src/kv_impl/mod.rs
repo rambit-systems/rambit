@@ -294,7 +294,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
 
     let models = model_values
       .into_iter()
-      .filter_map(|v| v)
+      .flatten()
       .map(|value| {
         Value::deserialize::<M>(value)
           .into_diagnostic()
