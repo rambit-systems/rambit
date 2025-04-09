@@ -34,6 +34,53 @@ impl From<Vec<u8>> for Value {
   fn from(value: Vec<u8>) -> Self { Self(value) }
 }
 
+impl From<&[u8]> for Value {
+  fn from(value: &[u8]) -> Self { Self(value.to_vec()) }
+}
+
 impl From<&str> for Value {
   fn from(value: &str) -> Self { Self(value.as_bytes().to_vec()) }
+}
+
+impl AsRef<[u8]> for Value {
+  fn as_ref(&self) -> &[u8] { &self.0 }
+}
+
+#[cfg(feature = "redb")]
+mod redb {
+  use std::any::type_name;
+
+  use super::Value;
+
+  impl redb::Value for Value {
+    type SelfType<'a>
+      = Value
+    where
+      Self: 'a;
+
+    type AsBytes<'a>
+      = Value
+    where
+      Self: 'a;
+
+    fn fixed_width() -> Option<usize> { None }
+
+    fn from_bytes<'a>(data: &'a [u8]) -> Self::SelfType<'a>
+    where
+      Self: 'a,
+    {
+      Self::from(data)
+    }
+
+    fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a>
+    where
+      Self: 'b,
+    {
+      value.clone()
+    }
+
+    fn type_name() -> redb::TypeName {
+      redb::TypeName::new(type_name::<Value>())
+    }
+  }
 }

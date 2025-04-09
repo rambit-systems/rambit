@@ -1,3 +1,5 @@
+#![feature(iterator_try_collect)]
+
 //! A generic interface for key-value stores.
 //!
 //! Specifically, this crate is for **transactional** key-value stores. We also
@@ -17,6 +19,8 @@
 mod key;
 #[cfg(feature = "mock")]
 mod mock;
+#[cfg(feature = "redb")]
+mod redb_client;
 mod retryable;
 #[cfg(feature = "tikv")]
 mod tikv;
@@ -44,6 +48,41 @@ pub enum KvError {
 #[cfg(feature = "tikv")]
 impl From<tikv_client::Error> for KvError {
   fn from(error: tikv_client::Error) -> Self {
+    KvError::PlatformError(miette::Report::from_err(error))
+  }
+}
+
+#[cfg(feature = "redb")]
+impl From<redb::TransactionError> for KvError {
+  fn from(error: redb::TransactionError) -> Self {
+    KvError::PlatformError(miette::Report::from_err(error))
+  }
+}
+
+#[cfg(feature = "redb")]
+impl From<redb::TableError> for KvError {
+  fn from(error: redb::TableError) -> Self {
+    KvError::PlatformError(miette::Report::from_err(error))
+  }
+}
+
+#[cfg(feature = "redb")]
+impl From<redb::StorageError> for KvError {
+  fn from(error: redb::StorageError) -> Self {
+    KvError::PlatformError(miette::Report::from_err(error))
+  }
+}
+
+#[cfg(feature = "redb")]
+impl From<redb::SavepointError> for KvError {
+  fn from(error: redb::SavepointError) -> Self {
+    KvError::PlatformError(miette::Report::from_err(error))
+  }
+}
+
+#[cfg(feature = "redb")]
+impl From<redb::CommitError> for KvError {
+  fn from(error: redb::CommitError) -> Self {
     KvError::PlatformError(miette::Report::from_err(error))
   }
 }
