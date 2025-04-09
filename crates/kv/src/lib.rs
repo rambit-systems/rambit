@@ -235,6 +235,13 @@ impl KeyValueStore {
   pub fn from_mock(mock: Arc<mock_impl::MockStore>) -> Self {
     Self { inner: mock }
   }
+  /// Create a new key-value store built on a ReDB backend.
+  #[cfg(feature = "redb")]
+  pub fn new_redb(path: impl AsRef<std::path::Path>) -> miette::Result<Self> {
+    Ok(Self {
+      inner: Arc::new(redb_impl::RedbClient::new(path)?),
+    })
+  }
 
   /// Begin an optimistic transaction.
   pub async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
