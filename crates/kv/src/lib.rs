@@ -18,12 +18,12 @@
 
 mod key;
 #[cfg(feature = "mock")]
-mod mock;
+mod mock_impl;
 #[cfg(feature = "redb")]
-mod redb_client;
+mod redb_impl;
 mod retryable;
 #[cfg(feature = "tikv")]
-mod tikv;
+mod tikv_impl;
 mod txn_ext;
 mod value;
 
@@ -33,7 +33,7 @@ use hex::health;
 pub use slugger::*;
 
 #[cfg(feature = "mock")]
-pub use self::mock::MockStore;
+pub use self::mock_impl::MockStore;
 pub use self::{key::Key, txn_ext::KvTransactionExt, value::Value};
 
 /// Represents errors that can occur when interacting with a key-value store.
@@ -203,7 +203,7 @@ impl KeyValueStore {
   #[cfg(feature = "tikv")]
   pub async fn new_tikv_from_env() -> miette::Result<Self> {
     Ok(Self {
-      inner: Arc::new(tikv::TikvClient::new_from_env().await?),
+      inner: Arc::new(tikv_impl::TikvClient::new_from_env().await?),
     })
   }
   /// Attempt with retry to create a new key-value store pointing to a TiKV
@@ -212,7 +212,7 @@ impl KeyValueStore {
     delay: std::time::Duration,
   ) -> Self {
     let kv_store_init =
-      move || async move { tikv::TikvClient::new_from_env().await };
+      move || async move { tikv_impl::TikvClient::new_from_env().await };
     let retryable_tikv_store =
       hex::retryable::Retryable::init(attempt_limit, delay, kv_store_init)
         .await;
@@ -225,13 +225,15 @@ impl KeyValueStore {
   pub fn new_mock() -> Self {
     {
       Self {
-        inner: mock::MockStore::new(),
+        inner: mock_impl::MockStore::new(),
       }
     }
   }
   /// Create a new store from a mock store.
   #[cfg(feature = "mock")]
-  pub fn from_mock(mock: Arc<mock::MockStore>) -> Self { Self { inner: mock } }
+  pub fn from_mock(mock: Arc<mock_impl::MockStore>) -> Self {
+    Self { inner: mock }
+  }
 
   /// Begin an optimistic transaction.
   pub async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
