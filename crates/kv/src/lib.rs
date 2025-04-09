@@ -206,6 +206,7 @@ impl KeyValueStore {
       inner: Arc::new(tikv_impl::TikvClient::new_from_env().await?),
     })
   }
+  #[cfg(feature = "tikv")]
   /// Attempt with retry to create a new key-value store pointing to a TiKV
   pub async fn new_retryable_tikv_from_env(
     attempt_limit: u32,
