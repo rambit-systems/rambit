@@ -1,4 +1,5 @@
 #![feature(iterator_try_collect)]
+#![feature(slice_pattern)]
 
 //! A generic interface for key-value stores.
 //!

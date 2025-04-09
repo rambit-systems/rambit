@@ -107,7 +107,7 @@ impl TryFrom<&[u8]> for Key {
   type Error = std::str::Utf8Error;
 
   fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
-    let string = std::str::from_utf8(&bytes)?;
+    let string = std::str::from_utf8(bytes)?;
     let mut segments = string.split(':').map(|s| s.to_string());
     let first_segment = segments.next().unwrap();
     let first_segment = Starc::new_owned(StrictSlug::new(first_segment));
@@ -116,6 +116,14 @@ impl TryFrom<&[u8]> for Key {
       key.push(Starc::new_owned(StrictSlug::new(segment)));
     }
     Ok(key)
+  }
+}
+
+impl TryFrom<Vec<u8>> for Key {
+  type Error = std::str::Utf8Error;
+
+  fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+    Self::try_from(value.as_slice())
   }
 }
 
