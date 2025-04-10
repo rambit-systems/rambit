@@ -16,6 +16,24 @@ const TABLE: TableDefinition<Key, Value> = TableDefinition::new("master");
 
 impl RedbClient {
   pub fn new(path: impl AsRef<Path>) -> miette::Result<Self> {
+    let path = path.as_ref();
+    let path_parent = path.parent();
+
+    match path_parent {
+      Some(path_parent) if !path_parent.exists() => {
+        tracing::warn!(
+          "RedbClient store directory doesn't exist, creating: {}",
+          path_parent.display()
+        );
+        std::fs::create_dir_all(path_parent)
+          .into_diagnostic()
+          .wrap_err(
+            "failed to create directory for non-existent `RedbClient` path",
+          )?;
+      }
+      _ => {}
+    }
+
     Ok(Self(
       redb::Database::create(path)
         .into_diagnostic()
