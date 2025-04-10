@@ -190,6 +190,9 @@ impl Belt {
     }
   }
 
+  /// Get the current compression algorithm of the streamed data.
+  pub fn comp(&self) -> Option<CompressionAlgorithm> { self.declared_comp }
+
   /// Get a tracking counter for the total number of bytes read from this
   /// [`Belt`].
   pub fn counter(&self) -> Counter { Counter::new(self.count.clone()) }
