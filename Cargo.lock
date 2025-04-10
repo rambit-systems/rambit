@@ -2475,6 +2475,7 @@ name = "migrator"
 version = "0.1.0"
 dependencies = [
  "db",
+ "kv",
  "miette",
  "tokio",
  "tracing-subscriber",

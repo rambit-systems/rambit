@@ -29,7 +29,7 @@ rmp-serde = "1.3"
 tokio = { workspace = true, features = ["full"] }
 
 [features]
-default = [ "tikv", "mock", "redb" ]
+default = [ ]
 tikv = [ "dep:tikv-client" ]
 redb = [ "dep:redb" ]
 mock = [ "dep:tokio" ]

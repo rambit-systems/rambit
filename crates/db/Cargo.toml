@@ -9,7 +9,7 @@ workspace = true
 
 [dependencies]
 hex = { path = "../hex" }
-kv = { path = "../kv", features = [ "tikv" ] }
+kv = { path = "../kv", features = [ ] }
 model = { path = "../model" }
 models = { path = "../models", optional = true }
 

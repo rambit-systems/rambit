@@ -16,12 +16,12 @@ use crate::{
   CreateModelError, DatabaseAdapter,
 };
 
-/// A TiKV-based database adapter.
+/// A [`KeyValueStore`]-based database adapter.
 #[derive(Clone)]
 pub struct KvDatabaseAdapter(KeyValueStore);
 
 impl KvDatabaseAdapter {
-  /// Creates a new TiKV adapter.
+  /// Creates a new [`KeyValueStore`] adapter.
   pub fn new(kv_store: KeyValueStore) -> Self {
     tracing::info!("creating new `KvDatabaseAdapter` instance");
     Self(kv_store)
@@ -347,7 +347,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
 
 #[async_trait::async_trait]
 impl health::HealthReporter for KvDatabaseAdapter {
-  fn name(&self) -> &'static str { stringify!(TikvAdapter) }
+  fn name(&self) -> &'static str { stringify!(KvDatabaseAdapter) }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(Some(self.0.health_report()))
       .await
