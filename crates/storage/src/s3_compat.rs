@@ -113,7 +113,7 @@ impl StorageClientLike for S3CompatStorageClient {
     let data = data.bytes_chunks(required_chunk_size);
 
     // initiate the multipart with the destination storage
-    tracing::info!("starting multipart");
+    tracing::debug!("starting multipart");
     let multipart = Arc::new(Mutex::new(
       self
         .store
@@ -133,7 +133,7 @@ impl StorageClientLike for S3CompatStorageClient {
         let value = multipart.clone();
         async move {
           let chunk = r?;
-          tracing::info!("got bytes chunk with {} bytes", chunk.len());
+          tracing::debug!("got bytes chunk with {} bytes", chunk.len());
 
           let mut multipart = value.lock().await;
           let future = multipart
@@ -163,7 +163,7 @@ impl StorageClientLike for S3CompatStorageClient {
       .wrap_err("failed to complete multipart")
       .map_err(WriteError::MultipartError)?;
 
-    tracing::info!("finishing multipart");
+    tracing::debug!("finishing multipart");
 
     let file_size = dvf::FileSize::new(counter.current());
 

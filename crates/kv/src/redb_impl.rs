@@ -3,6 +3,7 @@ use std::{ops::Bound, path::Path};
 use hex::health;
 use miette::{miette, Context, IntoDiagnostic};
 use redb::{ReadableTable, TableDefinition, WriteTransaction};
+use tracing::instrument;
 
 use crate::{
   DynTransaction, Key, KvError, KvPrimitive, KvResult, KvTransaction,
@@ -58,6 +59,7 @@ impl RedbTransaction {
 #[async_trait::async_trait]
 impl KvTransactional for RedbClient {
   async fn begin_optimistic_transaction(&self) -> KvResult<DynTransaction> {
+    tracing::debug!("beginning optimistic transaction");
     let txn = self.0.begin_write()?;
     let savepoint = txn.ephemeral_savepoint()?;
     Ok(DynTransaction::new(RedbTransaction(
@@ -66,6 +68,7 @@ impl KvTransactional for RedbClient {
     )))
   }
   async fn begin_pessimistic_transaction(&self) -> KvResult<DynTransaction> {
+    tracing::debug!("beginning pessimistic transaction");
     let txn = self.0.begin_write()?;
     let savepoint = txn.ephemeral_savepoint()?;
     Ok(DynTransaction::new(RedbTransaction(
@@ -77,21 +80,27 @@ impl KvTransactional for RedbClient {
 
 #[async_trait::async_trait]
 impl KvPrimitive for RedbTransaction {
+  #[instrument(skip(self))]
   async fn get(&mut self, key: &Key) -> KvResult<Option<Value>> {
+    tracing::debug!("getting key");
     let txn = self.unpack()?;
     let table = txn.open_table(TABLE)?;
     let ag = table.get(key)?;
     Ok(ag.map(|ag| ag.value()))
   }
 
+  #[instrument(skip(self))]
   async fn put(&mut self, key: &Key, value: Value) -> KvResult<()> {
+    tracing::debug!("putting key");
     let txn = self.unpack()?;
     let mut table = txn.open_table(TABLE)?;
     table.insert(key, value)?;
     Ok(())
   }
 
+  #[instrument(skip(self))]
   async fn insert(&mut self, key: &Key, value: Value) -> KvResult<()> {
+    tracing::debug!("inserting key");
     let txn = self.unpack()?;
     let mut table = txn.open_table(TABLE)?;
     let populated = table.get(key)?.is_some();
@@ -101,12 +110,14 @@ impl KvPrimitive for RedbTransaction {
     Ok(())
   }
 
+  #[instrument(skip(self))]
   async fn scan(
     &mut self,
     start: Bound<Key>,
     end: Bound<Key>,
     limit: Option<u32>,
   ) -> KvResult<Vec<(Key, Value)>> {
+    tracing::debug!("scanning keys");
     let txn = self.unpack()?;
     let table = txn.open_table(TABLE)?;
     let range = table.range((start, end))?;
@@ -119,7 +130,9 @@ impl KvPrimitive for RedbTransaction {
     })
   }
 
+  #[instrument(skip(self))]
   async fn delete(&mut self, key: &Key) -> KvResult<bool> {
+    tracing::debug!("deleting key");
     let txn = self.unpack()?;
     let mut table = txn.open_table(TABLE)?;
     let deleted_val = table.remove(key)?;
@@ -130,16 +143,20 @@ impl KvPrimitive for RedbTransaction {
 #[async_trait::async_trait]
 impl KvTransaction for RedbTransaction {
   async fn commit(&mut self) -> KvResult<()> {
+    tracing::debug!("committing transaction");
     if self.0.is_some() && self.1.is_some() {
       let txn = self.0.take().unwrap();
       let savepoint = self.1.take().unwrap();
       txn.commit()?;
       drop(savepoint);
+      tracing::debug!("committed transaction");
     } else if self.0.is_none() {
+      tracing::error!("transaction already committed");
       return Err(KvError::PlatformError(miette!(
         "redb transaction already commited"
       )));
     } else {
+      tracing::error!("transaction already rolled back");
       return Err(KvError::PlatformError(miette!(
         "redb transaction already rolled back"
       )));
@@ -149,10 +166,13 @@ impl KvTransaction for RedbTransaction {
   }
 
   async fn rollback(&mut self) -> KvResult<()> {
+    tracing::debug!("rolling back transaction");
     if self.1.is_some() {
       let savepoint = self.1.take().unwrap();
       drop(savepoint);
+      tracing::debug!("transaction rolled back");
     } else {
+      tracing::error!("transaction already rolled back");
       return Err(KvError::PlatformError(miette!(
         "redb transaction already rolled back"
       )));

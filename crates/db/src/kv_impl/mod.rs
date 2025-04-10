@@ -32,7 +32,7 @@ impl KvDatabaseAdapter {
 impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
   #[instrument(skip(self, model), fields(id = model.id().to_string(), table = M::TABLE_NAME))]
   async fn create_model(&self, model: M) -> Result<M, CreateModelError> {
-    tracing::info!("creating model");
+    tracing::debug!("creating model");
 
     // the model itself will be stored under [model_name]:[id] -> model
     // and each index will be stored under
@@ -144,7 +144,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
     &self,
     id: model::RecordId<M>,
   ) -> Result<Option<M>, FetchModelError> {
-    tracing::info!("fetching model with id");
+    tracing::debug!("fetching model with id");
 
     let model_key = model_base_key::<M>(&id);
 
@@ -177,7 +177,7 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Option<M>, FetchModelByIndexError> {
-    tracing::info!("fetching model by index");
+    tracing::debug!("fetching model by unique index");
 
     if !M::UNIQUE_INDICES
       .iter()
@@ -243,6 +243,8 @@ impl<M: model::Model> DatabaseAdapter<M> for KvDatabaseAdapter {
     index_name: String,
     index_value: EitherSlug,
   ) -> Result<Vec<M>, FetchModelByIndexError> {
+    tracing::debug!("fetching model by index");
+
     let first_key = index_base_key::<M>(&index_name)
       .with_either(index_value.clone())
       .with(StrictSlug::new(model::RecordId::<M>::MIN().to_string()));

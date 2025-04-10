@@ -24,7 +24,7 @@ where
   where
     Fut: Future<Output = Result<R, E>> + 'static,
   {
-    tracing::info!("attempting to init");
+    tracing::debug!("attempting to init");
     let mut error = None;
 
     for attempt in 1..=attempt_limit {
