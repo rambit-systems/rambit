@@ -201,6 +201,22 @@ impl Belt {
   pub fn to_async_buf_read(self) -> tokio_util::io::StreamReader<Self, Bytes> {
     tokio_util::io::StreamReader::new(self)
   }
+
+  /// Consume and collect into a [`Bytes`]
+  pub async fn collect(self) -> Result<Bytes> {
+    use bytes::BytesMut;
+    use futures::TryStreamExt;
+
+    // Collect all bytes from the stream
+    let mut buffer = BytesMut::new();
+    let mut stream = self;
+
+    while let Some(chunk) = stream.try_next().await? {
+      buffer.extend_from_slice(&chunk);
+    }
+
+    Ok(buffer.freeze())
+  }
 }
 
 impl Stream for Belt {
