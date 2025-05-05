@@ -144,7 +144,7 @@ dependencies = [
  "axum 0.7.9",
  "cfg-if",
  "clap",
- "miette",
+ "miette 7.2.0",
  "mollusk",
  "prime-domain",
  "serde_json",
@@ -184,6 +184,7 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 [[package]]
 name = "art"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "artem",
  "image",
@@ -472,15 +473,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backtrace-ext"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "537beee3be4a18fb023b570f80e3ae28003db9167a751266b259926e25539d50"
-dependencies = [
- "backtrace",
-]
-
-[[package]]
 name = "base64"
 version = "0.21.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -495,6 +487,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "belt"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "async-compression",
  "bytes",
@@ -624,7 +617,7 @@ dependencies = [
  "leptos",
  "leptos_axum",
  "leptos_router",
- "miette",
+ "miette 7.2.0",
  "prime-domain",
  "tokio",
  "tower 0.5.1",
@@ -744,7 +737,7 @@ dependencies = [
  "clap",
  "humansize",
  "humantime",
- "miette",
+ "miette 7.2.0",
  "nasty",
  "tracing",
  "tracing-subscriber",
@@ -951,7 +944,7 @@ name = "daemon"
 version = "0.1.0"
 dependencies = [
  "art",
- "miette",
+ "miette 7.2.0",
  "rope",
  "tasks",
  "tokio",
@@ -975,19 +968,17 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "async-trait",
  "generic-tests",
  "hex",
  "kv",
- "miette",
+ "miette 7.6.0",
  "model",
- "models",
- "serde",
  "thiserror 1.0.69",
  "tokio",
  "tracing",
- "ulid",
 ]
 
 [[package]]
@@ -1054,10 +1045,10 @@ checksum = "669a445ee724c5c69b1b06fe0b63e70a1c84bc9bb7d9696cd4f4e3ec45050408"
 [[package]]
 name = "dvf"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "email_address",
  "nutype",
- "regex",
  "serde",
  "slugger",
  "ulid",
@@ -1476,6 +1467,7 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 [[package]]
 name = "health"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "async-trait",
  "futures",
@@ -1503,6 +1495,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 [[package]]
 name = "hex"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "health",
  "tokio",
@@ -1968,12 +1961,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ddc24109865250148c2e0f3d25d4f0f479571723792d3802153c60922a4fb708"
 
 [[package]]
-name = "is_ci"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7655c9839580ee829dfacba1d1278c2b7883e50a277ff7541299489d6bdfdc45"
-
-[[package]]
 name = "is_executable"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2060,10 +2047,11 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "async-trait",
  "hex",
- "miette",
+ "miette 7.6.0",
  "redb",
  "rmp-serde",
  "serde",
@@ -2072,7 +2060,6 @@ dependencies = [
  "starc",
  "thiserror 1.0.69",
  "tikv-client",
- "tokio",
  "tracing",
 ]
 
@@ -2446,17 +2433,21 @@ name = "miette"
 version = "7.2.0"
 source = "git+https://github.com/zkat/miette?rev=93d3bd118a072c35aa761f0ec74317166ec08113#93d3bd118a072c35aa761f0ec74317166ec08113"
 dependencies = [
- "backtrace",
- "backtrace-ext",
  "cfg-if",
- "miette-derive",
+ "miette-derive 7.2.0",
  "owo-colors",
- "supports-color",
- "supports-hyperlinks",
- "supports-unicode",
- "terminal_size",
  "textwrap",
  "thiserror 1.0.69",
+ "unicode-width 0.1.14",
+]
+
+[[package]]
+name = "miette"
+version = "7.6.0"
+source = "git+https://github.com/zkat/miette#907857058dc255caeae456e87146c629ce69cf5c"
+dependencies = [
+ "cfg-if",
+ "miette-derive 7.6.0",
  "unicode-width 0.1.14",
 ]
 
@@ -2471,12 +2462,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "miette-derive"
+version = "7.6.0"
+source = "git+https://github.com/zkat/miette#907857058dc255caeae456e87146c629ce69cf5c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.90",
+]
+
+[[package]]
 name = "migrator"
 version = "0.1.0"
 dependencies = [
  "db",
  "kv",
- "miette",
+ "miette 7.2.0",
  "tokio",
  "tracing-subscriber",
 ]
@@ -2527,6 +2528,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "dvf",
  "serde",
@@ -2549,7 +2551,7 @@ dependencies = [
  "axum-core 0.4.5",
  "bytes",
  "http 1.2.0",
- "miette",
+ "miette 7.2.0",
  "mime",
  "models",
  "serde",
@@ -2578,6 +2580,7 @@ dependencies = [
 [[package]]
 name = "names"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "nanorand",
 ]
@@ -2930,7 +2933,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "hex",
- "miette",
+ "miette 7.2.0",
  "models",
  "mollusk",
  "repos",
@@ -3446,7 +3449,7 @@ dependencies = [
  "async-trait",
  "db",
  "hex",
- "miette",
+ "miette 7.2.0",
  "models",
  "storage",
  "tokio",
@@ -3552,7 +3555,7 @@ name = "rope"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "miette",
+ "miette 7.2.0",
  "names",
  "redis",
  "serde",
@@ -3967,6 +3970,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "deunicode",
  "nutype",
@@ -4026,10 +4030,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
+source = "git+https://github.com/johnbchron/app-core#c0b89b97c3f8236cc229ebe9609991688a95b6a9"
 dependencies = [
  "async-trait",
  "belt",
@@ -4037,13 +4043,10 @@ dependencies = [
  "dvf",
  "futures",
  "hex",
- "miette",
+ "miette 7.6.0",
  "object_store",
- "serde",
- "temp-dir",
  "thiserror 1.0.69",
  "tokio",
- "tokio-util",
  "tracing",
 ]
 
@@ -4058,27 +4061,6 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
-
-[[package]]
-name = "supports-color"
-version = "3.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c64fc7232dd8d2e4ac5ce4ef302b1d81e0b80d055b9d77c7c4f51f6aa4c867d6"
-dependencies = [
- "is_ci",
-]
-
-[[package]]
-name = "supports-hyperlinks"
-version = "3.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "804f44ed3c63152de6a9f90acbea1a110441de43006ea51bcce8f436196a288b"
-
-[[package]]
-name = "supports-unicode"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7401a30af6cb5818bb64852270bb722533397edcfc7344954a38f420819ece2"
 
 [[package]]
 name = "symlink"
@@ -4215,12 +4197,6 @@ dependencies = [
  "serde",
  "tracing",
 ]
-
-[[package]]
-name = "temp-dir"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc1ee6eef34f12f765cb94725905c6312b6610ab2b0940889cfe58dae7bc3c72"
 
 [[package]]
 name = "terminal_size"
@@ -4442,7 +4418,6 @@ checksum = "d7fcaa8d55a2bdd6b83ace262b016eca0d79ee02818c5c1bcdf0305114081078"
 dependencies = [
  "bytes",
  "futures-core",
- "futures-io",
  "futures-sink",
  "pin-project-lite",
  "tokio",

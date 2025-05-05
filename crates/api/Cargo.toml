@@ -8,7 +8,7 @@ publish = false
 workspace = true
 
 [dependencies]
-art = { path = "../art" }
+art.workspace = true
 mollusk = { path = "../mollusk" }
 tasks = { path = "../tasks" }
 prime-domain = { path = "../prime-domain" }
@@ -18,12 +18,12 @@ serde_json.workspace = true
 cfg-if.workspace = true
 clap.workspace = true
 thiserror.workspace = true
-miette = { workspace = true, features = [ "fancy-no-syscall" ] }
+miette = { workspace = true, features = ["fancy-no-syscall"] }
 
-axum = { workspace = true, features = [ "macros" ] }
-tokio = { workspace = true, features = [ "full" ] }
+axum = { workspace = true, features = ["macros"] }
+tokio = { workspace = true, features = ["full"] }
 tokio-stream.workspace = true
-tokio-util = { workspace = true, features = [ "io" ] }
+tokio-util = { workspace = true, features = ["io"] }
 
 tracing.workspace = true
 tracing-subscriber.workspace = true

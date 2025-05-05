@@ -8,8 +8,8 @@ publish = false
 workspace = true
 
 [dependencies]
-db = { path = "../db", features = [ "migrate" ] }
-kv = { path = "../kv", features = [ "tikv" ] }
+db = { workspace = true }
+kv = { workspace = true, features = ["tikv"] }
 
 miette = { workspace = true, features = ["fancy-no-syscall"] }
 tokio = { workspace = true, features = ["rt"] }

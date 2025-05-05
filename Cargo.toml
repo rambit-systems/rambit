@@ -10,15 +10,28 @@ license-file = "LICENSE.md"
 missing_docs = "deny"
 
 [workspace.dependencies]
+# app-core
+art = { git = "https://github.com/johnbchron/app-core" }
+belt = { git = "https://github.com/johnbchron/app-core" }
+db = { git = "https://github.com/johnbchron/app-core" }
+dvf = { git = "https://github.com/johnbchron/app-core" }
+hex = { git = "https://github.com/johnbchron/app-core" }
+kv = { git = "https://github.com/johnbchron/app-core", features = ["redb"] }
+model = { git = "https://github.com/johnbchron/app-core" }
+names = { git = "https://github.com/johnbchron/app-core" }
+storage = { git = "https://github.com/johnbchron/app-core" }
+
 # strictly codegen
 async-trait = { version = "0.1" }
 cfg-if = { version = "1" }
-serde = { version = "1", features = [ "derive" ] }
+serde = { version = "1", features = ["derive"] }
 thiserror = { version = "1" }
 
 # errors
 # miette = { version = "7", default-features = false, features = [ "derive" ] }
-miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = ["derive"] }
+miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = [
+  "derive",
+] }
 
 # mainline application
 axum = { version = "0.7" }
@@ -30,26 +43,26 @@ tokio-stream = { version = "0.1" }
 
 # atomic-ish features
 bytes = { version = "1" }
-ulid = { version = "1.1", features = [ "serde" ] }
+ulid = { version = "1.1", features = ["serde"] }
 serde_json = { version = "1" }
 nanorand = { version = "0.7", default-features = false }
 futures = { version = "0.3" }
-clap = { version = "4.5", features = [ "derive" ] }
+clap = { version = "4.5", features = ["derive"] }
 nutype = { version = "0.5" }
 pin-project = { version = "1" }
 
 # leptos-specific
-leptos = { version = "0.7.0-rc2", features = [ "tracing", "nightly", "islands" ] }
+leptos = { version = "0.7.0-rc2", features = ["tracing", "nightly", "islands"] }
 leptos_axum = { version = "0.7.0-rc2", features = ["tracing"] }
 leptos_meta = { version = "0.7.0-rc2", features = ["tracing"] }
 leptos_router = { version = "0.7.0-rc2", features = ["nightly", "tracing"] }
-tower = { version = "0.5", features = [ ] }
-tower-http = { version = "0.6", features = [ ] }
+tower = { version = "0.5", features = [] }
+tower-http = { version = "0.6", features = [] }
 wasm-bindgen = "=0.2.95"
 
 # tracing
 tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # only for client-side leptos builds
 [profile.wasm-release]
@@ -89,4 +102,3 @@ bin-default-features = false
 lib-features = []
 lib-default-features = false
 lib-profile-release = "wasm-release"
-
