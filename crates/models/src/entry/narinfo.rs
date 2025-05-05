@@ -24,8 +24,8 @@ pub struct NarSignature {
   sig:      SignatureBytes,
 }
 
-/// Nix `.narinfo` data.
-pub struct EntryNarInfo {
+/// The `.narinfo` data that describes a store path.
+pub struct NarInfoStorePathDescription {
   /// Store path for this NAR.
   store_path: StorePath,
   /// Hash of the uncompressed NAR.
@@ -34,16 +34,25 @@ pub struct EntryNarInfo {
   nar_size:   FileSize,
   /// Store paths referred to by the contents of the NAR.
   references: Vec<StorePath>,
+}
 
+/// The `.narinfo` data that asserts authenticity.
+pub struct NarInfoAuthenticityData {
   /// Signatures for this NAR.
   signatures: Vec<NarSignature>,
-
   // CAHash unimplemented
+}
+
+/// The `.narinfo` data about the deriver.
+pub struct NarInfoDeriverData {
   /// The system string for this NAR's derivation.
   system:  Option<&'static str>,
   /// The path for this NAR's derivation.
   deriver: Option<DerivationPath>,
+}
 
+/// The `.narinfo` data specific to the binary cache.
+pub struct NarInfoBinaryCacheData {
   /// URL for the NAR.
   url:         String,
   /// Compression algorithm used for the NAR.
