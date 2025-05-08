@@ -4,9 +4,6 @@ target/
 # environment
 .env
 
-# redis
-*.rdb
-
 # chrome traces
 trace-*.json
 
