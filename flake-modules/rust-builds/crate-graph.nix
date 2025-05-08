@@ -39,6 +39,6 @@
       nativeBuildInputs = [ pkgs.graphviz ];
     };
   in {
-    packages = { inherit crate-graph crate-graph-image; };
+    packages = { inherit crate-graph-image; };
   };
 }
