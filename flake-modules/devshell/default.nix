@@ -6,7 +6,6 @@
 
         # libraries used in local rust builds
         pkg-config
-        openssl
 
         # other things used in local rust builds
         gcc
