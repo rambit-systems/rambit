@@ -1,16 +1,8 @@
 { ... }: {
-  perSystem = ps @ { pkgs, inputs', config, ... }: let
-    mkShell = pkgs.devshell.mkShell;
-
-    # note; there's a UTF-8 control character in the esc string below
-    esc = "";
-    # for highlighting binary names in the help text
-    bin-hl = s: "${esc}[31;1m${s}${esc}[0m";
-  in {
-    devShells.default = mkShell {
+  perSystem = { pkgs, inputs', config, rust-toolchain, ... }: {
+    devShells.default = pkgs.devshell.mkShell {
       packages = with pkgs; [
-        # pull in the rust toolchain from the `rust-builds` module
-        config.packages.dev-toolchain
+        (rust-toolchain.dev-toolchain pkgs)
 
         # libraries used in local rust builds
         pkg-config
@@ -19,36 +11,16 @@
         # other things used in local rust builds
         gcc
 
-        # dev tools
-        mprocs # parallel process execution
-        bacon # change detection
+        # cargo tools
         cargo-nextest # testing
         cargo-deny # package auditing
         cargo-depgraph # dependency graphing
         graphviz # graphviz
-
-        # cf worker deployment
-        yarn
-        inputs'.wrangler.packages.wrangler
-        worker-build
-        wasm-pack
-
-        # service runtimes
-        redis
-
-        # leptos development
-        cargo-leptos # builds and runs leptos projects
-        binaryen # for wasm-opt
-        dart-sass # for compiling scss
-        tailwindcss # for tailwindcss
-        yarn # for populating local style node_modules
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
 
-      commands = let
-        import-commands-module = path: (import path) (ps // { inherit bin-hl; });
-      in [
+      commands = [
         {
           name = "test";
           command = "cargo nextest run";
@@ -85,16 +57,7 @@
           help = "Update the crate graph";
           category = "[repo actions]";
         }
-        {
-          name = "migrate";
-          command = "cargo run --bin migrator";
-          help = "Run the migrator";
-          category = "[stack actions]";
-        }
-      ]
-        ++ import-commands-module ./bin-commands.nix
-        ++ import-commands-module ./docker-commands.nix
-        ++ import-commands-module ./stack-commands.nix;
+      ];
     };
   };
 }
