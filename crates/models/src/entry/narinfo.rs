@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use dvf::{slugger::LaxSlug, FileSize};
 
 /// A Nix store path digest.

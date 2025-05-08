@@ -1,0 +1,7 @@
+exclude = ["target/**", "result/**", ".direnv/**"]
+
+[formatting]
+column_width = 100
+reorder_keys = true
+# align_entries = true
+# indent_entries = true
