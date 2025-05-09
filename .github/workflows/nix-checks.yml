@@ -5,7 +5,7 @@ on:
 
 jobs:
   configure:
-    runs-on: x86_64-linux
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -13,7 +13,7 @@ jobs:
      - id: set-matrix
        run: |
          set -euxo pipefail
-         MATRIX="$(om ci gh-matrix --systems=x86_64-linux,aarch64-linux | jq -c .)"
+         MATRIX="$(om ci gh-matrix --systems=ubuntu-latest | jq -c .)"
          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
   nix:
     runs-on: ${{ matrix.system }}
