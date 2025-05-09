@@ -5,8 +5,7 @@ mod org;
 mod store;
 mod user;
 
-pub use dvf::*;
-pub use model::*;
-pub use slugger::*;
+pub use dvf::{self, slugger};
+pub use model;
 
-pub use self::org::*;
+pub use self::{entry::*, org::*, store::*, user::*};

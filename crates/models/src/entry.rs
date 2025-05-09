@@ -1,7 +1,11 @@
-use dvf::slugger::{EitherSlug, LaxSlug};
+use dvf::{
+  slugger::{EitherSlug, LaxSlug},
+  RecordId,
+};
+use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
-use crate::{store::Store, Model, RecordId};
+use crate::store::Store;
 
 /// An entry.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,6 +19,8 @@ pub struct Entry {
 }
 
 impl Entry {
+  /// Generates the value of the unique [`Entry`] index
+  /// `store-id-and-entry-path`.
   pub fn unique_index_store_id_and_entry_path(&self) -> EitherSlug {
     LaxSlug::new(format!(
       "{store_id}-{entry_path}",
@@ -28,14 +34,11 @@ impl Entry {
 impl Model for Entry {
   const TABLE_NAME: &'static str = "entry";
 
-  const UNIQUE_INDICES: &'static [(
-    &'static str,
-    crate::SlugFieldGetter<Self>,
-  )] = &[(
+  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[(
     "store-id-and-entry-path",
     Entry::unique_index_store_id_and_entry_path,
   )];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

@@ -1,6 +1,6 @@
+use dvf::RecordId;
+use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
-
-use crate::{Model, RecordId};
 
 /// An org.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -14,11 +14,9 @@ pub struct Org {
 impl Model for Org {
   const TABLE_NAME: &'static str = "org";
 
-  const UNIQUE_INDICES: &'static [(
-    &'static str,
-    crate::SlugFieldGetter<Self>,
-  )] = &[("name", |org| org.name.clone().into_inner().into())];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
+    &[("name", |org| org.name.clone().into_inner().into())];
+  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> RecordId<Org> { self.id }
 }
