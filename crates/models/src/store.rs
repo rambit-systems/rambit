@@ -1,4 +1,4 @@
-use dvf::{RecordId, StorageCredentials};
+use dvf::{EntityNickname, RecordId, StorageCredentials};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +15,8 @@ pub struct Store {
   pub credentials: StorageCredentials,
   /// The store's configuration.
   pub config:      StoreConfiguration,
+  /// The store's nickname.
+  pub nickname:    EntityNickname,
 }
 
 /// The configuration for a [`Store`].
