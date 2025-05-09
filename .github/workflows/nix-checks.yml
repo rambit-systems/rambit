@@ -4,11 +4,24 @@ on:
     branches: [main]
 
 jobs:
-  lints:
-    name: Build
-    runs-on: ubuntu-latest
+  configure:
+    runs-on: x86_64-linux
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+     - uses: actions/checkout@v4
+     - id: set-matrix
+       run: |
+         set -euxo pipefail
+         MATRIX="$(om ci gh-matrix --systems=x86_64-linux,aarch64-linux | jq -c .)"
+         echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+  nix:
+    runs-on: ${{ matrix.system }}
+    needs: configure
+    strategy:
+      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
-      - run: nix flake check -L
+      - run: om ci run --systems "${{ matrix.system }}" ".#default.${{ matrix.subflake }}"
 
