@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{HumanName, Model, Org, RecordId, StorageCredentials};
+use crate::{Model, Org, RecordId, StorageCredentials};
 
 /// A store.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
