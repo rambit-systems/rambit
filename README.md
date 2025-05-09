@@ -17,7 +17,7 @@ the necessary dependencies available. The devshell will also come with custom
 commands, which you can explore with the `menu` command.
 
 ### Contributing
-
+- We adhere to the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. We don't care so much about strict commit types, but include the crates you touch or `flake` or `deps` in the scope position.
 - Before submitting a PR, run the `check` command (an alias of `nix flake check -L`). This will test many things, and will also be run in CI.
 - If first-party crate dependencies are modified, run `update-crate-graph` to update the crate graph SVG at `media/crate-graph.svg`. CI will fail if it's out-of-date.
 
