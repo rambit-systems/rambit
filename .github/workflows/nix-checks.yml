@@ -4,28 +4,10 @@ on:
     branches: [main]
 
 jobs:
-  configure:
+  lints:
+    name: Nix Checks
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-     - uses: actions/checkout@v4
-     - uses: DeterminateSystems/nix-installer-action@main
-     - name: Install omnix
-       run: nix --accept-flake-config profile install "github:juspay/omnix"
-     - run: om ci
-     - id: set-matrix
-       run: |
-         set -euxo pipefail
-         MATRIX="$(om ci gh-matrix --systems=ubuntu-latest | jq -c .)"
-         echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-  nix:
-    runs-on: ${{ matrix.system }}
-    needs: configure
-    strategy:
-      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
-      fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - run: om ci run --systems "${{ matrix.system }}" ".#default.${{ matrix.subflake }}"
-
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: nix flake check -L
