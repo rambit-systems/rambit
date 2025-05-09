@@ -5,17 +5,19 @@ use dvf::{
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
-use crate::store::Store;
+use crate::{cache::Cache, store::Store};
 
 /// An entry.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Entry {
   /// The entry's ID.
-  pub id:    RecordId<Entry>,
+  pub id:     RecordId<Entry>,
   /// The entry's store.
-  pub store: RecordId<Store>,
+  pub store:  RecordId<Store>,
   /// The entry's nix path.
-  pub path:  LaxSlug,
+  pub path:   LaxSlug,
+  /// The [`Cache`]s that this entry is accessible from.
+  pub caches: RecordId<Cache>,
 }
 
 impl Entry {
