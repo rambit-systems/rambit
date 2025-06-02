@@ -12,11 +12,10 @@ pub struct Org {
 }
 
 impl Model for Org {
+  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "org";
-
   const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
     &[("name", |org| org.name.clone().into_inner().into())];
-  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> RecordId<Org> { self.id }
 }

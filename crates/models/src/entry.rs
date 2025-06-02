@@ -1,6 +1,6 @@
 use dvf::{
-  slugger::{EitherSlug, LaxSlug},
   RecordId,
+  slugger::{EitherSlug, LaxSlug},
 };
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
@@ -34,13 +34,12 @@ impl Entry {
 }
 
 impl Model for Entry {
+  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "entry";
-
   const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[(
     "store-id-and-entry-path",
     Entry::unique_index_store_id_and_entry_path,
   )];
-  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

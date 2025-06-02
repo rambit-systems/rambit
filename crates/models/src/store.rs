@@ -24,10 +24,9 @@ pub struct Store {
 pub struct StoreConfiguration {}
 
 impl Model for Store {
-  const TABLE_NAME: &'static str = "store";
-
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
   const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  const TABLE_NAME: &'static str = "store";
+  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

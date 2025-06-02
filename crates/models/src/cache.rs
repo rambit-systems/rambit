@@ -1,4 +1,4 @@
-use dvf::{slugger::EitherSlug, EntityName, RecordId};
+use dvf::{EntityName, RecordId, slugger::EitherSlug};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -24,11 +24,10 @@ impl Cache {
 }
 
 impl Model for Cache {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "cache";
-
   const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
     &[("name", Cache::unique_index_name)];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }
