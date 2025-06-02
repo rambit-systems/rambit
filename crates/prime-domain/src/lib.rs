@@ -1,0 +1,1 @@
+//! Entrypoint for domain logic.
