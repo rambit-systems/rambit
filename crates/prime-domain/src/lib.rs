@@ -1,6 +1,8 @@
 //! Entrypoint for domain logic.
 
+pub use db;
 use db::Database;
+pub use models;
 use models::{Cache, Entry, Org, Store, User};
 
 /// The prime domain service type.
