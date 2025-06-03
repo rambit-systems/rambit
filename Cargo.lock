@@ -115,7 +115,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -137,7 +137,7 @@ checksum = "339544cc9e2c4dc3fc7149fd630c5f22263a4fdf18a98afd0075784968b5cf00"
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "email_address",
  "nutype",
@@ -287,7 +287,7 @@ checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "async-trait",
  "futures",
@@ -297,7 +297,7 @@ dependencies = [
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "health",
  "tokio",
@@ -343,7 +343,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "async-trait",
  "hex",
@@ -437,7 +437,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "dvf",
  "serde",
@@ -756,7 +756,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 dependencies = [
  "deunicode",
  "nutype",
@@ -772,7 +772,7 @@ checksum = "8917285742e9f3e1683f0a9c4e6b57960b7314d0b08d30d1ecd426713ee2eee9"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#9b970a14f2b71dafc4f16bd64507f9050ace1df9"
+source = "git+https://github.com/johnbchron/app-core#d351f8611dd5dfb9c12c499f418eba0d83446d5e"
 
 [[package]]
 name = "supports-color"
