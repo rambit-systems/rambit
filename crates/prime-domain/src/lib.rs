@@ -1,5 +1,7 @@
 //! Entrypoint for domain logic.
 
+mod fetch_by_id;
+
 pub use db;
 use db::Database;
 pub use models;
