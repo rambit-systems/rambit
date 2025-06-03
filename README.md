@@ -24,8 +24,9 @@ commands, which you can explore with the `menu` command.
 ## Crate Map
 ![Crate Graph](./media/crate-graph.svg)
 
-**Data/Domain:**
+- `app` - server binary entrypoint.
 - `models` - primary db model types.
+- `prime-domain` - centralized, dependency-injected business logic.
 
 ## License
 
