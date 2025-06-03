@@ -9,5 +9,10 @@ publish = false
 [dependencies]
 prime-domain = { path = "../prime-domain" }
 
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
 [lints]
 workspace = true
