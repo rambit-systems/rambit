@@ -8,13 +8,15 @@ Welcome to the `rambit` monorepo. Feel free to look around.
 
 We use [Nix](https://nixos.org/) for dev shells, enabled by [`direnv`](https://direnv.net/).
 You should have both of these installed, and you should have the
-[flake features](https://nixos.wiki/wiki/flakes) enabled for your Nix installation.
+[flake features](https://nixos.wiki/wiki/flakes) enabled for your Nix
+installation.
 
 If all is well, enter the project directory and `direnv` should complain about
-the `.envrc` being untrusted. Trust it with `direnv allow`, and nix will begin
-to build the devshell. When that's complete, you should have a shell with all
-the necessary dependencies available. The devshell will also come with custom
-commands, which you can explore with the `menu` command.
+the `.envrc` being untrusted. Trust it with `direnv allow` (I mean, take a peak
+if you want), and nix will begin to build the devshell. When that's complete,
+you should have a shell with all the necessary dependencies available. The
+devshell will also come with custom commands, which you can explore with the
+`menu` command.
 
 ### Contributing
 - We adhere to the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. We don't care so much about strict commit types, but include the crates you touch or `flake` or `deps` in the scope position.
