@@ -636,6 +636,7 @@ dependencies = [
  "belt",
  "db",
  "models",
+ "thiserror",
 ]
 
 [[package]]
