@@ -1,6 +1,7 @@
 //! Entrypoint for domain logic.
 
 mod fetch_by_id;
+mod upload;
 
 pub use db;
 use db::Database;
