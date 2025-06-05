@@ -11,6 +11,7 @@ missing_docs = "deny"
 
 [workspace.dependencies]
 # app-core
+belt = { git = "https://github.com/johnbchron/app-core" }
 db = { git = "https://github.com/johnbchron/app-core" }
 dvf = { git = "https://github.com/johnbchron/app-core" }
 kv = { git = "https://github.com/johnbchron/app-core" }

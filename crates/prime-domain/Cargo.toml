@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 models = { path = "../models" }
 
+belt.workspace = true
 db.workspace = true
 
 [lints]
