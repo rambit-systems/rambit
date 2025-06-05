@@ -15,7 +15,7 @@ impl Model for Org {
   const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "org";
   const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
-    &[("name", |org| org.name.clone().into_inner().into())];
+    &[("name", |org| vec![org.name.clone().into_inner().into()])];
 
   fn id(&self) -> RecordId<Org> { self.id }
 }

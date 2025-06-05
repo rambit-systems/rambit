@@ -18,8 +18,8 @@ pub struct Cache {
 impl Cache {
   /// Generates the value of the unique [`Cache`] index
   /// `name`.
-  pub fn unique_index_name(&self) -> EitherSlug {
-    self.name.clone().into_inner().into()
+  pub fn unique_index_name(&self) -> Vec<EitherSlug> {
+    vec![self.name.clone().into_inner().into()]
   }
 }
 
