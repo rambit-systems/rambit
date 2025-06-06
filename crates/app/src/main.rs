@@ -31,8 +31,10 @@ async fn main() -> Result<()> {
   let entry_db = Database::new_from_kv(kv_store.clone());
   let cache_db = Database::new_from_kv(kv_store);
 
-  let _prime_domain_service =
+  let prime_domain_service =
     PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
+
+  prime_domain_service.migrate_test_data().await;
 
   Ok(())
 }
