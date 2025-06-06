@@ -1,7 +1,4 @@
-use dvf::{
-  RecordId,
-  slugger::{EitherSlug, LaxSlug},
-};
+use dvf::{EitherSlug, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 

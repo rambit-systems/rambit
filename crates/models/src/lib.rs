@@ -6,7 +6,7 @@ mod org;
 mod store;
 mod user;
 
-pub use dvf::{self, slugger};
+pub use dvf;
 pub use model;
 
 pub use self::{cache::*, entry::*, org::*, store::*, user::*};

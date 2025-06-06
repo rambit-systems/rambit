@@ -1,4 +1,4 @@
-use dvf::{EntityName, RecordId, slugger::EitherSlug};
+use dvf::{EitherSlug, EntityName, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 

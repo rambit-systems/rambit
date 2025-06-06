@@ -1,8 +1,7 @@
 use belt::Belt;
-use db::kv::LaxSlug;
 use models::{
   Entry,
-  dvf::{EntityName, RecordId},
+  dvf::{EntityName, LaxSlug, RecordId},
 };
 
 use crate::PrimeDomainService;
