@@ -1,4 +1,4 @@
-use dvf::{EitherSlug, LaxSlug, RecordId};
+use dvf::{EitherSlug, FileSize, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +19,15 @@ pub struct Entry {
   pub path:   LaxSlug,
   /// The [`Cache`]s that this entry is accessible from.
   pub caches: Vec<RecordId<Cache>>,
+  /// The entry's metadata.
+  pub meta:   EntryMetadata,
+}
+
+/// Metadata for an [`Entry`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct EntryMetadata {
+  /// The entry's [`FileSize`].
+  pub file_size: FileSize,
 }
 
 impl Entry {
