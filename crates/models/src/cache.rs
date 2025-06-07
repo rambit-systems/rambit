@@ -2,17 +2,19 @@ use dvf::{EitherSlug, EntityName, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
-use crate::Org;
+use crate::{Org, Store};
 
 /// A cache.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Cache {
   /// The cache's ID.
-  pub id:   RecordId<Cache>,
+  pub id:            RecordId<Cache>,
   /// The cache's org.
-  pub org:  RecordId<Org>,
+  pub org:           RecordId<Org>,
   /// The cache's name.
-  pub name: EntityName,
+  pub name:          EntityName,
+  /// The cache's default [`Store`].
+  pub default_store: RecordId<Store>,
 }
 
 impl Cache {

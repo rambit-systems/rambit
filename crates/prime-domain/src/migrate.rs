@@ -36,7 +36,7 @@ impl PrimeDomainService {
       .into_diagnostic()
       .context("failed to create user")?;
 
-    let _albert_store = self
+    let albert_store = self
       .store_repo
       .create_model(Store {
         id:          RecordId::new(),
@@ -45,7 +45,7 @@ impl PrimeDomainService {
           LocalStorageCredentials(PathBuf::from("/tmp/rambit-albert-store")),
         ),
         config:      StoreConfiguration {},
-        nickname:    EntityNickname::new(StrictSlug::new("albert")),
+        name:        EntityNickname::new(StrictSlug::new("albert")),
       })
       .await
       .into_diagnostic()
@@ -54,9 +54,10 @@ impl PrimeDomainService {
     let _aaron_cache = self
       .cache_repo
       .create_model(Cache {
-        id:   RecordId::new(),
-        org:  org.id,
-        name: EntityName::new(StrictSlug::new("aaron")),
+        id:            RecordId::new(),
+        org:           org.id,
+        name:          EntityName::new(StrictSlug::new("aaron")),
+        default_store: albert_store.id,
       })
       .await
       .into_diagnostic()
