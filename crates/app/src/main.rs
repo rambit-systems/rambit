@@ -1,5 +1,6 @@
 //! The server-side entrypoint for Rambit.
 
+use clap::Parser;
 use miette::Result;
 use prime_domain::{
   PrimeDomainService,
@@ -7,6 +8,14 @@ use prime_domain::{
 };
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, prelude::*};
+
+/// The Rambit app CLI.
+#[derive(Parser)]
+struct CliArgs {
+  /// Whether to run database migrations.
+  #[arg(short, long)]
+  migrate: bool,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -17,6 +26,8 @@ async fn main() -> Result<()> {
     .with(tracing_subscriber::fmt::layer())
     .with(env_filter)
     .init();
+
+  let args = CliArgs::parse();
 
   tracing::info!("starting app server");
 
@@ -34,7 +45,9 @@ async fn main() -> Result<()> {
   let prime_domain_service =
     PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
 
-  prime_domain_service.migrate_test_data().await?;
+  if args.migrate {
+    prime_domain_service.migrate_test_data().await?;
+  }
 
   Ok(())
 }
