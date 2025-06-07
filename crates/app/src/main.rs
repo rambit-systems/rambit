@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
   let prime_domain_service =
     PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
 
-  prime_domain_service.migrate_test_data().await;
+  prime_domain_service.migrate_test_data().await?;
 
   Ok(())
 }

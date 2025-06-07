@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use miette::{Context, IntoDiagnostic, Result};
 use models::{
   Cache, Org, Store, StoreConfiguration, User,
   dvf::{
@@ -12,7 +13,7 @@ use crate::PrimeDomainService;
 
 impl PrimeDomainService {
   /// Add test data to databases.
-  pub async fn migrate_test_data(&self) {
+  pub async fn migrate_test_data(&self) -> Result<()> {
     let org = self
       .org_repo
       .create_model(Org {
@@ -20,7 +21,8 @@ impl PrimeDomainService {
         name: EntityName::new(StrictSlug::new("the-federation")),
       })
       .await
-      .expect("failed to create org");
+      .into_diagnostic()
+      .context("failed to create org")?;
 
     let _user = self
       .user_repo
@@ -31,7 +33,8 @@ impl PrimeDomainService {
           .expect("failed to create name"),
       })
       .await
-      .expect("failed to create user");
+      .into_diagnostic()
+      .context("failed to create user")?;
 
     let _albert_store = self
       .store_repo
@@ -45,7 +48,8 @@ impl PrimeDomainService {
         nickname:    EntityNickname::new(StrictSlug::new("albert")),
       })
       .await
-      .expect("failed to create store");
+      .into_diagnostic()
+      .context("failed to create store")?;
 
     let _aaron_cache = self
       .cache_repo
@@ -55,6 +59,9 @@ impl PrimeDomainService {
         name: EntityName::new(StrictSlug::new("aaron")),
       })
       .await
-      .expect("failed to create cache");
+      .into_diagnostic()
+      .context("failed to create cache")?;
+
+    Ok(())
   }
 }
