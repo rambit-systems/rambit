@@ -45,7 +45,7 @@ impl PrimeDomainService {
           LocalStorageCredentials(PathBuf::from("/tmp/rambit-albert-store")),
         ),
         config:      StoreConfiguration {},
-        name:        EntityNickname::new(StrictSlug::new("albert")),
+        name:        EntityName::new(StrictSlug::new("albert")),
       })
       .await
       .into_diagnostic()

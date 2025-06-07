@@ -1,4 +1,4 @@
-use dvf::{EntityNickname, RecordId, StorageCredentials};
+use dvf::{EitherSlug, EntityName, RecordId, StorageCredentials};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,15 @@ pub struct Store {
   /// The store's configuration.
   pub config:      StoreConfiguration,
   /// The store's nickname.
-  pub nickname:    EntityNickname,
+  pub name:        EntityName,
+}
+
+impl Store {
+  /// Generates the value of the unique [`Store`] index
+  /// `name`.
+  pub fn unique_index_name(&self) -> Vec<EitherSlug> {
+    vec![self.name.clone().into_inner().into()]
+  }
 }
 
 /// The configuration for a [`Store`].
@@ -26,7 +34,8 @@ pub struct StoreConfiguration {}
 impl Model for Store {
   const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "store";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
+  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
+    &[("name", Store::unique_index_name)];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }
