@@ -635,6 +635,7 @@ version = "0.1.0"
 dependencies = [
  "belt",
  "db",
+ "miette",
  "models",
  "thiserror",
 ]

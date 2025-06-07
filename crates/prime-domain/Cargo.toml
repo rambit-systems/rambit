@@ -12,6 +12,7 @@ models = { path = "../models" }
 belt.workspace = true
 db.workspace = true
 
+miette.workspace = true
 thiserror.workspace = true
 
 [lints]
