@@ -16,6 +16,7 @@ db = { git = "https://github.com/johnbchron/app-core" }
 dvf = { git = "https://github.com/johnbchron/app-core" }
 kv = { git = "https://github.com/johnbchron/app-core" }
 model = { git = "https://github.com/johnbchron/app-core" }
+storage = { git = "https://github.com/johnbchron/app-core" }
 
 # strictly codegen
 serde = { version = "1", features = ["derive"] }
