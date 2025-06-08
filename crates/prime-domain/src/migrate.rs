@@ -3,10 +3,7 @@ use std::path::PathBuf;
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
   Cache, Org, Store, StoreConfiguration, User,
-  dvf::{
-    EntityName, EntityNickname, HumanName, LocalStorageCredentials, RecordId,
-    StrictSlug,
-  },
+  dvf::{EntityName, HumanName, LocalStorageCredentials, RecordId, StrictSlug},
 };
 
 use crate::PrimeDomainService;

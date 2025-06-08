@@ -4,7 +4,7 @@ use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Entry, EntryMetadata, User,
-  dvf::{EitherSlug, EntityName, EntityNickname, LaxSlug, RecordId},
+  dvf::{EitherSlug, EntityName, LaxSlug, RecordId},
 };
 
 use crate::PrimeDomainService;
@@ -161,5 +161,22 @@ impl PrimeDomainService {
       .map_err(UploadError::InternalError)?;
 
     Ok(UploadResponse { entry_id: entry.id })
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use db::Database;
+
+  use crate::PrimeDomainService;
+
+  fn mock_prime_domain() -> PrimeDomainService {
+    PrimeDomainService {
+      org_repo:   Database::new_mock(),
+      user_repo:  Database::new_mock(),
+      store_repo: Database::new_mock(),
+      entry_repo: Database::new_mock(),
+      cache_repo: Database::new_mock(),
+    }
   }
 }
