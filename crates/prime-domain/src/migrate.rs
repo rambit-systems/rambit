@@ -3,14 +3,17 @@ use std::path::PathBuf;
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
   Cache, Org, Store, StoreConfiguration, User,
-  dvf::{EntityName, HumanName, LocalStorageCredentials, RecordId, StrictSlug},
+  dvf::{
+    EntityName, HumanName, LocalStorageCredentials, MemoryStorageCredentials,
+    RecordId, StrictSlug,
+  },
 };
 
 use crate::PrimeDomainService;
 
 impl PrimeDomainService {
   /// Add test data to databases.
-  pub async fn migrate_test_data(&self) -> Result<()> {
+  pub async fn migrate_test_data(&self, ephemeral_storage: bool) -> Result<()> {
     let org = self
       .org_repo
       .create_model(Org {
@@ -38,9 +41,14 @@ impl PrimeDomainService {
       .create_model(Store {
         id:          RecordId::new(),
         org:         org.id,
-        credentials: models::dvf::StorageCredentials::Local(
-          LocalStorageCredentials(PathBuf::from("/tmp/rambit-albert-store")),
-        ),
+        credentials: match ephemeral_storage {
+          true => {
+            models::dvf::StorageCredentials::Memory(MemoryStorageCredentials)
+          }
+          false => models::dvf::StorageCredentials::Local(
+            LocalStorageCredentials(PathBuf::from("/tmp/rambit-albert-store")),
+          ),
+        },
         config:      StoreConfiguration {},
         name:        EntityName::new(StrictSlug::new("albert")),
       })

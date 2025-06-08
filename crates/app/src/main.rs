@@ -1,7 +1,7 @@
 //! The server-side entrypoint for Rambit.
 
 use clap::Parser;
-use miette::Result;
+use miette::{Context, Result};
 use prime_domain::{
   PrimeDomainService,
   db::{Database, kv},
@@ -46,7 +46,10 @@ async fn main() -> Result<()> {
     PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
 
   if args.migrate {
-    prime_domain_service.migrate_test_data().await?;
+    prime_domain_service
+      .migrate_test_data(false)
+      .await
+      .context("failed to migrate test data")?;
   }
 
   Ok(())
