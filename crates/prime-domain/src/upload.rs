@@ -18,6 +18,7 @@ pub struct UploadRequest {
 }
 
 pub struct UploadResponse {
+  #[allow(dead_code)]
   entry_id: RecordId<Entry>,
 }
 
