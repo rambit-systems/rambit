@@ -13,6 +13,7 @@ belt.workspace = true
 db.workspace = true
 storage.workspace = true
 
+bytes.workspace = true
 miette.workspace = true
 thiserror.workspace = true
 

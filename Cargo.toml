@@ -22,6 +22,7 @@ storage = { git = "https://github.com/johnbchron/app-core" }
 serde = { version = "1", features = ["derive"] }
 
 # atomic-ish features
+bytes = { version = "1" }
 clap = { version = "4.5", features = ["derive"] }
 miette = { git = "https://github.com/zkat/miette", default-features = false, features = ["derive"] }
 nutype = { version = "0.5" }
