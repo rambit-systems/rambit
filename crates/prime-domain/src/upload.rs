@@ -166,17 +166,69 @@ impl PrimeDomainService {
 
 #[cfg(test)]
 mod tests {
-  use db::Database;
+  use belt::Belt;
+  use db::{
+    Database,
+    kv::{LaxSlug, StrictSlug},
+  };
+  use models::dvf::EntityName;
 
+  use super::UploadRequest;
   use crate::PrimeDomainService;
 
-  fn mock_prime_domain() -> PrimeDomainService {
-    PrimeDomainService {
+  async fn mock_prime_domain() -> PrimeDomainService {
+    let pds = PrimeDomainService {
       org_repo:   Database::new_mock(),
       user_repo:  Database::new_mock(),
       store_repo: Database::new_mock(),
       entry_repo: Database::new_mock(),
       cache_repo: Database::new_mock(),
-    }
+    };
+
+    pds
+      .migrate_test_data(true)
+      .await
+      .expect("failed to migrate test data");
+
+    pds
+  }
+
+  #[tokio::test]
+  async fn test_upload() {
+    let pds = mock_prime_domain().await;
+
+    // just roll through the IDs to find the first user :shrug:
+    let user_id = pds
+      .user_repo
+      .enumerate_models()
+      .await
+      .unwrap()
+      .first()
+      .unwrap()
+      .id;
+    let data = Belt::from_bytes(bytes::Bytes::from("hello world"), None);
+    let cache_name = EntityName::new(StrictSlug::confident("aaron"));
+    let desired_path =
+      LaxSlug::confident("8r4xxbrvb9fmv9j0m224q7cb4jr5y1pa-file-5.46");
+    let target_store = None;
+
+    let req = UploadRequest {
+      data,
+      auth: user_id,
+      cache_name,
+      desired_path: desired_path.clone(),
+      target_store,
+    };
+
+    let resp = pds.upload(req).await.expect("failed to upload");
+
+    let entry = pds
+      .entry_repo
+      .fetch_model_by_id(resp.entry_id)
+      .await
+      .expect("failed to find entry")
+      .expect("failed to find entry");
+
+    assert_eq!(entry.path, desired_path);
   }
 }
