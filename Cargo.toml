@@ -1,6 +1,6 @@
 
 [workspace]
-members = ["crates/*"]
+members = [ "crates/*" ]
 resolver = "3"
 
 [workspace.package]
@@ -20,17 +20,19 @@ storage = { git = "https://github.com/johnbchron/app-core" }
 
 # strictly codegen
 nutype = { version = "0.5" }
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = [ "derive" ] }
 thiserror = { version = "2" }
 
 # atomic-ish features
 bytes = { version = "1" }
-clap = { version = "4.5", features = ["derive"] }
-miette = { git = "https://github.com/zkat/miette", default-features = false, features = ["derive"] }
-tracing = { version = "0.1", features = ["async-await"] }
-ulid = { version = "1.1", features = ["serde"] }
+clap = { version = "4.5", features = [ "derive" ] }
+miette = { git = "https://github.com/zkat/miette", default-features = false, features = [
+  "derive",
+] }
+tracing = { version = "0.1", features = [ "async-await" ] }
+ulid = { version = "1.1", features = [ "serde" ] }
 
-axum = { version = "0.8", features = ["http2", "macros"] }
+axum = { version = "0.8", features = [ "http2", "macros" ] }
 tower = { version = "0.5" }
 tower-http = { version = "0.6" }
 
