@@ -2,8 +2,10 @@
 
 mod app_state;
 
+use axum::{Router, response::IntoResponse, routing::post};
 use clap::Parser;
-use miette::{Context, Result};
+use miette::{Context, IntoDiagnostic, Result};
+use tower::ServiceBuilder;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, prelude::*};
 
@@ -13,9 +15,16 @@ use self::app_state::AppState;
 #[derive(Parser)]
 struct CliArgs {
   /// Whether to run database migrations.
-  #[arg(short, long)]
+  #[arg(long)]
   migrate: bool,
+  #[arg(long, default_value_t = 3000)]
+  port:    u16,
+  #[arg(long, default_value = "127.0.0.1")]
+  host:    String,
 }
+
+#[axum::debug_handler]
+async fn upload() -> impl IntoResponse {}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -42,6 +51,23 @@ async fn main() -> Result<()> {
       .await
       .context("failed to migrate test data")?;
   }
+
+  let router: Router<()> = axum::Router::new()
+    .route("/upload", post(upload))
+    .with_state(app_state);
+
+  let service = ServiceBuilder::new().service(router);
+
+  let addr = format!("{host}:{port}", host = args.host, port = args.port);
+  let listener = tokio::net::TcpListener::bind(&addr)
+    .await
+    .into_diagnostic()
+    .with_context(|| format!("failed to bind listener to `{addr}`"))?;
+  tracing::info!("listening on http://{}", &addr);
+  axum::serve(listener, service)
+    .await
+    .into_diagnostic()
+    .context("failed to serve app")?;
 
   Ok(())
 }

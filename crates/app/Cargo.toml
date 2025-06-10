@@ -19,5 +19,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 clap.workspace = true
 miette = { workspace = true, features = ["fancy"] }
 
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+
 [lints]
 workspace = true

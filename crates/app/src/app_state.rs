@@ -1,6 +1,7 @@
 use miette::Result;
 use prime_domain::{PrimeDomainService, db::Database};
 
+#[derive(Clone, Debug)]
 pub struct AppState {
   pub prime_domain: PrimeDomainService,
 }
