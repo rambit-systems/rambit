@@ -10,8 +10,8 @@ use axum::{
 };
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
-use tower::ServiceBuilder;
-use tracing::level_filters::LevelFilter;
+use tower_http::trace::{DefaultOnResponse, TraceLayer};
+use tracing::{Level, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
 use self::{app_state::AppState, args::CliArgs};
@@ -56,7 +56,10 @@ async fn main() -> Result<()> {
     .route("/upload", post(upload))
     .with_state(app_state);
 
-  let service = ServiceBuilder::new().service(router);
+  let service = router.layer(
+    TraceLayer::new_for_http()
+      .on_response(DefaultOnResponse::new().level(Level::INFO)),
+  );
 
   let addr = format!("{host}:{port}", host = args.host, port = args.port);
   let listener = tokio::net::TcpListener::bind(&addr)
