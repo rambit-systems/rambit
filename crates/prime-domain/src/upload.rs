@@ -12,6 +12,7 @@ use models::{
 use crate::PrimeDomainService;
 
 /// The request struct for the [`upload`](PrimeDomainService::upload) fn.
+#[derive(Debug)]
 pub struct UploadRequest {
   /// The data to be uploaded.
   pub data:         Belt,
@@ -26,6 +27,7 @@ pub struct UploadRequest {
 }
 
 /// The response struct for the [`upload`](PrimeDomainService::upload) fn.
+#[derive(Debug)]
 pub struct UploadResponse {
   #[allow(dead_code)]
   entry_id: RecordId<Entry>,
