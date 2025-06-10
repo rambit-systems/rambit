@@ -8,6 +8,7 @@ use models::{
   Entry, EntryMetadata, User,
   dvf::{EitherSlug, EntityName, LaxSlug, RecordId},
 };
+use serde::{Deserialize, Serialize};
 
 use crate::PrimeDomainService;
 
@@ -27,7 +28,7 @@ pub struct UploadRequest {
 }
 
 /// The response struct for the [`upload`](PrimeDomainService::upload) fn.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UploadResponse {
   #[allow(dead_code)]
   entry_id: RecordId<Entry>,
