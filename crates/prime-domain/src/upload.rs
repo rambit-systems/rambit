@@ -56,7 +56,7 @@ pub enum UploadError {
   #[error("Failed to write to storage: {0}")]
   StorageFailure(storage::WriteError),
   /// Some other internal error.
-  #[error("Unexpected error: {0:?}")]
+  #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
 }
 
