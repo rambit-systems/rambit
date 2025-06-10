@@ -9,8 +9,7 @@ pub struct AppState {
 impl AppState {
   pub async fn build() -> Result<Self> {
     let kv_store_location = std::path::PathBuf::from(
-      std::env::var("REDB_STORE_PATH")
-        .unwrap_or("/tmp/picturepro-db".to_owned()),
+      std::env::var("REDB_STORE_PATH").unwrap_or("/tmp/rambit-db".to_owned()),
     );
     let kv_store = kv::KeyValueStore::new_redb(&kv_store_location)?;
 
