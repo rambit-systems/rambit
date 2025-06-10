@@ -4,6 +4,7 @@ mod fetch_by_id;
 mod migrate;
 pub mod upload;
 
+pub use belt;
 pub use db;
 use db::Database;
 pub use models;
