@@ -2,7 +2,7 @@
 
 mod fetch_by_id;
 mod migrate;
-mod upload;
+pub mod upload;
 
 pub use db;
 use db::Database;

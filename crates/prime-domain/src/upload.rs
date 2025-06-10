@@ -1,3 +1,5 @@
+//! Upload types.
+
 use std::path::PathBuf;
 
 use belt::Belt;
@@ -9,33 +11,48 @@ use models::{
 
 use crate::PrimeDomainService;
 
+/// The request struct for the [`upload`](PrimeDomainService::upload) fn.
 pub struct UploadRequest {
-  data:         Belt,
-  auth:         RecordId<User>,
-  cache_name:   EntityName,
-  desired_path: LaxSlug,
-  target_store: Option<EntityName>,
+  /// The data to be uploaded.
+  pub data:         Belt,
+  /// The uploading user's authentication.
+  pub auth:         RecordId<User>,
+  /// The name of the cache to register the entry in.
+  pub cache_name:   EntityName,
+  /// The entry's path.
+  pub desired_path: LaxSlug,
+  /// The store to store the data in.
+  pub target_store: Option<EntityName>,
 }
 
+/// The response struct for the [`upload`](PrimeDomainService::upload) fn.
 pub struct UploadResponse {
   #[allow(dead_code)]
   entry_id: RecordId<Entry>,
 }
 
+/// The error enum for the [`upload`](PrimeDomainService::upload) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum UploadError {
+  /// The user is unauthorized to upload to this cache.
   #[error("The user is unauthorized to upload to this cache")]
   Unauthorized,
+  /// The requested cache was not found.
   #[error("The requested cache was not found: \"{0}\"")]
   CacheNotFound(EntityName),
+  /// The target store was not found.
   #[error("The target store was not found: \"{0}\"")]
   TargetStoreNotFound(EntityName),
+  /// An entry with that path already exists in the target store.
   #[error("An entry with that path already exists in the target store: {0}")]
   DuplicateEntryInStore(RecordId<Entry>),
+  /// An entry with that path already exists in the cache.
   #[error("An entry with that path already exists in the cache: {0}")]
   DuplicateEntryInCache(RecordId<Entry>),
+  /// Failed to write to storage.
   #[error("Failed to write to storage: {0}")]
   StorageFailure(storage::WriteError),
+  /// Some other internal error.
   #[error("Unexpected error: {0:?}")]
   InternalError(miette::Report),
 }
