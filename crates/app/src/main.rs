@@ -1,6 +1,7 @@
 //! The server-side entrypoint for Rambit.
 
 mod app_state;
+mod args;
 
 use axum::{Router, response::IntoResponse, routing::post};
 use clap::Parser;
@@ -9,19 +10,7 @@ use tower::ServiceBuilder;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, prelude::*};
 
-use self::app_state::AppState;
-
-/// The Rambit app CLI.
-#[derive(Parser)]
-struct CliArgs {
-  /// Whether to run database migrations.
-  #[arg(long)]
-  migrate: bool,
-  #[arg(long, default_value_t = 3000)]
-  port:    u16,
-  #[arg(long, default_value = "127.0.0.1")]
-  host:    String,
-}
+use self::{app_state::AppState, args::CliArgs};
 
 #[axum::debug_handler]
 async fn upload() -> impl IntoResponse {}
