@@ -3,7 +3,11 @@
 mod app_state;
 mod args;
 
-use axum::{Router, response::IntoResponse, routing::post};
+use axum::{
+  Router,
+  response::IntoResponse,
+  routing::{get, post},
+};
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
 use tower::ServiceBuilder;
@@ -14,6 +18,12 @@ use self::{app_state::AppState, args::CliArgs};
 
 #[axum::debug_handler]
 async fn upload() -> impl IntoResponse {}
+
+#[axum::debug_handler]
+async fn root() -> impl IntoResponse {
+  "You've reached the root endpoint of the Rambit API.\nYou probably meant to \
+   go somewhere else."
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -42,6 +52,7 @@ async fn main() -> Result<()> {
   }
 
   let router: Router<()> = axum::Router::new()
+    .route("/", get(root))
     .route("/upload", post(upload))
     .with_state(app_state);
 
