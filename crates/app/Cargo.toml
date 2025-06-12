@@ -9,15 +9,19 @@ publish = false
 [dependencies]
 prime-domain = { path = "../prime-domain" }
 
-kv = { workspace = true, features = ["redb"] }
+kv = { workspace = true, features = [ "redb" ] }
 
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
 
 tracing.workspace = true
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
 
 clap.workspace = true
-miette = { workspace = true, features = ["fancy"] }
+miette = { workspace = true, features = [ "fancy" ] }
+
+axum.workspace = true
+tower.workspace = true
+tower-http = { workspace = true, features = [ "trace" ] }
 
 [lints]
 workspace = true

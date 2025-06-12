@@ -95,11 +95,14 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "clap",
  "kv",
  "miette",
  "prime-domain",
  "tokio",
+ "tower",
+ "tower-http",
  "tracing",
  "tracing-subscriber",
 ]
@@ -142,6 +145,72 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
+name = "axum"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "021e862c184ae977658b36c4500f7feac3221ca5da43e3f25bd04ab6c79a29b5"
+dependencies = [
+ "axum-core",
+ "axum-macros",
+ "bytes",
+ "form_urlencoded",
+ "futures-util",
+ "http",
+ "http-body",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "itoa",
+ "matchit",
+ "memchr",
+ "mime",
+ "percent-encoding",
+ "pin-project-lite",
+ "rustversion",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "serde_urlencoded",
+ "sync_wrapper",
+ "tokio",
+ "tower",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "axum-core"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68464cd0412f486726fb3373129ef5d2993f90c34bc2bc1c1e9943b2f4fc7ca6"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "http",
+ "http-body",
+ "http-body-util",
+ "mime",
+ "pin-project-lite",
+ "rustversion",
+ "sync_wrapper",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "axum-macros"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "604fde5e028fea851ce1d8570bbdc034bec850d157f7569d10f347d06808c05c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -174,7 +243,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "async-compression",
  "bytes",
@@ -348,7 +417,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -391,7 +460,7 @@ dependencies = [
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "email_address",
  "nutype",
@@ -615,7 +684,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "async-trait",
  "futures",
@@ -631,7 +700,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "health",
  "tokio",
@@ -679,6 +748,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
+name = "httpdate"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+
+[[package]]
 name = "humantime"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -697,6 +772,7 @@ dependencies = [
  "http",
  "http-body",
  "httparse",
+ "httpdate",
  "itoa",
  "pin-project-lite",
  "smallvec",
@@ -956,7 +1032,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "async-trait",
  "hex",
@@ -979,9 +1055,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.167"
+version = "0.2.172"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09d6582e104315a817dff97f75133544b2e094ee22447d2acf4a74e189ba06fc"
+checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 
 [[package]]
 name = "linux-raw-sys"
@@ -1019,6 +1095,12 @@ checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
 dependencies = [
  "regex-automata 0.1.10",
 ]
+
+[[package]]
+name = "matchit"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "md-5"
@@ -1093,7 +1175,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "dvf",
  "serde",
@@ -1327,6 +1409,7 @@ dependencies = [
  "db",
  "miette",
  "models",
+ "serde",
  "storage",
  "thiserror",
  "tokio",
@@ -1712,6 +1795,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a0d197bd2c9dc6e53b84da9556a69ba4cdfab8619eb41a8bd1cc2027a0f6b1d"
+
+[[package]]
 name = "ryu"
 version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1803,6 +1892,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_path_to_error"
+version = "0.1.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59fab13f937fa393d08645bf3a84bdfe86e296747b506ada67bb15f10f218b2a"
+dependencies = [
+ "itoa",
+ "serde",
+]
+
+[[package]]
 name = "serde_urlencoded"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1841,7 +1940,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "deunicode",
  "nutype",
@@ -1873,12 +1972,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#64628df320628ae542fcd9185645f819c53c4bcc"
+source = "git+https://github.com/johnbchron/app-core#3894c5fe7e87dd535b402c3f5f2f69635b693e92"
 dependencies = [
  "async-trait",
  "belt",
@@ -2035,9 +2134,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.42.1"
+version = "1.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2209a14885b74764cce87ffa777ffa1b8ce81a3f3166c6f886b83337fe7e077f"
+checksum = "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779"
 dependencies = [
  "backtrace",
  "bytes",
@@ -2051,9 +2150,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-macros"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "693d596312e88961bc67d7f1f97af8a70227d9f90c31bba5806eec004978d752"
+checksum = "6e06d43f1345a3bcd39f6a56dbb7dcab2ba47e68e8ac134855e7e2bdbaf8cab8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2096,6 +2195,23 @@ dependencies = [
  "tokio",
  "tower-layer",
  "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "tower-http"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adc82fd73de2a9722ac5da747f12383d2bfdb93591ee6c58486e0097890f05f2"
+dependencies = [
+ "bitflags",
+ "bytes",
+ "http",
+ "http-body",
+ "pin-project-lite",
+ "tower-layer",
+ "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -2116,6 +2232,7 @@ version = "0.1.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "784e0ac535deb450455cbfa28a6f0df145ea1bb7ae51b821cf5e7927fdcfbdd0"
 dependencies = [
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",

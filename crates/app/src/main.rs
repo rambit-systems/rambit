@@ -1,21 +1,20 @@
 //! The server-side entrypoint for Rambit.
 
-use clap::Parser;
-use miette::{Context, Result};
-use prime_domain::{
-  PrimeDomainService,
-  db::{Database, kv},
+mod app_state;
+mod args;
+mod endpoints;
+
+use axum::{
+  Router,
+  routing::{get, post},
 };
-use tracing::level_filters::LevelFilter;
+use clap::Parser;
+use miette::{Context, IntoDiagnostic, Result};
+use tower_http::trace::{DefaultOnResponse, TraceLayer};
+use tracing::{Level, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
-/// The Rambit app CLI.
-#[derive(Parser)]
-struct CliArgs {
-  /// Whether to run database migrations.
-  #[arg(short, long)]
-  migrate: bool,
-}
+use self::{app_state::AppState, args::CliArgs, endpoints::upload::upload};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -31,26 +30,39 @@ async fn main() -> Result<()> {
 
   tracing::info!("starting app server");
 
-  let kv_store_location = std::path::PathBuf::from(
-    std::env::var("REDB_STORE_PATH").unwrap_or("/tmp/picturepro-db".to_owned()),
-  );
-  let kv_store = kv::KeyValueStore::new_redb(&kv_store_location)?;
-
-  let org_db = Database::new_from_kv(kv_store.clone());
-  let user_db = Database::new_from_kv(kv_store.clone());
-  let store_db = Database::new_from_kv(kv_store.clone());
-  let entry_db = Database::new_from_kv(kv_store.clone());
-  let cache_db = Database::new_from_kv(kv_store);
-
-  let prime_domain_service =
-    PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
+  let app_state = AppState::build()
+    .await
+    .context("failed to build app state")?;
 
   if args.migrate {
-    prime_domain_service
+    app_state
+      .prime_domain
       .migrate_test_data(false)
       .await
       .context("failed to migrate test data")?;
   }
+
+  let router: Router<()> = axum::Router::new()
+    .route("/", get(self::endpoints::root))
+    .route("/upload/{cache_name}/{path}", post(upload))
+    .route("/upload/{cache_name}/{path}/{target_store}", post(upload))
+    .with_state(app_state);
+
+  let service = router.layer(
+    TraceLayer::new_for_http()
+      .on_response(DefaultOnResponse::new().level(Level::INFO)),
+  );
+
+  let addr = format!("{host}:{port}", host = args.host, port = args.port);
+  let listener = tokio::net::TcpListener::bind(&addr)
+    .await
+    .into_diagnostic()
+    .with_context(|| format!("failed to bind listener to `{addr}`"))?;
+  tracing::info!("listening on http://{}", &addr);
+  axum::serve(listener, service)
+    .await
+    .into_diagnostic()
+    .context("failed to serve app")?;
 
   Ok(())
 }

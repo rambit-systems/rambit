@@ -15,6 +15,7 @@ storage.workspace = true
 
 bytes.workspace = true
 miette.workspace = true
+serde.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
