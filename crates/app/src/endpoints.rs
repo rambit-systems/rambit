@@ -1,3 +1,4 @@
+mod download;
 mod upload;
 
 use axum::{
@@ -6,7 +7,7 @@ use axum::{
   routing::{get, post},
 };
 
-use self::upload::upload;
+use self::{download::download, upload::upload};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
@@ -20,5 +21,6 @@ pub fn router(app_state: AppState) -> Router {
     .route("/", get(root))
     .route("/upload/{cache_name}/{path}", post(upload))
     .route("/upload/{cache_name}/{path}/{target_store}", post(upload))
+    .route("/download/{cache_name}/{path}", get(download))
     .with_state(app_state)
 }
