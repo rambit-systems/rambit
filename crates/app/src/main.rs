@@ -4,17 +4,14 @@ mod app_state;
 mod args;
 mod endpoints;
 
-use axum::{
-  Router,
-  routing::{get, post},
-};
+use axum::Router;
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
 use tracing::{Level, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
-use self::{app_state::AppState, args::CliArgs, endpoints::upload::upload};
+use self::{app_state::AppState, args::CliArgs};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -42,11 +39,7 @@ async fn main() -> Result<()> {
       .context("failed to migrate test data")?;
   }
 
-  let router: Router<()> = axum::Router::new()
-    .route("/", get(self::endpoints::root))
-    .route("/upload/{cache_name}/{path}", post(upload))
-    .route("/upload/{cache_name}/{path}/{target_store}", post(upload))
-    .with_state(app_state);
+  let router: Router<()> = self::endpoints::router(app_state);
 
   let service = router.layer(
     TraceLayer::new_for_http()
