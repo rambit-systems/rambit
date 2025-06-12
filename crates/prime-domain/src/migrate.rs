@@ -5,7 +5,7 @@ use models::{
   Cache, Org, Store, StoreConfiguration, User,
   dvf::{
     EntityName, HumanName, LocalStorageCredentials, MemoryStorageCredentials,
-    RecordId, StrictSlug,
+    RecordId, StrictSlug, Visibility,
   },
 };
 
@@ -64,6 +64,7 @@ impl PrimeDomainService {
         org:           org.id,
         name:          EntityName::new(StrictSlug::new("aaron")),
         default_store: albert_store.id,
+        visibility:    Visibility::Public,
       })
       .await
       .into_diagnostic()
