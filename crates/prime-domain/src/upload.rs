@@ -30,8 +30,8 @@ pub struct UploadRequest {
 /// The response struct for the [`upload`](PrimeDomainService::upload) fn.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadResponse {
-  #[allow(dead_code)]
-  entry_id: RecordId<Entry>,
+  /// The ID of the created entry.
+  pub entry_id: RecordId<Entry>,
 }
 
 /// The error enum for the [`upload`](PrimeDomainService::upload) fn.
@@ -187,46 +187,20 @@ impl PrimeDomainService {
 
 #[cfg(test)]
 mod tests {
+  use std::str::FromStr;
+
   use belt::Belt;
-  use db::{
-    Database,
-    kv::{LaxSlug, StrictSlug},
-  };
-  use models::dvf::EntityName;
+  use db::kv::{LaxSlug, StrictSlug};
+  use models::dvf::{EntityName, RecordId};
 
   use super::UploadRequest;
   use crate::PrimeDomainService;
 
-  async fn mock_prime_domain() -> PrimeDomainService {
-    let pds = PrimeDomainService {
-      org_repo:   Database::new_mock(),
-      user_repo:  Database::new_mock(),
-      store_repo: Database::new_mock(),
-      entry_repo: Database::new_mock(),
-      cache_repo: Database::new_mock(),
-    };
-
-    pds
-      .migrate_test_data(true)
-      .await
-      .expect("failed to migrate test data");
-
-    pds
-  }
-
   #[tokio::test]
   async fn test_upload() {
-    let pds = mock_prime_domain().await;
+    let pds = PrimeDomainService::mock_prime_domain().await;
 
-    // just roll through the IDs to find the first user :shrug:
-    let user_id = pds
-      .user_repo
-      .enumerate_models()
-      .await
-      .unwrap()
-      .first()
-      .unwrap()
-      .id;
+    let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
     let data = Belt::from_bytes(bytes::Bytes::from("hello world"), None);
     let cache_name = EntityName::new(StrictSlug::confident("aaron"));
     let desired_path =
