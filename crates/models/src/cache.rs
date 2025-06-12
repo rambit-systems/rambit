@@ -1,4 +1,4 @@
-use dvf::{EitherSlug, EntityName, RecordId};
+use dvf::{EitherSlug, EntityName, RecordId, Visibility};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +15,8 @@ pub struct Cache {
   pub name:          EntityName,
   /// The cache's default [`Store`].
   pub default_store: RecordId<Store>,
+  /// The cache's base visibility.
+  pub visibility:    Visibility,
 }
 
 impl Cache {
