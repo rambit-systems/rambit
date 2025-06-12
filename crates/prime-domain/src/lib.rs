@@ -1,5 +1,6 @@
 //! Entrypoint for domain logic.
 
+pub mod download;
 mod fetch_by_id;
 mod migrate;
 pub mod upload;
