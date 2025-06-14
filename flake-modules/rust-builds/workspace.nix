@@ -24,38 +24,41 @@
 
       # inputs assumed to be relevant for all crates
       nativeBuildInputs = with pkgs; [
-        pkg-config gcc
+        pkg-config
       ];
       buildInputs = [ ];
     };
 
     # build the deps for the whole workspace
-    workspace-base-cargo-artifacts = rust-toolchain.craneLib.buildDepsOnly workspace-base-args;
+    workspace-cargo-artifacts = rust-toolchain.craneLib.buildDepsOnly workspace-base-args;
+
+    # feed it back into the args
+    workspace-args = workspace-base-args // {
+      cargoArtifacts = workspace-cargo-artifacts;
+    };
   in {
     # pass back to the flake
     config._module.args.rust-workspace = {
-      inherit workspace-base-args workspace-base-cargo-artifacts;
+      inherit workspace-base-args workspace-args workspace-cargo-artifacts;
     };
-    config.checks = let
-      args-with-artifacts = workspace-base-args // { cargoArtifacts = workspace-base-cargo-artifacts; };
-    in {
+    config.checks = {
       # run clippy, denying warnings
-      rust-cargo-clippy = rust-toolchain.craneLib.cargoClippy (args-with-artifacts // {
+      rust-cargo-clippy = rust-toolchain.craneLib.cargoClippy (workspace-args // {
         cargoClippyExtraArgs = "--all-targets --no-deps -- --deny warnings";
         pnameSuffix = "-clippy-all";
       });
       # run rust-doc, denying warnings
-      rust-cargo-docs = rust-toolchain.craneLib.cargoDoc (args-with-artifacts // {
+      rust-cargo-docs = rust-toolchain.craneLib.cargoDoc (workspace-args // {
         cargoClippyExtraArgs = "--no-deps";
         RUSTDOCFLAGS = "-D warnings";
       });
       # run rust tests with nextest
-      rust-cargo-nextest = rust-toolchain.craneLib.cargoNextest (args-with-artifacts // {
+      rust-cargo-nextest = rust-toolchain.craneLib.cargoNextest (workspace-args // {
         partitions = 1;
         partitionType = "count";
       });
       # run rust doc tests
-      rust-cargo-doctests = rust-toolchain.craneLib.cargoDocTest args-with-artifacts;
+      rust-cargo-doctests = rust-toolchain.craneLib.cargoDocTest workspace-args;
       # run cargo fmt, failing if not already formatted perfectly
       rust-cargo-fmt = rust-toolchain.craneLib.cargoFmt workspace-base-args;
       # run taplo fmt, failing if not already formatted perfectly
