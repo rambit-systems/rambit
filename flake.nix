@@ -26,6 +26,7 @@
       ./flake-modules/rust-toolchain
       ./flake-modules/rust-builds
       ./flake-modules/repo-tests
+      ./flake-modules/e2e-tests
       ./flake-modules/devshell
     ];
   });
