@@ -52,14 +52,14 @@ pub async fn upload(
   let desired_path = LaxSlug::new(desired_path);
 
   let target_store = params.get("target_store").cloned();
-  if let Some(target_store) = &target_store {
-    if dvf::strict::strict_slugify(target_store) != *target_store {
-      return (
-        StatusCode::BAD_REQUEST,
-        format!("Target store is malformed: `{target_store}`"),
-      )
-        .into_response();
-    }
+  if let Some(target_store) = &target_store
+    && dvf::strict::strict_slugify(target_store) != *target_store
+  {
+    return (
+      StatusCode::BAD_REQUEST,
+      format!("Target store is malformed: `{target_store}`"),
+    )
+      .into_response();
   }
   let target_store =
     target_store.map(|ts| EntityName::new(StrictSlug::new(ts)));
