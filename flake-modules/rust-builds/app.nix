@@ -9,6 +9,7 @@
   in {
     packages = {
       inherit app;
+      default = app;
     };
   };
 }
