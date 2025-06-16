@@ -56,6 +56,15 @@
           help = "Update the crate graph";
           category = "[repo actions]";
         }
+
+        {
+          name = "container";
+          command = ''
+            docker load -i $(nix build .#app-image --print-out-paths --no-link) && \
+            docker run --rm --network host app:latest
+          '';
+          help = "Runs the app in a container.";
+        }
       ];
     };
   };
