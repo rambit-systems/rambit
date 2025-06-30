@@ -37,6 +37,7 @@ async fn main() -> Result<()> {
       .migrate_test_data(false)
       .await
       .context("failed to migrate test data")?;
+    tracing::info!("migrated test data as requested");
   }
 
   let router: Router<()> = self::endpoints::router(app_state);
