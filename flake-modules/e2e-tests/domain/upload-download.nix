@@ -4,29 +4,34 @@
   cache = "aaron";
   path = "foo";
   store = "albert";
+
+  app-node = {
+    networking.firewall.allowedTCPPorts = [ 3000 ];
+
+    systemd.services.app = {
+      description = "App Server";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${config.packages.app}/bin/app --migrate --host 0.0.0.0";
+      };
+    };
+  };
+  client-node = { pkgs, ... }: {
+    environment.systemPackages = with pkgs; [
+      curl jq
+      config.packages.cli
+    ];
+  };
 in {
-  domain-api-upload-pathway = pkgs.testers.runNixOSTest {
-    name = "domain-api-upload-download";
+  domain-api-upload-download-cli = pkgs.testers.runNixOSTest {
+    name = "domain-api-upload-download-cli";
 
     nodes = {
-      app = {
-        networking.firewall.allowedTCPPorts = [ 3000 ];
-
-        systemd.services.app = {
-          description = "App Server";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network.target" ];
-
-          serviceConfig = {
-            Type = "simple";
-            ExecStart = "${config.packages.app}/bin/app --migrate --host 0.0.0.0";
-          };
-        };
-      };
-
-      client = { pkgs, ... }: {
-        environment.systemPackages = with pkgs; [ curl jq ];
-      };
+      app = app-node;
+      client = client-node;
     };
 
     testScript = ''
