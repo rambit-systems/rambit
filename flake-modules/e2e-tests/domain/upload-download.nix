@@ -5,17 +5,17 @@
   path = "foo";
   store = "albert";
 
-  app-node = {
+  grid-node = {
     networking.firewall.allowedTCPPorts = [ 3000 ];
 
-    systemd.services.app = {
-      description = "App Server";
+    systemd.services.grid = {
+      description = "grid Server";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${config.packages.app}/bin/app --migrate --host 0.0.0.0";
+        ExecStart = "${config.packages.grid}/bin/grid --migrate --host 0.0.0.0";
       };
     };
   };
@@ -30,25 +30,25 @@ in {
     name = "domain-api-upload-download-curl";
 
     nodes = {
-      app = app-node;
+      grid = grid-node;
       client = client-node;
     };
 
     testScript = ''
       start_all()
 
-      app.wait_for_unit("app.service")
+      grid.wait_for_unit("grid.service")
 
       client.wait_for_unit("network.target")
-      client.succeed("ping -c 1 app")
+      client.succeed("ping -c 1 grid")
 
       client.succeed("curl -X POST \
-        http://app:3000/upload/${cache}/${path}/${store} \
+        http://grid:3000/upload/${cache}/${path}/${store} \
         -H 'user_id: ${user-id}' \
         -d @${./upload-download.nix} \
       ")
 
-      client.succeed("curl http://app:3000/download/${cache}/${path}")
+      client.succeed("curl http://grid:3000/download/${cache}/${path}")
     '';
   };
 
@@ -56,20 +56,20 @@ in {
     name = "domain-api-upload-download-cli";
 
     nodes = {
-      app = app-node;
+      grid = grid-node;
       client = client-node;
     };
 
     testScript = ''
       start_all()
 
-      app.wait_for_unit("app.service")
+      grid.wait_for_unit("grid.service")
 
       client.wait_for_unit("network.target")
-      client.succeed("ping -c 1 app")
+      client.succeed("ping -c 1 grid")
 
       client.succeed("${config.packages.cli}/bin/cli \
-        --host app \
+        --host grid \
         upload \
         --cache ${cache} \
         --entry-path ${path} \
@@ -78,7 +78,7 @@ in {
         --file ${./upload-download.nix} \
       ")
 
-      client.succeed("curl http://app:3000/download/${cache}/${path}")
+      client.succeed("curl http://grid:3000/download/${cache}/${path}")
     '';
   };
 }
