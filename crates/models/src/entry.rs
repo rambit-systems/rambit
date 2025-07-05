@@ -1,8 +1,12 @@
-use dvf::{EitherSlug, FileSize, LaxSlug, RecordId};
+mod entry_data;
+
+use dvf::{EitherSlug, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
+use nix_compat::store_path::StorePath;
 use serde::{Deserialize, Serialize};
 
-use crate::{cache::Cache, store::Store};
+pub use self::entry_data::*;
+use crate::cache::Cache;
 
 /// An entry.
 ///
@@ -12,22 +16,19 @@ use crate::{cache::Cache, store::Store};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Entry {
   /// The entry's ID.
-  pub id:     RecordId<Entry>,
-  /// The entry's store.
-  pub store:  RecordId<Store>,
-  /// The entry's nix path.
-  pub path:   LaxSlug,
+  id:                RecordId<Entry>,
   /// The [`Cache`]s that this entry is accessible from.
-  pub caches: Vec<RecordId<Cache>>,
-  /// The entry's metadata.
-  pub meta:   EntryMetadata,
-}
-
-/// Metadata for an [`Entry`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct EntryMetadata {
-  /// The entry's [`FileSize`].
-  pub file_size: FileSize,
+  caches:            Vec<RecordId<Cache>>,
+  /// The store path that the entry refers to.
+  store_path:        StorePath<String>,
+  /// Intrensic data about the entry's NAR.
+  intrensic_data:    NarIntrensicData,
+  /// Data about how the NAR exists in the [`Store`].
+  storage_data:      NarStorageData,
+  /// Authenticity data about the entry.
+  authenticity_data: NarAuthenticityData,
+  /// Data about the NAR's deriver.
+  deriver_data:      NarDeriverData,
 }
 
 impl Entry {
@@ -37,7 +38,7 @@ impl Entry {
     vec![EitherSlug::Lax(LaxSlug::new(format!(
       "{store_id}-{entry_path}",
       store_id = self.id,
-      entry_path = self.path
+      entry_path = self.store_path
     )))]
   }
 
@@ -50,7 +51,7 @@ impl Entry {
       .map(|cache_id| {
         EitherSlug::Lax(LaxSlug::new(format!(
           "{cache_id}-{entry_path}",
-          entry_path = self.path
+          entry_path = self.store_path
         )))
       })
       .collect()
