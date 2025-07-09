@@ -10,7 +10,7 @@ publish = false
 dvf.workspace = true
 model.workspace = true
 
-nix-compat = { git = "https://code.tvl.fyi/depot.git", default-features = false }
+nix-compat.workspace = true
 
 serde.workspace = true
 ulid.workspace = true
