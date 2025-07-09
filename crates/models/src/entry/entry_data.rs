@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use dvf::{CompressionStatus, FileSize, RecordId, Ulid};
 use nix_compat::{narinfo::Signature, nixhash::CAHash, store_path::StorePath};
 use serde::{Deserialize, Serialize};
@@ -13,7 +15,7 @@ pub struct NarIntrensicData {
   /// The size of the NAR file.
   pub nar_size:   FileSize,
   /// Store paths known to be referenced by the contents.
-  pub references: Vec<StorePath<String>>,
+  pub references: HashSet<StorePath<String>>,
   /// The content-addressed hash of the entry.
   pub ca_hash:    Option<CAHash>,
 }

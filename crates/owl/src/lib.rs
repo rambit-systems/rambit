@@ -77,7 +77,7 @@ impl NarInterrogator {
         StorePath::<String>::from_absolute_path(p.as_bytes())
           .expect("failed to convert to store path")
       })
-      .collect::<Vec<_>>();
+      .collect();
 
     Ok(NarIntrensicData {
       nar_hash,
