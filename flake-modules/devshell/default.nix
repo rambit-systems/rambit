@@ -14,7 +14,6 @@
         cargo-nextest # testing
         cargo-deny # package auditing
         cargo-depgraph # dependency graphing
-        graphviz # graphviz
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
