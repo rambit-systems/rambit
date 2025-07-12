@@ -18,19 +18,19 @@ use crate::cache::Cache;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Entry {
   /// The entry's ID.
-  id:                RecordId<Entry>,
+  pub id:                RecordId<Entry>,
   /// The [`Cache`]s that this entry is accessible from.
-  caches:            Vec<RecordId<Cache>>,
+  pub caches:            Vec<RecordId<Cache>>,
   /// The store path that the entry refers to.
-  store_path:        StorePath<String>,
+  pub store_path:        StorePath<String>,
   /// Intrensic data about the entry's NAR.
-  intrensic_data:    NarIntrensicData,
+  pub intrensic_data:    NarIntrensicData,
   /// Data about how the NAR exists in the [`Store`].
-  storage_data:      NarStorageData,
+  pub storage_data:      NarStorageData,
   /// Authenticity data about the entry.
-  authenticity_data: NarAuthenticityData,
+  pub authenticity_data: NarAuthenticityData,
   /// Data about the NAR's deriver.
-  deriver_data:      NarDeriverData,
+  pub deriver_data:      NarDeriverData,
 }
 
 impl Entry {
