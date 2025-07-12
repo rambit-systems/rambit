@@ -6,11 +6,10 @@ use axum::{
   http::{HeaderMap, StatusCode},
   response::IntoResponse,
 };
-use kv::LaxSlug;
 use prime_domain::{
   download::DownloadRequest,
   models::{
-    User,
+    StorePath, User,
     dvf::{self, EntityName, RecordId, StrictSlug},
   },
 };
@@ -36,18 +35,20 @@ pub async fn download(
   }
   let cache_name = EntityName::new(StrictSlug::new(cache_name));
 
-  let desired_path = params
-    .get("path")
+  let store_path = params
+    .get("store_path")
     .expect("upload route param names are malformed")
     .clone();
-  if dvf::lax::lax_slugify(&desired_path) != desired_path {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Path is malformed: `{desired_path}`"),
-    )
-      .into_response();
-  }
-  let desired_path = LaxSlug::new(desired_path);
+  let store_path = match StorePath::from_bytes(store_path.as_bytes()) {
+    Ok(store_path) => store_path,
+    Err(_) => {
+      return (
+        StatusCode::BAD_REQUEST,
+        format!("Store path is malformed: `{store_path}`"),
+      )
+        .into_response();
+    }
+  };
 
   let user_id = match headers.get("user_id") {
     Some(hv) => match hv.to_str() {
@@ -69,7 +70,7 @@ pub async fn download(
   let download_req = DownloadRequest {
     auth: user_id,
     cache_name,
-    desired_path,
+    store_path,
   };
 
   let download_resp = app_state.prime_domain.download(download_req).await;
