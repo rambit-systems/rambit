@@ -25,7 +25,7 @@ pub struct Entry {
   pub store_path:        StorePath<String>,
   /// Intrensic data about the entry's NAR.
   pub intrensic_data:    NarIntrensicData,
-  /// Data about how the NAR exists in the [`Store`].
+  /// Data about how the NAR exists in the [`Store`](super::Store).
   pub storage_data:      NarStorageData,
   /// Authenticity data about the entry.
   pub authenticity_data: NarAuthenticityData,

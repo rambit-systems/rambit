@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::Store;
 
-/// Data intrensic to the NAR contents of an [`Entry`]. This can all be derived
-/// from the NAR file itself.
+/// Data intrensic to the NAR contents of an [`Entry`](super::Entry). This can
+/// all be derived from the NAR file itself.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NarIntrensicData {
   /// The SHA-256 digest of the NAR file.
@@ -20,14 +20,15 @@ pub struct NarIntrensicData {
   pub ca_hash:    Option<CAHash>,
 }
 
-/// Data about how the NAR exists in the [`Store`].
+/// Data about how the NAR exists in the [`Store`](crate::Store).
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NarStorageData {
   /// The entry's store.
   pub store:              RecordId<Store>,
   /// The path to the entry's data within the store.
   pub storage_path:       PathBuf,
-  /// The compression status of the entry data in-situ within its [`Store`].
+  /// The compression status of the entry data in-situ within its
+  /// [`Store`](crate::Store).
   pub compression_status: CompressionStatus,
 }
 
