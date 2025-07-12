@@ -48,7 +48,8 @@ in {
         -d @${./upload-download.nix} \
       ")
 
-      client.succeed("curl http://grid:3000/download/${cache}/${path}")
+      client.succeed("curl http://grid:3000/download/${cache}/${path} > output")
+      client.succeed("diff ${./upload-download.nix} output")
     '';
   };
 
