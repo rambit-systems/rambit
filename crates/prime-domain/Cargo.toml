@@ -8,6 +8,7 @@ publish = false
 
 [dependencies]
 models = { path = "../models" }
+owl = { path = "../owl" }
 
 belt.workspace = true
 db.workspace = true

@@ -1686,6 +1686,7 @@ dependencies = [
  "futures",
  "miette",
  "models",
+ "owl",
  "serde",
  "storage",
  "thiserror 2.0.12",
