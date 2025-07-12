@@ -5,8 +5,10 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Entry, EntryMetadata, User,
-  dvf::{EitherSlug, EntityName, LaxSlug, RecordId},
+  Cache, Entry, NarAuthenticityData, NarDeriverData, NarStorageData, StorePath,
+  User,
+  dvf::{CompressionStatus, EitherSlug, EntityName, LaxSlug, RecordId},
+  model::Model,
 };
 use serde::{Deserialize, Serialize};
 
@@ -16,15 +18,17 @@ use crate::PrimeDomainService;
 #[derive(Debug)]
 pub struct UploadRequest {
   /// The data to be uploaded.
-  pub data:         Belt,
+  pub nar_contents: Belt,
   /// The uploading user's authentication.
   pub auth:         RecordId<User>,
   /// The name of the cache to register the entry in.
-  pub cache_name:   EntityName,
-  /// The entry's path.
-  pub desired_path: LaxSlug,
+  pub caches:       Vec<EntityName>,
   /// The store to store the data in.
-  pub target_store: Option<EntityName>,
+  pub target_store: EntityName,
+  /// The store path of the entry.
+  pub store_path:   StorePath<String>,
+  /// Data about the NAR's deriver.
+  pub deriver_data: NarDeriverData,
 }
 
 /// The response struct for the [`upload`](PrimeDomainService::upload) fn.
@@ -50,11 +54,25 @@ pub enum UploadError {
   #[error("An entry with that path already exists in the target store: {0}")]
   DuplicateEntryInStore(RecordId<Entry>),
   /// An entry with that path already exists in the cache.
-  #[error("An entry with that path already exists in the cache: {0}")]
-  DuplicateEntryInCache(RecordId<Entry>),
+  #[error(
+    "An entry with that path already exists in the cache: entry {entry} in \
+     cache {cache}"
+  )]
+  DuplicateEntryInCache {
+    /// The entry that already exists in the cache.
+    entry: RecordId<Entry>,
+    /// The cache that contains the duplicate.
+    cache: RecordId<Cache>,
+  },
   /// Failed to write to storage.
   #[error("Failed to write to storage: {0}")]
   StorageFailure(storage::WriteError),
+  /// Failed to read all the input data.
+  #[error("Failed to read input data: {0}")]
+  InputDataError(std::io::Error),
+  /// Failed to validate NAR.
+  #[error("Failed to validate NAR: {0}")]
+  NarValidationError(owl::InterrogatorError),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -66,18 +84,27 @@ impl PrimeDomainService {
     &self,
     req: UploadRequest,
   ) -> Result<UploadResponse, UploadError> {
-    let cache = self
-      .cache_repo
-      .fetch_model_by_unique_index(
-        "name".into(),
-        EitherSlug::Strict(req.cache_name.clone().into_inner()),
-      )
-      .await
-      .into_diagnostic()
-      .context("failed to search for cache")
-      .map_err(UploadError::InternalError)?
-      .ok_or(UploadError::CacheNotFound(req.cache_name.clone()))?;
+    let entry_id = RecordId::new();
 
+    // find all the caches specified
+    let mut caches = Vec::with_capacity(req.caches.len());
+    for cache_name in req.caches {
+      caches.push(
+        self
+          .cache_repo
+          .fetch_model_by_unique_index(
+            "name".into(),
+            EitherSlug::Strict(cache_name.clone().into_inner()),
+          )
+          .await
+          .into_diagnostic()
+          .context("failed to search for cache")
+          .map_err(UploadError::InternalError)?
+          .ok_or(UploadError::CacheNotFound(cache_name))?,
+      );
+    }
+
+    // find the user
     let user = self
       .user_repo
       .fetch_model_by_id(req.auth)
@@ -88,32 +115,23 @@ impl PrimeDomainService {
       .ok_or(miette!("authenticated user not found"))
       .map_err(UploadError::InternalError)?;
 
-    if user.org != cache.org {
+    // reject request if any cache lies outside the user's org
+    if caches.iter().any(|c| user.org != c.org) {
       return Err(UploadError::Unauthorized);
     }
 
-    let target_store = match req.target_store {
-      Some(store_name) => self
-        .store_repo
-        .fetch_model_by_unique_index(
-          "name".into(),
-          EitherSlug::Strict(store_name.clone().into_inner()),
-        )
-        .await
-        .into_diagnostic()
-        .context("failed to search for target store")
-        .map_err(UploadError::InternalError)?
-        .ok_or(UploadError::TargetStoreNotFound(store_name))?,
-      None => self
-        .store_repo
-        .fetch_model_by_id(cache.default_store)
-        .await
-        .into_diagnostic()
-        .context("failed to find store")
-        .map_err(UploadError::InternalError)?
-        .ok_or(miette!("store not found"))
-        .map_err(UploadError::InternalError)?,
-    };
+    // find the given store
+    let target_store = self
+      .store_repo
+      .fetch_model_by_unique_index(
+        "name".into(),
+        EitherSlug::Strict(req.target_store.clone().into_inner()),
+      )
+      .await
+      .into_diagnostic()
+      .context("failed to search for target store")
+      .map_err(UploadError::InternalError)?
+      .ok_or(UploadError::TargetStoreNotFound(req.target_store))?;
 
     // make sure no entry exists for this path and store
     let duplicate_entry_by_store = self
@@ -123,7 +141,7 @@ impl PrimeDomainService {
         EitherSlug::Lax(LaxSlug::new(format!(
           "{store_id}-{entry_path}",
           store_id = target_store.id,
-          entry_path = req.desired_path
+          entry_path = req.store_path
         ))),
       )
       .await
@@ -135,24 +153,51 @@ impl PrimeDomainService {
       return Err(UploadError::DuplicateEntryInStore(entry.id));
     }
 
-    // make sure no entry exists for this path and cache
-    let duplicate_entry_by_cache = self
-      .entry_repo
-      .fetch_model_by_unique_index(
-        "cache-id-and-entry-path".into(),
-        EitherSlug::Lax(LaxSlug::new(format!(
-          "{cache_id}-{entry_path}",
-          cache_id = cache.id,
-          entry_path = req.desired_path
-        ))),
-      )
-      .await
-      .into_diagnostic()
-      .context("failed to search for conflicting entries by cache and path")
-      .map_err(UploadError::InternalError)?;
+    // make sure no entry exists for this path and any targeted cache
+    for cache in caches.iter() {
+      let duplicate_entry_by_cache = self
+        .entry_repo
+        .fetch_model_by_unique_index(
+          "cache-id-and-entry-path".into(),
+          EitherSlug::Lax(LaxSlug::new(format!(
+            "{cache_id}-{entry_path}",
+            cache_id = cache.id,
+            entry_path = req.store_path
+          ))),
+        )
+        .await
+        .into_diagnostic()
+        .context("failed to search for conflicting entries by cache and path")
+        .map_err(UploadError::InternalError)?;
 
-    if let Some(entry) = duplicate_entry_by_cache {
-      return Err(UploadError::DuplicateEntryInCache(entry.id));
+      if let Some(entry) = duplicate_entry_by_cache {
+        return Err(UploadError::DuplicateEntryInCache {
+          entry: entry.id,
+          cache: cache.id,
+        });
+      }
+    }
+
+    // buffer all the data right now because we need it to validate the NAR and
+    // to upload to storage
+    let big_terrible_buffer = req
+      .nar_contents
+      .collect()
+      .await
+      .map_err(UploadError::InputDataError)?;
+
+    // validate the NAR and gather intrensic data
+    let nar_interrogator = owl::NarInterrogator;
+    let mut nar_intrensic_data = nar_interrogator
+      .interrogate(Belt::from_bytes(big_terrible_buffer.clone(), None))
+      .await
+      .map_err(UploadError::NarValidationError)?;
+
+    // remove any self-reference from the intrensic data
+    let removed_self_reference =
+      nar_intrensic_data.references.remove(&req.store_path);
+    if !removed_self_reference {
+      tracing::warn!("no self-reference found in entry {entry_id}");
     }
 
     let store_client =
@@ -160,21 +205,36 @@ impl PrimeDomainService {
         .await
         .map_err(UploadError::InternalError)?;
 
-    let path = PathBuf::from(req.desired_path.clone().into_inner());
+    let storage_path = PathBuf::from(req.store_path.to_string());
     let file_size = store_client
-      .write(path.as_ref(), req.data)
+      .write(
+        storage_path.as_ref(),
+        Belt::from_bytes(big_terrible_buffer, None),
+      )
       .await
       .map_err(UploadError::StorageFailure)?;
+    let compression_status =
+      CompressionStatus::Uncompressed { size: file_size };
+
+    let nar_storage_data = NarStorageData {
+      store: target_store.id,
+      storage_path,
+      compression_status,
+    };
+
+    let nar_authenticity_data = NarAuthenticityData::default();
 
     // insert entry
     let entry = self
       .entry_repo
       .create_model(Entry {
-        id:     RecordId::new(),
-        store:  target_store.id,
-        path:   req.desired_path,
-        caches: vec![cache.id],
-        meta:   EntryMetadata { file_size },
+        id:                entry_id,
+        caches:            caches.iter().map(Model::id).collect(),
+        store_path:        req.store_path,
+        intrensic_data:    nar_intrensic_data,
+        storage_data:      nar_storage_data,
+        authenticity_data: nar_authenticity_data,
+        deriver_data:      req.deriver_data,
       })
       .await
       .into_diagnostic()
@@ -190,8 +250,12 @@ mod tests {
   use std::str::FromStr;
 
   use belt::Belt;
-  use db::kv::{LaxSlug, StrictSlug};
-  use models::dvf::{EntityName, RecordId};
+  use bytes::Bytes;
+  use db::kv::StrictSlug;
+  use models::{
+    NarDeriverData, StorePath,
+    dvf::{EntityName, RecordId},
+  };
 
   use super::UploadRequest;
   use crate::PrimeDomainService;
@@ -200,30 +264,45 @@ mod tests {
   async fn test_upload() {
     let pds = PrimeDomainService::mock_prime_domain().await;
 
+    let bytes = Bytes::from_static(include_bytes!(
+      "../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"
+    ));
+    let nar_contents = Belt::from_bytes(bytes, None);
+
     let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
-    let data = Belt::from_bytes(bytes::Bytes::from("hello world"), None);
-    let cache_name = EntityName::new(StrictSlug::confident("aaron"));
-    let desired_path =
-      LaxSlug::confident("8r4xxbrvb9fmv9j0m224q7cb4jr5y1pa-file-5.46");
-    let target_store = None;
+    let caches = vec![EntityName::new(StrictSlug::confident("aaron"))];
+    let target_store = EntityName::new(StrictSlug::confident("albert"));
+    let store_path = "/nix/store/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";
+    let store_path =
+      StorePath::from_absolute_path(store_path.as_bytes()).unwrap();
+
+    let deriver_path =
+      "/nix/store/4yz8qa58nmysad5w88rgdhq15rkssqr6-bat-0.25.0.drv".to_string();
+    let deriver_path = StorePath::from_absolute_path(
+      deriver_path.strip_suffix(".drv").unwrap().as_bytes(),
+    )
+    .unwrap();
+    let deriver_data = NarDeriverData {
+      system:  Some("aarch64-linux".to_string()),
+      deriver: Some(deriver_path),
+    };
 
     let req = UploadRequest {
-      data,
+      nar_contents,
       auth: user_id,
-      cache_name,
-      desired_path: desired_path.clone(),
+      caches,
       target_store,
+      store_path,
+      deriver_data,
     };
 
     let resp = pds.upload(req).await.expect("failed to upload");
 
-    let entry = pds
+    let _entry = pds
       .entry_repo
       .fetch_model_by_id(resp.entry_id)
       .await
       .expect("failed to find entry")
       .expect("failed to find entry");
-
-    assert_eq!(entry.path, desired_path);
   }
 }

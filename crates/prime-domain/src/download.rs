@@ -1,12 +1,13 @@
 //! Download types.
 
-use std::path::PathBuf;
-
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  User,
-  dvf::{EitherSlug, EntityName, FileSize, LaxSlug, RecordId, Visibility},
+  StorePath, User,
+  dvf::{
+    CompressionAlgorithm, CompressionStatus, EitherSlug, EntityName, FileSize,
+    LaxSlug, RecordId, Visibility,
+  },
 };
 
 use crate::PrimeDomainService;
@@ -15,11 +16,11 @@ use crate::PrimeDomainService;
 #[derive(Debug)]
 pub struct DownloadRequest {
   /// The downloading user's authentication.
-  pub auth:         Option<RecordId<User>>,
+  pub auth:       Option<RecordId<User>>,
   /// The name of the cache to look for the path in.
-  pub cache_name:   EntityName,
-  /// The entry's path.
-  pub desired_path: LaxSlug,
+  pub cache_name: EntityName,
+  /// The entry's store path.
+  pub store_path: StorePath<String>,
 }
 
 /// The response struct for the [`download`](PrimeDomainService::download) fn.
@@ -45,13 +46,14 @@ pub enum DownloadError {
   InternalError(miette::Report),
   /// The requested entry was not found.
   #[error(
-    "The requested entry was not found: path \"{path}\" in cache \"{cache}\""
+    "The requested entry was not found: store path \"{store_path}\" in cache \
+     \"{cache}\""
   )]
   EntryNotFound {
     /// The cache.
-    cache: EntityName,
-    /// The entry path.
-    path:  LaxSlug,
+    cache:      EntityName,
+    /// The entry store path.
+    store_path: StorePath<String>,
   },
   /// Failed to read from storage.
   #[error("Failed to read from storage: {0}")]
@@ -110,7 +112,7 @@ impl PrimeDomainService {
         EitherSlug::Lax(LaxSlug::new(format!(
           "{cache_id}-{entry_path}",
           cache_id = cache.id,
-          entry_path = req.desired_path
+          entry_path = req.store_path
         ))),
       )
       .await
@@ -118,13 +120,13 @@ impl PrimeDomainService {
       .context("failed to search for entry")
       .map_err(DownloadError::InternalError)?
       .ok_or(DownloadError::EntryNotFound {
-        cache: cache.name,
-        path:  req.desired_path.clone(),
+        cache:      cache.name,
+        store_path: req.store_path.clone(),
       })?;
 
     let store = self
       .store_repo
-      .fetch_model_by_id(entry.store)
+      .fetch_model_by_id(entry.storage_data.store)
       .await
       .into_diagnostic()
       .context("failed to find store")
@@ -137,12 +139,27 @@ impl PrimeDomainService {
         .await
         .map_err(DownloadError::InternalError)?;
 
-    let path = PathBuf::from(req.desired_path.clone().into_inner());
+    let path = entry.storage_data.storage_path;
+    let comp_status = entry.storage_data.compression_status;
     let data = store_client
       .read(&path)
       .await
       .map_err(DownloadError::StorageFailure)?;
-    let file_size = entry.meta.file_size;
+    let (file_size, data) = match comp_status {
+      CompressionStatus::Compressed {
+        uncompressed_size,
+        algorithm,
+        ..
+      } => {
+        let data = data
+          .set_declared_comp(Some(match algorithm {
+            CompressionAlgorithm::Zstd => belt::CompressionAlgorithm::Zstd,
+          }))
+          .adapt_to_no_comp();
+        (uncompressed_size, data)
+      }
+      CompressionStatus::Uncompressed { size } => (size, data),
+    };
 
     Ok(DownloadResponse { data, file_size })
   }
@@ -153,7 +170,11 @@ mod tests {
   use std::str::FromStr;
 
   use belt::Belt;
-  use models::dvf::{EntityName, LaxSlug, RecordId, StrictSlug};
+  use bytes::Bytes;
+  use models::{
+    NarDeriverData, StorePath,
+    dvf::{EntityName, RecordId, StrictSlug},
+  };
 
   use crate::{
     PrimeDomainService, download::DownloadRequest, upload::UploadRequest,
@@ -163,38 +184,52 @@ mod tests {
   async fn test_download() {
     let pds = PrimeDomainService::mock_prime_domain().await;
 
-    let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
-    let data = bytes::Bytes::from("hello world");
-    let data_belt = Belt::from_bytes(data.clone(), None);
-    let cache_name = EntityName::new(StrictSlug::confident("aaron"));
-    let desired_path =
-      LaxSlug::confident("8r4xxbrvb9fmv9j0m224q7cb4jr5y1pa-file-5.46");
-    let target_store = None;
+    let input_bytes = Bytes::from_static(include_bytes!(
+      "../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"
+    ));
+    let nar_contents = Belt::from_bytes(input_bytes.clone(), None);
 
-    let upload_req = UploadRequest {
-      data: data_belt,
-      auth: user_id,
-      cache_name: cache_name.clone(),
-      desired_path: desired_path.clone(),
-      target_store,
+    let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
+    let cache_name = EntityName::new(StrictSlug::confident("aaron"));
+    let target_store = EntityName::new(StrictSlug::confident("albert"));
+    let store_path = "/nix/store/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";
+    let store_path =
+      StorePath::from_absolute_path(store_path.as_bytes()).unwrap();
+
+    let deriver_path =
+      "/nix/store/4yz8qa58nmysad5w88rgdhq15rkssqr6-bat-0.25.0.drv".to_string();
+    let deriver_path = StorePath::from_absolute_path(
+      deriver_path.strip_suffix(".drv").unwrap().as_bytes(),
+    )
+    .unwrap();
+    let deriver_data = NarDeriverData {
+      system:  Some("aarch64-linux".to_string()),
+      deriver: Some(deriver_path),
     };
 
-    let upload_resp = pds.upload(upload_req).await.expect("failed to upload");
+    let req = UploadRequest {
+      nar_contents,
+      auth: user_id,
+      caches: vec![cache_name.clone()],
+      target_store,
+      store_path: store_path.clone(),
+      deriver_data,
+    };
 
-    let entry = pds
+    let resp = pds.upload(req).await.expect("failed to upload");
+
+    let _entry = pds
       .entry_repo
-      .fetch_model_by_id(upload_resp.entry_id)
+      .fetch_model_by_id(resp.entry_id)
       .await
       .expect("failed to find entry")
       .expect("failed to find entry");
-
-    assert_eq!(entry.path, desired_path.clone());
     // upload complete
 
     let download_req = DownloadRequest {
       auth: None,
       cache_name,
-      desired_path,
+      store_path,
     };
 
     let download_resp = pds
@@ -207,6 +242,6 @@ mod tests {
       .collect()
       .await
       .expect("failed to collect bytes from belt");
-    assert_eq!(data, downloaded_data);
+    assert_eq!(input_bytes, downloaded_data);
   }
 }
