@@ -1,3 +1,5 @@
+#![feature(iterator_try_collect)]
+
 //! The server-side entrypoint for Rambit.
 
 mod app_state;

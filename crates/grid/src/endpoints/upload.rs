@@ -3,88 +3,112 @@ use std::{collections::HashMap, io, str::FromStr};
 use axum::{
   Json,
   body::Body,
-  extract::{Path, State},
+  extract::{Path, Query, State},
   http::{HeaderMap, StatusCode},
   response::IntoResponse,
 };
 use prime_domain::{
   belt::{self, Belt, StreamExt},
   models::{
-    User,
+    NarDeriverData, StorePath, User,
     dvf::{self, EntityName, LaxSlug, RecordId, StrictSlug},
   },
   upload::UploadRequest,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::app_state::AppState;
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UploadPayload {
+  caches:             Vec<String>,
+  store_path:         String,
+  target_store:       String,
+  deriver_system:     String,
+  deriver_store_path: String,
+}
+
 #[axum::debug_handler]
 pub async fn upload(
-  Path(params): Path<HashMap<String, String>>,
+  Query(params): Query<UploadPayload>,
   headers: HeaderMap,
   State(app_state): State<AppState>,
   body: Body,
 ) -> impl IntoResponse {
-  let cache_name = params
-    .get("cache_name")
-    .expect("upload route param names are malformed")
-    .clone();
-  if dvf::strict::strict_slugify(&cache_name) != cache_name {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Cache name is malformed: `{cache_name}`"),
-    )
-      .into_response();
-  }
-  let cache_name = EntityName::new(StrictSlug::new(cache_name));
+  let caches = params
+    .caches
+    .into_iter()
+    .map(|c| match dvf::strict::strict_slugify(&c) == c {
+      true => Ok(EntityName::new(StrictSlug::new(c))),
+      false => Err(
+        (
+          StatusCode::BAD_REQUEST,
+          format!("Cache name is malformed: `{c}`"),
+        )
+          .into_response(),
+      ),
+    })
+    .try_collect::<Vec<_>>();
+  let caches = match caches {
+    Ok(caches) => caches,
+    Err(r) => return r,
+  };
 
-  let desired_path = params
-    .get("path")
-    .expect("upload route param names are malformed")
-    .clone();
-  if dvf::lax::lax_slugify(&desired_path) != desired_path {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Path is malformed: `{desired_path}`"),
-    )
-      .into_response();
-  }
-  let desired_path = LaxSlug::new(desired_path);
-
-  let target_store = params.get("target_store").cloned();
-  if let Some(target_store) = &target_store
-    && dvf::strict::strict_slugify(target_store) != *target_store
-  {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Target store is malformed: `{target_store}`"),
-    )
-      .into_response();
-  }
-  let target_store =
-    target_store.map(|ts| EntityName::new(StrictSlug::new(ts)));
-
-  let user_id = match headers.get("user_id") {
-    Some(hv) => match hv.to_str() {
-      Ok(s) => match RecordId::<User>::from_str(s) {
-        Ok(user_id) => user_id,
-        Err(_) => {
-          return (StatusCode::BAD_REQUEST, "`user_id` malformed: `{s}`")
-            .into_response();
-        }
-      },
-      Err(_) => {
-        return (StatusCode::BAD_REQUEST, "`user_id` header is not ASCII")
-          .into_response();
-      }
-    },
-    None => {
-      return (StatusCode::BAD_REQUEST, "`user_id` header missing")
+  let store_path = match StorePath::from_bytes(params.store_path.as_bytes()) {
+    Ok(store_path) => store_path,
+    Err(_) => {
+      return (
+        StatusCode::BAD_REQUEST,
+        format!("Store path is malformed: `{}`", params.store_path),
+      )
         .into_response();
     }
   };
 
-  let data = Belt::from_stream(
+  if dvf::strict::strict_slugify(&params.target_store) != params.target_store {
+    return (
+      StatusCode::BAD_REQUEST,
+      format!("Target store is malformed: `{}`", params.target_store),
+    )
+      .into_response();
+  }
+  let target_store = EntityName::new(StrictSlug::new(params.target_store));
+
+  let Some(user_id_header_data) = headers.get("user_id") else {
+    return (StatusCode::BAD_REQUEST, "`user_id` header missing")
+      .into_response();
+  };
+  let Ok(user_id_header_string) = user_id_header_data.to_str() else {
+    return (StatusCode::BAD_REQUEST, "`user_id` header is not ASCII")
+      .into_response();
+  };
+  let Ok(user_id) = RecordId::<User>::from_str(user_id_header_string) else {
+    return (StatusCode::BAD_REQUEST, "`user_id` malformed: `{s}`")
+      .into_response();
+  };
+
+  let deriver_store_path =
+    match StorePath::from_bytes(params.deriver_store_path.as_bytes()) {
+      Ok(deriver_store_path) => deriver_store_path,
+      Err(_) => {
+        return (
+          StatusCode::BAD_REQUEST,
+          format!(
+            "Deriver store path is malformed: `{}`",
+            params.deriver_store_path
+          ),
+        )
+          .into_response();
+      }
+    };
+
+  // WARNING: the system field is totally unvalidated at this point.
+  let deriver_data = NarDeriverData {
+    system:  Some(params.deriver_system),
+    deriver: Some(deriver_store_path),
+  };
+
+  let nar_contents = Belt::from_stream(
     body
       .into_data_stream()
       .map(|res| res.map_err(|e| io::Error::other(e.to_string()))),
@@ -92,11 +116,12 @@ pub async fn upload(
   );
 
   let upload_req = UploadRequest {
-    data,
     auth: user_id,
-    cache_name,
-    desired_path,
     target_store,
+    nar_contents,
+    caches,
+    store_path,
+    deriver_data,
   };
 
   let upload_resp = app_state.prime_domain.upload(upload_req).await;
