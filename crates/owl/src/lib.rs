@@ -130,7 +130,8 @@ mod test {
 
   #[tokio::test]
   async fn test_bat_nar() {
-    let bat_nar = include_bytes!("../test/bat.nar");
+    let bat_nar =
+      include_bytes!("../test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0");
 
     let interrogator = NarInterrogator;
     let data = interrogator
