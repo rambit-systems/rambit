@@ -28,7 +28,7 @@ miette = { git = "https://github.com/zkat/miette", default-features = false, fea
   "derive",
 ] }
 nix-compat = { git = "https://code.tvl.fyi/depot.git", default-features = false }
-tracing = { version = "0.1", features = [ "async-await" ] }
+tracing = { version = "0.1" }
 ulid = { version = "1.1", features = [ "serde" ] }
 
 axum = { version = "0.8", features = [ "http2", "macros" ] }
