@@ -776,6 +776,7 @@ dependencies = [
  "kv",
  "miette",
  "prime-domain",
+ "serde",
  "tokio",
  "tower",
  "tower-http",
