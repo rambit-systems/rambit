@@ -2,7 +2,9 @@ mod nar_data;
 
 use dvf::{EitherSlug, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
-use nix_compat::store_path::StorePath;
+pub use nix_compat::{
+  narinfo::Signature, nixhash::CAHash, store_path::StorePath,
+};
 use serde::{Deserialize, Serialize};
 
 pub use self::nar_data::*;
