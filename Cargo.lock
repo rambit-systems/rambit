@@ -1682,6 +1682,7 @@ dependencies = [
  "belt",
  "bytes",
  "db",
+ "futures",
  "miette",
  "models",
  "serde",
