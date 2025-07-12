@@ -1,6 +1,6 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, path::PathBuf};
 
-use dvf::{CompressionStatus, FileSize, RecordId, Ulid};
+use dvf::{CompressionStatus, FileSize, RecordId};
 use nix_compat::{narinfo::Signature, nixhash::CAHash, store_path::StorePath};
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +26,7 @@ pub struct NarStorageData {
   /// The entry's store.
   pub store:              RecordId<Store>,
   /// The path to the entry's data within the store.
-  pub storage_path:       Ulid,
+  pub storage_path:       PathBuf,
   /// The compression status of the entry data in-situ within its [`Store`].
   pub compression_status: CompressionStatus,
 }
