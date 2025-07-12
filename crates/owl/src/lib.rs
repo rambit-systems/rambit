@@ -18,11 +18,13 @@ use regex::bytes::Regex as RegexBytes;
 pub struct NarInterrogator;
 
 /// Possible failures of a NAR interrogation.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum InterrogatorError {
   /// Failed to read from input [`Belt`].
+  #[error("Failed to read input data: {0}")]
   InputError(io::Error),
   /// Failed to decode NAR.
+  #[error("Failed to decode NAR: {0}")]
   DecodingError(nix_nar::NarError),
 }
 
@@ -34,6 +36,7 @@ static NIX_STORE_PATH_REGEX: LazyLock<RegexBytes> = LazyLock::new(|| {
 impl NarInterrogator {
   /// Interrogate a NAR and return its intrensically known data.
   pub async fn interrogate(
+    &self,
     data: Belt,
   ) -> Result<NarIntrensicData, InterrogatorError> {
     let buffered_data = data
@@ -129,12 +132,14 @@ mod test {
   async fn test_bat_nar() {
     let bat_nar = include_bytes!("../test/bat.nar");
 
-    let data = NarInterrogator::interrogate(Belt::from_bytes(
-      bytes::Bytes::from(bat_nar.as_slice()),
-      None,
-    ))
-    .await
-    .unwrap();
+    let interrogator = NarInterrogator;
+    let data = interrogator
+      .interrogate(Belt::from_bytes(
+        bytes::Bytes::from(bat_nar.as_slice()),
+        None,
+      ))
+      .await
+      .unwrap();
 
     println!("{data:?}");
     println!(
