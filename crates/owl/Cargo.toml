@@ -19,6 +19,7 @@ nix-nar = { version = "0.3" }
 regex = "1.11.1"
 sha256 = { version = "1.6.0", default-features = false }
 thiserror.workspace = true
+tracing.workspace = true
 
 [lints]
 workspace = true

@@ -6,6 +6,7 @@ mod migrate;
 pub mod upload;
 
 pub use belt;
+pub use bytes;
 pub use db;
 use db::Database;
 pub use models;

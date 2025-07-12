@@ -1,111 +1,67 @@
-use std::{io, str::FromStr};
+use std::{collections::HashMap, io};
 
 use axum::{
   Json,
   body::Body,
   extract::{Query, State},
-  http::{HeaderMap, StatusCode},
+  http::StatusCode,
   response::IntoResponse,
 };
 use prime_domain::{
   belt::{self, Belt, StreamExt},
   models::{
-    NarDeriverData, StorePath, User,
-    dvf::{self, EntityName, RecordId, StrictSlug},
+    NarDeriverData,
+    dvf::{self, EntityName, StrictSlug},
   },
   upload::UploadRequest,
 };
-use serde::{Deserialize, Serialize};
 
+use super::extractors::{
+  CacheListExtractor, DeriverStorePathExtractor, StorePathExtractor,
+  UserIdExtractor,
+};
 use crate::app_state::AppState;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UploadPayload {
-  caches:             Vec<String>,
-  store_path:         String,
-  target_store:       String,
-  deriver_system:     String,
-  deriver_store_path: String,
-}
 
 #[axum::debug_handler]
 pub async fn upload(
-  Query(params): Query<UploadPayload>,
-  headers: HeaderMap,
+  Query(query): Query<HashMap<String, String>>,
+  CacheListExtractor(caches): CacheListExtractor,
+  store_path: StorePathExtractor,
+  deriver_store_path: DeriverStorePathExtractor,
+  UserIdExtractor(user_id): UserIdExtractor,
   State(app_state): State<AppState>,
   body: Body,
 ) -> impl IntoResponse {
-  let caches = params
-    .caches
-    .into_iter()
-    .map(|c| match dvf::strict::strict_slugify(&c) == c {
-      true => Ok(EntityName::new(StrictSlug::new(c))),
-      false => Err(
-        (
-          StatusCode::BAD_REQUEST,
-          format!("Cache name is malformed: `{c}`"),
-        )
-          .into_response(),
-      ),
-    })
-    .try_collect::<Vec<_>>();
-  let caches = match caches {
-    Ok(caches) => caches,
-    Err(r) => return r,
+  let Some(target_store) = query.get("target_store") else {
+    return (StatusCode::BAD_REQUEST, "Target store is missing")
+      .into_response();
   };
-
-  let store_path = match StorePath::from_bytes(params.store_path.as_bytes()) {
-    Ok(store_path) => store_path,
-    Err(_) => {
-      return (
-        StatusCode::BAD_REQUEST,
-        format!("Store path is malformed: `{}`", params.store_path),
-      )
-        .into_response();
-    }
-  };
-
-  if dvf::strict::strict_slugify(&params.target_store) != params.target_store {
+  if target_store.is_empty() {
+    return (StatusCode::BAD_REQUEST, "Target store is missing")
+      .into_response();
+  }
+  if dvf::strict::strict_slugify(target_store) != *target_store {
     return (
       StatusCode::BAD_REQUEST,
-      format!("Target store is malformed: `{}`", params.target_store),
+      format!("Target store is malformed: `{target_store}`"),
     )
       .into_response();
   }
-  let target_store = EntityName::new(StrictSlug::new(params.target_store));
+  let target_store = EntityName::new(StrictSlug::new(target_store));
 
-  let Some(user_id_header_data) = headers.get("user_id") else {
-    return (StatusCode::BAD_REQUEST, "`user_id` header missing")
+  let Some(deriver_system) = query.get("deriver_system") else {
+    return (StatusCode::BAD_REQUEST, "Deriver system is missing")
       .into_response();
   };
-  let Ok(user_id_header_string) = user_id_header_data.to_str() else {
-    return (StatusCode::BAD_REQUEST, "`user_id` header is not ASCII")
+  if deriver_system.is_empty() {
+    return (StatusCode::BAD_REQUEST, "Deriver system is missing")
       .into_response();
-  };
-  let Ok(user_id) = RecordId::<User>::from_str(user_id_header_string) else {
-    return (StatusCode::BAD_REQUEST, "`user_id` malformed: `{s}`")
-      .into_response();
-  };
-
-  let deriver_store_path =
-    match StorePath::from_bytes(params.deriver_store_path.as_bytes()) {
-      Ok(deriver_store_path) => deriver_store_path,
-      Err(_) => {
-        return (
-          StatusCode::BAD_REQUEST,
-          format!(
-            "Deriver store path is malformed: `{}`",
-            params.deriver_store_path
-          ),
-        )
-          .into_response();
-      }
-    };
+  }
 
   // WARNING: the system field is totally unvalidated at this point.
   let deriver_data = NarDeriverData {
-    system:  Some(params.deriver_system),
-    deriver: Some(deriver_store_path),
+    system:  Some(deriver_system.clone()),
+    deriver: Some(deriver_store_path.0),
   };
 
   let nar_contents = Belt::from_stream(
@@ -120,7 +76,7 @@ pub async fn upload(
     target_store,
     nar_contents,
     caches,
-    store_path,
+    store_path: store_path.0,
     deriver_data,
   };
 

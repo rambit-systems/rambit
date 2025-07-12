@@ -178,8 +178,8 @@ impl PrimeDomainService {
       }
     }
 
-    // buffer all the data right now because we need it to validate the NAR and
-    // to upload to storage
+    // WARNING: buffer all the data right now because we need it to validate the
+    // NAR and to upload to storage
     let big_terrible_buffer = req
       .nar_contents
       .collect()

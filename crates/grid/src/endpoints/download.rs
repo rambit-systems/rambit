@@ -77,6 +77,6 @@ pub async fn download(
 
   match download_resp {
     Ok(resp) => Body::from_stream(resp.data).into_response(),
-    Err(err) => format!("{err:?}").into_response(),
+    Err(err) => format!("{err:#?}").into_response(),
   }
 }

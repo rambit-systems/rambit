@@ -41,9 +41,6 @@ pub enum DownloadError {
   /// The requested cache was not found.
   #[error("The requested cache was not found: \"{0}\"")]
   CacheNotFound(EntityName),
-  /// Some other internal error.
-  #[error("Unexpected error: {0}")]
-  InternalError(miette::Report),
   /// The requested entry was not found.
   #[error(
     "The requested entry was not found: store path \"{store_path}\" in cache \
@@ -58,6 +55,9 @@ pub enum DownloadError {
   /// Failed to read from storage.
   #[error("Failed to read from storage: {0}")]
   StorageFailure(storage::ReadError),
+  /// Some other internal error.
+  #[error("Unexpected error: {0}")]
+  InternalError(miette::Report),
 }
 
 impl PrimeDomainService {
