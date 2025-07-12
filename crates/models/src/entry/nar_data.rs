@@ -32,7 +32,7 @@ pub struct NarStorageData {
 }
 
 /// Authenticity data for an entry.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct NarAuthenticityData {
   /// The signatures on the NAR's fingerprint data.
   pub signatures: Vec<Signature<String>>,
