@@ -1,9 +1,9 @@
-use std::{collections::HashMap, io, str::FromStr};
+use std::{io, str::FromStr};
 
 use axum::{
   Json,
   body::Body,
-  extract::{Path, Query, State},
+  extract::{Query, State},
   http::{HeaderMap, StatusCode},
   response::IntoResponse,
 };
@@ -11,7 +11,7 @@ use prime_domain::{
   belt::{self, Belt, StreamExt},
   models::{
     NarDeriverData, StorePath, User,
-    dvf::{self, EntityName, LaxSlug, RecordId, StrictSlug},
+    dvf::{self, EntityName, RecordId, StrictSlug},
   },
   upload::UploadRequest,
 };
