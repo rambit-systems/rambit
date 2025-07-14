@@ -60,34 +60,36 @@ in {
     '';
   };
 
-  # domain-api-upload-download-cli = pkgs.testers.runNixOSTest {
-  #   name = "domain-api-upload-download-cli";
+  domain-api-upload-download-cli = pkgs.testers.runNixOSTest {
+    name = "domain-api-upload-download-cli";
 
-  #   nodes = {
-  #     grid = grid-node;
-  #     client = client-node;
-  #   };
+    nodes = {
+      grid = grid-node;
+      client = client-node;
+    };
 
-  #   testScript = ''
-  #     start_all()
+    testScript = ''
+      start_all()
 
-  #     grid.wait_for_unit("grid.service")
+      grid.wait_for_unit("grid.service")
 
-  #     client.wait_for_unit("network.target")
-  #     client.succeed("ping -c 1 grid")
+      client.wait_for_unit("network.target")
+      client.succeed("ping -c 1 grid")
 
-  #     client.succeed("${config.packages.cli}/bin/cli \
-  #       --host grid \
-  #       upload \
-  #       --cache ${cache} \
-  #       --entry-path ${store-path} \
-  #       --store ${store} \
-  #       --user ${user-id} \
-  #       --file ${./upload-download.nix} \
-  #     ")
+      client.succeed("${config.packages.cli}/bin/cli \
+        --host grid \
+        upload \
+        --caches ${cache} \
+        --store-path ${store-path} \
+        --target-store ${store} \
+        --deriver-system ${deriver-system} \
+        --deriver-store-path ${deriver} \
+        --user ${user-id} \
+        --nar ${archive} \
+      ")
 
-  #     client.succeed("curl http://grid:3000/download/${cache}/${store-path} > output")
-  #     client.succeed("diff ${./upload-download.nix} output")
-  #   '';
-  # };
+      client.succeed("curl http://grid:3000/download/${cache}/${store-path} > output")
+      client.succeed("diff ${archive} output")
+    '';
+  };
 }
