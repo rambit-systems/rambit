@@ -29,6 +29,14 @@ impl<S: Sync> FromRequestParts<S> for CacheListExtractor {
         ),
       ));
     };
+
+    if value.is_empty() {
+      return Err(CacheListRejection(
+        StatusCode::BAD_REQUEST,
+        format!("Cache list is empty (query param `{CACHE_LIST_QUERY_PARAM}`)"),
+      ));
+    }
+
     let caches = value
       .split(",")
       .map(|c| {
