@@ -7,10 +7,7 @@ use axum::{
 };
 use prime_domain::models::StorePath;
 
-pub trait QueryParameter {
-  const PARAM_NAME: &'static str;
-  const DESCRIPTION: &'static str;
-}
+use super::QueryParameter;
 
 pub struct StorePathFromQueryExtractor<P: QueryParameter>(
   pub StorePath<String>,
