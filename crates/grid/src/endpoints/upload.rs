@@ -18,37 +18,22 @@ use prime_domain::{
 
 use super::extractors::{
   CacheListExtractor, DeriverStorePathExtractor, StorePathExtractor,
-  UserIdExtractor,
+  TargetStoreExtractor, UserIdExtractor,
 };
 use crate::app_state::AppState;
 
+#[allow(clippy::too_many_arguments)]
 #[axum::debug_handler]
 pub async fn upload(
   Query(query): Query<HashMap<String, String>>,
   CacheListExtractor(caches): CacheListExtractor,
   store_path: StorePathExtractor,
   deriver_store_path: DeriverStorePathExtractor,
+  target_store: TargetStoreExtractor,
   UserIdExtractor(user_id): UserIdExtractor,
   State(app_state): State<AppState>,
   body: Body,
 ) -> impl IntoResponse {
-  let Some(target_store) = query.get("target_store") else {
-    return (StatusCode::BAD_REQUEST, "Target store is missing")
-      .into_response();
-  };
-  if target_store.is_empty() {
-    return (StatusCode::BAD_REQUEST, "Target store is missing")
-      .into_response();
-  }
-  if dvf::strict::strict_slugify(target_store) != *target_store {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Target store is malformed: `{target_store}`"),
-    )
-      .into_response();
-  }
-  let target_store = EntityName::new(StrictSlug::new(target_store));
-
   let Some(deriver_system) = query.get("deriver_system") else {
     return (StatusCode::BAD_REQUEST, "Deriver system is missing")
       .into_response();
@@ -73,7 +58,7 @@ pub async fn upload(
 
   let upload_req = UploadRequest {
     auth: user_id,
-    target_store,
+    target_store: target_store.value().clone(),
     nar_contents,
     caches,
     store_path: store_path.value().clone(),
