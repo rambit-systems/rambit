@@ -8,15 +8,18 @@ publish = false
 
 [dependencies]
 models = { path = "../models" }
+owl = { path = "../owl" }
 
 belt.workspace = true
 db.workspace = true
 storage.workspace = true
 
 bytes.workspace = true
+futures.workspace = true
 miette.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+tracing.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true

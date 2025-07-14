@@ -10,7 +10,7 @@ license-file = "LICENSE.md"
 missing_docs = "deny"
 
 [workspace.dependencies]
-# app-core
+# # app-core
 belt = { git = "https://github.com/johnbchron/app-core" }
 db = { git = "https://github.com/johnbchron/app-core" }
 dvf = { git = "https://github.com/johnbchron/app-core" }
@@ -18,18 +18,24 @@ kv = { git = "https://github.com/johnbchron/app-core" }
 model = { git = "https://github.com/johnbchron/app-core" }
 storage = { git = "https://github.com/johnbchron/app-core" }
 
-# strictly codegen
-nutype = { version = "0.5" }
-serde = { version = "1", features = [ "derive" ] }
-thiserror = { version = "2" }
+# belt = { path = "../app-core/crates/belt" }
+# db = { path = "../app-core/crates/db" }
+# dvf = { path = "../app-core/crates/dvf" }
+# kv = { path = "../app-core/crates/kv" }
+# model = { path = "../app-core/crates/model" }
+# storage = { path = "../app-core/crates/storage" }
 
 # atomic-ish features
 bytes = { version = "1" }
 clap = { version = "4.5", features = [ "derive" ] }
+futures = { version = "0.3" }
 miette = { git = "https://github.com/zkat/miette", default-features = false, features = [
   "derive",
 ] }
-tracing = { version = "0.1", features = [ "async-await" ] }
+nix-compat = { git = "https://code.tvl.fyi/depot.git", default-features = false }
+serde = { version = "1", features = [ "derive" ] }
+thiserror = { version = "2" }
+tracing = { version = "0.1" }
 ulid = { version = "1.1", features = [ "serde" ] }
 
 axum = { version = "0.8", features = [ "http2", "macros" ] }

@@ -1,8 +1,11 @@
 { pkgs, config, ... }: let
   # from ../../../crates/prime-domain/src/migrate.rs
+  archive = ../../../crates/owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0;
+  store-path = "ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";
+  deriver = "4yz8qa58nmysad5w88rgdhq15rkssqr6-bat-0.25.0";
+  deriver-system = "aarch64-linux";
   user-id = "01JXGXV4R6VCZWQ2DAYDWR1VXD";
   cache = "aaron";
-  path = "foo";
   store = "albert";
 
   grid-node = {
@@ -42,13 +45,18 @@ in {
       client.wait_for_unit("network.target")
       client.succeed("ping -c 1 grid")
 
-      client.succeed("curl -X POST \
-        http://grid:3000/upload/${cache}/${path}/${store} \
-        -H 'user_id: ${user-id}' \
-        -d @${./upload-download.nix} \
+      client.succeed("curl -X POST http://grid:3000/upload \
+        --url-query caches=${cache} \
+        --url-query store_path=${store-path} \
+        --url-query target_store=${store} \
+        --url-query deriver_store_path=${deriver} \
+        --url-query deriver_system=${deriver-system} \
+        -H 'x-user-id: ${user-id}' \
+        --data-binary @${archive} \
       ")
 
-      client.succeed("curl http://grid:3000/download/${cache}/${path}")
+      client.succeed("curl http://grid:3000/download/${cache}/${store-path} > output")
+      client.succeed("diff ${archive} output")
     '';
   };
 
@@ -71,14 +79,17 @@ in {
       client.succeed("${config.packages.cli}/bin/cli \
         --host grid \
         upload \
-        --cache ${cache} \
-        --entry-path ${path} \
-        --store ${store} \
+        --caches ${cache} \
+        --store-path ${store-path} \
+        --target-store ${store} \
+        --deriver-system ${deriver-system} \
+        --deriver-store-path ${deriver} \
         --user ${user-id} \
-        --file ${./upload-download.nix} \
+        --nar ${archive} \
       ")
 
-      client.succeed("curl http://grid:3000/download/${cache}/${path}")
+      client.succeed("curl http://grid:3000/download/${cache}/${store-path} > output")
+      client.succeed("diff ${archive} output")
     '';
   };
 }

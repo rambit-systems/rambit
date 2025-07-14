@@ -1,4 +1,5 @@
 mod download;
+mod extractors;
 mod upload;
 
 use axum::{
@@ -19,8 +20,7 @@ pub async fn root() -> impl IntoResponse {
 pub fn router(app_state: AppState) -> Router {
   axum::Router::new()
     .route("/", get(root))
-    .route("/upload/{cache_name}/{path}", post(upload))
-    .route("/upload/{cache_name}/{path}/{target_store}", post(upload))
-    .route("/download/{cache_name}/{path}", get(download))
+    .route("/upload", post(upload))
+    .route("/download/{cache_name}/{store_path}", get(download))
     .with_state(app_state)
 }
