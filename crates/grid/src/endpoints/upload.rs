@@ -61,7 +61,7 @@ pub async fn upload(
   // WARNING: the system field is totally unvalidated at this point.
   let deriver_data = NarDeriverData {
     system:  Some(deriver_system.clone()),
-    deriver: Some(deriver_store_path.0),
+    deriver: Some(deriver_store_path.value().clone()),
   };
 
   let nar_contents = Belt::from_stream(
@@ -76,7 +76,7 @@ pub async fn upload(
     target_store,
     nar_contents,
     caches,
-    store_path: store_path.0,
+    store_path: store_path.value().clone(),
     deriver_data,
   };
 

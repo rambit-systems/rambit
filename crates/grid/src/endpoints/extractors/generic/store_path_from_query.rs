@@ -9,10 +9,11 @@ use prime_domain::models::StorePath;
 
 use super::QueryParameter;
 
-pub struct StorePathFromQueryExtractor<P: QueryParameter>(
-  pub StorePath<String>,
-  PhantomData<P>,
-);
+pub struct StorePathFromQueryExtractor<P>(StorePath<String>, PhantomData<P>);
+
+impl<P> StorePathFromQueryExtractor<P> {
+  pub fn value(&self) -> &StorePath<String> { &self.0 }
+}
 
 impl<S: Sync, P: QueryParameter> FromRequestParts<S>
   for StorePathFromQueryExtractor<P>
