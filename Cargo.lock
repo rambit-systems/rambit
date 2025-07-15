@@ -233,7 +233,7 @@ checksum = "55248b47b0caf0546f7988906588779981c43bb1bc9d0c44087278f80cdb44ba"
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "async-compression",
  "bytes",
@@ -486,7 +486,7 @@ checksum = "2a2330da5de22e8a3cb63252ce2abb30116bf5265e89c0e01bc17015ce30a476"
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -539,7 +539,7 @@ dependencies = [
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "email_address",
  "nutype",
@@ -813,7 +813,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "async-trait",
  "futures",
@@ -829,7 +829,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "health",
  "tokio",
@@ -1194,7 +1194,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "async-trait",
  "hex 0.1.0",
@@ -1362,7 +1362,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "dvf",
  "serde",
@@ -2242,7 +2242,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "deunicode",
  "nutype",
@@ -2284,12 +2284,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#67e4c30b2c5e406cabdae32ac3540739568005a2"
+source = "git+https://github.com/johnbchron/app-core#950738e739e4469b928de525941672bddafaff30"
 dependencies = [
  "async-trait",
  "belt",
