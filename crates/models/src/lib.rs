@@ -8,5 +8,6 @@ mod user;
 
 pub use dvf;
 pub use model;
+pub use nix_compat;
 
 pub use self::{cache::*, entry::*, org::*, store::*, user::*};

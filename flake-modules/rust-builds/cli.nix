@@ -5,6 +5,7 @@
 
     cli = craneLib.buildPackage (workspace-args // {
       pname = "cli";
+      cargoExtraArgs = "-p cli";
     });
   in {
     packages = {
