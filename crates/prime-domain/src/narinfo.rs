@@ -28,37 +28,42 @@ pub struct NarinfoResponse {
 impl NarinfoResponse {
   /// Returns the requested [`NarInfo`].
   pub fn narinfo(&self) -> NarInfo<'_> {
+    let mut references = self
+      .entry
+      .intrensic_data
+      .references
+      .iter()
+      .map(StorePath::as_ref)
+      .collect::<Vec<_>>();
+    references.sort_unstable();
+    let mut signatures = self
+      .entry
+      .authenticity_data
+      .signatures
+      .iter()
+      .map(Signature::as_ref)
+      .collect::<Vec<_>>();
+    signatures.sort_unstable_by_key(|s| s.to_string());
+
     NarInfo {
-      flags:       Flags::empty(),
-      store_path:  self.entry.store_path.as_ref(),
-      nar_hash:    self.entry.intrensic_data.nar_hash,
-      nar_size:    self.entry.intrensic_data.nar_size.into_inner(),
-      references:  self
-        .entry
-        .intrensic_data
-        .references
-        .iter()
-        .map(StorePath::as_ref)
-        .collect(),
-      signatures:  self
-        .entry
-        .authenticity_data
-        .signatures
-        .iter()
-        .map(Signature::as_ref)
-        .collect(),
-      ca:          self.entry.intrensic_data.ca_hash.clone(),
-      system:      self.entry.deriver_data.system.as_deref(),
-      deriver:     self
+      flags: Flags::empty(),
+      store_path: self.entry.store_path.as_ref(),
+      nar_hash: self.entry.intrensic_data.nar_hash,
+      nar_size: self.entry.intrensic_data.nar_size.into_inner(),
+      references,
+      signatures,
+      ca: self.entry.intrensic_data.ca_hash.clone(),
+      system: self.entry.deriver_data.system.as_deref(),
+      deriver: self
         .entry
         .deriver_data
         .deriver
         .as_ref()
         .map(StorePath::as_ref),
-      url:         &self.nar_relative_url,
+      url: &self.nar_relative_url,
       compression: None,
-      file_hash:   Some(self.entry.intrensic_data.nar_hash),
-      file_size:   Some(self.entry.intrensic_data.nar_size.into_inner()),
+      file_hash: Some(self.entry.intrensic_data.nar_hash),
+      file_size: Some(self.entry.intrensic_data.nar_size.into_inner()),
     }
   }
 }
