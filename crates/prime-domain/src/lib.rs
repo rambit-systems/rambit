@@ -3,6 +3,7 @@
 pub mod download;
 mod fetch_by_id;
 mod migrate;
+pub mod narinfo;
 pub mod upload;
 
 pub use belt;
