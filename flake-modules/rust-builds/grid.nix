@@ -5,6 +5,7 @@
 
     grid = craneLib.buildPackage (workspace-args // {
       pname = "grid";
+      cargoExtraArgs = "-p grid";
     });
 
     grid-image = pkgs.dockerTools.buildLayeredImage {
