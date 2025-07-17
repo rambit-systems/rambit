@@ -8,33 +8,19 @@ use axum::{
 };
 use prime_domain::{
   download::DownloadRequest,
-  models::{
-    StorePath, User,
-    dvf::{self, EntityName, RecordId, StrictSlug},
-  },
+  models::{StorePath, User, dvf::RecordId},
 };
 
+use super::extractors::CacheNameExtractor;
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn download(
+  cache_name: CacheNameExtractor,
   Path(params): Path<HashMap<String, String>>,
   headers: HeaderMap,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
-  let cache_name = params
-    .get("cache_name")
-    .expect("upload route param names are malformed")
-    .clone();
-  if dvf::strict::strict_slugify(&cache_name) != cache_name {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Cache name is malformed: `{cache_name}`"),
-    )
-      .into_response();
-  }
-  let cache_name = EntityName::new(StrictSlug::new(cache_name));
-
   let store_path = params
     .get("store_path")
     .expect("upload route param names are malformed")
@@ -69,7 +55,7 @@ pub async fn download(
 
   let download_req = DownloadRequest {
     auth: user_id,
-    cache_name,
+    cache_name: cache_name.value().clone(),
     store_path,
   };
 

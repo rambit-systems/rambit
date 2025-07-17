@@ -5,36 +5,18 @@ use axum::{
   http::StatusCode,
   response::IntoResponse,
 };
-use prime_domain::{
-  models::{
-    StorePath,
-    dvf::{self, EntityName, StrictSlug},
-  },
-  narinfo::NarinfoRequest,
-};
+use prime_domain::{models::StorePath, narinfo::NarinfoRequest};
 
-use super::extractors::UserIdExtractor;
+use super::extractors::{CacheNameExtractor, UserIdExtractor};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn narinfo(
+  cache_name: CacheNameExtractor,
   Path(params): Path<HashMap<String, String>>,
   user_id: Option<UserIdExtractor>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
-  let cache_name = params
-    .get("cache_name")
-    .expect("upload route param names are malformed")
-    .clone();
-  if dvf::strict::strict_slugify(&cache_name) != cache_name {
-    return (
-      StatusCode::BAD_REQUEST,
-      format!("Cache name is malformed: `{cache_name}`"),
-    )
-      .into_response();
-  }
-  let cache_name = EntityName::new(StrictSlug::new(cache_name));
-
   let store_path = params
     .get("store_path")
     .expect("upload route param names are malformed")
@@ -54,7 +36,7 @@ pub async fn narinfo(
 
   let narinfo_req = NarinfoRequest {
     auth: user_id,
-    cache_name,
+    cache_name: cache_name.value().clone(),
     store_path,
   };
 
