@@ -32,10 +32,8 @@ pub async fn narinfo(
     }
   };
 
-  let user_id = user_id.map(|e| e.0);
-
   let narinfo_req = NarinfoRequest {
-    auth: user_id,
+    auth: user_id.map(|c| c.0),
     cache_name: cache_name.value().clone(),
     store_path,
   };

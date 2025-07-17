@@ -1,24 +1,21 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 use axum::{
   body::Body,
   extract::{Path, State},
-  http::{HeaderMap, StatusCode},
+  http::StatusCode,
   response::IntoResponse,
 };
-use prime_domain::{
-  download::DownloadRequest,
-  models::{StorePath, User, dvf::RecordId},
-};
+use prime_domain::{download::DownloadRequest, models::StorePath};
 
-use super::extractors::CacheNameExtractor;
+use super::extractors::{CacheNameExtractor, UserIdExtractor};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn download(
   cache_name: CacheNameExtractor,
+  user_id: Option<UserIdExtractor>,
   Path(params): Path<HashMap<String, String>>,
-  headers: HeaderMap,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
   let store_path = params
@@ -36,25 +33,8 @@ pub async fn download(
     }
   };
 
-  let user_id = match headers.get("user_id") {
-    Some(hv) => match hv.to_str() {
-      Ok(s) => match RecordId::<User>::from_str(s) {
-        Ok(user_id) => Some(user_id),
-        Err(_) => {
-          return (StatusCode::BAD_REQUEST, "`user_id` malformed: `{s}`")
-            .into_response();
-        }
-      },
-      Err(_) => {
-        return (StatusCode::BAD_REQUEST, "`user_id` header is not ASCII")
-          .into_response();
-      }
-    },
-    None => None,
-  };
-
   let download_req = DownloadRequest {
-    auth: user_id,
+    auth: user_id.map(|e| e.0),
     cache_name: cache_name.value().clone(),
     store_path,
   };
