@@ -1,9 +1,9 @@
 //! Narinfo types and impl.
 
-use miette::{Context, IntoDiagnostic};
+use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Entry, Signature, StorePath,
-  dvf::{EitherSlug, EntityName, LaxSlug},
+  Entry, Signature, StorePath, User,
+  dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
@@ -12,6 +12,8 @@ use crate::PrimeDomainService;
 /// The request struct for the [`narinfo`](PrimeDomainService::narinfo) fn.
 #[derive(Debug)]
 pub struct NarinfoRequest {
+  /// The user's authentication.
+  pub auth:       Option<RecordId<User>>,
   /// The name of the cache the entry is stored in.
   pub cache_name: EntityName,
   /// The store path of the entry.
@@ -71,6 +73,9 @@ impl NarinfoResponse {
 /// The error enum for the [`narinfo`](PrimeDomainService::narinfo) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum NarinfoError {
+  /// The user is unauthorized to read from this cache.
+  #[error("The user is unauthorized to read from this cache")]
+  Unauthorized,
   /// The requested cache was not found.
   #[error("The requested cache was not found: \"{0}\"")]
   CacheNotFound(EntityName),
@@ -99,6 +104,33 @@ impl PrimeDomainService {
       .context("failed to search for cache")
       .map_err(NarinfoError::InternalError)?
       .ok_or(NarinfoError::CacheNotFound(req.cache_name))?;
+
+    let user = match req.auth {
+      Some(user_id) => Some(
+        self
+          .user_repo
+          .fetch_model_by_id(user_id)
+          .await
+          .into_diagnostic()
+          .context("failed to find user")
+          .map_err(NarinfoError::InternalError)?
+          .ok_or(miette!("authenticated user not found"))
+          .map_err(NarinfoError::InternalError)?,
+      ),
+      None => None,
+    };
+
+    // reject user if cache is private and org IDs don't match
+    match (cache.visibility, user) {
+      // let them through if it's private but org IDs match
+      (Visibility::Private, Some(user)) if user.org == cache.org => (),
+      // otherwise don't let them through if it's private
+      (Visibility::Private, _) => {
+        return Err(NarinfoError::Unauthorized);
+      }
+      // if it's not private don't worry about it
+      _ => (),
+    }
 
     let index_value = EitherSlug::Lax(LaxSlug::new(format!(
       "{cache_id}-{entry_path}",

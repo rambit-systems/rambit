@@ -13,11 +13,13 @@ use prime_domain::{
   narinfo::NarinfoRequest,
 };
 
+use super::extractors::UserIdExtractor;
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn narinfo(
   Path(params): Path<HashMap<String, String>>,
+  user_id: Option<UserIdExtractor>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
   let cache_name = params
@@ -48,7 +50,10 @@ pub async fn narinfo(
     }
   };
 
+  let user_id = user_id.map(|e| e.0);
+
   let narinfo_req = NarinfoRequest {
+    auth: user_id,
     cache_name,
     store_path,
   };
