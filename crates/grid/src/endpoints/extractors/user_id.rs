@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use axum::{
-  extract::FromRequestParts,
+  extract::{FromRequestParts, OptionalFromRequestParts},
   http::{HeaderName, StatusCode},
   response::{IntoResponse, Response},
 };
@@ -38,6 +38,23 @@ impl<S: Sync> FromRequestParts<S> for UserIdExtractor {
     };
 
     Ok(Self(id))
+  }
+}
+
+impl<S: Sync> OptionalFromRequestParts<S> for UserIdExtractor {
+  type Rejection = ();
+
+  async fn from_request_parts(
+    parts: &mut axum::http::request::Parts,
+    state: &S,
+  ) -> Result<Option<Self>, Self::Rejection> {
+    Ok(
+      <UserIdExtractor as FromRequestParts<S>>::from_request_parts(
+        parts, state,
+      )
+      .await
+      .ok(),
+    )
   }
 }
 
