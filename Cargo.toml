@@ -42,5 +42,8 @@ axum = { version = "0.8", features = [ "http2", "macros" ] }
 tower = { version = "0.5" }
 tower-http = { version = "0.6" }
 
+axum-login = { version = "0.17" }
+tower-sessions = { version = "0.14" }
+
 # async
 tokio = { version = "1" }

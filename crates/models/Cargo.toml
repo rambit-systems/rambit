@@ -15,5 +15,10 @@ nix-compat.workspace = true
 serde.workspace = true
 ulid.workspace = true
 
+axum-login = { workspace = true, optional = true }
+
+[features]
+auth = [ "dep:axum-login" ]
+
 [lints]
 workspace = true
