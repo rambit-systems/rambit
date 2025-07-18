@@ -1,0 +1,15 @@
+[package]
+name = "tower-sessions-db-store"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+db.workspace = true
+
+tower-sessions.workspace = true
+
+[lints]
+workspace = true
