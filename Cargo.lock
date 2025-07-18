@@ -1430,6 +1430,7 @@ dependencies = [
  "model",
  "nix-compat",
  "serde",
+ "tower-sessions",
  "ulid",
 ]
 
