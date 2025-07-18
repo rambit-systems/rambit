@@ -95,7 +95,7 @@ mod auth {
   use super::AuthUser;
 
   impl AxumLoginAuthUser for AuthUser {
-    type Id = super::UserRecordId;
+    type Id = super::RecordId<super::User>;
 
     fn id(&self) -> Self::Id { self.id }
 
