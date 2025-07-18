@@ -11,6 +11,7 @@ models = { path = "../models", features = [ "session" ] }
 
 db.workspace = true
 
+async-trait.workspace = true
 tower-sessions.workspace = true
 
 [lints]

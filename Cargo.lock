@@ -2762,6 +2762,7 @@ dependencies = [
 name = "tower-sessions-db-store"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "db",
  "models",
  "tower-sessions",
