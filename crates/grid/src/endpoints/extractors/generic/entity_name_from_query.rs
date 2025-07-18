@@ -3,7 +3,6 @@ use std::{collections::HashMap, marker::PhantomData};
 use axum::{
   extract::{FromRequestParts, Query},
   http::{StatusCode, request::Parts},
-  response::{IntoResponse, Response},
 };
 use prime_domain::models::dvf::{self, EntityName, StrictSlug};
 
@@ -18,7 +17,7 @@ impl<P> EntityNameFromQueryExtractor<P> {
 impl<S: Sync, P: QueryParameter> FromRequestParts<S>
   for EntityNameFromQueryExtractor<P>
 {
-  type Rejection = EntityNameFromQueryRejection;
+  type Rejection = (StatusCode, String);
 
   async fn from_request_parts(
     parts: &mut Parts,
@@ -28,7 +27,7 @@ impl<S: Sync, P: QueryParameter> FromRequestParts<S>
       Query::<HashMap<String, String>>::try_from_uri(&parts.uri).unwrap();
 
     let Some(value) = query.get(P::PARAM_NAME) else {
-      return Err(EntityNameFromQueryRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!(
           "{desc} is missing (query param `{p_name}`)",
@@ -38,13 +37,13 @@ impl<S: Sync, P: QueryParameter> FromRequestParts<S>
       ));
     };
     if value.is_empty() {
-      return Err(EntityNameFromQueryRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!("{desc} is empty", desc = P::DESCRIPTION),
       ));
     }
     if dvf::strict::strict_slugify(value) != *value {
-      return Err(EntityNameFromQueryRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!("{desc} is malformed: `{value}`", desc = P::DESCRIPTION),
       ));
@@ -53,10 +52,4 @@ impl<S: Sync, P: QueryParameter> FromRequestParts<S>
 
     Ok(Self(value, PhantomData))
   }
-}
-
-pub struct EntityNameFromQueryRejection(StatusCode, String);
-
-impl IntoResponse for EntityNameFromQueryRejection {
-  fn into_response(self) -> Response { (self.0, self.1).into_response() }
 }

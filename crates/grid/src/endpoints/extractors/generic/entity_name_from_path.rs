@@ -3,7 +3,6 @@ use std::{collections::HashMap, marker::PhantomData};
 use axum::{
   extract::{FromRequestParts, Path},
   http::{StatusCode, request::Parts},
-  response::{IntoResponse, Response},
 };
 use prime_domain::models::dvf::{self, EntityName, StrictSlug};
 
@@ -18,7 +17,7 @@ impl<P> EntityNameFromPathExtractor<P> {
 impl<S: Send + Sync, P: PathParameter> FromRequestParts<S>
   for EntityNameFromPathExtractor<P>
 {
-  type Rejection = EntityNameFromPathRejection;
+  type Rejection = (StatusCode, String);
 
   async fn from_request_parts(
     parts: &mut Parts,
@@ -30,7 +29,7 @@ impl<S: Send + Sync, P: PathParameter> FromRequestParts<S>
         .unwrap();
 
     let Some(value) = path.get(P::PARAM_NAME) else {
-      return Err(EntityNameFromPathRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!(
           "{desc} is missing (path param `{p_name}`)",
@@ -40,13 +39,13 @@ impl<S: Send + Sync, P: PathParameter> FromRequestParts<S>
       ));
     };
     if value.is_empty() {
-      return Err(EntityNameFromPathRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!("{desc} is empty", desc = P::DESCRIPTION),
       ));
     }
     if dvf::strict::strict_slugify(value) != *value {
-      return Err(EntityNameFromPathRejection(
+      return Err((
         StatusCode::BAD_REQUEST,
         format!("{desc} is malformed: `{value}`", desc = P::DESCRIPTION),
       ));
@@ -55,10 +54,4 @@ impl<S: Send + Sync, P: PathParameter> FromRequestParts<S>
 
     Ok(Self(value, PhantomData))
   }
-}
-
-pub struct EntityNameFromPathRejection(StatusCode, String);
-
-impl IntoResponse for EntityNameFromPathRejection {
-  fn into_response(self) -> Response { (self.0, self.1).into_response() }
 }
