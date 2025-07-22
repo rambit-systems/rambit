@@ -1,0 +1,12 @@
+[package]
+name = "auth-domain"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+
+[lints]
+workspace = true
