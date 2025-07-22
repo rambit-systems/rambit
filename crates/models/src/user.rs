@@ -1,6 +1,6 @@
 use std::hash::{self, Hash, Hasher};
 
-use dvf::{EmailAddress, HumanName, RecordId};
+use dvf::{EitherSlug, EmailAddress, HumanName, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -27,6 +27,12 @@ impl User {
     let mut hasher = hash::DefaultHasher::new();
     self.auth.hash(&mut hasher);
     hasher.finish()
+  }
+
+  /// Generates the value of the unique [`Entry`] index
+  /// `store-id-and-entry-path`.
+  pub fn unique_index_email(&self) -> Vec<EitherSlug> {
+    vec![EitherSlug::Lax(LaxSlug::new(self.email.as_ref()))]
   }
 }
 
@@ -57,7 +63,8 @@ pub enum UserAuthCredentials {
 impl Model for User {
   const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "user";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
+  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
+    &[("email", User::unique_index_email)];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }
