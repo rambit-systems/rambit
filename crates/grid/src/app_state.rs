@@ -1,8 +1,10 @@
+use auth_domain::AuthDomainService;
 use miette::Result;
 use prime_domain::{PrimeDomainService, db::Database};
 
 #[derive(Clone, Debug)]
 pub struct AppState {
+  pub auth_domain:  AuthDomainService,
   pub prime_domain: PrimeDomainService,
 }
 
@@ -20,6 +22,7 @@ impl AppState {
     let cache_db = Database::new_from_kv(kv_store);
 
     Ok(AppState {
+      auth_domain:  AuthDomainService::new(user_db.clone()),
       prime_domain: PrimeDomainService::new(
         org_db, user_db, store_db, entry_db, cache_db,
       ),
