@@ -34,12 +34,12 @@ async fn main() -> Result<()> {
     .context("failed to build app state")?;
 
   if args.migrate {
-    app_state
-      .prime_domain
-      .migrate_test_data(false)
-      .await
-      .context("failed to migrate test data")?;
-    tracing::info!("migrated test data as requested");
+    match app_state.prime_domain.migrate_test_data(false).await {
+      Ok(_) => {
+        tracing::info!("migrated test data as requested");
+      }
+      Err(e) => tracing::warn!("failed to migrate test data: {e}"),
+    }
   }
 
   let router: Router<()> = self::endpoints::router(app_state);
