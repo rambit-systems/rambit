@@ -1,11 +1,13 @@
 use auth_domain::AuthDomainService;
 use miette::Result;
 use prime_domain::{PrimeDomainService, db::Database};
+use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
 #[derive(Clone, Debug)]
 pub struct AppState {
-  pub auth_domain:  AuthDomainService,
-  pub prime_domain: PrimeDomainService,
+  pub auth_domain:   AuthDomainService,
+  pub prime_domain:  PrimeDomainService,
+  pub session_store: DatabaseSessionStore,
 }
 
 impl AppState {
@@ -19,13 +21,15 @@ impl AppState {
     let user_db = Database::new_from_kv(kv_store.clone());
     let store_db = Database::new_from_kv(kv_store.clone());
     let entry_db = Database::new_from_kv(kv_store.clone());
-    let cache_db = Database::new_from_kv(kv_store);
+    let cache_db = Database::new_from_kv(kv_store.clone());
+    let session_db = Database::new_from_kv(kv_store);
 
     Ok(AppState {
-      auth_domain:  AuthDomainService::new(user_db.clone()),
-      prime_domain: PrimeDomainService::new(
+      auth_domain:   AuthDomainService::new(user_db.clone()),
+      prime_domain:  PrimeDomainService::new(
         org_db, user_db, store_db, entry_db, cache_db,
       ),
+      session_store: DatabaseSessionStore::new(session_db),
     })
   }
 }

@@ -7,6 +7,7 @@ mod args;
 mod endpoints;
 
 use axum::Router;
+use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
@@ -42,12 +43,17 @@ async fn main() -> Result<()> {
     }
   }
 
-  let router: Router<()> = self::endpoints::router(app_state);
+  let router: Router<()> = self::endpoints::router(app_state.clone());
 
-  let service = router.layer(
-    TraceLayer::new_for_http()
-      .on_response(DefaultOnResponse::new().level(Level::INFO)),
-  );
+  let trace_layer = TraceLayer::new_for_http()
+    .on_response(DefaultOnResponse::new().level(Level::INFO));
+
+  let session_layer =
+    tower_sessions::SessionManagerLayer::new(app_state.session_store);
+  let auth_layer =
+    AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
+
+  let service = router.layer(trace_layer).layer(auth_layer);
 
   let addr = format!("{host}:{port}", host = args.host, port = args.port);
   let listener = tokio::net::TcpListener::bind(&addr)
