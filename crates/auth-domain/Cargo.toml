@@ -7,6 +7,21 @@ license-file.workspace = true
 publish = false
 
 [dependencies]
+models = { path = "../models" }
+
+db.workspace = true
+
+miette.workspace = true
+thiserror.workspace = true
+
+tracing.workspace = true
+
+axum-login.workspace = true
+argon2 = "0.5.3"
+async-trait.workspace = true
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
