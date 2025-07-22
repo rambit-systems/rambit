@@ -16,12 +16,12 @@ thiserror.workspace = true
 
 tracing.workspace = true
 
-axum-login.workspace = true
 argon2 = "0.5.3"
 async-trait.workspace = true
+axum-login.workspace = true
 
 [lints]
 workspace = true
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true, features = [ "full" ] }
