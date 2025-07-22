@@ -9,7 +9,7 @@ publish = false
 [dependencies]
 prime-domain = { path = "../prime-domain" }
 
-kv = { workspace = true, features = [ "redb" ] }
+kv = { workspace = true, features = [ "redb", "no-field-names" ] }
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
 
