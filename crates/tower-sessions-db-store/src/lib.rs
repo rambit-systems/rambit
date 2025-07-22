@@ -22,6 +22,11 @@ pub struct DatabaseStore {
   inner: Database<Session>,
 }
 
+impl DatabaseStore {
+  /// Construct a new [`SessionStore`].
+  pub fn new(db: Database<Session>) -> Self { Self { inner: db } }
+}
+
 #[async_trait::async_trait]
 impl SessionStore for DatabaseStore {
   async fn save(&self, session_record: &Record) -> Result<(), Error> {
