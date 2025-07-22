@@ -851,6 +851,7 @@ version = "0.1.0"
 dependencies = [
  "auth-domain",
  "axum",
+ "axum-login",
  "clap",
  "http-body-util",
  "kv",
@@ -860,6 +861,8 @@ dependencies = [
  "tokio",
  "tower",
  "tower-http",
+ "tower-sessions",
+ "tower-sessions-db-store",
  "tracing",
  "tracing-subscriber",
 ]

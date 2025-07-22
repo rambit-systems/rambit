@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 auth-domain = { path = "../auth-domain" }
 prime-domain = { path = "../prime-domain" }
+tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 
 kv = { workspace = true, features = [ "redb", "no-field-names" ] }
 
@@ -21,10 +22,12 @@ clap.workspace = true
 miette = { workspace = true, features = [ "fancy" ] }
 
 axum.workspace = true
+axum-login.workspace = true
 http-body-util = "0.1.3"
 serde.workspace = true
 tower.workspace = true
 tower-http = { workspace = true, features = [ "trace" ] }
+tower-sessions.workspace = true
 
 [lints]
 workspace = true
