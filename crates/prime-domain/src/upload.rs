@@ -116,7 +116,7 @@ impl PrimeDomainService {
       .map_err(UploadError::InternalError)?;
 
     // reject request if any cache lies outside the user's org
-    if caches.iter().any(|c| user.org != c.org) {
+    if caches.iter().any(|c| user.orgs.contains(&c.org)) {
       return Err(UploadError::Unauthorized);
     }
 

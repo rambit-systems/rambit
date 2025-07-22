@@ -11,8 +11,8 @@ use crate::Org;
 pub struct User {
   /// The user's ID.
   pub id:    RecordId<User>,
-  /// The user's org.
-  pub org:   RecordId<Org>,
+  /// The user's orgs.
+  pub orgs:  Vec<RecordId<Org>>,
   /// The user's name.
   pub name:  HumanName,
   /// The user's email address.
@@ -67,8 +67,8 @@ impl Model for User {
 pub struct AuthUser {
   /// The user's ID.
   pub id:              RecordId<User>,
-  /// The user's org.
-  pub org:             RecordId<Org>,
+  /// The user's orgs.
+  pub orgs:            Vec<RecordId<Org>>,
   /// The user's name.
   pub name:            HumanName,
   /// The hash of the user's authentication secrets.
@@ -81,7 +81,7 @@ impl From<User> for AuthUser {
       user.auth_hash().to_be_bytes().to_vec().into_boxed_slice();
     Self {
       id: user.id,
-      org: user.org,
+      orgs: user.orgs,
       name: user.name,
       auth_hash_bytes,
     }

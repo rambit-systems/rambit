@@ -28,7 +28,7 @@ impl PrimeDomainService {
       .user_repo
       .create_model(User {
         id:    RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap(),
-        org:   org.id,
+        orgs:  vec![org.id],
         email: EmailAddress::try_new("jpicard@federation.gov").unwrap(),
         name:  HumanName::try_new("Jean-Luc Picard")
           .expect("failed to create name"),
