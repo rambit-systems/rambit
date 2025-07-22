@@ -29,8 +29,7 @@ impl User {
     hasher.finish()
   }
 
-  /// Generates the value of the unique [`Entry`] index
-  /// `store-id-and-entry-path`.
+  /// Generates the value of the unique [`User`] index `email`.
   pub fn unique_index_email(&self) -> Vec<EitherSlug> {
     vec![EitherSlug::Lax(LaxSlug::new(self.email.as_ref()))]
   }

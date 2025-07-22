@@ -68,7 +68,7 @@ impl AuthDomainService {
     self.user_repo.fetch_model_by_id(id).await
   }
 
-  /// Fetch a [`User`] by [`EmailAddress`](models::EmailAddress).
+  /// Fetch a [`User`] by [`EmailAddress`](EmailAddress).
   #[instrument(skip(self))]
   pub async fn fetch_user_by_email(
     &self,
