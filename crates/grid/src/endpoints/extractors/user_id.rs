@@ -36,6 +36,6 @@ impl<S: Send + Sync> OptionalFromRequestParts<S> for UserAuthExtractor {
     // extract AuthSession straight from the request and pull the user field
     AuthSession::from_request_parts(parts, state)
       .await
-      .map(|s| s.user.map(|u| Self(u)))
+      .map(|s| s.user.map(Self))
   }
 }
