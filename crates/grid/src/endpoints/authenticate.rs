@@ -1,8 +1,7 @@
+use auth_domain::AuthSession;
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use prime_domain::models::{UserSubmittedAuthCredentials, dvf::EmailAddress};
 use serde::Deserialize;
-
-type AuthSession = axum_login::AuthSession<auth_domain::AuthDomainService>;
 
 #[derive(Deserialize)]
 pub struct AuthenticateQueryParams {
