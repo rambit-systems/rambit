@@ -1,3 +1,4 @@
+mod authenticate;
 mod download;
 mod extractors;
 mod narinfo;
@@ -9,7 +10,10 @@ use axum::{
   routing::{get, post},
 };
 
-use self::{download::download, narinfo::narinfo, upload::upload};
+use self::{
+  authenticate::authenticate, download::download, narinfo::narinfo,
+  upload::upload,
+};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
@@ -21,6 +25,7 @@ pub async fn root() -> impl IntoResponse {
 pub fn router(app_state: AppState) -> Router {
   axum::Router::new()
     .route("/", get(root))
+    .route("/authenticate", get(authenticate).post(authenticate))
     .route("/upload", post(upload))
     .route("/download/{cache_name}/{store_path}", get(download))
     .route("/narinfo/{cache_name}/{store_path}", get(narinfo))
