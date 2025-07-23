@@ -49,7 +49,8 @@ async fn main() -> Result<()> {
     .on_response(DefaultOnResponse::new().level(Level::INFO));
 
   let session_layer =
-    tower_sessions::SessionManagerLayer::new(app_state.session_store);
+    tower_sessions::SessionManagerLayer::new(app_state.session_store)
+      .with_secure(!args.no_secure_cookies);
   let auth_layer =
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
 
