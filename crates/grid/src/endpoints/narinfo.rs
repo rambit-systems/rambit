@@ -7,14 +7,14 @@ use axum::{
 };
 use prime_domain::{models::StorePath, narinfo::NarinfoRequest};
 
-use super::extractors::{CacheNameExtractor, UserIdExtractor};
+use super::extractors::{CacheNameExtractor, UserAuthExtractor};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn narinfo(
   cache_name: CacheNameExtractor,
   Path(params): Path<HashMap<String, String>>,
-  user_id: Option<UserIdExtractor>,
+  user: Option<UserAuthExtractor>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
   let store_path = params
@@ -33,7 +33,7 @@ pub async fn narinfo(
   };
 
   let narinfo_req = NarinfoRequest {
-    auth: user_id.map(|c| c.0),
+    auth: user.map(|e| e.0.id),
     cache_name: cache_name.value().clone(),
     store_path,
   };

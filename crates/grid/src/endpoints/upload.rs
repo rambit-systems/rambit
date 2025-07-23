@@ -15,7 +15,7 @@ use prime_domain::{
 
 use super::extractors::{
   CacheListExtractor, DeriverStorePathExtractor, StorePathExtractor,
-  TargetStoreExtractor, UserIdExtractor,
+  TargetStoreExtractor, UserAuthExtractor,
 };
 use crate::app_state::AppState;
 
@@ -27,7 +27,7 @@ pub async fn upload(
   store_path: StorePathExtractor,
   deriver_store_path: DeriverStorePathExtractor,
   target_store: TargetStoreExtractor,
-  UserIdExtractor(user_id): UserIdExtractor,
+  UserAuthExtractor(user): UserAuthExtractor,
   State(app_state): State<AppState>,
   body: Body,
 ) -> impl IntoResponse {
@@ -54,7 +54,7 @@ pub async fn upload(
   );
 
   let upload_req = UploadRequest {
-    auth: user_id,
+    auth: user.id,
     target_store: target_store.value().clone(),
     nar_contents,
     caches,
