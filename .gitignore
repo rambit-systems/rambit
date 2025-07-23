@@ -21,3 +21,6 @@ mprocs.log
 
 # leptos
 **/node_modules/
+
+# curl cookies
+cookie.txt
