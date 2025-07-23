@@ -22,7 +22,7 @@ pub async fn authenticate(
   }
   let email = match EmailAddress::try_new(email) {
     Ok(email) => email,
-    Err(e) => {
+    Err(_) => {
       return (StatusCode::BAD_REQUEST, "Malformed `email` field")
         .into_response();
     }
