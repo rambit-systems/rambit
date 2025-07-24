@@ -101,22 +101,22 @@ impl CliArgs {
 
         match tokio::fs::try_exists(nar_path).await {
           Ok(false) => {
-            tracing::error!(?nar_path, "symlinks to input file are broken");
-            bail!("symlinks to input file are broken: \"{nar_path:?}\"")
+            tracing::error!(?nar_path, "symlinks to input NAR are broken");
+            bail!("symlinks to input NAR are broken: \"{nar_path:?}\"")
           }
           Err(_) => {
-            tracing::error!(?nar_path, "input file does not exist");
-            bail!("input file does not exist: \"{nar_path:?}\"")
+            tracing::error!(?nar_path, "input NAR does not exist");
+            bail!("input NAR does not exist: \"{nar_path:?}\"")
           }
           _ => {}
         }
-        tracing::debug!(?nar_path, "file exists");
+        tracing::debug!(?nar_path, "NAR exists");
 
         let file = tokio::fs::File::open(nar_path)
           .await
           .into_diagnostic()
-          .context("failed to read file")?;
-        tracing::debug!(?nar_path, "opened file");
+          .context("failed to read NAR")?;
+        tracing::debug!(?nar_path, "opened NAR");
 
         let data = belt::Belt::from_async_buf_read(BufReader::new(file), None);
 
@@ -148,8 +148,8 @@ impl CliArgs {
           .into_diagnostic()
           .context("failed to send request")?;
 
-        tracing::info!(?resp, "sent request");
-        tracing::info!("response body: {}", resp.text().await.unwrap());
+        tracing::debug!(?resp, "sent request");
+        tracing::debug!("response body: {}", resp.text().await.unwrap());
 
         Ok(())
       }
