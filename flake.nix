@@ -11,11 +11,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     crane.url = "https://flakehub.com/f/ipetkov/crane/0.20.tar.gz";
-
-    tikv = {
-      url = "github:rambit-systems/tikv-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } ({ ... }: {
