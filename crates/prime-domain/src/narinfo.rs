@@ -132,16 +132,15 @@ impl PrimeDomainService {
       _ => (),
     }
 
-    let index_value = EitherSlug::Lax(LaxSlug::new(format!(
-      "{cache_id}-{entry_path}",
-      cache_id = cache.id,
-      entry_path = &req.store_path
-    )));
     let entry = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "cache-id-and-entry-path".to_owned(),
-        index_value,
+        "cache-id-and-entry-digest".into(),
+        EitherSlug::Lax(LaxSlug::new(format!(
+          "{cache_id}-{entry_digest:x?}",
+          cache_id = cache.id,
+          entry_digest = req.store_path.digest()
+        ))),
       )
       .await
       .context("failed to search for entry")

@@ -45,15 +45,15 @@ impl Entry {
   }
 
   /// Generates the value of the unique [`Entry`] index
-  /// `cache-id-and-entry-path`.
-  pub fn unique_index_cache_id_and_entry_path(&self) -> Vec<EitherSlug> {
+  /// `cache-id-and-entry-digest`.
+  pub fn unique_index_cache_id_and_entry_digest(&self) -> Vec<EitherSlug> {
     self
       .caches
       .iter()
       .map(|cache_id| {
         EitherSlug::Lax(LaxSlug::new(format!(
-          "{cache_id}-{entry_path}",
-          entry_path = self.store_path
+          "{cache_id}-{entry_digest:x?}",
+          entry_digest = self.store_path.digest()
         )))
       })
       .collect()
@@ -69,8 +69,8 @@ impl Model for Entry {
       Entry::unique_index_store_id_and_entry_path,
     ),
     (
-      "cache-id-and-entry-path",
-      Entry::unique_index_cache_id_and_entry_path,
+      "cache-id-and-entry-digest",
+      Entry::unique_index_cache_id_and_entry_digest,
     ),
   ];
 
