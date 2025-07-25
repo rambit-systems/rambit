@@ -3,6 +3,7 @@
 //! The CLI entrypoint for Rambit.
 
 mod args;
+mod upload;
 
 use clap::Parser;
 use miette::Result;

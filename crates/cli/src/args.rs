@@ -1,12 +1,11 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use miette::{Context, IntoDiagnostic, Result, bail};
+use miette::Result;
 use models::{
   StorePath, User,
   dvf::{self, EntityName, RecordId, StrictSlug},
 };
-use tokio::io::BufReader;
 
 #[derive(Parser, Debug)]
 pub struct CliArgs {
@@ -97,61 +96,18 @@ impl CliArgs {
         user_id,
         ref nar_path,
       } => {
-        let client = reqwest::Client::new();
-
-        match tokio::fs::try_exists(nar_path).await {
-          Ok(false) => {
-            tracing::error!(?nar_path, "symlinks to input NAR are broken");
-            bail!("symlinks to input NAR are broken: \"{nar_path:?}\"")
-          }
-          Err(_) => {
-            tracing::error!(?nar_path, "input NAR does not exist");
-            bail!("input NAR does not exist: \"{nar_path:?}\"")
-          }
-          _ => {}
-        }
-        tracing::debug!(?nar_path, "NAR exists");
-
-        let file = tokio::fs::File::open(nar_path)
-          .await
-          .into_diagnostic()
-          .context("failed to read NAR")?;
-        tracing::debug!(?nar_path, "opened NAR");
-
-        let data = belt::Belt::from_async_buf_read(BufReader::new(file), None);
-
-        let cache_list =
-          cache_list.iter().map(|c| c.to_string()).collect::<String>();
-        let req = client
-          .post(format!(
-            "http://{host}:{port}/upload",
-            host = self
-              .host
-              .as_ref()
-              .cloned()
-              .unwrap_or("localhost".to_string()),
-            port = self.port.unwrap_or(3000),
-          ))
-          .header("x-user-id", user_id.to_string())
-          .query(&[
-            ("caches", cache_list),
-            ("store_path", store_path.to_string()),
-            ("target_store", target_store.to_string()),
-            ("deriver_store_path", deriver_store_path.to_string()),
-            ("deriver_system", deriver_system.to_string()),
-          ])
-          .body(reqwest::Body::wrap_stream(data));
-
-        let resp = req
-          .send()
-          .await
-          .into_diagnostic()
-          .context("failed to send request")?;
-
-        tracing::debug!(?resp, "sent request");
-        tracing::debug!("response body: {}", resp.text().await.unwrap());
-
-        Ok(())
+        crate::upload::upload(
+          &self.host,
+          &self.port,
+          cache_list,
+          store_path,
+          target_store,
+          deriver_system,
+          deriver_store_path,
+          user_id,
+          nar_path,
+        )
+        .await
       }
     }
   }
