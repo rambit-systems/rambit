@@ -2,23 +2,33 @@ use std::path::Path;
 
 use miette::{Context, IntoDiagnostic, bail};
 use models::{
-  StorePath, User,
-  dvf::{EntityName, RecordId},
+  StorePath,
+  dvf::{EmailAddress, EntityName},
 };
 use tokio::io::BufReader;
 
+#[allow(clippy::too_many_arguments)]
 pub async fn upload(
   host: &Option<String>,
   port: &Option<u16>,
+  email: &EmailAddress,
+  password: &str,
   cache_list: &[EntityName],
   store_path: &StorePath<String>,
   target_store: &EntityName,
   deriver_system: &str,
   deriver_store_path: &StorePath<String>,
-  user_id: RecordId<User>,
   nar_path: &Path,
 ) -> miette::Result<()> {
-  let client = reqwest::Client::new();
+  let client = reqwest::Client::builder()
+    .cookie_store(true)
+    .build()
+    .into_diagnostic()
+    .context("failed to build http client")?;
+
+  crate::authenticate::authenticate(&client, host, port, email, password)
+    .await
+    .context("failed to authenticate")?;
 
   match tokio::fs::try_exists(nar_path).await {
     Ok(false) => {
@@ -48,7 +58,6 @@ pub async fn upload(
       host = host.as_ref().cloned().unwrap_or("localhost".to_string()),
       port = port.unwrap_or(3000),
     ))
-    .header("x-user-id", user_id.to_string())
     .query(&[
       ("caches", cache_list),
       ("store_path", store_path.to_string()),
@@ -62,7 +71,7 @@ pub async fn upload(
     .send()
     .await
     .into_diagnostic()
-    .context("failed to send request")?;
+    .context("failed to send upload request")?;
 
   tracing::debug!(?resp, "sent request");
   tracing::debug!("response body: {}", resp.text().await.unwrap());

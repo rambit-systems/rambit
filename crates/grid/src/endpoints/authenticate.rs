@@ -4,7 +4,7 @@ use prime_domain::models::{UserSubmittedAuthCredentials, dvf::EmailAddress};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub struct AuthenticateQueryParams {
+pub struct AuthenticateParams {
   email:    Option<String>,
   password: Option<String>,
 }
@@ -12,7 +12,7 @@ pub struct AuthenticateQueryParams {
 #[axum::debug_handler]
 pub async fn authenticate(
   mut auth_session: AuthSession,
-  Json(params): Json<AuthenticateQueryParams>,
+  Json(params): Json<AuthenticateParams>,
 ) -> impl IntoResponse {
   let Some(email) = params.email else {
     return (StatusCode::BAD_REQUEST, "Missing `email` field").into_response();

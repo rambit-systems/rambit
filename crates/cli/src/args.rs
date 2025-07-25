@@ -3,20 +3,26 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 use miette::Result;
 use models::{
-  StorePath, User,
-  dvf::{self, EntityName, RecordId, StrictSlug},
+  StorePath,
+  dvf::{self, EmailAddress, EntityName, StrictSlug},
 };
 
 #[derive(Parser, Debug)]
 pub struct CliArgs {
   #[command(subcommand)]
-  pub command: SubCommand,
+  pub command:  SubCommand,
   /// The Rambit host to connect to.
   #[arg(long)]
-  pub host:    Option<String>,
+  pub host:     Option<String>,
   /// The port of the Rambit host to connect to.
   #[arg(long)]
-  pub port:    Option<u16>,
+  pub port:     Option<u16>,
+  /// The email of the user.
+  #[arg(long, value_parser = parse_email)]
+  pub email:    EmailAddress,
+  /// The password of the user.
+  #[arg(long)]
+  pub password: String,
 }
 
 #[derive(Subcommand, Debug)]
@@ -37,13 +43,18 @@ pub enum SubCommand {
     /// The store path of the NAR's deriver.
     #[arg(long = "deriver-store-path", value_parser = parse_deriver_store_path)]
     deriver_store_path: StorePath<String>,
-    /// The user uploading to the cache.
-    #[arg(long = "user")]
-    user_id:            RecordId<User>,
     /// The file to upload to the cache.
     #[arg(long = "nar")]
     nar_path:           PathBuf,
   },
+}
+
+fn parse_email(input: &str) -> Result<EmailAddress, String> {
+  if input.is_empty() {
+    return Err("empty email address found".to_owned());
+  }
+  EmailAddress::try_new(input)
+    .map_err(|_| "email address is malformed".to_owned())
 }
 
 fn parse_cache_name(input: &str) -> Result<EntityName, String> {
@@ -93,18 +104,18 @@ impl CliArgs {
         ref target_store,
         ref deriver_system,
         ref deriver_store_path,
-        user_id,
         ref nar_path,
       } => {
         crate::upload::upload(
           &self.host,
           &self.port,
+          &self.email,
+          &self.password,
           cache_list,
           store_path,
           target_store,
           deriver_system,
           deriver_store_path,
-          user_id,
           nar_path,
         )
         .await

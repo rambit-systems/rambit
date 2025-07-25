@@ -3,6 +3,7 @@
 //! The CLI entrypoint for Rambit.
 
 mod args;
+mod authenticate;
 mod upload;
 
 use clap::Parser;
