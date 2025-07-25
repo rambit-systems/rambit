@@ -2,6 +2,7 @@ mod authenticate;
 mod download;
 mod extractors;
 mod narinfo;
+mod nix_cache_info;
 mod upload;
 
 use axum::{
@@ -12,7 +13,7 @@ use axum::{
 
 use self::{
   authenticate::authenticate, download::download, narinfo::narinfo,
-  upload::upload,
+  nix_cache_info::nix_cache_info, upload::upload,
 };
 use crate::app_state::AppState;
 
@@ -29,5 +30,6 @@ pub fn router(app_state: AppState) -> Router {
     .route("/upload", post(upload))
     .route("/download/{cache_name}/{store_path}", get(download))
     .route("/narinfo/{cache_name}/{store_path}", get(narinfo))
+    .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
     .with_state(app_state)
 }
