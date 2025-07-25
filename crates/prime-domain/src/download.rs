@@ -3,10 +3,10 @@
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  StorePath, User,
+  Digest, Entry, StorePath, User,
   dvf::{
     CompressionAlgorithm, CompressionStatus, EitherSlug, EntityName, FileSize,
-    LaxSlug, RecordId, Visibility,
+    RecordId, Visibility,
   },
 };
 
@@ -109,11 +109,10 @@ impl PrimeDomainService {
       .entry_repo
       .fetch_model_by_unique_index(
         "cache-id-and-entry-digest".into(),
-        EitherSlug::Lax(LaxSlug::new(format!(
-          "{cache_id}-{entry_digest:x?}",
-          cache_id = cache.id,
-          entry_digest = req.store_path.digest()
-        ))),
+        Entry::unique_index_cache_id_and_entry_digest(
+          cache.id,
+          Digest::from_bytes(*req.store_path.digest()),
+        ),
       )
       .await
       .into_diagnostic()

@@ -3,7 +3,7 @@
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Digest, Entry, Signature, StorePath, User,
-  dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility},
+  dvf::{EitherSlug, EntityName, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
@@ -136,22 +136,15 @@ impl PrimeDomainService {
       .entry_repo
       .fetch_model_by_unique_index(
         "cache-id-and-entry-digest".into(),
-        EitherSlug::Lax(LaxSlug::new(format!(
-          "{cache_id}-{entry_digest:x?}",
-          cache_id = cache.id,
-          entry_digest = req.digest
-        ))),
+        Entry::unique_index_cache_id_and_entry_digest(cache.id, req.digest),
       )
       .await
       .context("failed to search for entry")
       .map_err(NarinfoError::InternalError)?
       .ok_or(NarinfoError::EntryNotFound(req.digest))?;
 
-    let url = format!(
-      "/c/{cache_name}/download/{store_path}",
-      cache_name = cache.name,
-      store_path = entry.store_path
-    );
+    // note: this is a relative path from the narinfo endpoint
+    let url = format!("download/{store_path}", store_path = entry.store_path);
 
     Ok(NarinfoResponse {
       entry,

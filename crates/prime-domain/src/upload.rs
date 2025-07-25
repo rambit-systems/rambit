@@ -5,9 +5,9 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Cache, Entry, NarAuthenticityData, NarDeriverData, NarStorageData, StorePath,
-  User,
-  dvf::{CompressionStatus, EitherSlug, EntityName, LaxSlug, RecordId},
+  Cache, Digest, Entry, NarAuthenticityData, NarDeriverData, NarStorageData,
+  StorePath, User,
+  dvf::{CompressionStatus, EitherSlug, EntityName, RecordId},
   model::Model,
 };
 use serde::{Deserialize, Serialize};
@@ -138,11 +138,10 @@ impl PrimeDomainService {
       .entry_repo
       .fetch_model_by_unique_index(
         "store-id-and-entry-path".into(),
-        EitherSlug::Lax(LaxSlug::new(format!(
-          "{store_id}-{entry_path}",
-          store_id = target_store.id,
-          entry_path = req.store_path
-        ))),
+        Entry::unique_index_store_id_and_entry_path(
+          target_store.id,
+          &req.store_path,
+        ),
       )
       .await
       .into_diagnostic()
@@ -159,11 +158,10 @@ impl PrimeDomainService {
         .entry_repo
         .fetch_model_by_unique_index(
           "cache-id-and-entry-digest".into(),
-          EitherSlug::Lax(LaxSlug::new(format!(
-            "{cache_id}-{entry_digest:x?}",
-            cache_id = cache.id,
-            entry_digest = req.store_path.digest()
-          ))),
+          Entry::unique_index_cache_id_and_entry_digest(
+            cache.id,
+            Digest::from_bytes(*req.store_path.digest()),
+          ),
         )
         .await
         .into_diagnostic()
