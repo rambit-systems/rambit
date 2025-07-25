@@ -2,7 +2,7 @@
 
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Entry, Signature, StorePath, User,
+  Digest, Entry, Signature, StorePath, User,
   dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
@@ -16,8 +16,8 @@ pub struct NarinfoRequest {
   pub auth:       Option<RecordId<User>>,
   /// The name of the cache the entry is stored in.
   pub cache_name: EntityName,
-  /// The store path of the entry.
-  pub store_path: StorePath<String>,
+  /// The store path digest of the entry.
+  pub digest:     Digest,
 }
 
 /// The response struct for the [`narinfo`](PrimeDomainService::narinfo) fn.
@@ -81,7 +81,7 @@ pub enum NarinfoError {
   CacheNotFound(EntityName),
   /// The requested entry was not found.
   #[error("The requested entry was not found: \"{0}\"")]
-  EntryNotFound(StorePath<String>),
+  EntryNotFound(Digest),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -139,13 +139,13 @@ impl PrimeDomainService {
         EitherSlug::Lax(LaxSlug::new(format!(
           "{cache_id}-{entry_digest:x?}",
           cache_id = cache.id,
-          entry_digest = req.store_path.digest()
+          entry_digest = req.digest
         ))),
       )
       .await
       .context("failed to search for entry")
       .map_err(NarinfoError::InternalError)?
-      .ok_or(NarinfoError::EntryNotFound(req.store_path.clone()))?;
+      .ok_or(NarinfoError::EntryNotFound(req.digest))?;
 
     let url = format!(
       "/c/{cache_name}/download/{store_path}",
