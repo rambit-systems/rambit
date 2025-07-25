@@ -28,6 +28,7 @@
       curl jq
       config.packages.cli
     ];
+    nix.extraOptions = "experimental-features = nix-command";
   };
 in {
   domain-api-upload-download-curl = pkgs.testers.runNixOSTest {
@@ -43,15 +44,18 @@ in {
 
       grid.wait_for_unit("grid.service")
 
+      # make sure the grid node is reachable
       client.wait_for_unit("network.target")
       client.succeed("ping -c 1 grid")
 
+      # authenticate and hold onto the headers
       client.succeed("curl --fail-with-body -X POST http://grid:3000/authenticate \
         -b cookie.txt -c cookie.txt \
         -H \"Content-Type: application/json\" \
         -d '{\"email\":\"${email}\",\"password\":\"${password}\"}' \
       ")
 
+      # upload
       client.succeed("curl --fail-with-body -X POST http://grid:3000/upload \
         -b cookie.txt -c cookie.txt \
         --url-query caches=${cache} \
@@ -62,8 +66,14 @@ in {
         --data-binary @${archive} \
       ")
 
+      # download the payload
       client.succeed("curl --fail-with-body http://grid:3000/c/${cache}/download/${store-path} > output")
+      # make sure it's byte-identical
       client.succeed("diff ${archive} output")
+
+      # make sure nix can access it as a binary cache path
+      # with the --no-trust flag because we're not signing yet
+      client.succeed("nix store verify --no-trust --store http://grid:3000/c/${cache} /nix/store/${store-path}")
     '';
   };
 
@@ -80,9 +90,11 @@ in {
 
       grid.wait_for_unit("grid.service")
 
+      # make sure the grid node is reachable
       client.wait_for_unit("network.target")
       client.succeed("ping -c 1 grid")
 
+      # upload
       client.succeed("${config.packages.cli}/bin/cli \
         --host grid \
         --email ${email} \
@@ -96,8 +108,14 @@ in {
         --nar ${archive} \
       ")
 
-      client.succeed("curl http://grid:3000/c/${cache}/download/${store-path} > output")
+      # download the payload
+      client.succeed("curl --fail-with-body http://grid:3000/c/${cache}/download/${store-path} > output")
+      # make sure it's byte-identical
       client.succeed("diff ${archive} output")
+
+      # make sure nix can access it as a binary cache path
+      # with the --no-trust flag because we're not signing yet
+      client.succeed("nix store verify --no-trust --store http://grid:3000/c/${cache} /nix/store/${store-path}")
     '';
   };
 }
