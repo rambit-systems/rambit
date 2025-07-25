@@ -7,6 +7,7 @@ mod args;
 mod endpoints;
 
 use axum::Router;
+use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
@@ -34,20 +35,26 @@ async fn main() -> Result<()> {
     .context("failed to build app state")?;
 
   if args.migrate {
-    app_state
-      .prime_domain
-      .migrate_test_data(false)
-      .await
-      .context("failed to migrate test data")?;
-    tracing::info!("migrated test data as requested");
+    match app_state.prime_domain.migrate_test_data(false).await {
+      Ok(_) => {
+        tracing::info!("migrated test data as requested");
+      }
+      Err(e) => tracing::warn!("failed to migrate test data: {e}"),
+    }
   }
 
-  let router: Router<()> = self::endpoints::router(app_state);
+  let router: Router<()> = self::endpoints::router(app_state.clone());
 
-  let service = router.layer(
-    TraceLayer::new_for_http()
-      .on_response(DefaultOnResponse::new().level(Level::INFO)),
-  );
+  let trace_layer = TraceLayer::new_for_http()
+    .on_response(DefaultOnResponse::new().level(Level::INFO));
+
+  let session_layer =
+    tower_sessions::SessionManagerLayer::new(app_state.session_store)
+      .with_secure(!args.no_secure_cookies);
+  let auth_layer =
+    AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
+
+  let service = router.layer(trace_layer).layer(auth_layer);
 
   let addr = format!("{host}:{port}", host = args.host, port = args.port);
   let listener = tokio::net::TcpListener::bind(&addr)

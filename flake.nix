@@ -10,12 +10,7 @@
       url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    crane.url = "https://flakehub.com/f/ipetkov/crane/0.20.tar.gz";
-
-    tikv = {
-      url = "github:rambit-systems/tikv-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    crane.url = "https://flakehub.com/f/ipetkov/crane/0.21.tar.gz";
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } ({ ... }: {

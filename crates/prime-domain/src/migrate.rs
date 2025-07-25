@@ -4,8 +4,8 @@ use miette::{Context, IntoDiagnostic, Result};
 use models::{
   Cache, Org, Store, StoreConfiguration, User,
   dvf::{
-    EntityName, HumanName, LocalStorageCredentials, MemoryStorageCredentials,
-    RecordId, StrictSlug, Visibility,
+    EmailAddress, EntityName, HumanName, LocalStorageCredentials,
+    MemoryStorageCredentials, RecordId, StrictSlug, Visibility,
   },
 };
 
@@ -27,10 +27,19 @@ impl PrimeDomainService {
     let _user = self
       .user_repo
       .create_model(User {
-        id:   RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap(),
-        org:  org.id,
-        name: HumanName::try_new("Jean-Luc Picard")
+        id:    RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap(),
+        orgs:  vec![org.id],
+        email: EmailAddress::try_new("jpicard@federation.gov").unwrap(),
+        name:  HumanName::try_new("Jean-Luc Picard")
           .expect("failed to create name"),
+        auth:  models::UserAuthCredentials::Password {
+          // hash for password `password`
+          password_hash: models::PasswordHash(
+            "$argon2id$v=19$m=16,t=2,\
+             p=1$dGhpc2lzYXNhbHQ$dahcDJkLouoYfTwtXjg67Q"
+              .to_string(),
+          ),
+        },
       })
       .await
       .into_diagnostic()

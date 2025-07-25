@@ -98,7 +98,7 @@ impl PrimeDomainService {
         return Err(DownloadError::Unauthorized);
       }
       (Visibility::Private, Some(user)) => {
-        if user.org != cache.org {
+        if !user.orgs.contains(&cache.org) {
           return Err(DownloadError::Unauthorized);
         }
       }

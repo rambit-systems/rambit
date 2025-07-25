@@ -8,13 +8,13 @@ use axum::{
 };
 use prime_domain::{download::DownloadRequest, models::StorePath};
 
-use super::extractors::{CacheNameExtractor, UserIdExtractor};
+use super::extractors::{CacheNameExtractor, UserAuthExtractor};
 use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn download(
   cache_name: CacheNameExtractor,
-  user_id: Option<UserIdExtractor>,
+  user: Option<UserAuthExtractor>,
   Path(params): Path<HashMap<String, String>>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
@@ -34,7 +34,7 @@ pub async fn download(
   };
 
   let download_req = DownloadRequest {
-    auth: user_id.map(|e| e.0),
+    auth: user.map(|e| e.0.id),
     cache_name: cache_name.value().clone(),
     store_path,
   };
