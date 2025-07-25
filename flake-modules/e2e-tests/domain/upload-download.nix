@@ -85,6 +85,8 @@ in {
 
       client.succeed("${config.packages.cli}/bin/cli \
         --host grid \
+        --email ${email} \
+        --password ${password} \
         upload \
         --caches ${cache} \
         --store-path ${store-path} \
