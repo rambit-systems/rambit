@@ -62,7 +62,7 @@ in {
         --data-binary @${archive} \
       ")
 
-      client.succeed("curl --fail-with-body http://grid:3000/download/${cache}/${store-path} > output")
+      client.succeed("curl --fail-with-body http://grid:3000/c/${cache}/download/${store-path} > output")
       client.succeed("diff ${archive} output")
     '';
   };
@@ -96,7 +96,7 @@ in {
         --nar ${archive} \
       ")
 
-      client.succeed("curl http://grid:3000/download/${cache}/${store-path} > output")
+      client.succeed("curl http://grid:3000/c/${cache}/download/${store-path} > output")
       client.succeed("diff ${archive} output")
     '';
   };

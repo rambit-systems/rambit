@@ -148,7 +148,11 @@ impl PrimeDomainService {
       .map_err(NarinfoError::InternalError)?
       .ok_or(NarinfoError::EntryNotFound(req.store_path.clone()))?;
 
-    let url = format!("/download/{store_path}", store_path = entry.store_path);
+    let url = format!(
+      "/c/{cache_name}/download/{store_path}",
+      cache_name = cache.name,
+      store_path = entry.store_path
+    );
 
     Ok(NarinfoResponse {
       entry,

@@ -28,8 +28,8 @@ pub fn router(app_state: AppState) -> Router {
     .route("/", get(root))
     .route("/authenticate", get(authenticate).post(authenticate))
     .route("/upload", post(upload))
-    .route("/download/{cache_name}/{store_path}", get(download))
-    .route("/narinfo/{cache_name}/{store_path}", get(narinfo))
     .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
+    .route("/c/{cache_name}/download/{store_path}", get(download))
+    .route("/c/{cache_name}/narinfo/{store_path}", get(narinfo))
     .with_state(app_state)
 }
