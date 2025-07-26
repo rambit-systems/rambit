@@ -1,0 +1,21 @@
+[package]
+edition = "2021"
+name = "site-server"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
+
+leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos_axum.workspace = true
+leptos_router.workspace = true
+
+axum.workspace = true
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tower.workspace = true
+tower-http.workspace = true
+
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }

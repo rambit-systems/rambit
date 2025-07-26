@@ -50,3 +50,53 @@ axum-login = { version = "0.17" }
 tower = { version = "0.5" }
 tower-http = { version = "0.6" }
 tower-sessions = { version = "0.14" }
+
+# # # # # # # # # # # 
+### leptos config ###
+# # # # # # # # # # #
+
+leptos = { version = "0.8", features = [ "nightly", "islands" ] }
+leptos_axum = { version = "0.8", features = [  ] }
+leptos_meta = { version = "0.8", features = [  ] }
+leptos_router = { version = "0.8", features = [ "nightly" ] }
+
+console_error_panic_hook = "0.1"
+wasm-bindgen = "=0.2.100"
+
+[profile.wasm-release]
+codegen-units = 1
+inherits = "release"
+lto = true
+opt-level = 'z'
+
+[[workspace.metadata.leptos]]
+hash-files = false
+name = "site"
+
+bin-package = "site-server"
+lib-package = "site-frontend"
+
+site-pkg-dir = "pkg"
+site-root = "target/site"
+
+assets-dir = "crates/site-app/public"
+style-file = "crates/site-app/style/main.scss"
+
+reload-port = 3001
+site-addr = "0.0.0.0:3000"
+
+browserquery = "defaults"
+
+tailwind-config-file = "crates/site-app/style/tailwind/tailwind.config.js"
+tailwind-input-file = "crates/site-app/style/main.scss"
+
+# set by cargo-leptos
+env = "DEV"
+watch = false
+
+bin-default-features = false
+bin-features = [  ]
+# bin-profile-dev = "dev"
+lib-default-features = false
+lib-features = [  ]
+lib-profile-release = "wasm-release"
