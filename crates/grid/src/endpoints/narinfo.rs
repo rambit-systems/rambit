@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use axum::{
   extract::{Path, State},
   http::StatusCode,
   response::IntoResponse,
 };
-use prime_domain::{models::StorePath, narinfo::NarinfoRequest};
+use prime_domain::{models::Digest, narinfo::NarinfoRequest};
 
 use super::extractors::{CacheNameExtractor, UserAuthExtractor};
 use crate::app_state::AppState;
@@ -17,16 +17,26 @@ pub async fn narinfo(
   user: Option<UserAuthExtractor>,
   State(app_state): State<AppState>,
 ) -> impl IntoResponse {
-  let store_path = params
-    .get("store_path")
+  let digest = match params
+    .get("digest_with_suffix")
     .expect("upload route param names are malformed")
-    .clone();
-  let store_path = match StorePath::from_bytes(store_path.as_bytes()) {
-    Ok(store_path) => store_path,
+    .strip_suffix(".narinfo")
+  {
+    Some(d) => d,
+    None => {
+      return (
+        StatusCode::NOT_FOUND,
+        "Expected a digest ending in \".narinfo\"",
+      )
+        .into_response();
+    }
+  };
+  let digest = match Digest::from_str(digest) {
+    Ok(digest) => digest,
     Err(_) => {
       return (
         StatusCode::BAD_REQUEST,
-        format!("Store path is malformed: `{store_path}`"),
+        format!("Digest is malformed: `{digest}`"),
       )
         .into_response();
     }
@@ -35,7 +45,7 @@ pub async fn narinfo(
   let narinfo_req = NarinfoRequest {
     auth: user.map(|e| e.0.id),
     cache_name: cache_name.value().clone(),
-    store_path,
+    digest,
   };
 
   let narinfo_resp = app_state.prime_domain.narinfo(narinfo_req).await;

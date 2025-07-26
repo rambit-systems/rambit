@@ -2,8 +2,8 @@
 
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Entry, Signature, StorePath, User,
-  dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility},
+  Digest, Entry, Signature, StorePath, User,
+  dvf::{EitherSlug, EntityName, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
@@ -16,8 +16,8 @@ pub struct NarinfoRequest {
   pub auth:       Option<RecordId<User>>,
   /// The name of the cache the entry is stored in.
   pub cache_name: EntityName,
-  /// The store path of the entry.
-  pub store_path: StorePath<String>,
+  /// The store path digest of the entry.
+  pub digest:     Digest,
 }
 
 /// The response struct for the [`narinfo`](PrimeDomainService::narinfo) fn.
@@ -81,7 +81,7 @@ pub enum NarinfoError {
   CacheNotFound(EntityName),
   /// The requested entry was not found.
   #[error("The requested entry was not found: \"{0}\"")]
-  EntryNotFound(StorePath<String>),
+  EntryNotFound(Digest),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -132,23 +132,19 @@ impl PrimeDomainService {
       _ => (),
     }
 
-    let index_value = EitherSlug::Lax(LaxSlug::new(format!(
-      "{cache_id}-{entry_path}",
-      cache_id = cache.id,
-      entry_path = &req.store_path
-    )));
     let entry = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "cache-id-and-entry-path".to_owned(),
-        index_value,
+        "cache-id-and-entry-digest".into(),
+        Entry::unique_index_cache_id_and_entry_digest(cache.id, req.digest),
       )
       .await
       .context("failed to search for entry")
       .map_err(NarinfoError::InternalError)?
-      .ok_or(NarinfoError::EntryNotFound(req.store_path.clone()))?;
+      .ok_or(NarinfoError::EntryNotFound(req.digest))?;
 
-    let url = format!("/download/{store_path}", store_path = entry.store_path);
+    // note: this is a relative path from the narinfo endpoint
+    let url = format!("download/{store_path}", store_path = entry.store_path);
 
     Ok(NarinfoResponse {
       entry,

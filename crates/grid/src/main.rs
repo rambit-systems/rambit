@@ -11,7 +11,7 @@ use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
-use tracing::{Level, level_filters::LevelFilter};
+use tracing::{Level, info_span, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
 use self::{app_state::AppState, args::CliArgs};
@@ -46,6 +46,13 @@ async fn main() -> Result<()> {
   let router: Router<()> = self::endpoints::router(app_state.clone());
 
   let trace_layer = TraceLayer::new_for_http()
+    .make_span_with(|request: &axum::http::Request<_>| {
+      info_span!(
+          "http_request",
+          method = %request.method(),
+          uri = %request.uri(),
+      )
+    })
     .on_response(DefaultOnResponse::new().level(Level::INFO));
 
   let session_layer =
