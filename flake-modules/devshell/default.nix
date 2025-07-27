@@ -8,7 +8,7 @@
         pkg-config
 
         # other things used in local rust builds
-        gcc
+        clang mold
 
         # cargo tools
         cargo-nextest # testing
