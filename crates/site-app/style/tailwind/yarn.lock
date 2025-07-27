@@ -2,3 +2,22 @@
 # yarn lockfile v1
 
 
+"@kiwicom/orbit-design-tokens@^10.1.0":
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/@kiwicom/orbit-design-tokens/-/orbit-design-tokens-10.1.0.tgz#edadf1b7b53dad3359d502f36a050c19245d8bca"
+  integrity sha512-+m29zUuBZ2n1SvnEGkk5SkxWjL7+acs4THkiT4/n0W29G3UQXdZz8wmUjpoHXdbnT7VmMMCAY2YU3rocOeKwnQ==
+  dependencies:
+    color2k "^2.0.3"
+
+"@kiwicom/orbit-tailwind-preset@^7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@kiwicom/orbit-tailwind-preset/-/orbit-tailwind-preset-7.3.1.tgz#814d7e9b1924f120beba880a4a37552159c7e9d8"
+  integrity sha512-1X5zblDUf/xHB6w/wJsO+rWrUYe+p3r+uAHk6yYuFI9ryF3hdxxPp4v2H9Fuj5E/m3BxFSJcLFRYcEf1X9A0/A==
+  dependencies:
+    "@kiwicom/orbit-design-tokens" "^10.1.0"
+    color2k "^2.0.3"
+
+color2k@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/color2k/-/color2k-2.0.3.tgz#a771244f6b6285541c82aa65ff0a0c624046e533"
+  integrity sha512-zW190nQTIoXcGCaU08DvVNFTmQhUpnJfVuAKfWqUQkflXKpaDdpaYoM0iluLS9lgJNHyBF58KKA2FBEwkD7wog==

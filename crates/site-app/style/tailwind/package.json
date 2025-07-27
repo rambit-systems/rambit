@@ -2,5 +2,8 @@
   "name": "site-app-js",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@kiwicom/orbit-tailwind-preset": "^7.3.1"
+  }
 }
