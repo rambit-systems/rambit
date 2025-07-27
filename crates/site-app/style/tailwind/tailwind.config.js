@@ -7,7 +7,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["sans-serif"],
+        sans: ["Funnel Sans", "sans-serif"],
+        display: ["Funnel Display", "sans-serif"],
       },
     },
   },

@@ -31,7 +31,8 @@ pub fn App() -> impl IntoView {
   view! {
     <Stylesheet id="leptos" href="/pkg/site.css"/>
     <Title text="Welcome to Leptos"/>
-    <Style>{include_str!("../style/fonts.css")}</Style>
+    <Style>{include_str!("../style/funnel_sans.css")}</Style>
+    <Style>{include_str!("../style/funnel_display.css")}</Style>
 
     <Router>
       <main>
