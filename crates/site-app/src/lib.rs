@@ -1,9 +1,13 @@
+mod pages;
+
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Style, Stylesheet, Title};
 use leptos_router::{
   components::{Route, Router, Routes},
   StaticSegment,
 };
+
+use self::pages::HomePage;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -27,7 +31,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
   provide_meta_context();
 
-  const BASE_CLASSES: &str = "";
+  const BASE_CLASSES: &str =
+    "bg-cloud-light text-ink-dark border-cloud-normal font-medium";
 
   view! {
     <Stylesheet id="leptos" href="/pkg/site.css"/>
@@ -42,34 +47,5 @@ pub fn App() -> impl IntoView {
         </Routes>
       </main>
     </Router>
-  }
-}
-
-#[component]
-fn Button(children: Children) -> impl IntoView {
-  let class = "";
-
-  view! {
-    <button class=class>
-      { children() }
-    </button>
-  }
-}
-
-#[component]
-fn HomePage() -> impl IntoView {
-  view! {
-    <h1>"Welcome to Leptos!"</h1>
-    <CounterButton />
-  }
-}
-
-#[island]
-fn CounterButton() -> impl IntoView {
-  let count = RwSignal::new(0);
-  let on_click = move |_| *count.write() += 1;
-
-  view! {
-    <Button {..} on:click=on_click>"Click Me: " {count}</Button>
   }
 }
