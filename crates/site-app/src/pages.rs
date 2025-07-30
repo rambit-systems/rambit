@@ -6,14 +6,21 @@ pub fn HomePage() -> impl IntoView {
     <div class="container mx-auto flex flex-col gap-8 min-h-screen pb-8">
       <Navbar />
 
-      <div class="bg-white flex-1 border rounded">
-        <div class="p-24 font-display">
-          <p class="text-3xl">
-            "Welcome to"
+      <div class="bg-base-1 border border-base-6 rounded">
+        <div class="p-20 font-semibold flex flex-col gap-2">
+          <p class="text-lg text-product-11 uppercase">
+            "Welcome to Rambit Systems"
           </p>
-          <p class="text-8xl">
-            "Rambit"
-          </p>
+          <div class="text-6xl font-display tracking-tight">
+            <p class="font-thin">
+              "Integrate and"
+            </p>
+            <p>"never waste"</p>
+            <p>
+              "another "
+              <span class="text-product-11">"build"</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -22,12 +29,12 @@ pub fn HomePage() -> impl IntoView {
 
 #[component]
 fn Navbar() -> impl IntoView {
-  let class = "bg-white flex flex-row px-4 gap-2 items-center h-10 rounded-bl \
-               rounded-br shadow";
+  let class = "bg-product-1 flex flex-row px-4 gap-2 items-center h-10 \
+               rounded-bl rounded-br shadow-md";
 
   view! {
     <div class=class >
-      <span class="font-display text-xl font-bold">
+      <span class="font-display font-bold text-xl text-product-11">
         "Rambit"
       </span>
     </div>

@@ -31,8 +31,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
   provide_meta_context();
 
-  const BASE_CLASSES: &str =
-    "bg-cloud-light text-ink-dark border-cloud-normal font-medium";
+  const BASE_CLASSES: &str = "bg-base-2 text-base-12 border-base-6 font-medium";
 
   view! {
     <Stylesheet id="leptos" href="/pkg/site.css"/>

@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@import "tailwindcss-radix-colors/dist/orange.css";
+@import "tailwindcss-radix-colors/dist/sand.css";
+
+@theme inline {
+  --font-sans: Funnel Sans, sans-serif;
+  --font-display: Funnel Display, sans-serif;
+  
+  --color-cloud-light: #F5F7F9;
+  --color-cloud-normal: #E8EDF1;
+  --color-cloud-dark: #BAC7D5;
+
+  --color-ink-light: #657890;
+  --color-ink-normal: #4F5E71;
+  --color-ink-dark: #252A31;
+
+  --color-product-1: var(--color-orange-1);
+  --color-product-2: var(--color-orange-2);
+  --color-product-3: var(--color-orange-3);
+  --color-product-4: var(--color-orange-4);
+  --color-product-5: var(--color-orange-5);
+  --color-product-6: var(--color-orange-6);
+  --color-product-7: var(--color-orange-7);
+  --color-product-8: var(--color-orange-8);
+  --color-product-9: var(--color-orange-9);
+  --color-product-10: var(--color-orange-10);
+  --color-product-11: var(--color-orange-11);
+  --color-product-12: var(--color-orange-12);
+
+  --color-base-1: var(--color-sand-1);
+  --color-base-2: var(--color-sand-2);
+  --color-base-3: var(--color-sand-3);
+  --color-base-4: var(--color-sand-4);
+  --color-base-5: var(--color-sand-5);
+  --color-base-6: var(--color-sand-6);
+  --color-base-7: var(--color-sand-7);
+  --color-base-8: var(--color-sand-8);
+  --color-base-9: var(--color-sand-9);
+  --color-base-10: var(--color-sand-10);
+  --color-base-11: var(--color-sand-11);
+  --color-base-12: var(--color-sand-12);
+
+  --breakpoint-xl: initial;
+  --breakpoint-2xl: initial;
+}

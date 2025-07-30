@@ -80,15 +80,14 @@ site-pkg-dir = "pkg"
 site-root = "target/site"
 
 assets-dir = "crates/site-app/public"
-style-file = "crates/site-app/style/main.scss"
+style-file = "crates/site-app/style/main.css"
 
 reload-port = 3001
 site-addr = "0.0.0.0:3000"
 
 browserquery = "defaults"
 
-tailwind-config-file = "crates/site-app/style/tailwind/tailwind.config.js"
-tailwind-input-file = "crates/site-app/style/main.scss"
+tailwind-input-file = "crates/site-app/style/main.css"
 
 # set by cargo-leptos
 env = "DEV"
