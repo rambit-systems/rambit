@@ -44,7 +44,7 @@ pub fn App() -> impl IntoView {
   const BASE_CLASSES: &str = "bg-base-2 text-base-12 border-base-6 font-medium";
 
   view! {
-    <Title text="Welcome to Leptos"/>
+    <Title text="Rambit Labs — Never waste another build"/>
 
     <Router>
       <main class=BASE_CLASSES>
