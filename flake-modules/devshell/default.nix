@@ -8,12 +8,16 @@
         pkg-config
 
         # other things used in local rust builds
-        gcc
+        clang mold
 
         # cargo tools
         cargo-nextest # testing
         cargo-deny # package auditing
         cargo-depgraph # dependency graphing
+
+        # leptos items
+        cargo-leptos binaryen # leptos build tools
+        dart-sass tailwindcss_4 yarn # css build tools
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";

@@ -1,0 +1,9 @@
+{
+  "name": "site-app-js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "tailwindcss-radix-colors": "^2.1.0"
+  }
+}

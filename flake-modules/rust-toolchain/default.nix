@@ -9,10 +9,11 @@
     # keep in mind that these are functions that take pkgs and produce a toolchain
     toolchain = p: p.rust-bin.selectLatestNightlyWith (toolchain: toolchain.minimal.override {
       extensions = [ "rustfmt" "clippy" ];
-      targets = [ musl-target ];
+      targets = [ musl-target "wasm32-unknown-unknown" ];
     });
     dev-toolchain = p: p.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
       extensions = [ "rust-src" "rust-analyzer" ];
+      targets = [ "wasm32-unknown-unknown" ];
     });
 
     # configure crane to use the CI toolchain

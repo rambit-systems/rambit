@@ -25,26 +25,77 @@ storage = { git = "https://github.com/johnbchron/app-core" }
 # model = { path = "../app-core/crates/model" }
 # storage = { path = "../app-core/crates/storage" }
 
-# atomic-ish features
-async-trait = { version = "0.1" }
+# essentials
 bytes = { version = "1" }
-clap = { version = "4.5", features = [ "derive" ] }
-futures = { version = "0.3" }
-miette = { git = "https://github.com/zkat/miette", default-features = false, features = [
-  "derive",
-] }
-nix-compat = { git = "https://code.tvl.fyi/depot.git:workspace=views/tvix.git", default-features = false }
 serde = { version = "1", features = [ "derive" ] }
 thiserror = { version = "2" }
 tracing = { version = "0.1" }
 ulid = { version = "1.1", features = [ "serde" ] }
 
-axum = { version = "0.8", features = [ "http2", "macros" ] }
-tower = { version = "0.5" }
-tower-http = { version = "0.6" }
-
-axum-login = { version = "0.17" }
-tower-sessions = { version = "0.14" }
+# atomic-ish features
+clap = { version = "4.5", features = [ "derive" ] }
+miette = { git = "https://github.com/zkat/miette", default-features = false, features = [
+  "derive",
+] }
+nix-compat = { git = "https://code.tvl.fyi/depot.git:workspace=views/tvix.git", default-features = false }
 
 # async
+async-trait = { version = "0.1" }
+futures = { version = "0.3" }
 tokio = { version = "1" }
+
+# network stack
+axum = { version = "0.8", features = [ "http2", "macros" ] }
+axum-login = { version = "0.17" }
+tower = { version = "0.5" }
+tower-http = { version = "0.6" }
+tower-sessions = { version = "0.14" }
+
+# # # # # # # # # # # 
+### leptos config ###
+# # # # # # # # # # #
+
+leptos = { version = "0.8", features = [ "nightly", "islands" ] }
+leptos_axum = { version = "0.8", features = [  ] }
+leptos_meta = { version = "0.8", features = [  ] }
+leptos_router = { version = "0.8", features = [ "nightly" ] }
+
+console_error_panic_hook = "0.1"
+wasm-bindgen = "=0.2.100"
+
+[profile.wasm-release]
+codegen-units = 1
+inherits = "release"
+lto = true
+opt-level = 'z'
+
+[[workspace.metadata.leptos]]
+hash-files = false
+name = "site"
+
+bin-package = "site-server"
+lib-package = "site-frontend"
+
+site-pkg-dir = "pkg"
+site-root = "target/site"
+
+assets-dir = "crates/site-app/public"
+style-file = "crates/site-app/style/main.css"
+
+reload-port = 3001
+site-addr = "0.0.0.0:3000"
+
+browserquery = "defaults"
+
+tailwind-input-file = "crates/site-app/style/main.css"
+
+# set by cargo-leptos
+env = "DEV"
+watch = false
+
+bin-default-features = false
+bin-features = [  ]
+# bin-profile-dev = "dev"
+lib-default-features = false
+lib-features = [  ]
+lib-profile-release = "wasm-release"
