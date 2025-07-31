@@ -37,7 +37,7 @@
     };
 
     # build the deps for the frontend bundle, and export the target folder
-    site-frontend-deps = craneLib.mkCargoDerivation (common-args // {
+    frontend-deps = craneLib.mkCargoDerivation (common-args // {
       pname = "${leptos-options.lib-package}-deps";
       src = craneLib.mkDummySrc common-args;
       cargoArtifacts = null;
@@ -55,10 +55,10 @@
     });
 
     # build the deps for the server binary, and export the target folder
-    site-server-deps = craneLib.mkCargoDerivation (common-args // {
+    server-deps = craneLib.mkCargoDerivation (common-args // {
       pname = "${leptos-options.bin-package}-deps";
       src = craneLib.mkDummySrc common-args;
-      cargoArtifacts = site-frontend-deps;
+      cargoArtifacts = frontend-deps;
       doInstallCargoArtifacts = true;
 
       buildPhaseCargoCommand = ''
@@ -70,7 +70,7 @@
     });
 
     # build the binary and bundle using cargo leptos
-    site-server = craneLib.buildPackage (common-args // {
+    server = craneLib.buildPackage (common-args // {
       # add inputs needed for leptos build
       nativeBuildInputs = common-args.nativeBuildInputs ++ (with pkgs; [
         cargo-leptos tailwindcss_4
@@ -96,14 +96,14 @@
       '';
 
       doCheck = false;
-      cargoArtifacts = site-server-deps;
+      cargoArtifacts = server-deps;
     });
 
-    site-server-container = pkgs.dockerTools.buildLayeredImage {
+    server-container = pkgs.dockerTools.buildLayeredImage {
       name = leptos-options.bin-package;
       tag = "latest";
       contents = [
-        site-server
+        server
         pkgs.cacert
       ];
       config = {
@@ -111,7 +111,6 @@
         # this does signal forwarding and zombie process reaping
         # this should be removed if using something like firecracker (i.e. on fly.io)
         Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
-        WorkingDir = "${site-server}/bin";
         # we provide the env variables that we get from Cargo.toml during development
         # these can be overridden when the container is run, but defaults are needed
         Env = [
@@ -124,12 +123,13 @@
           # https://github.com/leptos-rs/cargo-leptos/issues/271
           "LEPTOS_HASH_FILES=true"
         ];
+        WorkingDir = "${server}/bin";
       };
     };
   in {
     packages = {
-      site-server = site-server;
-      site-server-container = site-server-container;
+      "${leptos-options.bin-package}" = server;
+      "${leptos-options.bin-package}-container" = server-container;
     };
   };
 }
