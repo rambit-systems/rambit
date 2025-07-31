@@ -1,7 +1,9 @@
 mod pages;
 
 use leptos::prelude::*;
-use leptos_meta::{provide_meta_context, MetaTags, Style, Stylesheet, Title};
+use leptos_meta::{
+  provide_meta_context, HashedStylesheet, MetaTags, Style, Title,
+};
 use leptos_router::{
   components::{Route, Router, Routes},
   StaticSegment,
@@ -14,10 +16,15 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
     <!DOCTYPE html>
     <html lang="en">
       <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
-        <HydrationScripts options islands=true/>
+        <HydrationScripts options={options.clone()} islands=true />
+
+        <HashedStylesheet options id="leptos" />
+        <Style>{include_str!("../style/funnel_sans.css")}</Style>
+        <Style>{include_str!("../style/funnel_display.css")}</Style>
+
         <MetaTags/>
       </head>
       <body>
@@ -34,10 +41,7 @@ pub fn App() -> impl IntoView {
   const BASE_CLASSES: &str = "bg-base-2 text-base-12 border-base-6 font-medium";
 
   view! {
-    <Stylesheet id="leptos" href="/pkg/site.css"/>
     <Title text="Welcome to Leptos"/>
-    <Style>{include_str!("../style/funnel_sans.css")}</Style>
-    <Style>{include_str!("../style/funnel_display.css")}</Style>
 
     <Router>
       <main class=BASE_CLASSES>

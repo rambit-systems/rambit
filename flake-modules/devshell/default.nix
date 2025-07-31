@@ -49,6 +49,15 @@
         }
 
         {
+          name = "container";
+          command = ''
+            docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
+            docker run --rm --network host -e BASE_URL='http://localhost:3000' site-server:latest
+          '';
+          help = "Runs the site binary in a container.";
+        }
+
+        {
           name = "update-crate-graph";
           command = ''
             echo "building crate graph image"
@@ -58,15 +67,6 @@
           '';
           help = "Update the crate graph";
           category = "[repo actions]";
-        }
-
-        {
-          name = "container";
-          command = ''
-            docker load -i $(nix build .#app-image --print-out-paths --no-link) && \
-            docker run --rm --network host app:latest
-          '';
-          help = "Runs the app in a container.";
         }
       ];
     };
