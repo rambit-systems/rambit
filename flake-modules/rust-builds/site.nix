@@ -38,7 +38,7 @@
 
     # build the deps for the frontend bundle, and export the target folder
     site-frontend-deps = craneLib.mkCargoDerivation (common-args // {
-      pname = "site-frontend-deps";
+      pname = "${leptos-options.lib-package}-deps";
       src = craneLib.mkDummySrc common-args;
       cargoArtifacts = null;
       doInstallCargoArtifacts = true;
@@ -56,7 +56,7 @@
 
     # build the deps for the server binary, and export the target folder
     site-server-deps = craneLib.mkCargoDerivation (common-args // {
-      pname = "site-server-deps";
+      pname = "${leptos-options.bin-package}-deps";
       src = craneLib.mkDummySrc common-args;
       cargoArtifacts = site-frontend-deps;
       doInstallCargoArtifacts = true;
@@ -90,7 +90,7 @@
 
       installPhaseCommand = ''
         mkdir -p $out/bin
-        cp target/release/site-server $out/bin/
+        cp target/release/${leptos-options.bin-package} $out/bin/
         cp target/release/hash.txt $out/bin/
         cp -r target/site $out/bin/
       '';
@@ -110,7 +110,7 @@
         # runs the executable with tini: https://github.com/krallin/tini
         # this does signal forwarding and zombie process reaping
         # this should be removed if using something like firecracker (i.e. on fly.io)
-        Entrypoint = [ "${pkgs.tini}/bin/tini" "site-server" "--" ];
+        Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
         WorkingDir = "${site-server}/bin";
         # we provide the env variables that we get from Cargo.toml during development
         # these can be overridden when the container is run, but defaults are needed
