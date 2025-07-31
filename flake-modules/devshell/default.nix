@@ -17,7 +17,7 @@
 
         # leptos items
         cargo-leptos binaryen # leptos build tools
-        dart-sass tailwindcss_4 yarn # css build tools
+        tailwindcss_4 yarn # css build tools
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
