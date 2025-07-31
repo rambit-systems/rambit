@@ -26,6 +26,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <Style>{include_str!("../style/funnel_sans.css")}</Style>
         <Style>{include_str!("../style/funnel_display.css")}</Style>
 
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
         <MetaTags/>
       </head>
       <body>
