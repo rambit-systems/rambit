@@ -17,7 +17,10 @@
 
         # leptos items
         cargo-leptos binaryen # leptos build tools
-        dart-sass tailwindcss_4 yarn # css build tools
+        tailwindcss_4 yarn # css build tools
+
+        # deployment
+        dive flyctl
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
@@ -51,8 +54,8 @@
         {
           name = "container";
           command = ''
-            docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
-            docker run --rm --network host -e BASE_URL='http://localhost:3000' site-server:latest
+            docker load -i $(nix build .#grid-container --print-out-paths --no-link) && \
+            docker run --rm --network host grid:latest
           '';
           help = "Runs the site binary in a container.";
         }

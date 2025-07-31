@@ -1,3 +1,6 @@
+
+name: nix-checks
+
 on:
   pull_request:
   push:
