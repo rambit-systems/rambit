@@ -3,6 +3,6 @@
     ./workspace.nix
     ./crate-graph.nix
     ./cli.nix
-    ./site.nix
+    ./grid.nix
   ];
 }
