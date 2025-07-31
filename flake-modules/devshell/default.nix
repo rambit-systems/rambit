@@ -51,8 +51,8 @@
         {
           name = "container";
           command = ''
-            docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
-            docker run --rm --network host -e BASE_URL='http://localhost:3000' site-server:latest
+            docker load -i $(nix build .#grid-container --print-out-paths --no-link) && \
+            docker run --rm --network host grid:latest
           '';
           help = "Runs the site binary in a container.";
         }
