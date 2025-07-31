@@ -73,7 +73,7 @@ opt-level = 'z'
 hash-files = false
 name = "site"
 
-bin-package = "site-server"
+bin-package = "grid"
 lib-package = "site-frontend"
 
 site-pkg-dir = "pkg"

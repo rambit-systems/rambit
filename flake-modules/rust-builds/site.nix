@@ -37,8 +37,8 @@
     };
 
     # build the deps for the frontend bundle, and export the target folder
-    site-frontend-deps = craneLib.mkCargoDerivation (common-args // {
-      pname = "site-frontend-deps";
+    frontend-deps = craneLib.mkCargoDerivation (common-args // {
+      pname = "${leptos-options.lib-package}-deps";
       src = craneLib.mkDummySrc common-args;
       cargoArtifacts = null;
       doInstallCargoArtifacts = true;
@@ -55,10 +55,10 @@
     });
 
     # build the deps for the server binary, and export the target folder
-    site-server-deps = craneLib.mkCargoDerivation (common-args // {
-      pname = "site-server-deps";
+    server-deps = craneLib.mkCargoDerivation (common-args // {
+      pname = "${leptos-options.bin-package}-deps";
       src = craneLib.mkDummySrc common-args;
-      cargoArtifacts = site-frontend-deps;
+      cargoArtifacts = frontend-deps;
       doInstallCargoArtifacts = true;
 
       buildPhaseCargoCommand = ''
@@ -70,10 +70,10 @@
     });
 
     # build the binary and bundle using cargo leptos
-    site-server = craneLib.buildPackage (common-args // {
+    server = craneLib.buildPackage (common-args // {
       # add inputs needed for leptos build
       nativeBuildInputs = common-args.nativeBuildInputs ++ (with pkgs; [
-        cargo-leptos tailwindcss_4
+        cargo-leptos tailwindcss_4 makeWrapper
      ]);
 
       # link the style packages node_modules into the build directory
@@ -90,46 +90,44 @@
 
       installPhaseCommand = ''
         mkdir -p $out/bin
-        cp target/release/site-server $out/bin/
+        cp target/release/${leptos-options.bin-package} $out/bin/
         cp target/release/hash.txt $out/bin/
         cp -r target/site $out/bin/
+
+        # supply env variable defaults from leptos options
+        wrapProgram $out/bin/${leptos-options.bin-package} \
+          --set-default LEPTOS_OUTPUT_NAME ${leptos-options.name} \
+          --set-default LEPTOS_SITE_ROOT $out/bin/${leptos-options.name} \
+          --set-default LEPTOS_SITE_PKG_DIR ${leptos-options.site-pkg-dir} \
+          --set-default LEPTOS_SITE_ADDR 0.0.0.0:3000 \
+          --set-default LEPTOS_RELOAD_PORT ${builtins.toString leptos-options.reload-port} \
+          --set-default LEPTOS_ENV PROD \
+          --set-default LEPTOS_HASH_FILES true
       '';
 
       doCheck = false;
-      cargoArtifacts = site-server-deps;
+      cargoArtifacts = server-deps;
     });
 
-    site-server-container = pkgs.dockerTools.buildLayeredImage {
+    server-container = pkgs.dockerTools.buildLayeredImage {
       name = leptos-options.bin-package;
       tag = "latest";
       contents = [
-        site-server
+        server
         pkgs.cacert
       ];
       config = {
         # runs the executable with tini: https://github.com/krallin/tini
         # this does signal forwarding and zombie process reaping
         # this should be removed if using something like firecracker (i.e. on fly.io)
-        Entrypoint = [ "${pkgs.tini}/bin/tini" "site-server" "--" ];
-        WorkingDir = "${site-server}/bin";
-        # we provide the env variables that we get from Cargo.toml during development
-        # these can be overridden when the container is run, but defaults are needed
-        Env = [
-          "LEPTOS_OUTPUT_NAME=${leptos-options.name}"
-          "LEPTOS_SITE_ROOT=${leptos-options.name}"
-          "LEPTOS_SITE_PKG_DIR=${leptos-options.site-pkg-dir}"
-          "LEPTOS_SITE_ADDR=0.0.0.0:3000"
-          "LEPTOS_RELOAD_PORT=${builtins.toString leptos-options.reload-port}"
-          "LEPTOS_ENV=PROD"
-          # https://github.com/leptos-rs/cargo-leptos/issues/271
-          "LEPTOS_HASH_FILES=true"
-        ];
+        Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
+        WorkingDir = "${server}/bin";
       };
     };
   in {
     packages = {
-      site-server = site-server;
-      site-server-container = site-server-container;
+      "${leptos-options.bin-package}" = server;
+      "${leptos-options.bin-package}-container" = server-container;
     };
   };
 }

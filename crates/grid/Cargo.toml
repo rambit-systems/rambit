@@ -9,11 +9,16 @@ publish = false
 [dependencies]
 auth-domain = { path = "../auth-domain" }
 prime-domain = { path = "../prime-domain" }
+site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
 tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 
 kv = { workspace = true, features = [ "redb", "no-field-names" ] }
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+
+leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos_axum.workspace = true
+leptos_router.workspace = true
 
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }

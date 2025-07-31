@@ -9,6 +9,7 @@ mod endpoints;
 use axum::Router;
 use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
+use leptos_axum::LeptosRoutes;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
 use tracing::{Level, info_span, level_filters::LevelFilter};
@@ -18,6 +19,7 @@ use self::{app_state::AppState, args::CliArgs};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+  // set up tracing
   let env_filter = EnvFilter::builder()
     .with_default_directive(LevelFilter::INFO.into())
     .from_env_lossy();
@@ -26,14 +28,17 @@ async fn main() -> Result<()> {
     .with(env_filter)
     .init();
 
+  // parse command-line arguments
   let args = CliArgs::parse();
 
   tracing::info!("starting app server");
 
+  // build app state
   let app_state = AppState::build()
     .await
     .context("failed to build app state")?;
 
+  // migrate if necessary
   if args.migrate {
     match app_state.prime_domain.migrate_test_data(false).await {
       Ok(_) => {
@@ -43,8 +48,23 @@ async fn main() -> Result<()> {
     }
   }
 
-  let router: Router<()> = self::endpoints::router(app_state.clone());
+  // prepare leptos
+  let leptos_options = app_state.leptos_options.clone();
+  let routes = leptos_axum::generate_route_list(site_app::App);
 
+  // build router
+  let router = Router::new()
+    .nest("/api/v1", self::endpoints::router())
+    .leptos_routes(&app_state, routes, {
+      let leptos_options = leptos_options.clone();
+      move || site_app::shell(leptos_options.clone())
+    })
+    .fallback(leptos_axum::file_and_error_handler::<AppState, _>(
+      site_app::shell,
+    ))
+    .with_state(app_state.clone());
+
+  // build tower service
   let trace_layer = TraceLayer::new_for_http()
     .make_span_with(|request: &axum::http::Request<_>| {
       info_span!(

@@ -28,7 +28,7 @@ pub async fn authenticate(
 
   let req = client
     .post(format!(
-      "http://{host}:{port}/authenticate",
+      "http://{host}:{port}/api/v1/authenticate",
       host = host.as_ref().cloned().unwrap_or("localhost".to_string()),
       port = port.unwrap_or(3000),
     ))

@@ -23,7 +23,7 @@ pub async fn root() -> impl IntoResponse {
    go somewhere else."
 }
 
-pub fn router(app_state: AppState) -> Router {
+pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
     .route("/authenticate", get(authenticate).post(authenticate))
@@ -31,5 +31,4 @@ pub fn router(app_state: AppState) -> Router {
     .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
     .route("/c/{cache_name}/download/{store_path}", get(download))
     .route("/c/{cache_name}/{digest_with_suffix}", get(narinfo))
-    .with_state(app_state)
 }

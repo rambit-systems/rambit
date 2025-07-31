@@ -1166,9 +1166,13 @@ dependencies = [
  "clap",
  "http-body-util",
  "kv",
+ "leptos",
+ "leptos_axum",
+ "leptos_router",
  "miette",
  "prime-domain",
  "serde",
+ "site-app",
  "tokio",
  "tower",
  "tower-http",
@@ -3364,22 +3368,6 @@ dependencies = [
  "leptos",
  "site-app",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "site-server"
-version = "0.1.0"
-dependencies = [
- "axum",
- "leptos",
- "leptos_axum",
- "leptos_router",
- "site-app",
- "tokio",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

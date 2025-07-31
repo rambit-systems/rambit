@@ -49,14 +49,14 @@ in {
       client.succeed("ping -c 1 grid")
 
       # authenticate and hold onto the headers
-      client.succeed("curl --fail-with-body -X POST http://grid:3000/authenticate \
+      client.succeed("curl --fail-with-body -X POST http://grid:3000/api/v1/authenticate \
         -b cookie.txt -c cookie.txt \
         -H \"Content-Type: application/json\" \
         -d '{\"email\":\"${email}\",\"password\":\"${password}\"}' \
       ")
 
       # upload
-      client.succeed("curl --fail-with-body -X POST http://grid:3000/upload \
+      client.succeed("curl --fail-with-body -X POST http://grid:3000/api/v1/upload \
         -b cookie.txt -c cookie.txt \
         --url-query caches=${cache} \
         --url-query store_path=${store-path} \
@@ -67,13 +67,13 @@ in {
       ")
 
       # download the payload
-      client.succeed("curl --fail-with-body http://grid:3000/c/${cache}/download/${store-path} > output")
+      client.succeed("curl --fail-with-body http://grid:3000/api/v1/c/${cache}/download/${store-path} > output")
       # make sure it's byte-identical
       client.succeed("diff ${archive} output")
 
       # make sure nix can access it as a binary cache path
       # with the --no-trust flag because we're not signing yet
-      client.succeed("nix store verify --no-trust --store http://grid:3000/c/${cache} /nix/store/${store-path}")
+      client.succeed("nix store verify --no-trust --store http://grid:3000/api/v1/c/${cache} /nix/store/${store-path}")
     '';
   };
 
@@ -109,13 +109,13 @@ in {
       ")
 
       # download the payload
-      client.succeed("curl --fail-with-body http://grid:3000/c/${cache}/download/${store-path} > output")
+      client.succeed("curl --fail-with-body http://grid:3000/api/v1/c/${cache}/download/${store-path} > output")
       # make sure it's byte-identical
       client.succeed("diff ${archive} output")
 
       # make sure nix can access it as a binary cache path
       # with the --no-trust flag because we're not signing yet
-      client.succeed("nix store verify --no-trust --store http://grid:3000/c/${cache} /nix/store/${store-path}")
+      client.succeed("nix store verify --no-trust --store http://grid:3000/api/v1/c/${cache} /nix/store/${store-path}")
     '';
   };
 }
