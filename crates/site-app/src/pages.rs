@@ -9,7 +9,7 @@ pub fn HomePage() -> impl IntoView {
       <div class="bg-base-1 border border-base-6 rounded">
         <div class="p-6 sm:p-20 font-semibold flex flex-col gap-2">
           <p class="text-sm sm:text-lg text-product-11 uppercase">
-            "Welcome to Rambit Systems"
+            "Welcome to Rambit Labs"
           </p>
           <div class="text-4xl sm:text-6xl font-display tracking-tight">
             <p class="font-thin">
