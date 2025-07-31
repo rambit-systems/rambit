@@ -120,7 +120,8 @@
         # runs the executable with tini: https://github.com/krallin/tini
         # this does signal forwarding and zombie process reaping
         # this should be removed if using something like firecracker (i.e. on fly.io)
-        Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
+        # Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
+        Entrypoint = [ "${leptos-options.bin-package}" ];
         WorkingDir = "${server}/bin";
       };
     };
