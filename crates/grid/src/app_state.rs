@@ -30,14 +30,16 @@ impl AppState {
     let leptos_conf = leptos::prelude::get_configuration(None)
       .into_diagnostic()
       .context("failed to prepare leptos config")?;
+    let leptos_options = leptos_conf.leptos_options;
+    dbg!(&leptos_options);
 
     Ok(AppState {
-      auth_domain:    AuthDomainService::new(user_db.clone()),
-      prime_domain:   PrimeDomainService::new(
+      auth_domain: AuthDomainService::new(user_db.clone()),
+      prime_domain: PrimeDomainService::new(
         org_db, user_db, store_db, entry_db, cache_db,
       ),
-      session_store:  DatabaseSessionStore::new(session_db),
-      leptos_options: leptos_conf.leptos_options,
+      session_store: DatabaseSessionStore::new(session_db),
+      leptos_options,
     })
   }
 }

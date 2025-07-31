@@ -73,7 +73,7 @@
     server = craneLib.buildPackage (common-args // {
       # add inputs needed for leptos build
       nativeBuildInputs = common-args.nativeBuildInputs ++ (with pkgs; [
-        cargo-leptos tailwindcss_4
+        cargo-leptos tailwindcss_4 makeWrapper
      ]);
 
       # link the style packages node_modules into the build directory
@@ -93,6 +93,16 @@
         cp target/release/${leptos-options.bin-package} $out/bin/
         cp target/release/hash.txt $out/bin/
         cp -r target/site $out/bin/
+
+        # supply env variable defaults from leptos options
+        wrapProgram $out/bin/${leptos-options.bin-package} \
+          --set-default LEPTOS_OUTPUT_NAME ${leptos-options.name} \
+          --set-default LEPTOS_SITE_ROOT $out/bin/${leptos-options.name} \
+          --set-default LEPTOS_SITE_PKG_DIR ${leptos-options.site-pkg-dir} \
+          --set-default LEPTOS_SITE_ADDR 0.0.0.0:3000 \
+          --set-default LEPTOS_RELOAD_PORT ${builtins.toString leptos-options.reload-port} \
+          --set-default LEPTOS_ENV PROD \
+          --set-default LEPTOS_HASH_FILES true
       '';
 
       doCheck = false;
@@ -111,18 +121,6 @@
         # this does signal forwarding and zombie process reaping
         # this should be removed if using something like firecracker (i.e. on fly.io)
         Entrypoint = [ "${pkgs.tini}/bin/tini" "${leptos-options.bin-package}" "--" ];
-        # we provide the env variables that we get from Cargo.toml during development
-        # these can be overridden when the container is run, but defaults are needed
-        Env = [
-          "LEPTOS_OUTPUT_NAME=${leptos-options.name}"
-          "LEPTOS_SITE_ROOT=${leptos-options.name}"
-          "LEPTOS_SITE_PKG_DIR=${leptos-options.site-pkg-dir}"
-          "LEPTOS_SITE_ADDR=0.0.0.0:3000"
-          "LEPTOS_RELOAD_PORT=${builtins.toString leptos-options.reload-port}"
-          "LEPTOS_ENV=PROD"
-          # https://github.com/leptos-rs/cargo-leptos/issues/271
-          "LEPTOS_HASH_FILES=true"
-        ];
         WorkingDir = "${server}/bin";
       };
     };
