@@ -1,13 +1,16 @@
 use auth_domain::AuthDomainService;
-use miette::Result;
+use axum::extract::FromRef;
+use leptos::config::LeptosOptions;
+use miette::{Context, IntoDiagnostic, Result};
 use prime_domain::{PrimeDomainService, db::Database};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, FromRef)]
 pub struct AppState {
-  pub auth_domain:   AuthDomainService,
-  pub prime_domain:  PrimeDomainService,
-  pub session_store: DatabaseSessionStore,
+  pub auth_domain:    AuthDomainService,
+  pub prime_domain:   PrimeDomainService,
+  pub session_store:  DatabaseSessionStore,
+  pub leptos_options: LeptosOptions,
 }
 
 impl AppState {
@@ -24,12 +27,17 @@ impl AppState {
     let cache_db = Database::new_from_kv(kv_store.clone());
     let session_db = Database::new_from_kv(kv_store);
 
+    let leptos_conf = leptos::prelude::get_configuration(None)
+      .into_diagnostic()
+      .context("failed to prepare leptos config")?;
+
     Ok(AppState {
-      auth_domain:   AuthDomainService::new(user_db.clone()),
-      prime_domain:  PrimeDomainService::new(
+      auth_domain:    AuthDomainService::new(user_db.clone()),
+      prime_domain:   PrimeDomainService::new(
         org_db, user_db, store_db, entry_db, cache_db,
       ),
-      session_store: DatabaseSessionStore::new(session_db),
+      session_store:  DatabaseSessionStore::new(session_db),
+      leptos_options: leptos_conf.leptos_options,
     })
   }
 }
