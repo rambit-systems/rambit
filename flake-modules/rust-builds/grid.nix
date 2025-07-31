@@ -115,6 +115,7 @@
       contents = [
         server
         pkgs.cacert
+        pkgs.bash
       ];
       config = {
         # runs the executable with tini: https://github.com/krallin/tini
