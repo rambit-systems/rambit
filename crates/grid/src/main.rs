@@ -43,7 +43,8 @@ async fn main() -> Result<()> {
     }
   }
 
-  let router: Router<()> = self::endpoints::router(app_state.clone());
+  let router =
+    Router::new().nest("/api/v1", self::endpoints::router(app_state.clone()));
 
   let trace_layer = TraceLayer::new_for_http()
     .make_span_with(|request: &axum::http::Request<_>| {
