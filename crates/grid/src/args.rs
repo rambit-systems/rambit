@@ -9,6 +9,6 @@ pub struct CliArgs {
   pub no_secure_cookies: bool,
   #[arg(long, default_value_t = 3000)]
   pub port:              u16,
-  #[arg(long, default_value = "127.0.0.1")]
+  #[arg(long, default_value = "0.0.0.0")]
   pub host:              String,
 }
