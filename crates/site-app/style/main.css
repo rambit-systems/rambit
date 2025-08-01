@@ -5,6 +5,7 @@
 @import "tailwindcss-radix-colors/dist/red.css";
 
 @import "./components/btn-link.css";
+@import "./utilities.css";
 
 @theme inline {
   /* set fonts */

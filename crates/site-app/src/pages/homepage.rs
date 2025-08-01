@@ -5,10 +5,10 @@ use crate::components::Navbar;
 #[component]
 pub fn HomePage() -> impl IntoView {
   view! {
-    <div class="mx-4 sm:container sm:mx-auto flex flex-col gap-8 min-h-screen pb-8">
+    <div class="page-container flex flex-col gap-8 min-h-screen pb-8">
       <Navbar />
 
-      <div class="bg-base-1 border border-base-6 rounded">
+      <div class="elevation-flat text-base-12">
         <div class="p-6 sm:p-20 font-semibold flex flex-col gap-2">
           <p class="text-sm sm:text-lg text-product-11 uppercase">
             "Welcome to Rambit Labs"
