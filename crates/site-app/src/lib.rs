@@ -1,3 +1,4 @@
+mod components;
 mod pages;
 
 use leptos::prelude::*;
@@ -25,6 +26,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <Style>{include_str!("../style/funnel_sans.css")}</Style>
         <Style>{include_str!("../style/funnel_display.css")}</Style>
 
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
         <MetaTags/>
       </head>
       <body>
@@ -41,7 +44,7 @@ pub fn App() -> impl IntoView {
   const BASE_CLASSES: &str = "bg-base-2 text-base-12 border-base-6 font-medium";
 
   view! {
-    <Title text="Welcome to Leptos"/>
+    <Title text="Rambit Labs — Never waste another build"/>
 
     <Router>
       <main class=BASE_CLASSES>

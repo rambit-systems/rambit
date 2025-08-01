@@ -54,7 +54,7 @@ pub async fn upload(
   let cache_list = cache_list.iter().map(|c| c.to_string()).collect::<String>();
   let req = client
     .post(format!(
-      "http://{host}:{port}/api/v1/upload",
+      "{host}:{port}/api/v1/upload",
       host = host.as_ref().cloned().unwrap_or("localhost".to_string()),
       port = port.unwrap_or(3000),
     ))

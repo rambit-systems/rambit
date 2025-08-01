@@ -96,7 +96,7 @@ in {
 
       # upload
       client.succeed("${config.packages.cli}/bin/cli \
-        --host grid \
+        --host http://grid \
         --email ${email} \
         --password ${password} \
         upload \
