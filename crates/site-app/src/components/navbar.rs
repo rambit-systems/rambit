@@ -11,8 +11,8 @@ pub fn Navbar() -> impl IntoView {
         "Rambit"
       </span>
       <div class="flex-1" />
-      <a class="btn-link btn-link-secondary">Login</a>
-      <a class="btn-link btn-link-primary">Sign Up</a>
+      <a href="/auth/login" class="btn-link btn-link-secondary">Login</a>
+      <a href="/auth/signup" class="btn-link btn-link-primary">Sign Up</a>
     </div>
   }
 }

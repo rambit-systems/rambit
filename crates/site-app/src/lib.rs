@@ -41,17 +41,27 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
   provide_meta_context();
 
-  const BASE_CLASSES: &str = "elevation-suppressed text-base-11 font-medium";
-
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
-    <Router>
-      <main class=BASE_CLASSES>
+    <PageContainer>
+      <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
         </Routes>
-      </main>
-    </Router>
+      </Router>
+    </PageContainer>
+  }
+}
+
+#[component]
+fn PageContainer(children: Children) -> impl IntoView {
+  view! {
+    <main class="elevation-suppressed text-base-11 font-medium">
+      <div class="page-container flex flex-col gap-8 min-h-screen pb-8">
+        <self::components::Navbar />
+        { children() }
+      </div>
+    </main>
   }
 }
