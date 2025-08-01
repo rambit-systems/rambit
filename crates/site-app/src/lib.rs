@@ -7,10 +7,10 @@ use leptos_meta::{
 };
 use leptos_router::{
   components::{Route, Router, Routes},
-  StaticSegment,
+  path, StaticSegment,
 };
 
-use self::pages::HomePage;
+use self::pages::{HomePage, LoginPage};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -48,6 +48,7 @@ pub fn App() -> impl IntoView {
       <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
+          <Route path=path!("/auth/login") view=LoginPage/>
         </Routes>
       </Router>
     </PageContainer>
