@@ -1,0 +1,28 @@
+/* based off https://orbit.kiwi/components/action/buttonlink/ */
+
+@layer base {
+  .btn-link {
+    /* behavior */
+    @apply cursor-pointer transition-colors select-none;
+
+    /* appearance */
+    @apply rounded-md;
+
+    /* spacing */
+    @apply px-2 py-0.5;
+  }
+
+  .btn-link-primary {
+    /* color */
+    @apply text-product-11 hover:bg-product-4 active:bg-product-5;
+  }
+  .btn-link-secondary {
+    /* color */
+    /* the base scheme uses shade 12 in its base state */
+    @apply text-base-12 hover:bg-base-4 active:bg-base-5;
+  }
+  .btn-link-critical {
+    /* color */
+    @apply text-critical-11 hover:bg-critical-4 active:bg-critical-5;
+  }
+}
