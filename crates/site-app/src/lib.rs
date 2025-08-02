@@ -7,10 +7,10 @@ use leptos_meta::{
 };
 use leptos_router::{
   components::{Route, Router, Routes},
-  StaticSegment,
+  path, StaticSegment,
 };
 
-use self::pages::HomePage;
+use self::pages::{HomePage, LoginPage};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -41,17 +41,28 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
   provide_meta_context();
 
-  const BASE_CLASSES: &str = "bg-base-2 text-base-12 border-base-6 font-medium";
-
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
-    <Router>
-      <main class=BASE_CLASSES>
+    <PageContainer>
+      <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
+          <Route path=path!("/auth/login") view=LoginPage/>
         </Routes>
-      </main>
-    </Router>
+      </Router>
+    </PageContainer>
+  }
+}
+
+#[component]
+fn PageContainer(children: Children) -> impl IntoView {
+  view! {
+    <main class="elevation-suppressed text-base-11 font-medium">
+      <div class="page-container flex flex-col gap-8 min-h-screen pb-8">
+        <self::components::Navbar />
+        { children() }
+      </div>
+    </main>
   }
 }

@@ -2,19 +2,17 @@
 
 @import "tailwindcss-radix-colors/dist/orange.css";
 @import "tailwindcss-radix-colors/dist/sand.css";
+@import "tailwindcss-radix-colors/dist/red.css";
+
+@import "./components/btn-link.css";
+@import "./utilities.css";
 
 @theme inline {
+  /* set fonts */
   --font-sans: Funnel Sans, sans-serif;
   --font-display: Funnel Display, sans-serif;
   
-  --color-cloud-light: #F5F7F9;
-  --color-cloud-normal: #E8EDF1;
-  --color-cloud-dark: #BAC7D5;
-
-  --color-ink-light: #657890;
-  --color-ink-normal: #4F5E71;
-  --color-ink-dark: #252A31;
-
+  /* product colors */
   --color-product-1: var(--color-orange-1);
   --color-product-2: var(--color-orange-2);
   --color-product-3: var(--color-orange-3);
@@ -28,6 +26,7 @@
   --color-product-11: var(--color-orange-11);
   --color-product-12: var(--color-orange-12);
 
+  /* base colors */
   --color-base-1: var(--color-sand-1);
   --color-base-2: var(--color-sand-2);
   --color-base-3: var(--color-sand-3);
@@ -41,6 +40,21 @@
   --color-base-11: var(--color-sand-11);
   --color-base-12: var(--color-sand-12);
 
+  /* critical colors */
+  --color-critical-1: var(--color-red-1);
+  --color-critical-2: var(--color-red-2);
+  --color-critical-3: var(--color-red-3);
+  --color-critical-4: var(--color-red-4);
+  --color-critical-5: var(--color-red-5);
+  --color-critical-6: var(--color-red-6);
+  --color-critical-7: var(--color-red-7);
+  --color-critical-8: var(--color-red-8);
+  --color-critical-9: var(--color-red-9);
+  --color-critical-10: var(--color-red-10);
+  --color-critical-11: var(--color-red-11);
+  --color-critical-12: var(--color-red-12);
+
+  /* disable larger breakpoints */
   --breakpoint-xl: initial;
   --breakpoint-2xl: initial;
 }
