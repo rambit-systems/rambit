@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+#[allow(dead_code)]
 pub trait JoinClasses {
   fn join_classes(self) -> String;
 }
