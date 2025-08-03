@@ -6,6 +6,7 @@
 
 @import "./components/btn-link.css";
 @import "./utilities.css";
+@import "./typography.css";
 
 @theme inline {
   /* set fonts */
