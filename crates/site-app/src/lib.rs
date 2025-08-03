@@ -59,7 +59,7 @@ pub fn App() -> impl IntoView {
 fn PageContainer(children: Children) -> impl IntoView {
   view! {
     <main class="elevation-suppressed text-base-11 font-medium">
-      <div class="page-container flex flex-col gap-8 min-h-screen pb-8">
+      <div class="page-container flex flex-col min-h-screen pb-8">
         <self::components::Navbar />
         { children() }
       </div>

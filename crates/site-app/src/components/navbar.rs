@@ -3,7 +3,7 @@ use leptos::prelude::*;
 #[component]
 pub fn Navbar() -> impl IntoView {
   let class = "elevation-navbar flex flex-row px-4 gap-1 items-center h-10 \
-               rounded-bl rounded-br";
+               rounded-bl rounded-br mb-8";
 
   view! {
     <div class=class >
