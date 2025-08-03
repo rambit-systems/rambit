@@ -23,8 +23,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HydrationScripts options={options.clone()} islands=true />
 
         <HashedStylesheet options id="leptos" />
-        <Style>{include_str!("../style/funnel_sans.css")}</Style>
-        <Style>{include_str!("../style/funnel_display.css")}</Style>
+        <Style>{include_str!("../style/fonts/funnel_sans.css")}</Style>
+        <Style>{include_str!("../style/fonts/funnel_display.css")}</Style>
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
