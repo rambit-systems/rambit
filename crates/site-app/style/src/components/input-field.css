@@ -1,0 +1,23 @@
+/* based off https://orbit.kiwi/components/input/inputfield/ */
+
+@layer base {
+  .input-field {
+    /* behavior */
+    @apply transition;
+
+    /* appearance */
+    @apply text-base-12 rounded;
+
+    /* spacing */
+    @apply px-2 max-w-72 flex flex-row gap-2 items-center;
+
+    /* border */
+    @apply border-[1.5px] border-base-7 hover:border-base-8 has-focus-visible:border-base-8/0;
+
+    /* ring */
+    @apply ring-product-7 has-focus-visible:ring-2;
+
+    /* SVGs */
+    @apply stroke-[2.0] stroke-base-11/50;
+  }
+}
