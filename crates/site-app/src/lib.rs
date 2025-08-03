@@ -1,4 +1,5 @@
 mod components;
+mod join_classes;
 mod pages;
 
 use leptos::prelude::*;
