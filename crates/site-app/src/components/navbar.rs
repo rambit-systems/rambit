@@ -7,9 +7,9 @@ pub fn Navbar() -> impl IntoView {
 
   view! {
     <div class=class >
-      <span class="font-display font-bold text-xl text-product-11">
+      <a href="/" class="cursor-pointer font-display font-bold text-xl text-product-11">
         "Rambit"
-      </span>
+      </a>
       <div class="flex-1" />
       <a href="/auth/login" class="btn-link btn-link-secondary">Login</a>
       <a href="/auth/signup" class="btn-link btn-link-primary">Sign Up</a>
