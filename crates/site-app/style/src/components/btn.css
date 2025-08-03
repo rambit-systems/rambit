@@ -1,0 +1,26 @@
+/* based off https://orbit.kiwi/components/action/button/ */
+
+@layer base {
+  .btn {
+    /* behavior */
+    @apply cursor-pointer transition select-none;
+
+    /* appearance */
+    @apply rounded-md;
+
+    /* spacing */
+    @apply px-4 py-3 flex flex-row gap-2;
+
+    /* text */
+    @apply font-sans font-medium leading-none;
+  }
+
+  .btn-primary {
+    /* color */
+    @apply text-product-1 bg-product-9 hover:bg-product-10 active:brightness-[0.92] active:saturate-[1.1];
+  }
+  .btn-primary-subtle {
+    /* color */
+    @apply text-product-11 bg-product-3 hover:bg-product-4 active:bg-product-5;
+  }
+}
