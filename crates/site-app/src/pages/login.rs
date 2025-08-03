@@ -3,8 +3,10 @@ use leptos::prelude::*;
 #[component]
 pub fn LoginPage() -> impl IntoView {
   view! {
-    <p class="text-base-12 text-4xl font-semibold tracking-tight">
-      "Login"
-    </p>
+    <div class="flex-1" />
+    <div class="p-4 mx-auto w-xl elevation-flat">
+      <p class="title">"Login"</p>
+    </div>
+    <div class="flex-1" />
   }
 }
