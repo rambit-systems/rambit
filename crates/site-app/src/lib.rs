@@ -45,14 +45,14 @@ pub fn App() -> impl IntoView {
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
-    <PageContainer>
-      <Router>
+    <Router>
+      <PageContainer>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
           <Route path=path!("/auth/login") view=LoginPage/>
         </Routes>
-      </Router>
-    </PageContainer>
+      </PageContainer>
+    </Router>
   }
 }
 
