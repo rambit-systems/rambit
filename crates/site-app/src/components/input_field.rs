@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{ev::Event, prelude::*};
 
 #[component]
 pub fn InputField(
@@ -8,6 +8,8 @@ pub fn InputField(
   placeholder: &'static str,
   #[prop(optional)] before: Option<Children>,
   #[prop(optional)] after: Option<Children>,
+  input_signal: impl Fn() -> String + Send + 'static,
+  output_signal: impl Fn(Event) + Send + 'static,
 ) -> impl IntoView {
   const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1";
   const LABEL_CLASS: &str = "text-base-11";
@@ -22,6 +24,7 @@ pub fn InputField(
         <input
           class=INPUT_CLASS type=input_type
           placeholder=placeholder id=id
+          on:input={move |ev| output_signal(ev)} prop:value={move || input_signal()}
         />
         { after.map(|a| a()) }
       </div>
