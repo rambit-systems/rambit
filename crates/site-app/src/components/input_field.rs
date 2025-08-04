@@ -10,11 +10,13 @@ pub fn InputField(
   #[prop(optional)] after: Option<Children>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
+  #[prop(into)] error_hint: MaybeProp<&'static str>,
 ) -> impl IntoView {
   const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1";
   const LABEL_CLASS: &str = "text-base-11";
   const INPUT_WRAPPER_CLASS: &str = "input-field max-w-80";
   const INPUT_CLASS: &str = "w-full py-2 focus-visible:outline-none";
+  const ERROR_HINT_CLASS: &str = "text-critical-11 text-sm";
 
   view! {
     <div class=OUTER_WRAPPER_CLASS>
@@ -28,6 +30,9 @@ pub fn InputField(
         />
         { after.map(|a| a()) }
       </div>
+      { move || error_hint().map(|e| view! {
+        <p class=ERROR_HINT_CLASS>{ e }</p>
+      })}
     </div>
   }
 }
