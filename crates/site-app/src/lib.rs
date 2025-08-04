@@ -1,4 +1,5 @@
 mod components;
+mod join_classes;
 mod pages;
 
 use leptos::prelude::*;
@@ -23,8 +24,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HydrationScripts options={options.clone()} islands=true />
 
         <HashedStylesheet options id="leptos" />
-        <Style>{include_str!("../style/funnel_sans.css")}</Style>
-        <Style>{include_str!("../style/funnel_display.css")}</Style>
+        <Style>{include_str!("../style/fonts/funnel_sans.css")}</Style>
+        <Style>{include_str!("../style/fonts/funnel_display.css")}</Style>
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -59,7 +60,7 @@ pub fn App() -> impl IntoView {
 fn PageContainer(children: Children) -> impl IntoView {
   view! {
     <main class="elevation-suppressed text-base-11 font-medium">
-      <div class="page-container flex flex-col gap-8 min-h-screen pb-8">
+      <div class="page-container flex flex-col min-h-screen pb-8">
         <self::components::Navbar />
         { children() }
       </div>

@@ -15,7 +15,9 @@ use tower_http::trace::{DefaultOnResponse, TraceLayer};
 use tracing::{Level, info_span, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
-use self::{app_state::AppState, args::CliArgs};
+use self::{
+  app_state::AppState, args::CliArgs, handlers::leptos_routes_handler,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -49,16 +51,12 @@ async fn main() -> Result<()> {
   }
 
   // prepare leptos
-  let leptos_options = app_state.leptos_options.clone();
   let routes = leptos_axum::generate_route_list(site_app::App);
 
   // build router
   let router = Router::new()
     .nest("/api/v1", self::endpoints::router())
-    .leptos_routes(&app_state, routes, {
-      let leptos_options = leptos_options.clone();
-      move || site_app::shell(leptos_options.clone())
-    })
+    .leptos_routes_with_handler(routes, leptos_routes_handler)
     .fallback(leptos_axum::file_and_error_handler::<AppState, _>(
       site_app::shell,
     ))
@@ -96,3 +94,5 @@ async fn main() -> Result<()> {
 
   Ok(())
 }
+
+mod handlers;

@@ -9,7 +9,10 @@
     @apply rounded-md;
 
     /* spacing */
-    @apply px-2 py-0.5;
+    @apply p-2;
+
+    /* text */
+    @apply font-sans font-medium leading-none;
   }
 
   .btn-link-primary {

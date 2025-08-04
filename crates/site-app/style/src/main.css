@@ -4,7 +4,10 @@
 @import "tailwindcss-radix-colors/dist/sand.css";
 @import "tailwindcss-radix-colors/dist/red.css";
 
+@import "./components/btn.css";
 @import "./components/btn-link.css";
+@import "./components/input-field.css";
+@import "./typography.css";
 @import "./utilities.css";
 
 @theme inline {

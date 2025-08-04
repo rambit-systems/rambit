@@ -94,6 +94,10 @@ impl From<User> for AuthUser {
   }
 }
 
+/// Optional user auth, as viewable from the client
+#[derive(Clone, Debug)]
+pub struct AuthStatus(pub Option<AuthUser>);
+
 #[cfg(feature = "auth")]
 mod auth {
   use axum_login::AuthUser as AxumLoginAuthUser;
