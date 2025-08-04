@@ -61,3 +61,9 @@
   --breakpoint-xl: initial;
   --breakpoint-2xl: initial;
 }
+
+@layer {
+  leptos-island {
+    display: contents;
+  }
+}
