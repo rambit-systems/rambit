@@ -3354,6 +3354,8 @@ dependencies = [
 name = "site-app"
 version = "0.1.0"
 dependencies = [
+ "dvf",
+ "gloo-net",
  "leptos",
  "leptos_axum",
  "leptos_meta",
@@ -3365,6 +3367,7 @@ name = "site-frontend"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
+ "getrandom 0.3.3",
  "leptos",
  "site-app",
  "wasm-bindgen",
