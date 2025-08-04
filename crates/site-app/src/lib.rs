@@ -1,5 +1,6 @@
 mod components;
 mod join_classes;
+mod navigation;
 mod pages;
 
 use leptos::prelude::*;
