@@ -12,9 +12,9 @@ pub fn InputField(
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(into)] error_hint: MaybeProp<&'static str>,
 ) -> impl IntoView {
-  const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1";
+  const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1 max-w-80";
   const LABEL_CLASS: &str = "text-base-11";
-  const INPUT_WRAPPER_CLASS: &str = "input-field max-w-80";
+  const INPUT_WRAPPER_CLASS: &str = "input-field";
   const INPUT_CLASS: &str = "w-full py-2 focus-visible:outline-none";
   const ERROR_HINT_CLASS: &str = "text-critical-11 text-sm";
 
