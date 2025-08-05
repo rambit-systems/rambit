@@ -29,8 +29,8 @@ pub async fn root() -> impl IntoResponse {
 pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
-    .route("/authenticate", get(authenticate).post(authenticate))
-    .route("/deauthenticate", get(deauthenticate).post(deauthenticate))
+    .route("/authenticate", post(authenticate))
+    .route("/deauthenticate", post(deauthenticate))
     .route("/upload", post(upload))
     .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
     .route("/c/{cache_name}/download/{store_path}", get(download))
