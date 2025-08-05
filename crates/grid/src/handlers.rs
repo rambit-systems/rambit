@@ -2,6 +2,7 @@ use auth_domain::AuthSession;
 use axum::{
   body::Body,
   extract::{Request, State},
+  http::Uri,
   response::IntoResponse,
 };
 use leptos::prelude::provide_context;
@@ -23,7 +24,21 @@ pub async fn leptos_routes_handler(
   .into_response()
 }
 
-fn context_provider(
+#[axum::debug_handler]
+pub async fn leptos_fallback_handler(
+  uri: Uri,
+  auth_session: AuthSession,
+  State(app_state): State<AppState>,
+  request: Request<Body>,
+) -> axum::response::Response {
+  leptos_axum::file_and_error_handler_with_context::<AppState, _>(
+    context_provider(app_state.clone(), auth_session),
+    site_app::shell,
+  )(uri, State(app_state), request)
+  .await
+}
+
+pub fn context_provider(
   app_state: AppState,
   auth_session: AuthSession,
 ) -> impl Fn() + Clone {
