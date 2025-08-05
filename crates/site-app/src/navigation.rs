@@ -34,13 +34,16 @@ pub fn navigate_to(path: &str) {
 
 /// Gets the next URL if it's already set or sets it to the current page.
 pub fn next_url_hook() -> Memo<String> {
-  let query = leptos_router::hooks::use_query_map();
-  let current_url = leptos_router::hooks::use_url();
+  #[cfg(feature = "ssr")]
+  let current_url = leptos_router::hooks::use_url()();
+  #[cfg(feature = "hydrate")]
+  let current_url = <leptos_router::location::BrowserUrl as leptos_router::location::LocationProvider>::current().unwrap();
 
   // set it to the existing next url or the current URL escaped
   Memo::new(move |_| {
-    query()
+    current_url
+      .search_params()
       .get("next")
-      .unwrap_or(Url::escape(&url_to_full_path(&current_url())))
+      .unwrap_or(Url::escape(&url_to_full_path(&current_url)))
   })
 }
