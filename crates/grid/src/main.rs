@@ -87,10 +87,18 @@ async fn main() -> Result<()> {
     .into_diagnostic()
     .with_context(|| format!("failed to bind listener to `{addr}`"))?;
   tracing::info!("listening on http://{}", &addr);
-  axum::serve(listener, service)
-    .await
-    .into_diagnostic()
-    .context("failed to serve app")?;
+
+  tokio::select! {
+    result = axum::serve(listener, service) => {
+      result
+        .into_diagnostic()
+        .with_context(|| format!("failed to bind listener to `{addr}`"))?;
+    }
+    _ = tokio::signal::ctrl_c() => {
+      tracing::warn!("received Ctrl+C, shutting down gracefully...");
+    }
+  }
+  tracing::info!("server shut down");
 
   Ok(())
 }

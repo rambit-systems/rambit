@@ -59,3 +59,16 @@ pub async fn authenticate(
     }
   }
 }
+
+#[axum::debug_handler]
+pub async fn deauthenticate(
+  mut auth_session: AuthSession,
+) -> impl IntoResponse {
+  match auth_session.logout().await {
+    Ok(_) => StatusCode::OK.into_response(),
+    Err(e) => {
+      tracing::error!("failed to deauthenticate: {e}");
+      (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
+    }
+  }
+}

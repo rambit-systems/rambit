@@ -80,7 +80,7 @@ site-pkg-dir = "pkg"
 site-root = "target/site"
 
 assets-dir = "crates/site-app/public"
-style-file = "crates/site-app/style/src/main.css"
+# style-file = "crates/site-app/style/src/main.css"
 
 reload-port = 3001
 site-addr = "0.0.0.0:3000"
