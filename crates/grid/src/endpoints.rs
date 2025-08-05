@@ -12,8 +12,11 @@ use axum::{
 };
 
 use self::{
-  authenticate::authenticate, download::download, narinfo::narinfo,
-  nix_cache_info::nix_cache_info, upload::upload,
+  authenticate::{authenticate, deauthenticate},
+  download::download,
+  narinfo::narinfo,
+  nix_cache_info::nix_cache_info,
+  upload::upload,
 };
 use crate::app_state::AppState;
 
@@ -27,6 +30,7 @@ pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
     .route("/authenticate", get(authenticate).post(authenticate))
+    .route("/deauthenticate", get(deauthenticate).post(deauthenticate))
     .route("/upload", post(upload))
     .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
     .route("/c/{cache_name}/download/{store_path}", get(download))
