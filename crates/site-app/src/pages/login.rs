@@ -5,7 +5,7 @@ use models::dvf::{EmailAddress, EmailAddressError};
 
 use crate::{
   components::{EnvelopeHeroIcon, InputField, LockClosedHeroIcon},
-  navigation::navigate_to,
+  navigation::{navigate_to, next_url_hook},
 };
 
 #[component]
@@ -38,6 +38,7 @@ pub fn LoginIsland() -> impl IntoView {
   let (read_email, write_email) = touched_input_bindings(email);
   let (read_password, write_password) = touched_input_bindings(password);
   let submit_touched = RwSignal::new(false);
+  let next_url = next_url_hook();
 
   let email_hint = move || {
     let email = email.get();
@@ -97,7 +98,7 @@ pub fn LoginIsland() -> impl IntoView {
 
   Effect::new(move || {
     if action.value().get() == Some(Ok(true)) {
-      navigate_to("/");
+      navigate_to(&next_url());
     }
   });
 
