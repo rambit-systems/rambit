@@ -1,6 +1,12 @@
-use leptos::prelude::*;
+use std::collections::HashMap;
 
-use crate::components::{EnvelopeHeroIcon, InputField, LockClosedHeroIcon};
+use leptos::{ev::Event, prelude::*};
+use models::dvf::{EmailAddress, EmailAddressError};
+
+use crate::{
+  components::{EnvelopeHeroIcon, InputField, LockClosedHeroIcon},
+  navigation::navigate_to,
+};
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
@@ -8,24 +14,114 @@ pub fn LoginPage() -> impl IntoView {
     <div class="flex-1" />
     <div class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8">
       <p class="title">"Login"</p>
-
-      <div class="flex flex-col gap-4">
-        <InputField
-          id="email" label_text="Email Address"
-          input_type="email" placeholder=""
-          before={ Box::new(|| view!{ <EnvelopeHeroIcon /> }.into_any()) }
-        />
-        <InputField
-          id="password" label_text="Password"
-          input_type="password" placeholder=""
-          before={ Box::new(|| view!{ <LockClosedHeroIcon /> }.into_any()) }
-        />
-      </div>
-
-      <div class="flex flex-row gap-2">
-        <button class="btn btn-primary">"Login"</button>
-      </div>
+      <LoginIsland />
     </div>
     <div class="flex-1" />
+  }
+}
+
+pub fn touched_input_bindings(
+  s: RwSignal<String>,
+) -> (impl Fn() -> String, impl Fn(Event)) {
+  (
+    move || s.get(),
+    move |e| {
+      s.set(event_target_value(&e));
+    },
+  )
+}
+
+#[island]
+pub fn LoginIsland() -> impl IntoView {
+  let email = RwSignal::new(String::new());
+  let password = RwSignal::new(String::new());
+  let (read_email, write_email) = touched_input_bindings(email);
+  let (read_password, write_password) = touched_input_bindings(password);
+  let submit_touched = RwSignal::new(false);
+
+  let email_hint = move || {
+    let email = email.get();
+    if email.is_empty() {
+      return Some("Email address required.");
+    }
+    match EmailAddress::try_new(email) {
+      Ok(_) => None,
+      Err(EmailAddressError::LenCharMaxViolated) => {
+        Some("That email address looks too long.")
+      }
+      Err(EmailAddressError::PredicateViolated) => {
+        Some("That email address doesn't look right.")
+      }
+    }
+  };
+
+  let password_hint = move || {
+    let password = password.get();
+    if password.is_empty() {
+      return Some("Password required.");
+    }
+    None
+  };
+
+  let action = Action::new_local(move |(): &()| async move {
+    let body = HashMap::<_, String>::from_iter([
+      ("email", email.get()),
+      ("password", password.get()),
+    ]);
+    let resp = gloo_net::http::Request::post("/api/v1/authenticate")
+      .json(&body)
+      .expect("failed to build json authenticate payload")
+      .send()
+      .await
+      .map_err(|e| format!("request error: {e}"))?;
+
+    match resp.status() {
+      200 => Ok(true),
+      401 => Ok(false),
+      400 => Err(format!("response error: {}", resp.text().await.unwrap())),
+      s => Err(format!("status error: got unknown status {s}")),
+    }
+  });
+
+  let submit_action = move |_| {
+    submit_touched.set(true);
+
+    if email_hint().is_some() || password_hint().is_some() {
+      return;
+    }
+
+    action.dispatch_local(());
+  };
+
+  Effect::new(move || {
+    if action.value().get() == Some(Ok(true)) {
+      navigate_to("/");
+    }
+  });
+
+  view! {
+    <div class="flex flex-col gap-4">
+      <InputField
+        id="email" label_text="Email Address"
+        input_type="email" placeholder=""
+        before={ Box::new(|| view!{ <EnvelopeHeroIcon /> }.into_any()) }
+        input_signal=read_email output_signal=write_email
+        error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
+      />
+      <InputField
+        id="password" label_text="Password"
+        input_type="password" placeholder=""
+        before={ Box::new(|| view!{ <LockClosedHeroIcon /> }.into_any()) }
+        input_signal=read_password output_signal=write_password
+        error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
+      />
+    </div>
+
+    <div class="flex flex-row gap-2">
+      <button
+        class="btn btn-primary"
+        on:click=submit_action
+      >"Login"</button>
+    </div>
   }
 }

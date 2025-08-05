@@ -7,6 +7,7 @@
 @import "./components/btn.css";
 @import "./components/btn-link.css";
 @import "./components/input-field.css";
+@import "./components/text-link.css";
 @import "./typography.css";
 @import "./utilities.css";
 
@@ -60,4 +61,10 @@
   /* disable larger breakpoints */
   --breakpoint-xl: initial;
   --breakpoint-2xl: initial;
+}
+
+@layer {
+  leptos-island {
+    display: contents;
+  }
 }

@@ -1,0 +1,16 @@
+/* based off https://orbit.kiwi/components/action/textlink/ */
+ 
+@layer base {
+  .text-link {
+    /* behavior */
+    @apply cursor-pointer transition-colors;
+
+    /* text */
+    @apply font-sans font-medium underline hover:no-underline;
+  }
+
+  .text-link-primary {
+    /* color */
+    @apply text-product-11 hover:text-product-12;
+  }
+}
