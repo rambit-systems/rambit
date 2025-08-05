@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
 
   tokio::select! {
     result = axum::serve(listener, service) => {
-      let _ = result
+      result
         .into_diagnostic()
         .with_context(|| format!("failed to bind listener to `{addr}`"))?;
     }
