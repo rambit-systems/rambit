@@ -23,4 +23,12 @@
     /* color */
     @apply text-product-11 bg-product-3 hover:bg-product-4 active:bg-product-5;
   }
+  .btn-critical {
+    /* color */
+    @apply text-critical-1 bg-critical-9 hover:bg-critical-10 active:brightness-[0.92] active:saturate-[1.1];
+  }
+  .btn-critical-subtle {
+    /* color */
+    @apply text-critical-11 bg-critical-3 hover:bg-critical-4 active:bg-critical-5;
+  }
 }
