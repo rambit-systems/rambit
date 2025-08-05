@@ -1,8 +1,7 @@
 use leptos::{either::Either, prelude::*};
-use leptos_router::location::Url;
 use models::{AuthStatus, AuthUser};
 
-use crate::navigation::url_to_full_path;
+use crate::navigation::next_url_hook;
 
 #[component]
 pub fn Navbar() -> impl IntoView {
@@ -27,19 +26,6 @@ fn NavbarUserArea() -> impl IntoView {
     Some(user) => Either::Left(view! { <LoggedInUserAuthActions user=user /> }),
     None => Either::Right(view! { <LoggedOutUserAuthActions /> }),
   }
-}
-
-/// Gets the next URL if it's already set or sets it to the current page.
-fn next_url_hook() -> Memo<String> {
-  let query = leptos_router::hooks::use_query_map();
-  let current_url = leptos_router::hooks::use_url();
-
-  // set it to the existing next url or the current URL escaped
-  Memo::new(move |_| {
-    query()
-      .get("next")
-      .unwrap_or(Url::escape(&url_to_full_path(&current_url())))
-  })
 }
 
 #[component]
