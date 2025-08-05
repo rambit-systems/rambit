@@ -63,23 +63,25 @@ pub fn LoginIsland() -> impl IntoView {
     None
   };
 
-  let action = Action::new_local(move |(): &()| async move {
+  let action = Action::new_local(move |(): &()| {
     let body = HashMap::<_, String>::from_iter([
       ("email", email.get()),
       ("password", password.get()),
     ]);
-    let resp = gloo_net::http::Request::post("/api/v1/authenticate")
-      .json(&body)
-      .expect("failed to build json authenticate payload")
-      .send()
-      .await
-      .map_err(|e| format!("request error: {e}"))?;
+    async move {
+      let resp = gloo_net::http::Request::post("/api/v1/authenticate")
+        .json(&body)
+        .expect("failed to build json authenticate payload")
+        .send()
+        .await
+        .map_err(|e| format!("request error: {e}"))?;
 
-    match resp.status() {
-      200 => Ok(true),
-      401 => Ok(false),
-      400 => Err(format!("response error: {}", resp.text().await.unwrap())),
-      s => Err(format!("status error: got unknown status {s}")),
+      match resp.status() {
+        200 => Ok(true),
+        401 => Ok(false),
+        400 => Err(format!("response error: {}", resp.text().await.unwrap())),
+        s => Err(format!("status error: got unknown status {s}")),
+      }
     }
   });
 

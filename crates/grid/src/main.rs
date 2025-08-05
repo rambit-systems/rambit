@@ -16,7 +16,9 @@ use tracing::{Level, info_span, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
 use self::{
-  app_state::AppState, args::CliArgs, handlers::leptos_routes_handler,
+  app_state::AppState,
+  args::CliArgs,
+  handlers::{leptos_fallback_handler, leptos_routes_handler},
 };
 
 #[tokio::main]
@@ -57,9 +59,7 @@ async fn main() -> Result<()> {
   let router = Router::new()
     .nest("/api/v1", self::endpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
-    .fallback(leptos_axum::file_and_error_handler::<AppState, _>(
-      site_app::shell,
-    ))
+    .fallback(leptos_fallback_handler)
     .with_state(app_state.clone());
 
   // build tower service
