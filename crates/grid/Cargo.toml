@@ -14,7 +14,7 @@ tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 
 kv = { workspace = true, features = [ "redb", "no-field-names" ] }
 
-tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
 
 leptos = { workspace = true, features = [ "ssr", "tracing" ] }
 leptos_axum.workspace = true
