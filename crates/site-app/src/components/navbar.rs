@@ -29,28 +29,26 @@ fn NavbarUserArea() -> impl IntoView {
   }
 }
 
+/// Gets the next URL if it's already set or sets it to the current page.
+fn next_url_hook() -> Memo<String> {
+  let query = leptos_router::hooks::use_query_map();
+  let current_url = leptos_router::hooks::use_url();
+
+  // set it to the existing next url or the current URL escaped
+  Memo::new(move |_| {
+    query()
+      .get("next")
+      .unwrap_or(Url::escape(&url_to_full_path(&current_url())))
+  })
+}
+
 #[component]
 fn LoggedOutUserAuthActions() -> impl IntoView {
-  let query = leptos_router::hooks::use_query_map();
-  // if we already have a `next` url
-  let existing_next_url = Signal::derive(move || query().get("next"));
-
-  // if we need a `next_url`
-  let return_url = leptos_router::hooks::use_url();
-  let escaped_return_url =
-    Signal::derive(move || Url::escape(&url_to_full_path(&return_url())));
-
-  // use the existing `next` url if it exists, rather than setting it to the
-  // current page
-  let redirect_url = Signal::derive(move || match existing_next_url() {
-    Some(existing_next_url) => existing_next_url,
-    _ => escaped_return_url(),
-  });
-
+  let next_url = next_url_hook();
   let signup_url =
-    Signal::derive(move || format!("/auth/signup?next={}", redirect_url()));
+    Signal::derive(move || format!("/auth/signup?next={}", next_url()));
   let login_url =
-    Signal::derive(move || format!("/auth/login?next={}", redirect_url()));
+    Signal::derive(move || format!("/auth/login?next={}", next_url()));
 
   view! {
     <a href=login_url class="btn-link btn-link-secondary">"Log In"</a>
