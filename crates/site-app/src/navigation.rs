@@ -33,6 +33,7 @@ pub fn navigate_to(path: &str) {
 }
 
 /// Gets the next URL if it's already set or sets it to the current page.
+#[allow(unused_variables)]
 pub fn next_url_hook() -> Memo<String> {
   #[cfg(feature = "ssr")]
   let current_url = leptos_router::hooks::use_url()();
