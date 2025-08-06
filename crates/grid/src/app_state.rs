@@ -27,7 +27,7 @@ impl AppState {
     let cache_db = Database::new_from_kv(kv_store.clone());
     let session_db = Database::new_from_kv(kv_store);
 
-    let auth_domain = AuthDomainService::new(user_db.clone());
+    let auth_domain = AuthDomainService::new(org_db.clone(), user_db.clone());
     let prime_domain =
       PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
     let session_store = DatabaseSessionStore::new(session_db);

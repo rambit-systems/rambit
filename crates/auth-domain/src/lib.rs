@@ -6,7 +6,8 @@ pub use axum_login::AuthnBackend;
 use db::{Database, FetchModelByIndexError, FetchModelError, kv::LaxSlug};
 use miette::{IntoDiagnostic, miette};
 use models::{
-  AuthUser, User, UserAuthCredentials, UserSubmittedAuthCredentials,
+  AuthUser, Org, OrgIdent, User, UserAuthCredentials,
+  UserSubmittedAuthCredentials,
   dvf::{EitherSlug, EmailAddress, HumanName},
   model::RecordId,
 };
@@ -18,13 +19,19 @@ pub type AuthSession = axum_login::AuthSession<AuthDomainService>;
 /// A dynamic [`AuthDomainService`] trait object.
 #[derive(Clone, Debug)]
 pub struct AuthDomainService {
+  org_repo:  Database<Org>,
   user_repo: Database<User>,
 }
 
 impl AuthDomainService {
   /// Creates a new [`AuthDomainService`].
   #[must_use]
-  pub fn new(user_repo: Database<User>) -> Self { Self { user_repo } }
+  pub fn new(org_repo: Database<Org>, user_repo: Database<User>) -> Self {
+    Self {
+      org_repo,
+      user_repo,
+    }
+  }
 }
 
 /// An error that occurs during user creation.
@@ -118,13 +125,27 @@ impl AuthDomainService {
       }
     };
 
+    let user_id = RecordId::new();
+
+    let org = Org {
+      id:        RecordId::new(),
+      org_ident: OrgIdent::UserOrg(user_id),
+    };
+
     let user = User {
-      id: RecordId::new(),
-      orgs: Vec::new(),
+      id: user_id,
+      orgs: (org.id, Vec::new()),
       name,
       email,
       auth,
     };
+
+    self
+      .org_repo
+      .create_model(org)
+      .await
+      .into_diagnostic()
+      .map_err(CreateUserError::CreateError)?;
 
     self
       .user_repo
@@ -214,8 +235,9 @@ mod tests {
 
   #[tokio::test]
   async fn test_user_signup() {
+    let org_repo = Database::new_mock();
     let user_repo = Database::new_mock();
-    let service = AuthDomainService::new(user_repo);
+    let service = AuthDomainService::new(org_repo, user_repo);
 
     let name = HumanName::try_new("Test User 1").unwrap();
     let email = EmailAddress::try_new("test@example.com").unwrap();
@@ -239,8 +261,9 @@ mod tests {
 
   #[tokio::test]
   async fn test_user_authenticate() {
+    let org_repo = Database::new_mock();
     let user_repo = Database::new_mock();
-    let service = AuthDomainService::new(user_repo);
+    let service = AuthDomainService::new(org_repo, user_repo);
 
     let name = HumanName::try_new("Test User 1").unwrap();
     let email = EmailAddress::try_new("test@example.com").unwrap();
