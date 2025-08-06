@@ -2,7 +2,7 @@ use std::{path::PathBuf, str::FromStr};
 
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
-  Cache, Org, Store, StoreConfiguration, User,
+  Cache, Org, OrgIdent, Store, StoreConfiguration, User,
   dvf::{
     EmailAddress, EntityName, HumanName, LocalStorageCredentials,
     MemoryStorageCredentials, RecordId, StrictSlug, Visibility,
@@ -14,11 +14,25 @@ use crate::PrimeDomainService;
 impl PrimeDomainService {
   /// Add test data to databases.
   pub async fn migrate_test_data(&self, ephemeral_storage: bool) -> Result<()> {
-    let org = self
+    let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
+
+    let personal_org = self
       .org_repo
       .create_model(Org {
-        id:   RecordId::from_str("01JXGXSB69BDHNFTSVG2EPW2M3").unwrap(),
-        name: EntityName::new(StrictSlug::new("the-federation")),
+        id:        RecordId::from_str("01K202SRBQMRM29MMSTJTMSJVD").unwrap(),
+        org_ident: OrgIdent::UserOrg(user_id),
+      })
+      .await
+      .into_diagnostic()
+      .context("failed to create org")?;
+
+    let federation = self
+      .org_repo
+      .create_model(Org {
+        id:        RecordId::from_str("01JXGXSB69BDHNFTSVG2EPW2M3").unwrap(),
+        org_ident: OrgIdent::Named(EntityName::new(StrictSlug::new(
+          "the-federation",
+        ))),
       })
       .await
       .into_diagnostic()
@@ -27,8 +41,8 @@ impl PrimeDomainService {
     let _user = self
       .user_repo
       .create_model(User {
-        id:    RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap(),
-        orgs:  (org.id, Vec::new()),
+        id:    user_id,
+        orgs:  (personal_org.id, vec![federation.id]),
         email: EmailAddress::try_new("jpicard@federation.gov").unwrap(),
         name:  HumanName::try_new("Jean-Luc Picard")
           .expect("failed to create name"),
@@ -49,7 +63,7 @@ impl PrimeDomainService {
       .store_repo
       .create_model(Store {
         id:          RecordId::from_str("01JXGXVF0MVQNGRM565YHM20BC").unwrap(),
-        org:         org.id,
+        org:         federation.id,
         credentials: match ephemeral_storage {
           true => {
             models::dvf::StorageCredentials::Memory(MemoryStorageCredentials)
@@ -70,7 +84,7 @@ impl PrimeDomainService {
       .create_model(Cache {
         id:            RecordId::from_str("01JXGXVVE6J16590YJT3SP2P6M")
           .unwrap(),
-        org:           org.id,
+        org:           federation.id,
         name:          EntityName::new(StrictSlug::new("aaron")),
         default_store: albert_store.id,
         visibility:    Visibility::Public,
