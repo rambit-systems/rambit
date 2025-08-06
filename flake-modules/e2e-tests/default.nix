@@ -4,7 +4,7 @@
     test-prefix = "nixvm-test-";
 
     # the common module
-    common = import ./common (moduleTop // perSystemTop);
+    common = import ./common.nix (moduleTop // perSystemTop);
     # the args we'll give to each module
     module-args = moduleTop // perSystemTop // { inherit common; };
     # helper to call a module with the args
