@@ -114,14 +114,14 @@ pub fn LoginIsland() -> impl IntoView {
         <InputField
           id="email" label_text="Email Address"
           input_type="email" placeholder=""
-          before={ Box::new(|| view!{ <EnvelopeHeroIcon /> }.into_any()) }
+          before={ Box::new(|| view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()) }
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
         />
         <InputField
           id="password" label_text="Password"
           input_type="password" placeholder=""
-          before={ Box::new(|| view!{ <LockClosedHeroIcon /> }.into_any()) }
+          before={ Box::new(|| view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any()) }
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
         />
