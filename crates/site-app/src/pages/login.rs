@@ -7,7 +7,9 @@ use leptos::{
 use models::dvf::{EmailAddress, EmailAddressError};
 
 use crate::{
-  components::{EnvelopeHeroIcon, InputField, LockClosedHeroIcon},
+  components::{
+    EnvelopeHeroIcon, InputField, LoadingCircle, LockClosedHeroIcon,
+  },
   navigation::{navigate_to, next_url_hook},
 };
 
@@ -86,6 +88,8 @@ pub fn LoginIsland() -> impl IntoView {
     }
   });
 
+  let loading = action.pending();
+
   let submit_action = move |ev: SubmitEvent| {
     ev.prevent_default();
 
@@ -114,26 +118,28 @@ pub fn LoginIsland() -> impl IntoView {
         <InputField
           id="email" label_text="Email Address"
           input_type="email" placeholder=""
-          before={ Box::new(|| view!{ <EnvelopeHeroIcon /> }.into_any()) }
+          before={ Box::new(|| view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()) }
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
         />
         <InputField
           id="password" label_text="Password"
           input_type="password" placeholder=""
-          before={ Box::new(|| view!{ <LockClosedHeroIcon /> }.into_any()) }
+          before={ Box::new(|| view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any()) }
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
         />
       </div>
 
-      <div class="flex flex-row gap-2">
-        <input
-          type="submit"
-          class="btn btn-primary"
-          value="Log in"
-        />
-      </div>
+      <label class="flex flex-row gap-2">
+        <input type="submit" class="hidden" />
+        <button class="btn btn-primary">
+          "Log in"
+          { move || loading().then_some(view! {
+            <LoadingCircle {..} class="size-4" />
+          })}
+        </button>
+      </label>
     </form>
   }
 }
