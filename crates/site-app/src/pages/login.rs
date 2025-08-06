@@ -7,7 +7,9 @@ use leptos::{
 use models::dvf::{EmailAddress, EmailAddressError};
 
 use crate::{
-  components::{EnvelopeHeroIcon, InputField, LockClosedHeroIcon},
+  components::{
+    EnvelopeHeroIcon, InputField, LoadingCircle, LockClosedHeroIcon,
+  },
   navigation::{navigate_to, next_url_hook},
 };
 
@@ -86,6 +88,8 @@ pub fn LoginIsland() -> impl IntoView {
     }
   });
 
+  let loading = action.pending();
+
   let submit_action = move |ev: SubmitEvent| {
     ev.prevent_default();
 
@@ -127,13 +131,15 @@ pub fn LoginIsland() -> impl IntoView {
         />
       </div>
 
-      <div class="flex flex-row gap-2">
-        <input
-          type="submit"
-          class="btn btn-primary"
-          value="Log in"
-        />
-      </div>
+      <label class="flex flex-row gap-2">
+        <input type="submit" class="hidden" />
+        <button class="btn btn-primary">
+          "Log in"
+          { move || loading().then_some(view! {
+            <LoadingCircle {..} class="size-4" />
+          })}
+        </button>
+      </label>
     </form>
   }
 }

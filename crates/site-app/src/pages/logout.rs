@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::navigation::navigate_to;
+use crate::{components::LoadingCircle, navigation::navigate_to};
 
 #[component]
 pub fn LogoutPage() -> impl IntoView {
@@ -38,6 +38,7 @@ pub fn LogoutButton() -> impl IntoView {
       s => Err(format!("status error: got unknown status {s}")),
     }
   });
+  let loading = action.pending();
 
   let button_action = move |_| {
     action.dispatch_local(());
@@ -53,6 +54,11 @@ pub fn LogoutButton() -> impl IntoView {
     <button
       class="btn btn-critical"
       on:click=button_action
-    >"Log out"</button>
+    >
+      "Log out"
+      { move || loading().then_some(view! {
+        <LoadingCircle {..} class="size-4" />
+      })}
+    </button>
   }
 }
