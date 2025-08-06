@@ -65,7 +65,7 @@ in {
       client.succeed("ping -c 1 grid")
 
       # upload
-      client.succeed("${config.packages.cli}/bin/cli \
+      client.succeed("cli \
         --host http://grid \
         --email ${test-data.email} \
         --password ${test-data.password} \
