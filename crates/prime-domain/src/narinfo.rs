@@ -123,7 +123,7 @@ impl PrimeDomainService {
     // reject user if cache is private and org IDs don't match
     match (cache.visibility, user) {
       // let them through if it's private but org IDs match
-      (Visibility::Private, Some(user)) if user.orgs.contains(&cache.org) => (),
+      (Visibility::Private, Some(user)) if user.belongs_to_org(cache.org) => (),
       // otherwise don't let them through if it's private
       (Visibility::Private, _) => {
         return Err(NarinfoError::Unauthorized);
