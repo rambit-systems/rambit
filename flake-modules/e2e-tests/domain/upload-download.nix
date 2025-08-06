@@ -18,7 +18,7 @@ in {
       client.wait_for_unit("network.target")
       client.succeed("ping -c 1 grid")
 
-      # authenticate and hold onto the headers
+      # authenticate and hold onto the cookies
       client.succeed("curl --fail-with-body -X POST http://grid:3000/api/v1/authenticate \
         -b cookie.txt -c cookie.txt \
         -H \"Content-Type: application/json\" \

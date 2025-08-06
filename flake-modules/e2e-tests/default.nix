@@ -16,6 +16,7 @@
   in {
     checks = { }
       // (callTestModule ./domain/upload-download.nix)
+      // (callTestModule ./domain/authenticate-deauthenticate.nix)
     ;
   };
 }
