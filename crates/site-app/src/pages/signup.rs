@@ -25,9 +25,12 @@ fn SignupIsland() -> impl IntoView {
   let name = RwSignal::new(String::new());
   let email = RwSignal::new(String::new());
   let password = RwSignal::new(String::new());
+  let confirm_password = RwSignal::new(String::new());
   let (read_name, write_name) = touched_input_bindings(name);
   let (read_email, write_email) = touched_input_bindings(email);
   let (read_password, write_password) = touched_input_bindings(password);
+  let (read_confirm_password, write_confirm_password) =
+    touched_input_bindings(confirm_password);
   let submit_touched = RwSignal::new(false);
   let next_url = next_url_hook();
 
@@ -72,6 +75,16 @@ fn SignupIsland() -> impl IntoView {
     None
   };
 
+  // error text for confirm password field
+  let confirm_password_hint = move || {
+    let password = password.get();
+    let confirm_password = confirm_password.get();
+    if confirm_password != password {
+      return Some("Passwords don't match.");
+    }
+    None
+  };
+
   // action to perform login
   let action = Action::new_local(move |(): &()| {
     // json body for authenticate endpoint
@@ -105,7 +118,11 @@ fn SignupIsland() -> impl IntoView {
 
     submit_touched.set(true);
 
-    if email_hint().is_some() || password_hint().is_some() {
+    if name_hint().is_some()
+      || email_hint().is_some()
+      || password_hint().is_some()
+      || confirm_password_hint().is_some()
+    {
       return;
     }
 
@@ -144,6 +161,11 @@ fn SignupIsland() -> impl IntoView {
         <PasswordInputField
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
+        />
+        <PasswordInputField
+          id="confirm_password" label_text="Confirm Password"
+          input_signal=read_confirm_password output_signal=write_confirm_password
+          error_hint={MaybeProp::derive(move || submit_touched().then_some(confirm_password_hint()).flatten())}
         />
       </div>
 
