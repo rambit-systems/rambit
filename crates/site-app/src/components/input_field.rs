@@ -10,6 +10,7 @@ pub fn InputField(
   #[prop(optional)] after: Option<Children>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
+  #[prop(default = false)] autofocus: bool,
   #[prop(into)] error_hint: MaybeProp<&'static str>,
 ) -> impl IntoView {
   const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1 max-w-80";
@@ -24,7 +25,7 @@ pub fn InputField(
       <div class=INPUT_WRAPPER_CLASS>
         { before.map(|b| b()) }
         <input
-          class=INPUT_CLASS type=input_type
+          class=INPUT_CLASS type=input_type autofocus=autofocus
           placeholder=placeholder id=id
           on:input={move |ev| output_signal(ev)} prop:value={move || input_signal()}
         />
