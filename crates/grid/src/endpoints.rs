@@ -3,6 +3,7 @@ mod download;
 mod extractors;
 mod narinfo;
 mod nix_cache_info;
+mod signup;
 mod upload;
 
 use axum::{
@@ -17,6 +18,7 @@ use self::{
   download::download,
   narinfo::narinfo,
   nix_cache_info::nix_cache_info,
+  signup::signup,
   upload::upload,
 };
 use crate::app_state::AppState;
@@ -35,6 +37,7 @@ pub async fn fallback() -> impl IntoResponse {
 pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
+    .route("/signup", post(signup))
     .route("/authenticate", post(authenticate))
     .route("/deauthenticate", post(deauthenticate))
     .route("/upload", post(upload))
