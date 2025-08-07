@@ -142,7 +142,7 @@ fn SignupIsland() -> impl IntoView {
         />
         <InputField
           id="email" label_text="Email Address"
-          input_type="email" placeholder="" autofocus=true
+          input_type="text" placeholder="" autofocus=true
           before={ Box::new(|| view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()) }
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
