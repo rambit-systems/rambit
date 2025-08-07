@@ -29,6 +29,7 @@ pub fn LoginIsland() -> impl IntoView {
   let submit_touched = RwSignal::new(false);
   let next_url = next_url_hook();
 
+  // error text for email field
   let email_hint = move || {
     let email = email.get();
     if email.is_empty() {
@@ -45,6 +46,7 @@ pub fn LoginIsland() -> impl IntoView {
     }
   };
 
+  // error text for password field
   let password_hint = move || {
     let password = password.get();
     if password.is_empty() {
@@ -53,7 +55,9 @@ pub fn LoginIsland() -> impl IntoView {
     None
   };
 
+  // action to perform login
   let action = Action::new_local(move |(): &()| {
+    // json body for authenticate endpoint
     let body = HashMap::<_, String>::from_iter([
       ("email", email.get()),
       ("password", password.get()),
@@ -77,6 +81,7 @@ pub fn LoginIsland() -> impl IntoView {
 
   let loading = action.pending();
 
+  // submit callback
   let submit_action = move |ev: SubmitEvent| {
     ev.prevent_default();
 
@@ -89,6 +94,7 @@ pub fn LoginIsland() -> impl IntoView {
     action.dispatch_local(());
   };
 
+  // redirect on successful login
   Effect::new(move || {
     if action.value().get() == Some(Ok(true)) {
       navigate_to(&next_url());
