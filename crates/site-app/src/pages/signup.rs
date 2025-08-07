@@ -1,31 +1,53 @@
 use std::collections::HashMap;
 
 use leptos::{ev::SubmitEvent, prelude::*};
-use models::dvf::{EmailAddress, EmailAddressError};
+use models::dvf::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
 
 use crate::{
-  components::{EmailInputField, LoadingCircle, PasswordInputField},
+  components::{
+    EmailInputField, LoadingCircle, NameInputField, PasswordInputField,
+  },
   navigation::{navigate_to, next_url_hook},
   reactive_utils::touched_input_bindings,
 };
 
 #[component]
-pub fn LoginPage() -> impl IntoView {
+pub fn SignupPage() -> impl IntoView {
   view! {
     <div class="flex-1" />
-    <LoginIsland />
+    <SignupIsland />
     <div class="flex-1" />
   }
 }
 
 #[island]
-fn LoginIsland() -> impl IntoView {
+fn SignupIsland() -> impl IntoView {
+  let name = RwSignal::new(String::new());
   let email = RwSignal::new(String::new());
   let password = RwSignal::new(String::new());
+  let confirm_password = RwSignal::new(String::new());
+  let (read_name, write_name) = touched_input_bindings(name);
   let (read_email, write_email) = touched_input_bindings(email);
   let (read_password, write_password) = touched_input_bindings(password);
+  let (read_confirm_password, write_confirm_password) =
+    touched_input_bindings(confirm_password);
   let submit_touched = RwSignal::new(false);
   let next_url = next_url_hook();
+
+  // error text for name field
+  let name_hint = move || {
+    let name = name.get();
+    if name.is_empty() {
+      return Some("Your name is required.");
+    }
+    match HumanName::try_new(name) {
+      Ok(_) => None,
+      Err(HumanNameError::LenCharMaxViolated) => {
+        Some("The name you entered is too long.")
+      }
+      Err(HumanNameError::NotEmptyViolated) => Some("Your name is required."),
+    }
+  };
 
   // error text for email field
   let email_hint = move || {
@@ -53,15 +75,26 @@ fn LoginIsland() -> impl IntoView {
     None
   };
 
+  // error text for confirm password field
+  let confirm_password_hint = move || {
+    let password = password.get();
+    let confirm_password = confirm_password.get();
+    if confirm_password != password {
+      return Some("Passwords don't match.");
+    }
+    None
+  };
+
   // action to perform login
   let action = Action::new_local(move |(): &()| {
     // json body for authenticate endpoint
     let body = HashMap::<_, String>::from_iter([
+      ("name", name.get()),
       ("email", email.get()),
       ("password", password.get()),
     ]);
     async move {
-      let resp = gloo_net::http::Request::post("/api/v1/authenticate")
+      let resp = gloo_net::http::Request::post("/api/v1/signup")
         .json(&body)
         .expect("failed to build json authenticate payload")
         .send()
@@ -85,7 +118,11 @@ fn LoginIsland() -> impl IntoView {
 
     submit_touched.set(true);
 
-    if email_hint().is_some() || password_hint().is_some() {
+    if name_hint().is_some()
+      || email_hint().is_some()
+      || password_hint().is_some()
+      || confirm_password_hint().is_some()
+    {
       return;
     }
 
@@ -104,10 +141,20 @@ fn LoginIsland() -> impl IntoView {
       on:submit=submit_action
       class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8"
     >
-      <p class="title">"Login"</p>
+      <p class="title">"Sign Up"</p>
+
+      <p class="max-w-prose">
+        "Thanks so much for trying us out — we can't wait to get you up and \
+        running in no time. Prepare for magical iteration cycle times."
+      </p>
+
       <div class="flex flex-col gap-4">
-        <EmailInputField
+        <NameInputField
           autofocus=true
+          input_signal=read_name output_signal=write_name
+          error_hint={MaybeProp::derive(move || submit_touched().then_some(name_hint()).flatten())}
+        />
+        <EmailInputField
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
         />
@@ -115,12 +162,17 @@ fn LoginIsland() -> impl IntoView {
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
         />
+        <PasswordInputField
+          id="confirm_password" label_text="Confirm Password"
+          input_signal=read_confirm_password output_signal=write_confirm_password
+          error_hint={MaybeProp::derive(move || submit_touched().then_some(confirm_password_hint()).flatten())}
+        />
       </div>
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
         <button class="btn btn-primary">
-          "Log in"
+          "Sign Up"
           { move || loading().then_some(view! {
             <LoadingCircle {..} class="size-4" />
           })}

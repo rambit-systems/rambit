@@ -5,7 +5,7 @@ use crate::navigation::next_url_hook;
 
 #[component]
 pub fn Navbar() -> impl IntoView {
-  let class = "elevation-navbar flex flex-row px-4 gap-1 items-center h-10 \
+  let class = "elevation-navbar flex flex-row px-4 gap-2 items-center h-12 \
                rounded-bl rounded-br mb-8";
 
   view! {

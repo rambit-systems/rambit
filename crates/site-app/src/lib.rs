@@ -2,6 +2,7 @@ mod components;
 mod join_classes;
 mod navigation;
 mod pages;
+mod reactive_utils;
 
 use leptos::prelude::*;
 use leptos_meta::{
@@ -12,7 +13,7 @@ use leptos_router::{
   path, StaticSegment,
 };
 
-use self::pages::{HomePage, LoginPage, LogoutPage};
+use self::pages::{HomePage, LoginPage, LogoutPage, SignupPage};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -50,6 +51,7 @@ pub fn App() -> impl IntoView {
       <PageContainer>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
+          <Route path=path!("/auth/signup") view=SignupPage/>
           <Route path=path!("/auth/login") view=LoginPage/>
           <Route path=path!("/auth/logout") view=LogoutPage/>
         </Routes>
@@ -62,7 +64,7 @@ pub fn App() -> impl IntoView {
 fn PageContainer(children: Children) -> impl IntoView {
   view! {
     <main class="elevation-suppressed text-base-11 font-medium">
-      <div class="page-container flex flex-col min-h-screen pb-8">
+      <div class="page-container flex flex-col min-h-svh pb-8">
         <self::components::Navbar />
         { children() }
       </div>
