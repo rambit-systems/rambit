@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::{
-  ev::{Event, SubmitEvent},
-  prelude::*,
-};
+use leptos::{ev::SubmitEvent, prelude::*};
 use models::dvf::{EmailAddress, EmailAddressError};
 
 use crate::{
@@ -11,6 +8,7 @@ use crate::{
     EnvelopeHeroIcon, InputField, LoadingCircle, LockClosedHeroIcon,
   },
   navigation::{navigate_to, next_url_hook},
+  reactive_utils::touched_input_bindings,
 };
 
 #[component]
@@ -20,17 +18,6 @@ pub fn LoginPage() -> impl IntoView {
     <LoginIsland />
     <div class="flex-1" />
   }
-}
-
-pub fn touched_input_bindings(
-  s: RwSignal<String>,
-) -> (impl Fn() -> String, impl Fn(Event)) {
-  (
-    move || s.get(),
-    move |e| {
-      s.set(event_target_value(&e));
-    },
-  )
 }
 
 #[island]
