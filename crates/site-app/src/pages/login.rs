@@ -21,7 +21,7 @@ pub fn LoginPage() -> impl IntoView {
 }
 
 #[island]
-pub fn LoginIsland() -> impl IntoView {
+fn LoginIsland() -> impl IntoView {
   let email = RwSignal::new(String::new());
   let password = RwSignal::new(String::new());
   let (read_email, write_email) = touched_input_bindings(email);
