@@ -1,4 +1,8 @@
+mod specialized;
+
 use leptos::{ev::Event, prelude::*};
+
+pub use self::specialized::*;
 
 #[component]
 pub fn InputField(
@@ -6,8 +10,8 @@ pub fn InputField(
   label_text: &'static str,
   input_type: &'static str,
   placeholder: &'static str,
-  #[prop(optional)] before: Option<Children>,
-  #[prop(optional)] after: Option<Children>,
+  #[prop(optional_no_strip)] before: Option<Children>,
+  #[prop(optional_no_strip)] after: Option<Children>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,

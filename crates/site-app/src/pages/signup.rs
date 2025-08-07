@@ -5,8 +5,7 @@ use models::dvf::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
 
 use crate::{
   components::{
-    EnvelopeHeroIcon, InputField, LoadingCircle, LockClosedHeroIcon,
-    UserHeroIcon,
+    EmailInputField, LoadingCircle, NameInputField, PasswordInputField,
   },
   navigation::{navigate_to, next_url_hook},
   reactive_utils::touched_input_bindings,
@@ -133,24 +132,16 @@ fn SignupIsland() -> impl IntoView {
       </p>
 
       <div class="flex flex-col gap-4">
-        <InputField
-          id="name" label_text="Full Name"
-          input_type="text" placeholder="" autofocus=true
-          before={ Box::new(|| view!{ <UserHeroIcon {..} class="size-6" /> }.into_any()) }
+        <NameInputField
+          autofocus=true
           input_signal=read_name output_signal=write_name
           error_hint={MaybeProp::derive(move || submit_touched().then_some(name_hint()).flatten())}
         />
-        <InputField
-          id="email" label_text="Email Address"
-          input_type="text" placeholder="" autofocus=true
-          before={ Box::new(|| view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()) }
+        <EmailInputField
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
         />
-        <InputField
-          id="password" label_text="Password"
-          input_type="password" placeholder=""
-          before={ Box::new(|| view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any()) }
+        <PasswordInputField
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
         />
