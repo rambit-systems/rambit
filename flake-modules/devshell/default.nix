@@ -55,7 +55,7 @@
           name = "container";
           command = ''
             docker load -i $(nix build .#grid-container --print-out-paths --no-link) && \
-            docker run --rm --network host grid:latest
+            docker run --rm --network host grid:latest --migrate
           '';
           help = "Runs the site binary in a container.";
         }
