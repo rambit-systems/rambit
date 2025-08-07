@@ -5,7 +5,7 @@
   }
 
   .elevation-flat {
-    @apply bg-base-1 border border-base-6 rounded;
+    @apply bg-base-1 border-[1.5px] border-base-6 rounded;
   }
 
   .elevation-navbar {
