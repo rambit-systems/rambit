@@ -1,4 +1,5 @@
 mod components;
+mod context;
 mod join_classes;
 mod navigation;
 mod pages;
@@ -14,7 +15,10 @@ use leptos_router::{
   path, StaticSegment,
 };
 
-use self::pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage};
+use self::{
+  context::UserDataContextProvider,
+  pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage},
+};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -49,15 +53,17 @@ pub fn App() -> impl IntoView {
     <Title text="Rambit Labs — Never waste another build"/>
 
     <Router>
-      <PageContainer>
-        <Routes fallback=|| "Page not found.".into_view()>
-          <Route path=StaticSegment("") view=HomePage/>
-          <Route path=path!("/dash") view=DashboardPage />
-          <Route path=path!("/auth/signup") view=SignupPage/>
-          <Route path=path!("/auth/login") view=LoginPage/>
-          <Route path=path!("/auth/logout") view=LogoutPage/>
-        </Routes>
-      </PageContainer>
+      <UserDataContextProvider>
+        <PageContainer>
+          <Routes fallback=|| "Page not found.".into_view()>
+            <Route path=StaticSegment("") view=HomePage/>
+            <Route path=path!("/dash") view=DashboardPage />
+            <Route path=path!("/auth/signup") view=SignupPage/>
+            <Route path=path!("/auth/login") view=LoginPage/>
+            <Route path=path!("/auth/logout") view=LogoutPage/>
+          </Routes>
+        </PageContainer>
+      </UserDataContextProvider>
     </Router>
   }
 }
