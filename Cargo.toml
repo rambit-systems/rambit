@@ -46,7 +46,7 @@ tokio = { version = "1" }
 
 # network stack
 axum = { version = "0.8", features = [ "http2", "macros" ] }
-axum-login = { version = "0.17" }
+axum-login = { version = "0.18" }
 tower = { version = "0.5" }
 tower-http = { version = "0.6" }
 tower-sessions = { version = "0.14" }

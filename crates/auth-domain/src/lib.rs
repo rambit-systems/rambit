@@ -199,7 +199,6 @@ impl AuthDomainService {
   }
 }
 
-#[async_trait::async_trait]
 impl AuthnBackend for AuthDomainService {
   type Credentials = (EmailAddress, UserSubmittedAuthCredentials);
   type Error = AuthenticationError;
