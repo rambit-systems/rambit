@@ -3359,6 +3359,7 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "models",
+ "serde",
 ]
 
 [[package]]

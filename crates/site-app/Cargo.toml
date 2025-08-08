@@ -13,6 +13,8 @@ leptos_router.workspace = true
 
 models = { path = "../models", default-features = false }
 
+serde.workspace = true
+
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 
 [features]
