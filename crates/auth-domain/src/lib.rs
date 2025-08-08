@@ -138,6 +138,7 @@ impl AuthDomainService {
       name,
       email,
       auth,
+      active_org_index: 0,
     };
 
     self

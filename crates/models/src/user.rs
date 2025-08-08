@@ -13,15 +13,17 @@ use crate::Org;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct User {
   /// The user's ID.
-  pub id:    RecordId<User>,
+  pub id:               RecordId<User>,
   /// The user's orgs, guaranteed to be at least one.
-  pub orgs:  (RecordId<Org>, Vec<RecordId<Org>>),
+  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
   /// The user's name.
-  pub name:  HumanName,
+  pub name:             HumanName,
   /// The user's email address.
-  pub email: EmailAddress,
+  pub email:            EmailAddress,
   /// The user's authentication secrets.
-  pub auth:  UserAuthCredentials,
+  pub auth:             UserAuthCredentials,
+  /// The index of the [`Org`] that the user is currently operating as.
+  pub active_org_index: u8,
 }
 
 impl User {
@@ -85,13 +87,15 @@ impl Model for User {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthUser {
   /// The user's ID.
-  pub id:              RecordId<User>,
+  pub id:               RecordId<User>,
   /// The user's orgs, guaranteed to be at least one.
-  pub orgs:            (RecordId<Org>, Vec<RecordId<Org>>),
+  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
   /// The user's name.
-  pub name:            HumanName,
+  pub name:             HumanName,
   /// The hash of the user's authentication secrets.
-  pub auth_hash_bytes: Box<[u8]>,
+  pub auth_hash_bytes:  Box<[u8]>,
+  /// The index of the [`Org`] that the user is currently operating as.
+  pub active_org_index: u8,
 }
 
 impl From<User> for AuthUser {
@@ -103,6 +107,7 @@ impl From<User> for AuthUser {
       orgs: user.orgs,
       name: user.name,
       auth_hash_bytes,
+      active_org_index: user.active_org_index,
     }
   }
 }
