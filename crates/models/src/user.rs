@@ -1,4 +1,7 @@
-use std::hash::{self, Hash, Hasher};
+use std::{
+  hash::{self, Hash, Hasher},
+  iter::once,
+};
 
 use dvf::{EitherSlug, EmailAddress, HumanName, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
@@ -32,6 +35,11 @@ impl User {
   /// Generates the value of the unique [`User`] index `email`.
   pub fn unique_index_email(&self) -> Vec<EitherSlug> {
     vec![EitherSlug::Lax(LaxSlug::new(self.email.as_ref()))]
+  }
+
+  /// Returns an iterator of the user's orgs.
+  pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
+    once(self.orgs.0).chain(self.orgs.1.iter().copied())
   }
 
   /// Returns whether the user belongs to the given org.
