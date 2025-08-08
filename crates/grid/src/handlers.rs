@@ -55,8 +55,8 @@ pub fn context_provider(
   move || {
     provide_context(app_state.prime_domain.clone());
     provide_context(app_state.auth_domain.clone());
-    provide_context(prime_domain::models::AuthStatus(
-      auth_session.user.clone(),
-    ));
+    if let Some(auth_user) = auth_session.user.clone() {
+      provide_context(auth_user);
+    }
   }
 }

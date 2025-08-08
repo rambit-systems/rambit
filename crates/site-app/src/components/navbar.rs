@@ -1,5 +1,5 @@
 use leptos::{either::Either, prelude::*};
-use models::{AuthStatus, AuthUser};
+use models::AuthUser;
 
 use crate::navigation::next_url_hook;
 
@@ -20,9 +20,9 @@ pub fn Navbar() -> impl IntoView {
 }
 #[component]
 fn NavbarUserArea() -> impl IntoView {
-  let auth_status = use_context::<AuthStatus>().and_then(|as_| as_.0);
+  let auth_user = use_context::<AuthUser>();
 
-  match auth_status {
+  match auth_user {
     Some(user) => Either::Left(view! { <LoggedInUserAuthActions user=user /> }),
     None => Either::Right(view! { <LoggedOutUserAuthActions /> }),
   }
