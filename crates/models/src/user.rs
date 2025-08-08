@@ -112,6 +112,13 @@ impl From<User> for AuthUser {
   }
 }
 
+impl AuthUser {
+  /// Returns an iterator of the user's orgs.
+  pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
+    once(self.orgs.0).chain(self.orgs.1.iter().copied())
+  }
+}
+
 #[cfg(feature = "auth")]
 mod auth {
   use axum_login::AuthUser as AxumLoginAuthUser;
