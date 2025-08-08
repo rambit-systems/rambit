@@ -1,7 +1,7 @@
 use leptos::{either::Either, prelude::*};
 use models::AuthUser;
 
-use crate::navigation::next_url_hook;
+use crate::{context::UserActiveOrg, navigation::next_url_hook};
 
 #[component]
 pub fn Navbar() -> impl IntoView {
@@ -46,11 +46,14 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 
 #[component]
 fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
+  let user_active_org = expect_context::<UserActiveOrg>();
+  let org_descriptor = user_active_org.org_descriptor();
+
   view! {
-    <span class="">
-      "Welcome, "
-      { user.name.to_string() }
-    </span>
+    <div class="flex flex-col gap leading-none items-end">
+      <span class="text-base-12">{ user.name.to_string() }</span>
+      <span class="text-sm">{ org_descriptor }</span>
+    </div>
     <div class="flex flex-row gap-1 items-center">
       <a href="/dash" class="btn-link btn-link-primary">"Dashboard"</a>
       <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
