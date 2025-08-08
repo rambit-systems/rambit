@@ -37,8 +37,10 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
     Signal::derive(move || format!("/auth/login?next={}", next_url()));
 
   view! {
-    <a href=login_url class="btn-link btn-link-secondary">"Log In"</a>
-    <a href=signup_url class="btn-link btn-link-primary">"Sign Up"</a>
+    <div class="flex flex-row gap-1 items-center">
+      <a href=login_url class="btn-link btn-link-secondary">"Log In"</a>
+      <a href=signup_url class="btn-link btn-link-primary">"Sign Up"</a>
+    </div>
   }
 }
 
@@ -47,10 +49,11 @@ fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
   view! {
     <span class="">
       "Welcome, "
-      <a class="text-link text-link-primary">
-        { user.name.to_string() }
-      </a>
+      { user.name.to_string() }
     </span>
-    <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    <div class="flex flex-row gap-1 items-center">
+      <a href="/dash" class="btn-link btn-link-primary">"Dashboard"</a>
+      <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    </div>
   }
 }
