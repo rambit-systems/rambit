@@ -5,6 +5,7 @@
 mod app_state;
 mod args;
 mod endpoints;
+mod handlers;
 
 use axum::Router;
 use axum_login::AuthManagerLayerBuilder;
@@ -102,5 +103,3 @@ async fn main() -> Result<()> {
 
   Ok(())
 }
-
-mod handlers;
