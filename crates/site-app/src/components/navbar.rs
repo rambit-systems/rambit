@@ -1,7 +1,7 @@
 use leptos::{either::Either, prelude::*};
-use models::{AuthStatus, AuthUser};
+use models::AuthUser;
 
-use crate::navigation::next_url_hook;
+use crate::{context::UserActiveOrg, navigation::next_url_hook};
 
 #[component]
 pub fn Navbar() -> impl IntoView {
@@ -20,9 +20,9 @@ pub fn Navbar() -> impl IntoView {
 }
 #[component]
 fn NavbarUserArea() -> impl IntoView {
-  let auth_status = use_context::<AuthStatus>().and_then(|as_| as_.0);
+  let auth_user = use_context::<AuthUser>();
 
-  match auth_status {
+  match auth_user {
     Some(user) => Either::Left(view! { <LoggedInUserAuthActions user=user /> }),
     None => Either::Right(view! { <LoggedOutUserAuthActions /> }),
   }
@@ -37,20 +37,26 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
     Signal::derive(move || format!("/auth/login?next={}", next_url()));
 
   view! {
-    <a href=login_url class="btn-link btn-link-secondary">"Log In"</a>
-    <a href=signup_url class="btn-link btn-link-primary">"Sign Up"</a>
+    <div class="flex flex-row gap-1 items-center">
+      <a href=login_url class="btn-link btn-link-secondary">"Log In"</a>
+      <a href=signup_url class="btn-link btn-link-primary">"Sign Up"</a>
+    </div>
   }
 }
 
 #[component]
 fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
+  let user_active_org = expect_context::<UserActiveOrg>();
+  let org_descriptor = user_active_org.org_descriptor();
+
   view! {
-    <span class="">
-      "Welcome, "
-      <a class="text-link text-link-primary">
-        { user.name.to_string() }
-      </a>
-    </span>
-    <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    <div class="flex flex-col gap leading-none items-end">
+      <span class="text-base-12">{ user.name.to_string() }</span>
+      <span class="text-sm">{ org_descriptor }</span>
+    </div>
+    <div class="flex flex-row gap-1 items-center">
+      <a href="/dash" class="btn-link btn-link-primary">"Dashboard"</a>
+      <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    </div>
   }
 }

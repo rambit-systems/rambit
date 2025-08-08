@@ -1,0 +1,14 @@
+
+@layer base {
+  .elevation-suppressed {
+    @apply bg-base-2;
+  }
+
+  .elevation-flat {
+    @apply bg-base-1 border-[1.5px] border-base-6 rounded;
+  }
+
+  .elevation-navbar {
+    @apply bg-base-1 shadow-md;
+  }
+}

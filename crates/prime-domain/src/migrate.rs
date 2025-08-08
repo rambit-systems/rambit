@@ -41,12 +41,13 @@ impl PrimeDomainService {
     let _user = self
       .user_repo
       .create_model(User {
-        id:    user_id,
-        orgs:  (personal_org.id, vec![federation.id]),
-        email: EmailAddress::try_new("jpicard@federation.gov").unwrap(),
-        name:  HumanName::try_new("Jean-Luc Picard")
+        id:               user_id,
+        orgs:             (personal_org.id, vec![federation.id]),
+        email:            EmailAddress::try_new("jpicard@federation.gov")
+          .unwrap(),
+        name:             HumanName::try_new("Jean-Luc Picard")
           .expect("failed to create name"),
-        auth:  models::UserAuthCredentials::Password {
+        auth:             models::UserAuthCredentials::Password {
           // hash for password `password`
           password_hash: models::PasswordHash(
             "$argon2id$v=19$m=16,t=2,\
@@ -54,6 +55,7 @@ impl PrimeDomainService {
               .to_string(),
           ),
         },
+        active_org_index: 1,
       })
       .await
       .into_diagnostic()

@@ -1,4 +1,7 @@
-use std::hash::{self, Hash, Hasher};
+use std::{
+  hash::{self, Hash, Hasher},
+  iter::once,
+};
 
 use dvf::{EitherSlug, EmailAddress, HumanName, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
@@ -10,15 +13,17 @@ use crate::Org;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct User {
   /// The user's ID.
-  pub id:    RecordId<User>,
+  pub id:               RecordId<User>,
   /// The user's orgs, guaranteed to be at least one.
-  pub orgs:  (RecordId<Org>, Vec<RecordId<Org>>),
+  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
   /// The user's name.
-  pub name:  HumanName,
+  pub name:             HumanName,
   /// The user's email address.
-  pub email: EmailAddress,
+  pub email:            EmailAddress,
   /// The user's authentication secrets.
-  pub auth:  UserAuthCredentials,
+  pub auth:             UserAuthCredentials,
+  /// The index of the [`Org`] that the user is currently operating as.
+  pub active_org_index: u8,
 }
 
 impl User {
@@ -32,6 +37,11 @@ impl User {
   /// Generates the value of the unique [`User`] index `email`.
   pub fn unique_index_email(&self) -> Vec<EitherSlug> {
     vec![EitherSlug::Lax(LaxSlug::new(self.email.as_ref()))]
+  }
+
+  /// Returns an iterator of the user's orgs.
+  pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
+    once(self.orgs.0).chain(self.orgs.1.iter().copied())
   }
 
   /// Returns whether the user belongs to the given org.
@@ -77,13 +87,15 @@ impl Model for User {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthUser {
   /// The user's ID.
-  pub id:              RecordId<User>,
+  pub id:               RecordId<User>,
   /// The user's orgs, guaranteed to be at least one.
-  pub orgs:            (RecordId<Org>, Vec<RecordId<Org>>),
+  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
   /// The user's name.
-  pub name:            HumanName,
+  pub name:             HumanName,
   /// The hash of the user's authentication secrets.
-  pub auth_hash_bytes: Box<[u8]>,
+  pub auth_hash_bytes:  Box<[u8]>,
+  /// The index of the [`Org`] that the user is currently operating as.
+  pub active_org_index: u8,
 }
 
 impl From<User> for AuthUser {
@@ -95,13 +107,17 @@ impl From<User> for AuthUser {
       orgs: user.orgs,
       name: user.name,
       auth_hash_bytes,
+      active_org_index: user.active_org_index,
     }
   }
 }
 
-/// Optional user auth, as viewable from the client
-#[derive(Clone, Debug)]
-pub struct AuthStatus(pub Option<AuthUser>);
+impl AuthUser {
+  /// Returns an iterator of the user's orgs.
+  pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
+    once(self.orgs.0).chain(self.orgs.1.iter().copied())
+  }
+}
 
 #[cfg(feature = "auth")]
 mod auth {

@@ -138,6 +138,7 @@ impl AuthDomainService {
       name,
       email,
       auth,
+      active_org_index: 0,
     };
 
     self
@@ -199,7 +200,6 @@ impl AuthDomainService {
   }
 }
 
-#[async_trait::async_trait]
 impl AuthnBackend for AuthDomainService {
   type Credentials = (EmailAddress, UserSubmittedAuthCredentials);
   type Error = AuthenticationError;
