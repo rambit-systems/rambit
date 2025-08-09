@@ -87,6 +87,38 @@ impl PrimeDomainService {
   ) -> Result<UploadResponse, UploadError> {
     let entry_id = RecordId::new();
 
+    // find the user
+    let user = self
+      .user_repo
+      .fetch_model_by_id(req.auth)
+      .await
+      .into_diagnostic()
+      .context("failed to find user")
+      .map_err(UploadError::InternalError)?
+      .ok_or(miette!("authenticated user not found"))
+      .map_err(UploadError::InternalError)?;
+
+    // find the given store
+    let target_store = self
+      .store_repo
+      .fetch_model_by_unique_index(
+        StoreUniqueIndexSelector::Name,
+        EitherSlug::Strict(req.target_store.clone().into_inner()),
+      )
+      .await
+      .into_diagnostic()
+      .context("failed to search for target store")
+      .map_err(UploadError::InternalError)?
+      .ok_or(UploadError::TargetStoreNotFound(req.target_store))?;
+
+    // org is assigned by the store
+    let org = target_store.org;
+
+    // make sure the user owns the store
+    if !user.belongs_to_org(org) {
+      return Err(UploadError::Unauthorized);
+    }
+
     // find all the caches specified
     let mut caches = Vec::with_capacity(req.caches.len());
     for cache_name in req.caches {
@@ -105,34 +137,10 @@ impl PrimeDomainService {
       );
     }
 
-    // find the user
-    let user = self
-      .user_repo
-      .fetch_model_by_id(req.auth)
-      .await
-      .into_diagnostic()
-      .context("failed to find user")
-      .map_err(UploadError::InternalError)?
-      .ok_or(miette!("authenticated user not found"))
-      .map_err(UploadError::InternalError)?;
-
-    // reject request if any cache lies outside the user's org
-    if caches.iter().any(|c| !user.belongs_to_org(c.org)) {
+    // reject request if any cache lies outside the org
+    if caches.iter().any(|c| org != c.org) {
       return Err(UploadError::Unauthorized);
     }
-
-    // find the given store
-    let target_store = self
-      .store_repo
-      .fetch_model_by_unique_index(
-        StoreUniqueIndexSelector::Name,
-        EitherSlug::Strict(req.target_store.clone().into_inner()),
-      )
-      .await
-      .into_diagnostic()
-      .context("failed to search for target store")
-      .map_err(UploadError::InternalError)?
-      .ok_or(UploadError::TargetStoreNotFound(req.target_store))?;
 
     // make sure no entry exists for this path and store
     let duplicate_entry_by_store = self
@@ -227,13 +235,14 @@ impl PrimeDomainService {
     let entry = self
       .entry_repo
       .create_model(Entry {
-        id:                entry_id,
-        caches:            caches.iter().map(Model::id).collect(),
-        store_path:        req.store_path,
-        intrensic_data:    nar_intrensic_data,
-        storage_data:      nar_storage_data,
+        id: entry_id,
+        org,
+        caches: caches.iter().map(Model::id).collect(),
+        store_path: req.store_path,
+        intrensic_data: nar_intrensic_data,
+        storage_data: nar_storage_data,
         authenticity_data: nar_authenticity_data,
-        deriver_data:      req.deriver_data,
+        deriver_data: req.deriver_data,
       })
       .await
       .into_diagnostic()

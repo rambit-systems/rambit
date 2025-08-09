@@ -11,7 +11,7 @@ use nix_compat::{nixbase32, store_path::DIGEST_SIZE};
 use serde::{Deserialize, Serialize};
 
 pub use self::nar_data::*;
-use crate::{Store, cache::Cache};
+use crate::{Org, Store, cache::Cache};
 
 /// A store path digest.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -48,6 +48,8 @@ impl FromStr for Digest {
 pub struct Entry {
   /// The entry's ID.
   pub id:                RecordId<Entry>,
+  /// The entry's org.
+  pub org:               RecordId<Org>,
   /// The [`Cache`]s that this entry is accessible from.
   pub caches:            Vec<RecordId<Cache>>,
   /// The store path that the entry refers to.
