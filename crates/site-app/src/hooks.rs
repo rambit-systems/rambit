@@ -33,6 +33,13 @@ impl UserActiveOrgHook {
       })
   }
 
+  pub fn active_org_dash_url(&self) -> String {
+    format!(
+      "/dash/{active_org_id}",
+      active_org_id = self.active_org_id()
+    )
+  }
+
   pub fn active_org_descriptor(&self) -> Memo<Option<String>> {
     let resource = self.resource;
     let user_id = self.user.id;
