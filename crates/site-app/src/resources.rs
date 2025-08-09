@@ -1,14 +1,10 @@
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, Org};
 
-pub fn org(
-  id: RecordId<Org>,
-  blocking: bool,
-) -> Resource<Result<Option<Org>, ServerFnError>> {
-  match blocking {
-    true => Resource::new_blocking(move || id, fetch_org),
-    false => Resource::new(move || id, fetch_org),
-  }
+pub fn org(id: RecordId<Org>) -> Resource<Result<Option<Org>, ServerFnError>> {
+  let client = expect_context::<QueryClient>();
+  client.resource(fetch_org, move || id)
 }
 
 #[server]

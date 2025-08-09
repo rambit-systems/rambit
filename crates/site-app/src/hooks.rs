@@ -4,13 +4,26 @@ use models::{AuthUser, Org, OrgIdent};
 use crate::resources;
 
 #[derive(Clone)]
-pub struct UserActiveOrg {
+pub struct UserActiveOrgHook {
   resource: Resource<Result<Option<Org>, ServerFnError>>,
   user:     AuthUser,
 }
 
-impl UserActiveOrg {
-  pub fn org_descriptor(&self) -> Memo<Option<String>> {
+impl UserActiveOrgHook {
+  pub fn new(auth_user: AuthUser) -> Self {
+    let user_orgs = auth_user.iter_orgs().collect::<Vec<_>>();
+    let active_org = *user_orgs
+      .get(auth_user.active_org_index as usize)
+      .expect("active org index out of org list");
+    let active_org_resource = resources::org(active_org);
+
+    UserActiveOrgHook {
+      resource: active_org_resource,
+      user:     auth_user,
+    }
+  }
+
+  pub fn active_org_descriptor(&self) -> Memo<Option<String>> {
     let resource = self.resource;
     let user_id = self.user.id;
     Memo::new(move |_| {
@@ -34,22 +47,4 @@ impl UserActiveOrg {
         })
     })
   }
-}
-
-#[component]
-pub fn UserDataContextProvider(children: Children) -> impl IntoView {
-  if let Some(auth_user) = use_context::<AuthUser>() {
-    let user_orgs = auth_user.iter_orgs().collect::<Vec<_>>();
-    let active_org = *user_orgs
-      .get(auth_user.active_org_index as usize)
-      .expect("active org index out of org list");
-    let active_org_resource = resources::org(active_org, true);
-
-    provide_context(UserActiveOrg {
-      resource: active_org_resource,
-      user:     auth_user,
-    });
-  }
-
-  children()
 }
