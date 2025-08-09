@@ -62,6 +62,28 @@ pub struct Entry {
   pub deriver_data:      NarDeriverData,
 }
 
+/// The unique index selector for [`Entry`].
+#[derive(Debug, Clone, Copy)]
+pub enum EntryUniqueIndexSelector {
+  /// The `store-id-and-entry-path` index.
+  StoreIdAndEntryPath,
+  /// The `cache-id-and-entry-digest` index.
+  CacheIdAndEntryDigest,
+}
+
+impl fmt::Display for EntryUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      EntryUniqueIndexSelector::StoreIdAndEntryPath => {
+        write!(f, "store-id-and-entry-path")
+      }
+      EntryUniqueIndexSelector::CacheIdAndEntryDigest => {
+        write!(f, "cache-id-and-entry-digest")
+      }
+    }
+  }
+}
+
 impl Entry {
   /// Generates the value of the unique [`Entry`] index
   /// `store-id-and-entry-path`.
@@ -83,16 +105,22 @@ impl Entry {
 }
 
 impl Model for Entry {
-  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = !;
+  type UniqueIndexSelector = EntryUniqueIndexSelector;
+
+  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "entry";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[
-    ("store-id-and-entry-path", |e| {
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[
+    (EntryUniqueIndexSelector::StoreIdAndEntryPath, |e| {
       vec![Entry::unique_index_store_id_and_entry_path(
         e.storage_data.store,
         &e.store_path,
       )]
     }),
-    ("cache-id-and-entry-digest", |e| {
+    (EntryUniqueIndexSelector::CacheIdAndEntryDigest, |e| {
       e.caches
         .iter()
         .map(|c| {

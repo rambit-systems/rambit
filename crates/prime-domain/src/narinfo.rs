@@ -2,7 +2,8 @@
 
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Digest, Entry, Signature, StorePath, User,
+  CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector, Signature,
+  StorePath, User,
   dvf::{EitherSlug, EntityName, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
@@ -96,7 +97,7 @@ impl PrimeDomainService {
     let cache = self
       .cache_repo
       .fetch_model_by_unique_index(
-        "name".into(),
+        CacheUniqueIndexSelector::Name,
         EitherSlug::Strict(req.cache_name.clone().into_inner()),
       )
       .await
@@ -135,7 +136,7 @@ impl PrimeDomainService {
     let entry = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "cache-id-and-entry-digest".into(),
+        EntryUniqueIndexSelector::CacheIdAndEntryDigest,
         Entry::unique_index_cache_id_and_entry_digest(cache.id, req.digest),
       )
       .await

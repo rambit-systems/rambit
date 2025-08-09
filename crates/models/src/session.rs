@@ -13,10 +13,16 @@ pub struct Session {
 }
 
 impl Model for Session {
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = !;
+  type UniqueIndexSelector = !;
+
+  const INDICES: &'static [(
+    Self::IndexSelector,
+    model::SlugFieldGetter<Self>,
+  )] = &[];
   const TABLE_NAME: &'static str = "session";
   const UNIQUE_INDICES: &'static [(
-    &'static str,
+    Self::UniqueIndexSelector,
     model::SlugFieldGetter<Self>,
   )] = &[];
 

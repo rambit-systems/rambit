@@ -3,7 +3,8 @@
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Digest, Entry, StorePath, User,
+  CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector, StorePath,
+  User,
   dvf::{
     CompressionAlgorithm, CompressionStatus, EitherSlug, EntityName, FileSize,
     RecordId, Visibility,
@@ -69,7 +70,7 @@ impl PrimeDomainService {
     let cache = self
       .cache_repo
       .fetch_model_by_unique_index(
-        "name".into(),
+        CacheUniqueIndexSelector::Name,
         EitherSlug::Strict(req.cache_name.clone().into_inner()),
       )
       .await
@@ -108,7 +109,7 @@ impl PrimeDomainService {
     let entry = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "cache-id-and-entry-digest".into(),
+        EntryUniqueIndexSelector::CacheIdAndEntryDigest,
         Entry::unique_index_cache_id_and_entry_digest(
           cache.id,
           Digest::from_bytes(*req.store_path.digest()),

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use dvf::{EitherSlug, EntityName, RecordId, StorageCredentials};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
@@ -27,15 +29,38 @@ impl Store {
   }
 }
 
+/// The unique index selector for [`Store`].
+#[derive(Debug, Clone, Copy)]
+pub enum StoreUniqueIndexSelector {
+  /// The `name` index.
+  Name,
+}
+
+impl fmt::Display for StoreUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      StoreUniqueIndexSelector::Name => write!(f, "name"),
+    }
+  }
+}
+
 /// The configuration for a [`Store`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StoreConfiguration {}
 
 impl Model for Store {
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = !;
+  type UniqueIndexSelector = StoreUniqueIndexSelector;
+
+  const INDICES: &'static [(
+    Self::IndexSelector,
+    model::SlugFieldGetter<Self>,
+  )] = &[];
   const TABLE_NAME: &'static str = "store";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
-    &[("name", Store::unique_index_name)];
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[(StoreUniqueIndexSelector::Name, Store::unique_index_name)];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

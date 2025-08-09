@@ -7,7 +7,7 @@ use db::{Database, FetchModelByIndexError, FetchModelError, kv::LaxSlug};
 use miette::{IntoDiagnostic, miette};
 use models::{
   AuthUser, Org, OrgIdent, User, UserAuthCredentials,
-  UserSubmittedAuthCredentials,
+  UserSubmittedAuthCredentials, UserUniqueIndexSelector,
   dvf::{EitherSlug, EmailAddress, HumanName},
   model::RecordId,
 };
@@ -84,7 +84,7 @@ impl AuthDomainService {
     self
       .user_repo
       .fetch_model_by_unique_index(
-        "email".to_string(),
+        UserUniqueIndexSelector::Email,
         EitherSlug::Lax(LaxSlug::new(email.as_ref())),
       )
       .await

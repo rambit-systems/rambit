@@ -1,4 +1,5 @@
 use std::{
+  fmt,
   hash::{self, Hash, Hasher},
   iter::once,
 };
@@ -50,6 +51,21 @@ impl User {
   }
 }
 
+/// The unique index selector for [`User`]
+#[derive(Debug, Clone, Copy)]
+pub enum UserUniqueIndexSelector {
+  /// The `email` index.
+  Email,
+}
+
+impl fmt::Display for UserUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      UserUniqueIndexSelector::Email => write!(f, "email"),
+    }
+  }
+}
+
 /// A password hash.
 #[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub struct PasswordHash(pub String);
@@ -75,10 +91,18 @@ pub enum UserAuthCredentials {
 }
 
 impl Model for User {
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = !;
+  type UniqueIndexSelector = UserUniqueIndexSelector;
+
+  const INDICES: &'static [(
+    Self::IndexSelector,
+    model::SlugFieldGetter<Self>,
+  )] = &[];
   const TABLE_NAME: &'static str = "user";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
-    &[("email", User::unique_index_email)];
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[(UserUniqueIndexSelector::Email, User::unique_index_email)];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

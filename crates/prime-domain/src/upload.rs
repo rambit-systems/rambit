@@ -5,8 +5,9 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Cache, Digest, Entry, NarAuthenticityData, NarDeriverData, NarStorageData,
-  StorePath, User,
+  Cache, CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector,
+  NarAuthenticityData, NarDeriverData, NarStorageData, StorePath,
+  StoreUniqueIndexSelector, User,
   dvf::{CompressionStatus, EitherSlug, EntityName, RecordId},
   model::Model,
 };
@@ -93,7 +94,7 @@ impl PrimeDomainService {
         self
           .cache_repo
           .fetch_model_by_unique_index(
-            "name".into(),
+            CacheUniqueIndexSelector::Name,
             EitherSlug::Strict(cache_name.clone().into_inner()),
           )
           .await
@@ -124,7 +125,7 @@ impl PrimeDomainService {
     let target_store = self
       .store_repo
       .fetch_model_by_unique_index(
-        "name".into(),
+        StoreUniqueIndexSelector::Name,
         EitherSlug::Strict(req.target_store.clone().into_inner()),
       )
       .await
@@ -137,7 +138,7 @@ impl PrimeDomainService {
     let duplicate_entry_by_store = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "store-id-and-entry-path".into(),
+        EntryUniqueIndexSelector::StoreIdAndEntryPath,
         Entry::unique_index_store_id_and_entry_path(
           target_store.id,
           &req.store_path,
@@ -157,7 +158,7 @@ impl PrimeDomainService {
       let duplicate_entry_by_cache = self
         .entry_repo
         .fetch_model_by_unique_index(
-          "cache-id-and-entry-digest".into(),
+          EntryUniqueIndexSelector::CacheIdAndEntryDigest,
           Entry::unique_index_cache_id_and_entry_digest(
             cache.id,
             Digest::from_bytes(*req.store_path.digest()),
