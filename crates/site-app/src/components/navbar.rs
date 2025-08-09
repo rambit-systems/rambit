@@ -48,6 +48,8 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
   let user_active_org_hook = UserActiveOrgHook::new(user.clone());
   let org_descriptor = user_active_org_hook.active_org_descriptor();
+  let active_org_id = user_active_org_hook.active_org_id();
+  let dash_url = format!("/dash/{active_org_id}");
 
   view! {
     <div class="flex flex-col gap leading-none items-end">
@@ -55,7 +57,7 @@ fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
       <span class="text-sm">{ org_descriptor }</span>
     </div>
     <div class="flex flex-row gap-1 items-center">
-      <a href="/dash" class="btn-link btn-link-primary">"Dashboard"</a>
+      <a href=dash_url class="btn-link btn-link-primary">"Dashboard"</a>
       <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
     </div>
   }

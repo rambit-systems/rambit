@@ -56,7 +56,7 @@ pub fn App() -> impl IntoView {
         <QueryDevtools client=query_client />
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
-          <Route path=path!("/dash") view=DashboardPage />
+          <Route path=path!("/dash/:org") view=DashboardPage />
           <Route path=path!("/auth/signup") view=SignupPage/>
           <Route path=path!("/auth/login") view=LoginPage/>
           <Route path=path!("/auth/logout") view=LogoutPage/>

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{AuthUser, Org, OrgIdent};
+use models::{dvf::RecordId, AuthUser, Org, OrgIdent};
 
 use crate::resources;
 
@@ -21,6 +21,16 @@ impl UserActiveOrgHook {
       resource: active_org_resource,
       user:     auth_user,
     }
+  }
+
+  pub fn active_org_id(&self) -> RecordId<Org> {
+    let orgs = self.user.iter_orgs().collect::<Vec<_>>();
+    *orgs
+      .get(self.user.active_org_index as usize)
+      .unwrap_or_else(|| {
+        leptos::logging::error!("active org index was out of bounds");
+        orgs.last().expect("org list is empty")
+      })
   }
 
   pub fn active_org_descriptor(&self) -> Memo<Option<String>> {
