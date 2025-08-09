@@ -86,6 +86,21 @@ impl fmt::Display for EntryUniqueIndexSelector {
   }
 }
 
+/// The index selector for [`Entry`]
+#[derive(Debug, Clone, Copy)]
+pub enum EntryIndexSelector {
+  /// The `org` index.
+  Org,
+}
+
+impl fmt::Display for EntryIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      EntryIndexSelector::Org => write!(f, "org"),
+    }
+  }
+}
+
 impl Entry {
   /// Generates the value of the unique [`Entry`] index
   /// `store-id-and-entry-path`.
@@ -107,10 +122,13 @@ impl Entry {
 }
 
 impl Model for Entry {
-  type IndexSelector = !;
+  type IndexSelector = EntryIndexSelector;
   type UniqueIndexSelector = EntryUniqueIndexSelector;
 
-  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] = &[];
+  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] =
+    &[(EntryIndexSelector::Org, |e| {
+      vec![LaxSlug::new(e.org.to_string()).into()]
+    })];
   const TABLE_NAME: &'static str = "entry";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,

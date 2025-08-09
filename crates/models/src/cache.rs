@@ -1,6 +1,6 @@
 use std::fmt;
 
-use dvf::{EitherSlug, EntityName, RecordId, Visibility};
+use dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -66,7 +66,9 @@ impl Model for Cache {
   const INDICES: &'static [(
     Self::IndexSelector,
     model::SlugFieldGetter<Self>,
-  )] = &[];
+  )] = &[(CacheIndexSelector::Org, |c| {
+    vec![LaxSlug::new(c.org.to_string()).into()]
+  })];
   const TABLE_NAME: &'static str = "cache";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,

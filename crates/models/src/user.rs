@@ -66,6 +66,21 @@ impl fmt::Display for UserUniqueIndexSelector {
   }
 }
 
+/// The index selector for [`User`]
+#[derive(Debug, Clone, Copy)]
+pub enum UserIndexSelector {
+  /// The `org` index.
+  Org,
+}
+
+impl fmt::Display for UserIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      UserIndexSelector::Org => write!(f, "org"),
+    }
+  }
+}
+
 /// A password hash.
 #[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub struct PasswordHash(pub String);
@@ -91,13 +106,17 @@ pub enum UserAuthCredentials {
 }
 
 impl Model for User {
-  type IndexSelector = !;
+  type IndexSelector = UserIndexSelector;
   type UniqueIndexSelector = UserUniqueIndexSelector;
 
   const INDICES: &'static [(
     Self::IndexSelector,
     model::SlugFieldGetter<Self>,
-  )] = &[];
+  )] = &[(UserIndexSelector::Org, |u| {
+    u.iter_orgs()
+      .map(|id| LaxSlug::new(id.to_string()).into())
+      .collect()
+  })];
   const TABLE_NAME: &'static str = "user";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,

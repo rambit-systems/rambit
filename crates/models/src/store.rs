@@ -1,6 +1,6 @@
 use std::fmt;
 
-use dvf::{EitherSlug, EntityName, RecordId, StorageCredentials};
+use dvf::{EitherSlug, EntityName, LaxSlug, RecordId, StorageCredentials};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -44,18 +44,35 @@ impl fmt::Display for StoreUniqueIndexSelector {
   }
 }
 
+/// The index selector for [`Store`].
+#[derive(Debug, Clone, Copy)]
+pub enum StoreIndexSelector {
+  /// The `org` index.
+  Org,
+}
+
+impl fmt::Display for StoreIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      StoreIndexSelector::Org => write!(f, "org"),
+    }
+  }
+}
+
 /// The configuration for a [`Store`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StoreConfiguration {}
 
 impl Model for Store {
-  type IndexSelector = !;
+  type IndexSelector = StoreIndexSelector;
   type UniqueIndexSelector = StoreUniqueIndexSelector;
 
   const INDICES: &'static [(
     Self::IndexSelector,
     model::SlugFieldGetter<Self>,
-  )] = &[];
+  )] = &[(StoreIndexSelector::Org, |s| {
+    vec![LaxSlug::new(s.org.to_string()).into()]
+  })];
   const TABLE_NAME: &'static str = "store";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,
