@@ -18,6 +18,7 @@ serde.workspace = true
 tracing.workspace = true
 
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
+leptos-fetch = { version = "0.4", features = [ "devtools" ] }
 
 [features]
 default = [  ]
@@ -27,6 +28,7 @@ ssr = [
   "leptos/tracing",
   "leptos_meta/ssr",
   "leptos_router/ssr",
+  "leptos-fetch/ssr",
   "dep:leptos_axum",
   "dep:prime-domain",
 ]

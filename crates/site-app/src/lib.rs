@@ -1,5 +1,5 @@
 mod components;
-mod context;
+mod hooks;
 mod join_classes;
 mod navigation;
 mod pages;
@@ -7,6 +7,7 @@ mod reactive_utils;
 mod resources;
 
 use leptos::prelude::*;
+use leptos_fetch::{QueryClient, QueryDevtools};
 use leptos_meta::{
   provide_meta_context, HashedStylesheet, MetaTags, Style, Title,
 };
@@ -15,10 +16,7 @@ use leptos_router::{
   path, StaticSegment,
 };
 
-use self::{
-  context::UserDataContextProvider,
-  pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage},
-};
+use self::pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -48,22 +46,22 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 #[component]
 pub fn App() -> impl IntoView {
   provide_meta_context();
+  let query_client = QueryClient::new().provide();
 
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
     <Router>
-      <UserDataContextProvider>
-        <PageContainer>
-          <Routes fallback=|| "Page not found.".into_view()>
-            <Route path=StaticSegment("") view=HomePage/>
-            <Route path=path!("/dash") view=DashboardPage />
-            <Route path=path!("/auth/signup") view=SignupPage/>
-            <Route path=path!("/auth/login") view=LoginPage/>
-            <Route path=path!("/auth/logout") view=LogoutPage/>
-          </Routes>
-        </PageContainer>
-      </UserDataContextProvider>
+      <PageContainer>
+        <QueryDevtools client=query_client />
+        <Routes fallback=|| "Page not found.".into_view()>
+          <Route path=StaticSegment("") view=HomePage/>
+          <Route path=path!("/dash/:org") view=DashboardPage />
+          <Route path=path!("/auth/signup") view=SignupPage/>
+          <Route path=path!("/auth/login") view=LoginPage/>
+          <Route path=path!("/auth/logout") view=LogoutPage/>
+        </Routes>
+      </PageContainer>
     </Router>
   }
 }

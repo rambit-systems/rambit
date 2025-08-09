@@ -465,9 +465,20 @@ checksum = "c469d952047f47f91b68d1cba3f10d63c11d73e4636f24f08daf0278abf01c4d"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link",
+]
+
+[[package]]
+name = "chrono-humanize"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "799627e6b4d27827a814e837b9d8a504832086081806d45b1afa34dc982b023b"
+dependencies = [
+ "chrono",
 ]
 
 [[package]]
@@ -1726,6 +1737,26 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm_split_helpers",
+ "web-sys",
+]
+
+[[package]]
+name = "leptos-fetch"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ea58660f9ab2c4157c6cc5e82e68d36e1a9da406a02f297bf662b70be4dffa1"
+dependencies = [
+ "chrono",
+ "chrono-humanize",
+ "codee",
+ "futures",
+ "leptos",
+ "parking_lot",
+ "paste",
+ "rustc_version",
+ "send_wrapper",
+ "task-local",
+ "tracing",
  "web-sys",
 ]
 
@@ -3355,6 +3386,7 @@ version = "0.1.0"
 dependencies = [
  "gloo-net",
  "leptos",
+ "leptos-fetch",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
@@ -3577,6 +3609,15 @@ dependencies = [
  "tracing",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "task-local"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2c821daee0efdf6414970c8185a1c22e259a7ed87b2fd9f7d3c5f5503fd2863"
+dependencies = [
+ "pin-project-lite",
 ]
 
 [[package]]
