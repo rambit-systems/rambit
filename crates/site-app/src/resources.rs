@@ -1,6 +1,17 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::RecordId, Org};
+use models::{dvf::RecordId, AuthUser, Org};
+
+fn authorize_by_org(org: RecordId<Org>) -> Result<(), ServerFnError> {
+  let auth_user: Option<AuthUser> = use_context();
+  let cleared_orgs = auth_user
+    .map(|au| au.iter_orgs().collect::<Vec<_>>())
+    .unwrap_or_default();
+  if !cleared_orgs.contains(&org) {
+    return Err(ServerFnError::new("Unauthorized"));
+  }
+  Ok(())
+}
 
 pub fn org(id: RecordId<Org>) -> Resource<Result<Option<Org>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
@@ -10,6 +21,9 @@ pub fn org(id: RecordId<Org>) -> Resource<Result<Option<Org>, ServerFnError>> {
 #[server]
 async fn fetch_org(id: RecordId<Org>) -> Result<Option<Org>, ServerFnError> {
   use prime_domain::{db::FetchModelError, PrimeDomainService};
+
+  authorize_by_org(id)?;
+
   let prime_domain_service: PrimeDomainService = expect_context();
 
   prime_domain_service
