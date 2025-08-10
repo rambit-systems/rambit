@@ -2,6 +2,7 @@
 
 pub mod download;
 mod fetch_by_id;
+mod fetch_by_org;
 mod migrate;
 pub mod narinfo;
 pub mod upload;
