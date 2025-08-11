@@ -1,48 +1,27 @@
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, Entry, Org};
 
-use crate::{
-  components::{CacheItemLink, LoadingCircle},
-  resources::entry::entries_in_org_query_scope,
-};
+use super::{DataTable, DataTableReloadButton};
+use crate::components::CacheItemLink;
 
 #[island]
 pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
-  let query_client = expect_context::<QueryClient>();
-
-  let key = move || org;
-  let entries_in_org = crate::resources::entry::entries_in_org(key);
-  let fetching =
-    query_client.subscribe_is_fetching(entries_in_org_query_scope(), key);
-  let invalidate = move |_| {
-    query_client.invalidate_query(entries_in_org_query_scope(), key());
-  };
-
-  let suspend = move || {
-    Suspend::new(async move {
-      match entries_in_org.await {
-        Ok(entries) => view! { <EntryDataTable entries=entries /> }.into_any(),
-        Err(e) => view! { { format!("Error: {e}") } }.into_any(),
-      }
-    })
-  };
+  let key_fn = move || org;
+  let fetcher = crate::resources::entry::fetch_entries_in_org;
 
   view! {
     <div class="flex flex-row items-start gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
-      <button class="btn btn-secondary relative" on:click=invalidate>
-        <span class:invisible=fetching>"Reload"</span>
-        <div class="absolute inset-0 flex flex-row justify-center items-center">
-          <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
-        </div>
-      </button>
+      <DataTableReloadButton
+        key_fn=key_fn fetcher=fetcher
+      />
     </div>
 
-    <Suspense fallback=move || view! { "Loading..." }>
-      { suspend }
-    </Suspense>
+    <DataTable
+      key_fn=key_fn fetcher=fetcher
+      view_fn=move |e| view! { <EntryDataTable entries=e /> }
+    />
   }
 }
 

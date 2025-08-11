@@ -22,7 +22,7 @@ pub fn entries_in_org_query_scope(
 }
 
 #[server(prefix = "/api/sfn")]
-async fn fetch_entries_in_org(
+pub async fn fetch_entries_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Entry>, ServerFnError> {
   use prime_domain::PrimeDomainService;
