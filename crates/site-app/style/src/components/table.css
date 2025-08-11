@@ -1,0 +1,60 @@
+/* based off https://orbit.kiwi/components/structure/table/ */
+
+@layer base {
+  .table {
+    /* table-specific */
+    @apply border-collapse border-spacing-0;
+
+    /* appearance */
+    @apply rounded;
+
+    /* spacing */
+    @apply w-full;
+
+    /* text */
+    @apply whitespace-nowrap;
+  }
+
+  .table thead th {
+    /* text */
+    @apply text-start;
+  }
+
+  .table thead {
+    /* border */
+    @apply border-b-base-6 border-b;
+  }
+
+  .table tbody > tr {
+    /* behavior */
+    @apply transition-colors;
+
+    /* color */
+    @apply bg-base-1 even:bg-base-3 hover:bg-base-4;
+
+    /* border */
+    @apply border-b-base-6 border-b last:border-b-0;
+  }
+
+  .table th {
+    /* text */
+    @apply leading-normal font-bold;
+
+    /* color */
+    @apply text-base-12;
+
+    /* spacing */
+    @apply h-10 px-3 py-[10px];
+  }
+
+  .table td {
+    /* text */
+    @apply leading-normal;
+
+    /* color */
+    @apply text-base-12;
+
+    /* spacing */
+    @apply h-10 px-3 py-[10px];
+  }
+}

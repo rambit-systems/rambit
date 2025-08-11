@@ -7,7 +7,9 @@
 @import "./components/btn.css";
 @import "./components/btn-link.css";
 @import "./components/input-field.css";
+@import "./components/table.css";
 @import "./components/text-link.css";
+
 @import "./elevation.css";
 @import "./typography.css";
 @import "./utilities.css";
