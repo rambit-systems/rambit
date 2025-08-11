@@ -51,17 +51,19 @@ pub fn App() -> impl IntoView {
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
-    <Router>
-      <PageContainer>
-        <Routes fallback=|| "Page not found.".into_view()>
-          <Route path=StaticSegment("") view=HomePage/>
-          <Route path=path!("/dash/:org") view=DashboardPage />
-          <Route path=path!("/auth/signup") view=SignupPage/>
-          <Route path=path!("/auth/login") view=LoginPage/>
-          <Route path=path!("/auth/logout") view=LogoutPage/>
-        </Routes>
-      </PageContainer>
-    </Router>
+    <IslandContextProvider>
+      <Router>
+        <PageContainer>
+          <Routes fallback=|| "Page not found.".into_view()>
+            <Route path=StaticSegment("") view=HomePage/>
+            <Route path=path!("/dash/:org") view=DashboardPage />
+            <Route path=path!("/auth/signup") view=SignupPage/>
+            <Route path=path!("/auth/login") view=LoginPage/>
+            <Route path=path!("/auth/logout") view=LogoutPage/>
+          </Routes>
+        </PageContainer>
+      </Router>
+    </IslandContextProvider>
   }
 }
 
@@ -75,4 +77,10 @@ fn PageContainer(children: Children) -> impl IntoView {
       </div>
     </main>
   }
+}
+
+#[island]
+fn IslandContextProvider(children: Children) -> impl IntoView {
+  QueryClient::new().provide();
+  children()
 }
