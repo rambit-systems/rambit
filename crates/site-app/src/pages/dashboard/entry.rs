@@ -51,11 +51,9 @@ fn EntryTableRow(entry: Entry) -> impl IntoView {
     <tr>
       <th scope="row">{ entry.store_path.to_string() }</th>
       <td>
-        <For
-          each=move || entry.caches.clone().into_iter()
-          key=move |r| *r
-          children=move |r| view! { <CacheItemLink id=r /> }
-        />
+        { entry.caches.clone().into_iter().map(|id| view! {
+          <CacheItemLink id=id />
+        }).collect_view()}
       </td>
       <td>{ entry.intrensic_data.nar_size.to_string() }</td>
       <td>{ entry.intrensic_data.references.len().to_string() }</td>
