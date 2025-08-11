@@ -3,7 +3,8 @@ use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, Entry, Org};
 
 use crate::{
-  components::CacheItemLink, resources::entry::entries_in_org_query_scope,
+  components::{CacheItemLink, LoadingCircle},
+  resources::entry::entries_in_org_query_scope,
 };
 
 #[island]
@@ -32,8 +33,11 @@ pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
       <div class="flex flex-row items-start gap-2">
         <p class="title">"Entries"</p>
         <div class="flex-1" />
-        <button class="btn btn-secondary" on:click=invalidate>
+        <button class="btn btn-secondary relative" on:click=invalidate>
           <span class:invisible=fetching>"Reload"</span>
+          <div class="absolute inset-0 flex flex-row justify-center items-center">
+            <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
+          </div>
         </button>
       </div>
 
