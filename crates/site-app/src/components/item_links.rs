@@ -1,7 +1,7 @@
 use leptos::{either::Either, prelude::*};
 use models::{dvf::RecordId, Cache};
 
-#[component]
+#[island]
 pub fn CacheItemLink(id: RecordId<Cache>) -> impl IntoView {
   let cache = crate::resources::cache::cache(id);
 
@@ -17,9 +17,11 @@ pub fn CacheItemLink(id: RecordId<Cache>) -> impl IntoView {
   };
 
   view! {
-    <Suspense fallback=move || view! { <LoadingItemLink /> }>
-      { suspend }
-    </Suspense>
+    <span>
+      <Suspense fallback=move || view! { <LoadingItemLink /> }>
+        { suspend }
+      </Suspense>
+    </span>
   }
 }
 

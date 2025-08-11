@@ -1,5 +1,7 @@
+use std::time::Duration;
+
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
+use leptos_fetch::{QueryClient, QueryOptions, QueryScope};
 use models::{dvf::RecordId, Entry, Org};
 
 #[cfg(feature = "ssr")]
@@ -9,7 +11,12 @@ pub fn entries_in_org(
   org: RecordId<Org>,
 ) -> Resource<Result<Vec<Entry>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
-  client.resource(fetch_entries_in_org, move || org)
+  client.resource(
+    QueryScope::new(fetch_entries_in_org).with_options(
+      QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
+    ),
+    move || org,
+  )
 }
 
 #[server(prefix = "/api/sfn")]
