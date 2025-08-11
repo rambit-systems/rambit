@@ -1,8 +1,11 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::RecordId, AuthUser, Cache, Org};
+use models::{dvf::RecordId, Cache, Org};
 
+#[cfg(feature = "ssr")]
 fn authorize_for_org(org: RecordId<Org>) -> Result<(), ServerFnError> {
+  use models::AuthUser;
+
   let auth_user: Option<AuthUser> = use_context();
   let cleared_orgs = auth_user
     .map(|au| au.iter_orgs().collect::<Vec<_>>())
