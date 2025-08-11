@@ -41,7 +41,7 @@ fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
 
   view! {
     <div class="grid gap-4 h-full grid-cols-2 grid-rows-2">
-      <div class="p-4 elevation-flat flex flex-col gap-4">
+      <div class="p-6 elevation-flat flex flex-col gap-4">
         <p class="title">"Caches"</p>
 
         <Suspense fallback=move || view! { "Loading..." }>
@@ -55,6 +55,21 @@ fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
 #[component]
 fn CacheTable(caches: Vec<Cache>) -> impl IntoView {
   view! {
-    <p>{ move || format!("{caches:?}") }</p>
+    <table class="table">
+      <thead>
+        <th>"Name"</th>
+        <th>"Visibility"</th>
+        <th>"Default Cache"</th>
+      </thead>
+      <tbody>
+        { move || caches.iter().map(|c| view! {
+          <tr>
+            <th scope="row">{ c.name.to_string() }</th>
+            <td>{ c.visibility.to_string() }</td>
+            <td>{ c.default_store.to_string() }</td>
+          </tr>
+        }).collect::<Vec<_>>() }
+      </tbody>
+    </table>
   }
 }
