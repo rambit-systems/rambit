@@ -18,7 +18,7 @@ pub fn cache_query_scope(
 }
 
 #[server(prefix = "/api/sfn")]
-async fn fetch_cache(
+pub async fn fetch_cache(
   id: RecordId<Cache>,
 ) -> Result<Option<Cache>, ServerFnError> {
   use prime_domain::PrimeDomainService;
@@ -41,20 +41,13 @@ async fn fetch_cache(
   Ok(cache)
 }
 
-pub fn caches_in_org(
-  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
-) -> Resource<Result<Vec<Cache>, ServerFnError>> {
-  let client = expect_context::<QueryClient>();
-  client.resource(caches_in_org_query_scope(), key)
-}
-
 pub fn caches_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<Cache>, ServerFnError>> {
   QueryScope::new(fetch_caches_in_org)
 }
 
 #[server(prefix = "/api/sfn")]
-async fn fetch_caches_in_org(
+pub async fn fetch_caches_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Cache>, ServerFnError> {
   use prime_domain::PrimeDomainService;

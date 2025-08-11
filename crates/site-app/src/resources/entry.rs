@@ -1,18 +1,11 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use leptos_fetch::{QueryClient, QueryOptions, QueryScope};
+use leptos_fetch::{QueryOptions, QueryScope};
 use models::{dvf::RecordId, Entry, Org};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
-
-pub fn entries_in_org(
-  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
-) -> Resource<Result<Vec<Entry>, ServerFnError>> {
-  let client = expect_context::<QueryClient>();
-  client.resource(entries_in_org_query_scope(), key)
-}
 
 pub fn entries_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<Entry>, ServerFnError>> {

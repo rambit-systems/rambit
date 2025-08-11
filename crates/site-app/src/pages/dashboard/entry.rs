@@ -2,32 +2,24 @@ use leptos::prelude::*;
 use models::{dvf::RecordId, Entry, Org};
 
 use super::{DataTable, DataTableReloadButton};
-use crate::components::CacheItemLink;
+use crate::{
+  components::CacheItemLink, resources::entry::entries_in_org_query_scope,
+};
 
 #[island]
 pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
   let key_fn = move || org;
-  let fetcher = crate::resources::entry::fetch_entries_in_org;
+  let query_scope = entries_in_org_query_scope();
 
   view! {
     <div class="flex flex-row items-start gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
       <DataTableReloadButton
-        key_fn=key_fn fetcher=fetcher
+        key_fn=key_fn query_scope=query_scope.clone()
       />
     </div>
 
-    <DataTable
-      key_fn=key_fn fetcher=fetcher
-      view_fn=move |e| view! { <EntryDataTable entries=e /> }
-    />
-  }
-}
-
-#[component]
-fn EntryDataTable(entries: Vec<Entry>) -> impl IntoView {
-  view! {
     <table class="table">
       <thead>
         <th>"Store Path"</th>
@@ -35,17 +27,20 @@ fn EntryDataTable(entries: Vec<Entry>) -> impl IntoView {
         <th>"File Size"</th>
         <th>"Ref Count"</th>
       </thead>
-      <tbody>
-        { move || entries.iter().map(|e| view! {
-          <EntryTableRow entry=e.clone() />
-        }).collect::<Vec<_>>() }
-      </tbody>
+        <DataTable
+          key_fn=key_fn query_scope=query_scope
+          view_fn=move |e| view! {
+            <tbody>
+              <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+            </tbody>
+          }
+        />
     </table>
   }
 }
 
 #[component]
-fn EntryTableRow(entry: Entry) -> impl IntoView {
+fn EntryDataRow(entry: Entry) -> impl IntoView {
   view! {
     <tr>
       <th scope="row">

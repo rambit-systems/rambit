@@ -1,51 +1,48 @@
-use leptos::{either::Either, prelude::*};
+use std::iter::once;
+
+use leptos::prelude::*;
 use models::{dvf::RecordId, Cache, Store};
 
-#[island]
-pub fn CacheItemLink(id: RecordId<Cache>) -> impl IntoView {
+#[component]
+pub fn CacheItemLink(
+  id: RecordId<Cache>,
+  #[prop(optional)] extra_class: Option<&'static str>,
+) -> impl IntoView {
   let cache = crate::resources::cache::cache(move || id);
-
-  let suspend = move || {
-    Suspend::new(async move {
-      match cache.await {
-        Ok(Some(cache)) => Either::Left(
-          view! { <a class="text-link">{ cache.name.to_string() }</a> },
-        ),
-        Ok(None) | Err(_) => Either::Right(view! { <UnknownItemLink /> }),
-      }
-    })
-  };
+  let class = Signal::stored(
+    once("text-link")
+      .chain(extra_class)
+      .collect::<Vec<_>>()
+      .join(" "),
+  );
 
   view! {
-    <span>
-      <Suspense fallback=move || view! { <LoadingItemLink /> }>
-        { suspend }
-      </Suspense>
-    </span>
+    <Suspense fallback=|| view! { <LoadingItemLink /> }>
+      { move || match cache.get() {
+        Some(Ok(Some(cache))) => {
+          view! { <a class=class>{ cache.name.to_string() }</a> }.into_any()
+        }
+        Some(Ok(None) | Err(_)) => view! { <UnknownItemLink /> }.into_any(),
+        None => view! { <LoadingItemLink /> }.into_any(),
+      }}
+    </Suspense>
   }
 }
 
-#[island]
+#[component]
 pub fn StoreItemLink(id: RecordId<Store>) -> impl IntoView {
   let store = crate::resources::store::store(move || id);
 
-  let suspend = move || {
-    Suspend::new(async move {
-      match store.await {
-        Ok(Some(store)) => {
-          Either::Left(view! { <a class="">{ store.name.to_string() }</a> })
-        }
-        Ok(None) | Err(_) => Either::Right(view! { <UnknownItemLink /> }),
-      }
-    })
-  };
-
   view! {
-    <span>
-      <Suspense fallback=move || view! { <LoadingItemLink /> }>
-        { suspend }
-      </Suspense>
-    </span>
+    <Suspense fallback=|| view! { <LoadingItemLink /> }>
+      { move || match store.get() {
+        Some(Ok(Some(store))) => {
+          view! { <a class="text-link">{ store.name.to_string() }</a> }.into_any()
+        }
+        Some(Ok(None) | Err(_)) => view! { <UnknownItemLink /> }.into_any(),
+        None => view! { <LoadingItemLink /> }.into_any(),
+      }}
+    </Suspense>
   }
 }
 
