@@ -5,7 +5,7 @@ use crate::components::CacheItemLink;
 
 #[component]
 pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
-  let entries_in_org = crate::resources::entry::entries_in_org(org);
+  let entries_in_org = crate::resources::entry::entries_in_org(move || org);
   let suspend = move || {
     Suspend::new(async move {
       match entries_in_org.await {

@@ -8,14 +8,16 @@ use models::{dvf::RecordId, Entry, Org};
 use crate::resources::authorize_for_org;
 
 pub fn entries_in_org(
-  org: RecordId<Org>,
+  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
 ) -> Resource<Result<Vec<Entry>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
-  client.resource(
-    QueryScope::new(fetch_entries_in_org).with_options(
-      QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
-    ),
-    move || org,
+  client.resource(entries_in_org_query_scope(), key)
+}
+
+pub fn entries_in_org_query_scope(
+) -> QueryScope<RecordId<Org>, Result<Vec<Entry>, ServerFnError>> {
+  QueryScope::new(fetch_entries_in_org).with_options(
+    QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
   )
 }
 

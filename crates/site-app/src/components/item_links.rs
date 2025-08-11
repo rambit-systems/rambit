@@ -3,7 +3,7 @@ use models::{dvf::RecordId, Cache};
 
 #[island]
 pub fn CacheItemLink(id: RecordId<Cache>) -> impl IntoView {
-  let cache = crate::resources::cache::cache(id);
+  let cache = crate::resources::cache::cache(move || id);
 
   let suspend = move || {
     Suspend::new(async move {

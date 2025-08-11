@@ -1,15 +1,20 @@
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
+use leptos_fetch::{QueryClient, QueryScope};
 use models::{dvf::RecordId, Cache, Org};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
 pub fn cache(
-  id: RecordId<Cache>,
+  key: impl Fn() -> RecordId<Cache> + Send + Sync + 'static,
 ) -> Resource<Result<Option<Cache>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
-  client.resource(fetch_cache, move || id)
+  client.resource(cache_query_scope(), key)
+}
+
+pub fn cache_query_scope(
+) -> QueryScope<RecordId<Cache>, Result<Option<Cache>, ServerFnError>> {
+  QueryScope::new(fetch_cache)
 }
 
 #[server(prefix = "/api/sfn")]
@@ -37,10 +42,15 @@ async fn fetch_cache(
 }
 
 pub fn caches_in_org(
-  org: RecordId<Org>,
+  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
 ) -> Resource<Result<Vec<Cache>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
-  client.resource(fetch_caches_in_org, move || org)
+  client.resource(caches_in_org_query_scope(), key)
+}
+
+pub fn caches_in_org_query_scope(
+) -> QueryScope<RecordId<Org>, Result<Vec<Cache>, ServerFnError>> {
+  QueryScope::new(fetch_caches_in_org)
 }
 
 #[server(prefix = "/api/sfn")]

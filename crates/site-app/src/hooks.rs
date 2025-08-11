@@ -13,7 +13,7 @@ impl UserActiveOrgHook {
     let active_org = *user_orgs
       .get(auth_user.active_org_index as usize)
       .expect("active org index out of org list");
-    let active_org_resource = crate::resources::org::org(active_org);
+    let active_org_resource = crate::resources::org::org(move || active_org);
 
     UserActiveOrgHook {
       resource: active_org_resource,
