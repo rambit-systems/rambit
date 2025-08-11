@@ -1,4 +1,6 @@
-use dvf::{EitherSlug, EntityName, RecordId, Visibility};
+use std::fmt;
+
+use dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +21,36 @@ pub struct Cache {
   pub visibility:    Visibility,
 }
 
+/// The unique index selector for [`Cache`].
+#[derive(Debug, Clone, Copy)]
+pub enum CacheUniqueIndexSelector {
+  /// The `name` index.
+  Name,
+}
+
+impl fmt::Display for CacheUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      CacheUniqueIndexSelector::Name => write!(f, "name"),
+    }
+  }
+}
+
+/// The index selector for [`Cache`].
+#[derive(Debug, Clone, Copy)]
+pub enum CacheIndexSelector {
+  /// The `org` index.
+  Org,
+}
+
+impl fmt::Display for CacheIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      CacheIndexSelector::Org => write!(f, "org"),
+    }
+  }
+}
+
 impl Cache {
   /// Generates the value of the unique [`Cache`] index
   /// `name`.
@@ -28,10 +60,20 @@ impl Cache {
 }
 
 impl Model for Cache {
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = CacheIndexSelector;
+  type UniqueIndexSelector = CacheUniqueIndexSelector;
+
+  const INDICES: &'static [(
+    Self::IndexSelector,
+    model::SlugFieldGetter<Self>,
+  )] = &[(CacheIndexSelector::Org, |c| {
+    vec![LaxSlug::new(c.org.to_string()).into()]
+  })];
   const TABLE_NAME: &'static str = "cache";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
-    &[("name", Cache::unique_index_name)];
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[(CacheUniqueIndexSelector::Name, Cache::unique_index_name)];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use dvf::{EitherSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
@@ -25,6 +27,21 @@ impl Org {
   }
 }
 
+/// The unique index selector for [`Org`].
+#[derive(Debug, Clone, Copy)]
+pub enum OrgUniqueIndexSelector {
+  /// The `ident` index.
+  Ident,
+}
+
+impl fmt::Display for OrgUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      OrgUniqueIndexSelector::Ident => write!(f, "ident"),
+    }
+  }
+}
+
 /// The [`Org`]'s identifier.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum OrgIdent {
@@ -35,10 +52,15 @@ pub enum OrgIdent {
 }
 
 impl Model for Org {
-  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = !;
+  type UniqueIndexSelector = OrgUniqueIndexSelector;
+
+  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = "org";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] =
-    &[("ident", Org::unique_index_ident)];
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[(OrgUniqueIndexSelector::Ident, Org::unique_index_ident)];
 
   fn id(&self) -> RecordId<Org> { self.id }
 }

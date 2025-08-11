@@ -1,5 +1,7 @@
 //! Provides domain model types. Used by most crates in the workspace.
 
+#![feature(never_type)]
+
 mod cache;
 mod entry;
 mod org;

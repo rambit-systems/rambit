@@ -5,8 +5,9 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Cache, Digest, Entry, NarAuthenticityData, NarDeriverData, NarStorageData,
-  StorePath, User,
+  Cache, CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector,
+  NarAuthenticityData, NarDeriverData, NarStorageData, StorePath,
+  StoreUniqueIndexSelector, User,
   dvf::{CompressionStatus, EitherSlug, EntityName, RecordId},
   model::Model,
 };
@@ -86,24 +87,6 @@ impl PrimeDomainService {
   ) -> Result<UploadResponse, UploadError> {
     let entry_id = RecordId::new();
 
-    // find all the caches specified
-    let mut caches = Vec::with_capacity(req.caches.len());
-    for cache_name in req.caches {
-      caches.push(
-        self
-          .cache_repo
-          .fetch_model_by_unique_index(
-            "name".into(),
-            EitherSlug::Strict(cache_name.clone().into_inner()),
-          )
-          .await
-          .into_diagnostic()
-          .context("failed to search for cache")
-          .map_err(UploadError::InternalError)?
-          .ok_or(UploadError::CacheNotFound(cache_name))?,
-      );
-    }
-
     // find the user
     let user = self
       .user_repo
@@ -115,16 +98,11 @@ impl PrimeDomainService {
       .ok_or(miette!("authenticated user not found"))
       .map_err(UploadError::InternalError)?;
 
-    // reject request if any cache lies outside the user's org
-    if caches.iter().any(|c| !user.belongs_to_org(c.org)) {
-      return Err(UploadError::Unauthorized);
-    }
-
     // find the given store
     let target_store = self
       .store_repo
       .fetch_model_by_unique_index(
-        "name".into(),
+        StoreUniqueIndexSelector::Name,
         EitherSlug::Strict(req.target_store.clone().into_inner()),
       )
       .await
@@ -133,11 +111,42 @@ impl PrimeDomainService {
       .map_err(UploadError::InternalError)?
       .ok_or(UploadError::TargetStoreNotFound(req.target_store))?;
 
+    // org is assigned by the store
+    let org = target_store.org;
+
+    // make sure the user owns the store
+    if !user.belongs_to_org(org) {
+      return Err(UploadError::Unauthorized);
+    }
+
+    // find all the caches specified
+    let mut caches = Vec::with_capacity(req.caches.len());
+    for cache_name in req.caches {
+      caches.push(
+        self
+          .cache_repo
+          .fetch_model_by_unique_index(
+            CacheUniqueIndexSelector::Name,
+            EitherSlug::Strict(cache_name.clone().into_inner()),
+          )
+          .await
+          .into_diagnostic()
+          .context("failed to search for cache")
+          .map_err(UploadError::InternalError)?
+          .ok_or(UploadError::CacheNotFound(cache_name))?,
+      );
+    }
+
+    // reject request if any cache lies outside the org
+    if caches.iter().any(|c| org != c.org) {
+      return Err(UploadError::Unauthorized);
+    }
+
     // make sure no entry exists for this path and store
     let duplicate_entry_by_store = self
       .entry_repo
       .fetch_model_by_unique_index(
-        "store-id-and-entry-path".into(),
+        EntryUniqueIndexSelector::StoreIdAndEntryPath,
         Entry::unique_index_store_id_and_entry_path(
           target_store.id,
           &req.store_path,
@@ -157,7 +166,7 @@ impl PrimeDomainService {
       let duplicate_entry_by_cache = self
         .entry_repo
         .fetch_model_by_unique_index(
-          "cache-id-and-entry-digest".into(),
+          EntryUniqueIndexSelector::CacheIdAndEntryDigest,
           Entry::unique_index_cache_id_and_entry_digest(
             cache.id,
             Digest::from_bytes(*req.store_path.digest()),
@@ -226,13 +235,14 @@ impl PrimeDomainService {
     let entry = self
       .entry_repo
       .create_model(Entry {
-        id:                entry_id,
-        caches:            caches.iter().map(Model::id).collect(),
-        store_path:        req.store_path,
-        intrensic_data:    nar_intrensic_data,
-        storage_data:      nar_storage_data,
+        id: entry_id,
+        org,
+        caches: caches.iter().map(Model::id).collect(),
+        store_path: req.store_path,
+        intrensic_data: nar_intrensic_data,
+        storage_data: nar_storage_data,
         authenticity_data: nar_authenticity_data,
-        deriver_data:      req.deriver_data,
+        deriver_data: req.deriver_data,
       })
       .await
       .into_diagnostic()

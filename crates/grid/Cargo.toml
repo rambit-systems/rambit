@@ -12,7 +12,7 @@ prime-domain = { path = "../prime-domain" }
 site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
 tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 
-kv = { workspace = true, features = [ "redb", "no-field-names" ] }
+kv = { workspace = true, features = [ "redb" ] }
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
 
@@ -33,6 +33,10 @@ serde.workspace = true
 tower.workspace = true
 tower-http = { workspace = true, features = [ "trace" ] }
 tower-sessions.workspace = true
+
+[features]
+default = [  ]
+tikv = [ "kv/tikv" ]
 
 [lints]
 workspace = true

@@ -11,7 +11,7 @@ use nix_compat::{nixbase32, store_path::DIGEST_SIZE};
 use serde::{Deserialize, Serialize};
 
 pub use self::nar_data::*;
-use crate::{Store, cache::Cache};
+use crate::{Org, Store, cache::Cache};
 
 /// A store path digest.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -48,6 +48,8 @@ impl FromStr for Digest {
 pub struct Entry {
   /// The entry's ID.
   pub id:                RecordId<Entry>,
+  /// The entry's org.
+  pub org:               RecordId<Org>,
   /// The [`Cache`]s that this entry is accessible from.
   pub caches:            Vec<RecordId<Cache>>,
   /// The store path that the entry refers to.
@@ -60,6 +62,43 @@ pub struct Entry {
   pub authenticity_data: NarAuthenticityData,
   /// Data about the NAR's deriver.
   pub deriver_data:      NarDeriverData,
+}
+
+/// The unique index selector for [`Entry`].
+#[derive(Debug, Clone, Copy)]
+pub enum EntryUniqueIndexSelector {
+  /// The `store-id-and-entry-path` index.
+  StoreIdAndEntryPath,
+  /// The `cache-id-and-entry-digest` index.
+  CacheIdAndEntryDigest,
+}
+
+impl fmt::Display for EntryUniqueIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      EntryUniqueIndexSelector::StoreIdAndEntryPath => {
+        write!(f, "store-id-and-entry-path")
+      }
+      EntryUniqueIndexSelector::CacheIdAndEntryDigest => {
+        write!(f, "cache-id-and-entry-digest")
+      }
+    }
+  }
+}
+
+/// The index selector for [`Entry`]
+#[derive(Debug, Clone, Copy)]
+pub enum EntryIndexSelector {
+  /// The `org` index.
+  Org,
+}
+
+impl fmt::Display for EntryIndexSelector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      EntryIndexSelector::Org => write!(f, "org"),
+    }
+  }
 }
 
 impl Entry {
@@ -83,16 +122,25 @@ impl Entry {
 }
 
 impl Model for Entry {
-  const INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[];
+  type IndexSelector = EntryIndexSelector;
+  type UniqueIndexSelector = EntryUniqueIndexSelector;
+
+  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] =
+    &[(EntryIndexSelector::Org, |e| {
+      vec![LaxSlug::new(e.org.to_string()).into()]
+    })];
   const TABLE_NAME: &'static str = "entry";
-  const UNIQUE_INDICES: &'static [(&'static str, SlugFieldGetter<Self>)] = &[
-    ("store-id-and-entry-path", |e| {
+  const UNIQUE_INDICES: &'static [(
+    Self::UniqueIndexSelector,
+    SlugFieldGetter<Self>,
+  )] = &[
+    (EntryUniqueIndexSelector::StoreIdAndEntryPath, |e| {
       vec![Entry::unique_index_store_id_and_entry_path(
         e.storage_data.store,
         &e.store_path,
       )]
     }),
-    ("cache-id-and-entry-digest", |e| {
+    (EntryUniqueIndexSelector::CacheIdAndEntryDigest, |e| {
       e.caches
         .iter()
         .map(|c| {
