@@ -38,6 +38,20 @@ pub async fn leptos_fallback_handler(
   .await
 }
 
+#[axum::debug_handler]
+pub async fn server_fn_handler(
+  auth_session: AuthSession,
+  State(app_state): State<AppState>,
+  request: Request<Body>,
+) -> axum::response::Response {
+  leptos_axum::handle_server_fns_with_context(
+    context_provider(app_state.clone(), auth_session),
+    request,
+  )
+  .await
+  .into_response()
+}
+
 pub fn context_provider(
   app_state: AppState,
   auth_session: AuthSession,

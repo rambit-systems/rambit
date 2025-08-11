@@ -10,7 +10,7 @@ pub fn org(id: RecordId<Org>) -> Resource<Result<Option<Org>, ServerFnError>> {
   client.resource(fetch_org, move || id)
 }
 
-#[server]
+#[server(prefix = "/api/sfn")]
 async fn fetch_org(id: RecordId<Org>) -> Result<Option<Org>, ServerFnError> {
   use prime_domain::PrimeDomainService;
 

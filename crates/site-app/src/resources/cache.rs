@@ -12,7 +12,7 @@ pub fn cache(
   client.resource(fetch_cache, move || id)
 }
 
-#[server]
+#[server(prefix = "/api/sfn")]
 async fn fetch_cache(
   id: RecordId<Cache>,
 ) -> Result<Option<Cache>, ServerFnError> {
@@ -43,7 +43,7 @@ pub fn caches_in_org(
   client.resource(fetch_caches_in_org, move || org)
 }
 
-#[server]
+#[server(prefix = "/api/sfn")]
 async fn fetch_caches_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Cache>, ServerFnError> {

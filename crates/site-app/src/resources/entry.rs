@@ -12,7 +12,7 @@ pub fn entries_in_org(
   client.resource(fetch_entries_in_org, move || org)
 }
 
-#[server]
+#[server(prefix = "/api/sfn")]
 async fn fetch_entries_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Entry>, ServerFnError> {
