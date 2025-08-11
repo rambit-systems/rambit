@@ -6,8 +6,9 @@ mod app_state;
 mod args;
 mod endpoints;
 mod handlers;
+mod middleware;
 
-use axum::Router;
+use axum::{Router, handler::Handler};
 use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use leptos_axum::LeptosRoutes;
@@ -20,6 +21,7 @@ use self::{
   app_state::AppState,
   args::CliArgs,
   handlers::{leptos_fallback_handler, leptos_routes_handler},
+  middleware::CacheOnSuccessLayer,
 };
 
 #[tokio::main]
@@ -60,7 +62,7 @@ async fn main() -> Result<()> {
   let router = Router::new()
     .nest("/api/v1", self::endpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
-    .fallback(leptos_fallback_handler)
+    .fallback(leptos_fallback_handler.layer(CacheOnSuccessLayer::new()))
     .with_state(app_state.clone());
 
   // build tower service
