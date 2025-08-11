@@ -4,7 +4,7 @@ use std::{
   task::{Context, Poll},
 };
 
-use axum::http::{HeaderValue, Request, Response};
+use http::{HeaderValue, Request, Response};
 use tower::{Layer, Service};
 
 #[derive(Clone)]
@@ -66,7 +66,7 @@ where
 // Usage example
 #[cfg(test)]
 mod tests {
-  use axum::http::{Request, Response, StatusCode};
+  use http::{Request, Response, StatusCode};
   use tower::{ServiceBuilder, ServiceExt, service_fn};
 
   use super::*;

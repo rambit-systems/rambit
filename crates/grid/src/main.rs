@@ -13,7 +13,10 @@ use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use leptos_axum::LeptosRoutes;
 use miette::{Context, IntoDiagnostic, Result};
-use tower_http::trace::{DefaultOnResponse, TraceLayer};
+use tower_http::{
+  compression::{CompressionLayer, DefaultPredicate, Predicate},
+  trace::{DefaultOnResponse, TraceLayer},
+};
 use tracing::{Level, info_span, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, prelude::*};
 
@@ -21,7 +24,10 @@ use self::{
   app_state::AppState,
   args::CliArgs,
   handlers::{leptos_fallback_handler, leptos_routes_handler},
-  middleware::cache_on_success::CacheOnSuccessLayer,
+  middleware::{
+    cache_on_success::CacheOnSuccessLayer,
+    compression_predicate::NotForFailureStatus,
+  },
 };
 
 #[tokio::main]
@@ -62,12 +68,18 @@ async fn main() -> Result<()> {
   let router = Router::new()
     .nest("/api/v1", self::endpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
-    .fallback(leptos_fallback_handler.layer(CacheOnSuccessLayer::new()))
+    .fallback(
+      leptos_fallback_handler
+        .layer(CacheOnSuccessLayer::new())
+        .layer(CompressionLayer::new().compress_when(
+          DefaultPredicate::new().and(NotForFailureStatus::new()),
+        )),
+    )
     .with_state(app_state.clone());
 
   // build tower service
   let trace_layer = TraceLayer::new_for_http()
-    .make_span_with(|request: &axum::http::Request<_>| {
+    .make_span_with(|request: &http::Request<_>| {
       info_span!(
           "http_request",
           method = %request.method(),
