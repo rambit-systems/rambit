@@ -23,6 +23,10 @@
     /* color */
     @apply text-product-11 bg-product-3 hover:bg-product-4 active:bg-product-5;
   }
+  .btn-secondary {
+    /* color */
+    @apply text-base-12 bg-base-3 hover:bg-base-4 active:bg-base-5;
+  }
   .btn-critical {
     /* color */
     @apply text-critical-1 bg-critical-9 hover:bg-critical-10 active:brightness-[0.92] active:saturate-[1.1];

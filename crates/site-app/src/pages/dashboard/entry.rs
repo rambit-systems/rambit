@@ -1,11 +1,23 @@
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, Entry, Org};
 
-use crate::components::CacheItemLink;
+use crate::{
+  components::CacheItemLink, resources::entry::entries_in_org_query_scope,
+};
 
-#[component]
+#[island]
 pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
-  let entries_in_org = crate::resources::entry::entries_in_org(move || org);
+  let query_client = expect_context::<QueryClient>();
+
+  let key = move || org;
+  let entries_in_org = crate::resources::entry::entries_in_org(key);
+  let fetching =
+    query_client.subscribe_is_fetching(entries_in_org_query_scope(), key);
+  let invalidate = move |_| {
+    query_client.invalidate_query(entries_in_org_query_scope(), key());
+  };
+
   let suspend = move || {
     Suspend::new(async move {
       match entries_in_org.await {
@@ -17,7 +29,13 @@ pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
 
   view! {
     <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
-      <p class="title">"Entries"</p>
+      <div class="flex flex-row items-start gap-2">
+        <p class="title">"Entries"</p>
+        <div class="flex-1" />
+        <button class="btn btn-secondary" on:click=invalidate>
+          <span class:invisible=fetching>"Reload"</span>
+        </button>
+      </div>
 
       <Suspense fallback=move || view! { "Loading..." }>
         { suspend }
