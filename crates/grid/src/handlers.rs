@@ -2,7 +2,7 @@ use auth_domain::AuthSession;
 use axum::{
   body::Body,
   extract::{Request, State},
-  http::{HeaderValue, StatusCode, Uri},
+  http::Uri,
   response::IntoResponse,
 };
 use leptos::prelude::provide_context;
@@ -31,21 +31,11 @@ pub async fn leptos_fallback_handler(
   State(app_state): State<AppState>,
   request: Request<Body>,
 ) -> axum::response::Response {
-  let mut res =
-    leptos_axum::file_and_error_handler_with_context::<AppState, _>(
-      context_provider(app_state.clone(), auth_session),
-      site_app::shell,
-    )(uri, State(app_state), request)
-    .await;
-
-  if res.status() != StatusCode::NOT_FOUND {
-    res.headers_mut().insert(
-      "Cache-Control",
-      HeaderValue::from_static("max-age=31536000, immutable"),
-    );
-  }
-
-  res
+  leptos_axum::file_and_error_handler_with_context::<AppState, _>(
+    context_provider(app_state.clone(), auth_session),
+    site_app::shell,
+  )(uri, State(app_state), request)
+  .await
 }
 
 pub fn context_provider(

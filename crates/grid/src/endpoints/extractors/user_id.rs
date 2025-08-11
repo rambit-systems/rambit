@@ -13,7 +13,7 @@ impl<S: Send + Sync> FromRequestParts<S> for UserAuthExtractor {
   type Rejection = (StatusCode, &'static str);
 
   async fn from_request_parts(
-    parts: &mut axum::http::request::Parts,
+    parts: &mut http::request::Parts,
     state: &S,
   ) -> Result<Self, Self::Rejection> {
     // extract using the optional form and then throw an error on None
@@ -30,7 +30,7 @@ impl<S: Send + Sync> OptionalFromRequestParts<S> for UserAuthExtractor {
   type Rejection = (StatusCode, &'static str);
 
   async fn from_request_parts(
-    parts: &mut axum::http::request::Parts,
+    parts: &mut http::request::Parts,
     state: &S,
   ) -> Result<Option<Self>, Self::Rejection> {
     // extract AuthSession straight from the request and pull the user field
