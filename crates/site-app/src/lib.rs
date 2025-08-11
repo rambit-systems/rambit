@@ -7,7 +7,7 @@ mod reactive_utils;
 mod resources;
 
 use leptos::prelude::*;
-use leptos_fetch::{QueryClient, QueryDevtools};
+use leptos_fetch::QueryClient;
 use leptos_meta::{
   provide_meta_context, HashedStylesheet, MetaTags, Style, Title,
 };
@@ -46,14 +46,13 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 #[component]
 pub fn App() -> impl IntoView {
   provide_meta_context();
-  let query_client = QueryClient::new().provide();
+  QueryClient::new().provide();
 
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
     <Router>
       <PageContainer>
-        <QueryDevtools client=query_client />
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
           <Route path=path!("/dash/:org") view=DashboardPage />
