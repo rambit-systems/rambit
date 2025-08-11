@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
 
-use self::{cache::CacheDashboardTile, entry::EntryDashboardTile};
+use self::{cache::CacheTable, entry::EntryTable};
 use crate::pages::UnauthorizedPage;
 
 #[component]
@@ -35,8 +35,12 @@ pub fn DashboardPage() -> impl IntoView {
 fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
   view! {
     <div class="grid gap-4 h-full grid-cols-2 grid-rows-2">
-      <EntryDashboardTile org=org />
-      <CacheDashboardTile org=org />
+      <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
+        <EntryTable org=org />
+      </div>
+      <div class="p-6 elevation-flat flex flex-col gap-4">
+        <CacheTable org=org />
+      </div>
     </div>
   }
 }

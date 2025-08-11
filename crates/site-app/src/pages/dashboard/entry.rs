@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[island]
-pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
+pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
   let query_client = expect_context::<QueryClient>();
 
   let key = move || org;
@@ -22,34 +22,32 @@ pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
   let suspend = move || {
     Suspend::new(async move {
       match entries_in_org.await {
-        Ok(entries) => view! { <EntryTable entries=entries /> }.into_any(),
+        Ok(entries) => view! { <EntryDataTable entries=entries /> }.into_any(),
         Err(e) => view! { { format!("Error: {e}") } }.into_any(),
       }
     })
   };
 
   view! {
-    <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
-      <div class="flex flex-row items-start gap-2">
-        <p class="title">"Entries"</p>
-        <div class="flex-1" />
-        <button class="btn btn-secondary relative" on:click=invalidate>
-          <span class:invisible=fetching>"Reload"</span>
-          <div class="absolute inset-0 flex flex-row justify-center items-center">
-            <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
-          </div>
-        </button>
-      </div>
-
-      <Suspense fallback=move || view! { "Loading..." }>
-        { suspend }
-      </Suspense>
+    <div class="flex flex-row items-start gap-2">
+      <p class="title">"Entries"</p>
+      <div class="flex-1" />
+      <button class="btn btn-secondary relative" on:click=invalidate>
+        <span class:invisible=fetching>"Reload"</span>
+        <div class="absolute inset-0 flex flex-row justify-center items-center">
+          <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
+        </div>
+      </button>
     </div>
+
+    <Suspense fallback=move || view! { "Loading..." }>
+      { suspend }
+    </Suspense>
   }
 }
 
 #[component]
-fn EntryTable(entries: Vec<Entry>) -> impl IntoView {
+fn EntryDataTable(entries: Vec<Entry>) -> impl IntoView {
   view! {
     <table class="table">
       <thead>
@@ -71,7 +69,11 @@ fn EntryTable(entries: Vec<Entry>) -> impl IntoView {
 fn EntryTableRow(entry: Entry) -> impl IntoView {
   view! {
     <tr>
-      <th scope="row">{ entry.store_path.to_string() }</th>
+      <th scope="row">
+        <a class="text-link text-link-primary">
+          { entry.store_path.to_string() }
+        </a>
+      </th>
       <td>
         { entry.caches.clone().into_iter().map(|id| view! {
           <CacheItemLink id=id />
