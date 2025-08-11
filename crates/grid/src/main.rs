@@ -21,7 +21,7 @@ use self::{
   app_state::AppState,
   args::CliArgs,
   handlers::{leptos_fallback_handler, leptos_routes_handler},
-  middleware::CacheOnSuccessLayer,
+  middleware::cache_on_success::CacheOnSuccessLayer,
 };
 
 #[tokio::main]
