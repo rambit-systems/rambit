@@ -1,10 +1,11 @@
 mod cache;
+mod entry;
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
 
-use self::cache::CacheDashboardTile;
+use self::{cache::CacheDashboardTile, entry::EntryDashboardTile};
 use crate::pages::UnauthorizedPage;
 
 #[component]
@@ -34,6 +35,7 @@ pub fn DashboardPage() -> impl IntoView {
 fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
   view! {
     <div class="grid gap-4 h-full grid-cols-2 grid-rows-2">
+      <EntryDashboardTile org=org />
       <CacheDashboardTile org=org />
     </div>
   }
