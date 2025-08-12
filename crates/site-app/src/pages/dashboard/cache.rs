@@ -1,47 +1,51 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Cache, Org};
 
-#[component]
-pub(super) fn CacheDashboardTile(org: RecordId<Org>) -> impl IntoView {
-  let caches_in_org = crate::resources::cache::caches_in_org(org);
-  let suspend = move || {
-    Suspend::new(async move {
-      match caches_in_org.await {
-        Ok(caches) => view! { <CacheTable caches=caches /> }.into_any(),
-        Err(e) => view! { { format!("Error: {e}") } }.into_any(),
-      }
-    })
-  };
+use super::{DataTable, DataTableReloadButton};
+use crate::{
+  components::{CacheItemLink, StoreItemLink},
+  resources::cache::caches_in_org_query_scope,
+};
+
+#[island]
+pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
+  let key_fn = move || org;
+  let query_scope = caches_in_org_query_scope();
 
   view! {
-    <div class="p-6 elevation-flat flex flex-col gap-4">
+    <div class="flex flex-row items-start gap-2">
       <p class="title">"Caches"</p>
-
-      <Suspense fallback=move || view! { "Loading..." }>
-        { suspend }
-      </Suspense>
+      <div class="flex-1" />
+      <DataTableReloadButton
+        key_fn=key_fn query_scope=query_scope.clone()
+      />
     </div>
-  }
-}
 
-#[component]
-fn CacheTable(caches: Vec<Cache>) -> impl IntoView {
-  view! {
     <table class="table">
       <thead>
         <th>"Name"</th>
         <th>"Visibility"</th>
-        <th>"Default Cache"</th>
+        <th>"Default Store"</th>
       </thead>
       <tbody>
-        { move || caches.iter().map(|c| view! {
-          <tr>
-            <th scope="row">{ c.name.to_string() }</th>
-            <td>{ c.visibility.to_string() }</td>
-            <td>{ c.default_store.to_string() }</td>
-          </tr>
-        }).collect::<Vec<_>>() }
+        <DataTable
+          key_fn=key_fn query_scope=query_scope
+          view_fn=move |c| view! {
+            <For each=c key=|c| c.id children=|c| view! { <CacheDataRow cache=c /> } />
+          }
+        />
       </tbody>
     </table>
+  }
+}
+
+#[component]
+fn CacheDataRow(cache: Cache) -> impl IntoView {
+  view! {
+    <tr>
+      <th scope="row"><CacheItemLink id=cache.id extra_class="btn-link-primary"/></th>
+      <td>{ cache.visibility.to_string() }</td>
+      <td><StoreItemLink id=cache.default_store /></td>
+    </tr>
   }
 }

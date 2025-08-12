@@ -8,7 +8,7 @@ mod endpoints;
 mod handlers;
 mod middleware;
 
-use axum::{Router, handler::Handler};
+use axum::{Router, handler::Handler, routing::post};
 use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
 use leptos_axum::LeptosRoutes;
@@ -23,7 +23,9 @@ use tracing_subscriber::{EnvFilter, prelude::*};
 use self::{
   app_state::AppState,
   args::CliArgs,
-  handlers::{leptos_fallback_handler, leptos_routes_handler},
+  handlers::{
+    leptos_fallback_handler, leptos_routes_handler, server_fn_handler,
+  },
   middleware::{
     cache_on_success::CacheOnSuccessLayer,
     compression_predicate::NotForFailureStatus,
@@ -68,6 +70,7 @@ async fn main() -> Result<()> {
   let router = Router::new()
     .nest("/api/v1", self::endpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
+    .route("/api/sfn/{*fn_name}", post(server_fn_handler))
     .fallback(
       leptos_fallback_handler
         .layer(CacheOnSuccessLayer::new())

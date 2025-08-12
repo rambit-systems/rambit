@@ -1,34 +1,25 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Entry, Org};
 
-use crate::components::CacheItemLink;
+use super::{DataTable, DataTableReloadButton};
+use crate::{
+  components::CacheItemLink, resources::entry::entries_in_org_query_scope,
+};
 
-#[component]
-pub(super) fn EntryDashboardTile(org: RecordId<Org>) -> impl IntoView {
-  let entries_in_org = crate::resources::entry::entries_in_org(org);
-  let suspend = move || {
-    Suspend::new(async move {
-      match entries_in_org.await {
-        Ok(entries) => view! { <EntryTable entries=entries /> }.into_any(),
-        Err(e) => view! { { format!("Error: {e}") } }.into_any(),
-      }
-    })
-  };
+#[island]
+pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
+  let key_fn = move || org;
+  let query_scope = entries_in_org_query_scope();
 
   view! {
-    <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
+    <div class="flex flex-row items-start gap-2">
       <p class="title">"Entries"</p>
-
-      <Suspense fallback=move || view! { "Loading..." }>
-        { suspend }
-      </Suspense>
+      <div class="flex-1" />
+      <DataTableReloadButton
+        key_fn=key_fn query_scope=query_scope.clone()
+      />
     </div>
-  }
-}
 
-#[component]
-fn EntryTable(entries: Vec<Entry>) -> impl IntoView {
-  view! {
     <table class="table">
       <thead>
         <th>"Store Path"</th>
@@ -36,26 +27,31 @@ fn EntryTable(entries: Vec<Entry>) -> impl IntoView {
         <th>"File Size"</th>
         <th>"Ref Count"</th>
       </thead>
-      <tbody>
-        { move || entries.iter().map(|e| view! {
-          <EntryTableRow entry=e.clone() />
-        }).collect::<Vec<_>>() }
-      </tbody>
+        <DataTable
+          key_fn=key_fn query_scope=query_scope
+          view_fn=move |e| view! {
+            <tbody>
+              <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+            </tbody>
+          }
+        />
     </table>
   }
 }
 
 #[component]
-fn EntryTableRow(entry: Entry) -> impl IntoView {
+fn EntryDataRow(entry: Entry) -> impl IntoView {
   view! {
     <tr>
-      <th scope="row">{ entry.store_path.to_string() }</th>
+      <th scope="row">
+        <a class="text-link text-link-primary">
+          { entry.store_path.to_string() }
+        </a>
+      </th>
       <td>
-        <For
-          each=move || entry.caches.clone().into_iter()
-          key=move |r| *r
-          children=move |r| view! { <CacheItemLink id=r /> }
-        />
+        { entry.caches.clone().into_iter().map(|id| view! {
+          <CacheItemLink id=id />
+        }).collect_view()}
       </td>
       <td>{ entry.intrensic_data.nar_size.to_string() }</td>
       <td>{ entry.intrensic_data.references.len().to_string() }</td>

@@ -1,16 +1,23 @@
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
+use leptos_fetch::{QueryClient, QueryScope};
 use models::{dvf::RecordId, Org};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
-pub fn org(id: RecordId<Org>) -> Resource<Result<Option<Org>, ServerFnError>> {
+pub fn org(
+  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
+) -> Resource<Result<Option<Org>, ServerFnError>> {
   let client = expect_context::<QueryClient>();
-  client.resource(fetch_org, move || id)
+  client.resource(org_query_scope(), key)
 }
 
-#[server]
+pub fn org_query_scope(
+) -> QueryScope<RecordId<Org>, Result<Option<Org>, ServerFnError>> {
+  QueryScope::new(fetch_org)
+}
+
+#[server(prefix = "/api/sfn")]
 async fn fetch_org(id: RecordId<Org>) -> Result<Option<Org>, ServerFnError> {
   use prime_domain::PrimeDomainService;
 

@@ -1,19 +1,21 @@
+use std::time::Duration;
+
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
+use leptos_fetch::{QueryOptions, QueryScope};
 use models::{dvf::RecordId, Entry, Org};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
-pub fn entries_in_org(
-  org: RecordId<Org>,
-) -> Resource<Result<Vec<Entry>, ServerFnError>> {
-  let client = expect_context::<QueryClient>();
-  client.resource(fetch_entries_in_org, move || org)
+pub fn entries_in_org_query_scope(
+) -> QueryScope<RecordId<Org>, Result<Vec<Entry>, ServerFnError>> {
+  QueryScope::new(fetch_entries_in_org).with_options(
+    QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
+  )
 }
 
-#[server]
-async fn fetch_entries_in_org(
+#[server(prefix = "/api/sfn")]
+pub async fn fetch_entries_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Entry>, ServerFnError> {
   use prime_domain::PrimeDomainService;

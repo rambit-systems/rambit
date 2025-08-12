@@ -9,7 +9,7 @@
     @apply rounded-md;
 
     /* spacing */
-    @apply p-2;
+    @apply px-4 py-3 flex flex-row gap-2 items-center;
 
     /* text */
     @apply font-sans font-medium leading-none;

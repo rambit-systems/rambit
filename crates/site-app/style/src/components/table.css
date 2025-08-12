@@ -39,7 +39,7 @@
     @apply text-base-12;
 
     /* spacing */
-    @apply h-10 px-3 py-[10px];
+    @apply h-10 px-3;
   }
 
   .table td {
@@ -50,6 +50,6 @@
     @apply text-base-12;
 
     /* spacing */
-    @apply h-10 px-3 py-[10px];
+    @apply h-10 px-3;
   }
 }
