@@ -29,6 +29,30 @@ impl Store {
   }
 }
 
+/// The public view of [`Store`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PvStore {
+  /// The store's ID.
+  pub id:     RecordId<Store>,
+  /// The store's org.
+  pub org:    RecordId<Org>,
+  /// The store's configuration.
+  pub config: StoreConfiguration,
+  /// The store's nickname.
+  pub name:   EntityName,
+}
+
+impl From<Store> for PvStore {
+  fn from(value: Store) -> Self {
+    PvStore {
+      id:     value.id,
+      org:    value.org,
+      config: value.config,
+      name:   value.name,
+    }
+  }
+}
+
 /// The unique index selector for [`Store`].
 #[derive(Debug, Clone, Copy)]
 pub enum StoreUniqueIndexSelector {

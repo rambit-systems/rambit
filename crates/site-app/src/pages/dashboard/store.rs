@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Org, Store};
+use models::{dvf::RecordId, Org, PvStore};
 
 use super::{DataTable, DataTableRefreshButton};
 use crate::{
@@ -37,7 +37,7 @@ pub(super) fn StoreTable(org: RecordId<Org>) -> impl IntoView {
 }
 
 #[component]
-fn StoreDataRow(store: Store) -> impl IntoView {
+fn StoreDataRow(store: PvStore) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><StoreItemLink id=store.id extra_class="btn-link-primary"/></th>
