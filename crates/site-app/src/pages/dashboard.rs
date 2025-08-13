@@ -1,5 +1,6 @@
 mod cache;
 mod entry;
+mod store;
 
 use std::{fmt::Debug, hash::Hash};
 
@@ -9,7 +10,7 @@ use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
 use serde::{de::DeserializeOwned, Serialize};
 
-use self::{cache::CacheTable, entry::EntryTable};
+use self::{cache::CacheTable, entry::EntryTable, store::StoreTable};
 use crate::{components::LoadingCircle, pages::UnauthorizedPage};
 
 #[component]
@@ -44,6 +45,9 @@ fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
       </div>
       <div class="p-6 elevation-flat flex flex-col gap-4">
         <CacheTable org=org />
+      </div>
+      <div class="p-6 elevation-flat flex flex-col gap-4">
+        <StoreTable org=org />
       </div>
     </div>
   }

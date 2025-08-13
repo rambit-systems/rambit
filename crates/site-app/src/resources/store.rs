@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, Store};
+use models::{dvf::RecordId, Org, Store};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
@@ -39,4 +39,28 @@ async fn fetch_store(
   }
 
   Ok(store)
+}
+
+pub fn stores_in_org_query_scope(
+) -> QueryScope<RecordId<Org>, Result<Vec<Store>, ServerFnError>> {
+  QueryScope::new(fetch_stores_in_org)
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn fetch_stores_in_org(
+  org: RecordId<Org>,
+) -> Result<Vec<Store>, ServerFnError> {
+  use prime_domain::PrimeDomainService;
+
+  authorize_for_org(org)?;
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+
+  prime_domain_service
+    .fetch_stores_by_org(org)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch stores by org: {e}");
+      ServerFnError::new("internal error")
+    })
 }
