@@ -62,7 +62,7 @@
   --color-critical-12: var(--color-red-12);
 
   /* disable larger breakpoints */
-  --breakpoint-xl: initial;
+  /* --breakpoint-xl: initial; */
   --breakpoint-2xl: initial;
 }
 

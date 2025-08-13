@@ -2,16 +2,13 @@ mod cache;
 mod entry;
 mod store;
 
-use std::{fmt::Debug, hash::Hash};
-
 use leptos::prelude::*;
-use leptos_fetch::{QueryClient, QueryScope};
+use leptos_fetch::QueryClient;
 use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
-use serde::{de::DeserializeOwned, Serialize};
 
 use self::{cache::CacheTable, entry::EntryTable, store::StoreTable};
-use crate::{components::LoadingCircle, pages::UnauthorizedPage};
+use crate::{pages::UnauthorizedPage, resources::org::org_query_scope};
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {
@@ -37,74 +34,55 @@ pub fn DashboardPage() -> impl IntoView {
 }
 
 #[component]
-fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
+fn CurrentOrgTile(org: RecordId<Org>) -> impl IntoView {
+  let query_client = expect_context::<QueryClient>();
+  let resource = query_client.resource(org_query_scope(), move || org);
+
+  let auth_user = Signal::stored(expect_context::<AuthUser>());
+
+  let org_title_suspend = move || {
+    Suspend::new(async move {
+      let auth_user = auth_user();
+      resource.await.map(|o| {
+        o.map(|o| {
+          o.user_facing_title(&auth_user)
+            .unwrap_or("[unknown-org]".to_owned())
+        })
+        .unwrap_or("[error]".to_owned())
+      })
+    })
+  };
+
   view! {
-    <div class="grid gap-4 h-full grid-cols-2 grid-rows-2">
-      <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
-        <EntryTable org=org />
-      </div>
-      <div class="p-6 elevation-flat flex flex-col gap-4">
-        <CacheTable org=org />
-      </div>
-      <div class="p-6 elevation-flat flex flex-col gap-4">
-        <StoreTable org=org />
+    <div class="w-80 p-4 elevation-flat flex flex-col gap-4">
+      <div class="flex flex-col leading-none">
+        <p class="text-xl">"org"</p>
+        <p class="text-3xl text-base-12">
+          <Suspense fallback=|| "[loading]">
+            { org_title_suspend }
+          </Suspense>
+        </p>
       </div>
     </div>
   }
 }
 
 #[component]
-fn DataTable<
-  K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
-  KF: Fn() -> K + Copy + Send + Sync + 'static,
-  O: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
-  VF: Fn(Signal<Vec<O>>) -> V + Copy + Send + Sync + 'static,
-  V: IntoView,
->(
-  key_fn: KF,
-  query_scope: QueryScope<K, Result<Vec<O>, ServerFnError>>,
-  view_fn: VF,
-) -> impl IntoView {
-  let query_client = expect_context::<QueryClient>();
-
-  let resource = query_client.local_resource(query_scope, key_fn);
-
+fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
   view! {
-    <Transition fallback=|| ()>
-      { move || Suspend::new(async move { match resource.await {
-        Ok(output) => view_fn(Signal::stored(output)).into_any(),
-        Err(e) => format!("Error: {e}").into_any(),
-      }})}
-    </Transition>
-  }
-}
-
-#[component]
-fn DataTableRefreshButton<
-  K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
-  KF: Fn() -> K + Copy + Send + Sync + 'static,
-  O: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
->(
-  key_fn: KF,
-  query_scope: QueryScope<K, Result<Vec<O>, ServerFnError>>,
-) -> impl IntoView {
-  let query_client = expect_context::<QueryClient>();
-
-  let fetching =
-    query_client.subscribe_is_fetching(query_scope.clone(), key_fn);
-  let invalidate = {
-    let query_scope = query_scope.clone();
-    move |_| {
-      query_client.invalidate_query(query_scope.clone(), key_fn());
-    }
-  };
-
-  view! {
-    <button class="btn-link btn-link-secondary relative duration-300" on:click=invalidate>
-      <span class="transition-opacity" class=("opacity-0", fetching)>"Refresh"</span>
-      <div class="absolute inset-0 flex flex-row justify-center items-center">
-        <LoadingCircle {..} class="size-5 transition-opacity" class=("opacity-0", move || { !fetching() }) />
+    <div class="flex flex-row items-start gap-4">
+      <CurrentOrgTile org=org />
+      <div class="flex-1 grid gap-4 grid-cols-2">
+        <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
+          <EntryTable org=org />
+        </div>
+        <div class="p-6 elevation-flat flex flex-col gap-4">
+          <CacheTable org=org />
+        </div>
+        <div class="p-6 elevation-flat flex flex-col gap-4">
+          <StoreTable org=org />
+        </div>
       </div>
-    </button>
+    </div>
   }
 }

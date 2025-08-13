@@ -1,9 +1,10 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Org, PvCache};
 
-use super::{DataTable, DataTableRefreshButton};
 use crate::{
-  components::{CacheItemLink, StoreItemLink},
+  components::{
+    CacheItemLink, DataTable, DataTableRefreshButton, StoreItemLink,
+  },
   resources::cache::caches_in_org_query_scope,
 };
 

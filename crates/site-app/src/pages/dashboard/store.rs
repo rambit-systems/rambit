@@ -1,9 +1,9 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Org, PvStore};
 
-use super::{DataTable, DataTableRefreshButton};
 use crate::{
-  components::StoreItemLink, resources::store::stores_in_org_query_scope,
+  components::{DataTable, DataTableRefreshButton, StoreItemLink},
+  resources::store::stores_in_org_query_scope,
 };
 
 #[island]
