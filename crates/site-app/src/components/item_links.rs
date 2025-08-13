@@ -58,13 +58,13 @@ pub fn StoreItemLink(
 #[component]
 fn LoadingItemLink() -> impl IntoView {
   view! {
-    <span>"[loading-item]"</span>
+    <span class="font-medium text-base-11">"[loading-item]"</span>
   }
 }
 
 #[component]
 fn UnknownItemLink() -> impl IntoView {
   view! {
-    <span>"[unknown-item]"</span>
+    <span class="font-medium text-base-11">"[unknown-item]"</span>
   }
 }
