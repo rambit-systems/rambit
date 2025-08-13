@@ -45,4 +45,12 @@ impl PrimeDomainService {
     model: Entry,
     index_selector: EntryIndexSelector
   );
+
+  impl_fetch_by_org!(
+    /// Fetches all [`Store`]s by org.
+    pub fn fetch_stores_by_org,
+    repo: store_repo,
+    model: Store,
+    index_selector: StoreIndexSelector
+  );
 }
