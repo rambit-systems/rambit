@@ -103,7 +103,7 @@ fn DataTableRefreshButton<
     <button class="btn-link btn-link-secondary relative duration-300" on:click=invalidate>
       <span class="transition-opacity" class=("opacity-0", fetching)>"Refresh"</span>
       <div class="absolute inset-0 flex flex-row justify-center items-center">
-        <LoadingCircle {..} class="size-6 transition-opacity" class=("opacity-0", move || { !fetching() }) />
+        <LoadingCircle {..} class="size-5 transition-opacity" class=("opacity-0", move || { !fetching() }) />
       </div>
     </button>
   }
