@@ -119,11 +119,17 @@ fn LoginIsland() -> impl IntoView {
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
-        <button class="btn btn-primary">
-          "Log in"
-          { move || loading().then_some(view! {
-            <LoadingCircle {..} class="size-4" />
-          })}
+        <button class="btn btn-primary w-full max-w-80">
+          <div class="flex-1" />
+          <div class="flex-1 flex flex-row justify-center items-center">
+            "Log in"
+          </div>
+          <div class="flex-1 flex flex-row justify-end items-center">
+            <LoadingCircle {..}
+              class="size-4 transition-opacity"
+              class=("opacity-0", move || { !loading() })
+            />
+          </div>
         </button>
       </label>
     </form>

@@ -1,5 +1,6 @@
 mod cache;
 mod entry;
+mod store;
 
 use std::{fmt::Debug, hash::Hash};
 
@@ -9,7 +10,7 @@ use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
 use serde::{de::DeserializeOwned, Serialize};
 
-use self::{cache::CacheTable, entry::EntryTable};
+use self::{cache::CacheTable, entry::EntryTable, store::StoreTable};
 use crate::{components::LoadingCircle, pages::UnauthorizedPage};
 
 #[component]
@@ -45,6 +46,9 @@ fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
       <div class="p-6 elevation-flat flex flex-col gap-4">
         <CacheTable org=org />
       </div>
+      <div class="p-6 elevation-flat flex flex-col gap-4">
+        <StoreTable org=org />
+      </div>
     </div>
   }
 }
@@ -66,15 +70,17 @@ fn DataTable<
   let resource = query_client.local_resource(query_scope, key_fn);
 
   view! {
-    { move || resource.get().map(|r| match r {
-      Ok(output) => view_fn(Signal::stored(output)).into_any(),
-      Err(e) => format!("Error: {e}").into_any(),
-    })}
+    <Transition fallback=|| ()>
+      { move || Suspend::new(async move { match resource.await {
+        Ok(output) => view_fn(Signal::stored(output)).into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }})}
+    </Transition>
   }
 }
 
 #[component]
-fn DataTableReloadButton<
+fn DataTableRefreshButton<
   K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
   KF: Fn() -> K + Copy + Send + Sync + 'static,
   O: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
@@ -94,10 +100,10 @@ fn DataTableReloadButton<
   };
 
   view! {
-    <button class="btn btn-secondary relative" on:click=invalidate>
-      <span class:invisible=fetching>"Reload"</span>
+    <button class="btn-link btn-link-secondary relative duration-300" on:click=invalidate>
+      <span class="transition-opacity" class=("opacity-0", fetching)>"Refresh"</span>
       <div class="absolute inset-0 flex flex-row justify-center items-center">
-        <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
+        <LoadingCircle {..} class="size-5 transition-opacity" class=("opacity-0", move || { !fetching() }) />
       </div>
     </button>
   }

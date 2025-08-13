@@ -1,7 +1,7 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Cache, Org};
+use models::{dvf::RecordId, Org, PvCache};
 
-use super::{DataTable, DataTableReloadButton};
+use super::{DataTable, DataTableRefreshButton};
 use crate::{
   components::{CacheItemLink, StoreItemLink},
   resources::cache::caches_in_org_query_scope,
@@ -13,10 +13,10 @@ pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
   let query_scope = caches_in_org_query_scope();
 
   view! {
-    <div class="flex flex-row items-start gap-2">
+    <div class="flex flex-row items-center gap-2">
       <p class="title">"Caches"</p>
       <div class="flex-1" />
-      <DataTableReloadButton
+      <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
     </div>
@@ -27,20 +27,20 @@ pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
         <th>"Visibility"</th>
         <th>"Default Store"</th>
       </thead>
-      <tbody>
-        <DataTable
-          key_fn=key_fn query_scope=query_scope
-          view_fn=move |c| view! {
+      <DataTable
+        key_fn=key_fn query_scope=query_scope
+        view_fn=move |c| view! {
+          <tbody class="min-h-10">
             <For each=c key=|c| c.id children=|c| view! { <CacheDataRow cache=c /> } />
-          }
-        />
-      </tbody>
+          </tbody>
+        }
+      />
     </table>
   }
 }
 
 #[component]
-fn CacheDataRow(cache: Cache) -> impl IntoView {
+fn CacheDataRow(cache: PvCache) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="btn-link-primary"/></th>

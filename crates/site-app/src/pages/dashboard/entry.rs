@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Entry, Org};
 
-use super::{DataTable, DataTableReloadButton};
+use super::{DataTable, DataTableRefreshButton};
 use crate::{
   components::CacheItemLink, resources::entry::entries_in_org_query_scope,
 };
@@ -12,10 +12,10 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
   let query_scope = entries_in_org_query_scope();
 
   view! {
-    <div class="flex flex-row items-start gap-2">
+    <div class="flex flex-row items-center gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
-      <DataTableReloadButton
+      <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
     </div>
@@ -27,14 +27,14 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
         <th>"File Size"</th>
         <th>"Ref Count"</th>
       </thead>
-        <DataTable
-          key_fn=key_fn query_scope=query_scope
-          view_fn=move |e| view! {
-            <tbody>
-              <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
-            </tbody>
-          }
-        />
+      <DataTable
+        key_fn=key_fn query_scope=query_scope
+        view_fn=move |e| view! {
+          <tbody class="min-h-10">
+            <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+          </tbody>
+        }
+      />
     </table>
   }
 }

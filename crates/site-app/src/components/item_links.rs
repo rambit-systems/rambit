@@ -30,14 +30,23 @@ pub fn CacheItemLink(
 }
 
 #[component]
-pub fn StoreItemLink(id: RecordId<Store>) -> impl IntoView {
+pub fn StoreItemLink(
+  id: RecordId<Store>,
+  #[prop(optional)] extra_class: Option<&'static str>,
+) -> impl IntoView {
   let store = crate::resources::store::store(move || id);
+  let class = Signal::stored(
+    once("text-link")
+      .chain(extra_class)
+      .collect::<Vec<_>>()
+      .join(" "),
+  );
 
   view! {
     <Suspense fallback=|| view! { <LoadingItemLink /> }>
       { move || match store.get() {
         Some(Ok(Some(store))) => {
-          view! { <a class="text-link">{ store.name.to_string() }</a> }.into_any()
+          view! { <a class=class>{ store.name.to_string() }</a> }.into_any()
         }
         Some(Ok(None) | Err(_)) => view! { <UnknownItemLink /> }.into_any(),
         None => view! { <LoadingItemLink /> }.into_any(),
@@ -49,13 +58,13 @@ pub fn StoreItemLink(id: RecordId<Store>) -> impl IntoView {
 #[component]
 fn LoadingItemLink() -> impl IntoView {
   view! {
-    <span>"[loading-item]"</span>
+    <span class="font-medium text-base-11">"[loading-item]"</span>
   }
 }
 
 #[component]
 fn UnknownItemLink() -> impl IntoView {
   view! {
-    <span>"[unknown-item]"</span>
+    <span class="font-medium text-base-11">"[unknown-item]"</span>
   }
 }
