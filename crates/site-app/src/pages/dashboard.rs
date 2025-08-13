@@ -70,10 +70,12 @@ fn DataTable<
   let resource = query_client.local_resource(query_scope, key_fn);
 
   view! {
-    { move || resource.get().map(|r| match r {
-      Ok(output) => view_fn(Signal::stored(output)).into_any(),
-      Err(e) => format!("Error: {e}").into_any(),
-    })}
+    <Transition fallback=|| ()>
+      { move || Suspend::new(async move { match resource.await {
+        Ok(output) => view_fn(Signal::stored(output)).into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }})}
+    </Transition>
   }
 }
 
