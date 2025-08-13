@@ -4,7 +4,7 @@ use dvf::{EitherSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
-use crate::User;
+use crate::{AuthUser, User};
 
 /// An org.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -34,6 +34,20 @@ pub struct PvOrg {
   pub id:        RecordId<Org>,
   /// The org's identifier.
   pub org_ident: OrgIdent,
+}
+
+impl PvOrg {
+  /// Returns the org's title from the perspective of a user. `None` if user
+  /// shouldn't have access.
+  pub fn user_facing_title(&self, user: &AuthUser) -> Option<String> {
+    match &self.org_ident {
+      OrgIdent::Named(entity_name) => Some(entity_name.to_string()),
+      OrgIdent::UserOrg(user_id) if *user_id == user.id => {
+        Some("Personal Org".to_owned())
+      }
+      _ => None,
+    }
+  }
 }
 
 impl From<Org> for PvOrg {

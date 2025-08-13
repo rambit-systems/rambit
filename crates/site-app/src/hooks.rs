@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, AuthUser, Org, OrgIdent, PvOrg};
+use models::{dvf::RecordId, AuthUser, Org, PvOrg};
 
 #[derive(Clone)]
 pub struct UserActiveOrgHook {
@@ -40,26 +40,20 @@ impl UserActiveOrgHook {
 
   pub fn active_org_descriptor(&self) -> Memo<Option<String>> {
     let resource = self.resource;
-    let user_id = self.user.id;
-    Memo::new(move |_| {
-      resource
-        .get()
-        .map(|r| match r.map(|o| o.map(|o| o.org_ident)) {
-          Ok(Some(OrgIdent::Named(entity_name))) => entity_name.to_string(),
-          Ok(Some(OrgIdent::UserOrg(user_org_id)))
-            if user_org_id == user_id =>
-          {
-            "Personal Org".to_owned()
-          }
-          Ok(Some(OrgIdent::UserOrg(user_org_id))) => {
-            format!("{user_org_id}'s Org")
-          }
-          Ok(None) => "unknown-org".to_string(),
-          Err(e) => {
-            tracing::error!("failed to get org descriptor: {e}");
-            "unknown-org".to_string()
+    Memo::new({
+      let user = self.user.clone();
+      move |_| {
+        resource.get().map(|r| {
+          match r.map(|o| o.and_then(|o| o.user_facing_title(&user))) {
+            Ok(Some(title)) => title,
+            Ok(None) => "unknown-org".to_string(),
+            Err(e) => {
+              tracing::error!("failed to get org descriptor: {e}");
+              "unknown-org".to_string()
+            }
           }
         })
+      }
     })
   }
 }

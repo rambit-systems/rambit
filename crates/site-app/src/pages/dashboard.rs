@@ -3,11 +3,12 @@ mod entry;
 mod store;
 
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, AuthUser, Org};
 
 use self::{cache::CacheTable, entry::EntryTable, store::StoreTable};
-use crate::pages::UnauthorizedPage;
+use crate::{pages::UnauthorizedPage, resources::org::org_query_scope};
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {
@@ -33,17 +34,54 @@ pub fn DashboardPage() -> impl IntoView {
 }
 
 #[component]
+fn CurrentOrgTile(org: RecordId<Org>) -> impl IntoView {
+  let query_client = expect_context::<QueryClient>();
+  let resource = query_client.resource(org_query_scope(), move || org);
+
+  let auth_user = Signal::stored(expect_context::<AuthUser>());
+
+  let org_title_suspend = move || {
+    Suspend::new(async move {
+      let auth_user = auth_user();
+      resource.await.map(|o| {
+        o.map(|o| {
+          o.user_facing_title(&auth_user)
+            .unwrap_or("[unknown-org]".to_owned())
+        })
+        .unwrap_or("[error]".to_owned())
+      })
+    })
+  };
+
+  view! {
+    <div class="w-80 p-4 elevation-flat flex flex-col gap-4">
+      <div class="flex flex-col leading-none">
+        <p class="text-xl">"org"</p>
+        <p class="text-3xl text-base-12">
+          <Suspense fallback=|| "[loading]">
+            { org_title_suspend }
+          </Suspense>
+        </p>
+      </div>
+    </div>
+  }
+}
+
+#[component]
 fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
   view! {
-    <div class="grid gap-4 h-full grid-cols-2 grid-rows-2">
-      <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
-        <EntryTable org=org />
-      </div>
-      <div class="p-6 elevation-flat flex flex-col gap-4">
-        <CacheTable org=org />
-      </div>
-      <div class="p-6 elevation-flat flex flex-col gap-4">
-        <StoreTable org=org />
+    <div class="flex flex-row items-start gap-4">
+      <CurrentOrgTile org=org />
+      <div class="flex-1 grid gap-4 grid-cols-2">
+        <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
+          <EntryTable org=org />
+        </div>
+        <div class="p-6 elevation-flat flex flex-col gap-4">
+          <CacheTable org=org />
+        </div>
+        <div class="p-6 elevation-flat flex flex-col gap-4">
+          <StoreTable org=org />
+        </div>
       </div>
     </div>
   }
