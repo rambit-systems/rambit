@@ -27,6 +27,24 @@ impl Org {
   }
 }
 
+/// The public view of [`Org`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PvOrg {
+  /// The org's ID.
+  pub id:        RecordId<Org>,
+  /// The org's identifier.
+  pub org_ident: OrgIdent,
+}
+
+impl From<Org> for PvOrg {
+  fn from(value: Org) -> Self {
+    PvOrg {
+      id:        value.id,
+      org_ident: value.org_ident,
+    }
+  }
+}
+
 /// The unique index selector for [`Org`].
 #[derive(Debug, Clone, Copy)]
 pub enum OrgUniqueIndexSelector {

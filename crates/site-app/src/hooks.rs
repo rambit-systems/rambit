@@ -1,9 +1,9 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, AuthUser, Org, OrgIdent};
+use models::{dvf::RecordId, AuthUser, Org, OrgIdent, PvOrg};
 
 #[derive(Clone)]
 pub struct UserActiveOrgHook {
-  resource: Resource<Result<Option<Org>, ServerFnError>>,
+  resource: Resource<Result<Option<PvOrg>, ServerFnError>>,
   user:     AuthUser,
 }
 
