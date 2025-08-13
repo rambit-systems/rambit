@@ -74,7 +74,7 @@ fn DataTable<
 }
 
 #[component]
-fn DataTableReloadButton<
+fn DataTableRefreshButton<
   K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
   KF: Fn() -> K + Copy + Send + Sync + 'static,
   O: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
@@ -94,10 +94,10 @@ fn DataTableReloadButton<
   };
 
   view! {
-    <button class="btn btn-secondary relative" on:click=invalidate>
-      <span class:invisible=fetching>"Reload"</span>
+    <button class="btn-link btn-link-secondary relative duration-300" on:click=invalidate>
+      <span class="transition-opacity" class=("opacity-0", fetching)>"Refresh"</span>
       <div class="absolute inset-0 flex flex-row justify-center items-center">
-        <LoadingCircle {..} class="size-6" class:invisible=move || { !fetching() }/>
+        <LoadingCircle {..} class="size-6 transition-opacity" class=("opacity-0", move || { !fetching() }) />
       </div>
     </button>
   }

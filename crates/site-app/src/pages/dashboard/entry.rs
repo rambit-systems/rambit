@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use models::{dvf::RecordId, Entry, Org};
 
-use super::{DataTable, DataTableReloadButton};
+use super::{DataTable, DataTableRefreshButton};
 use crate::{
   components::CacheItemLink, resources::entry::entries_in_org_query_scope,
 };
@@ -12,10 +12,10 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
   let query_scope = entries_in_org_query_scope();
 
   view! {
-    <div class="flex flex-row items-start gap-2">
+    <div class="flex flex-row items-center gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
-      <DataTableReloadButton
+      <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
     </div>
