@@ -24,14 +24,14 @@ pub(super) fn StoreTable(org: RecordId<Org>) -> impl IntoView {
       <thead>
         <th>"Name"</th>
       </thead>
-      <tbody>
-        <DataTable
-          key_fn=key_fn query_scope=query_scope
-          view_fn=move |c| view! {
+      <DataTable
+        key_fn=key_fn query_scope=query_scope
+        view_fn=move |c| view! {
+          <tbody class="min-h-10">
             <For each=c key=|c| c.id children=|c| view! { <StoreDataRow store=c /> } />
-          }
-        />
-      </tbody>
+          </tbody>
+        }
+      />
     </table>
   }
 }
