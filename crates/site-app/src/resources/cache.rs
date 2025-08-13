@@ -57,7 +57,7 @@ pub async fn fetch_caches_in_org(
   let prime_domain_service: PrimeDomainService = expect_context();
 
   prime_domain_service
-    .fetch_cache_by_org(org)
+    .fetch_caches_by_org(org)
     .await
     .map_err(|e| {
       tracing::error!("failed to fetch caches by org: {e}");
