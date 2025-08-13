@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Cache, Org};
+use models::{dvf::RecordId, Org, PvCache};
 
 use super::{DataTable, DataTableRefreshButton};
 use crate::{
@@ -40,7 +40,7 @@ pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
 }
 
 #[component]
-fn CacheDataRow(cache: Cache) -> impl IntoView {
+fn CacheDataRow(cache: PvCache) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="btn-link-primary"/></th>
