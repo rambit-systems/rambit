@@ -1,11 +1,11 @@
 use leptos::{either::Either, ev::keydown, prelude::*};
 use leptos_use::{on_click_outside, use_event_listener, use_window};
-use models::AuthUser;
+use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::{
   components::{CheckHeroIcon, ChevronDownHeroIcon},
   hooks::OrgHook,
-  navigation::next_url_hook,
+  navigation::{navigate_to, next_url_hook},
 };
 
 #[component]
@@ -132,10 +132,23 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
     .collect::<Vec<_>>();
   let active_org = user.active_org();
 
+  let action = Action::new(|o| switch_active_org(*o));
+
+  // reload on successful action
+  Effect::new(move || {
+    if let Some(Ok(new_org)) = action.value().get() {
+      let new_dash_url = format!("/dash/{new_org}");
+      navigate_to(&new_dash_url)
+    }
+  });
+
   view! {
     <div class=POPOVER_CLASS>
       { org_hooks.into_iter().map(move |(id, oh)| view! {
-        <div class="hover:bg-base-3 active:bg-base-4 rounded p-2 flex flex-row gap-2 items-center">
+        <div
+          class="hover:bg-base-3 active:bg-base-4 rounded p-2 flex flex-row gap-2 items-center"
+          on:click=move |_| { action.dispatch(id); }
+        >
           <CheckHeroIcon {..}
             class="size-5 stroke-product-11 stroke-[2.0]"
             class:invisible={id != active_org}
@@ -149,4 +162,30 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
       }).collect_view()}
     </div>
   }
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn switch_active_org(
+  new_active_org: RecordId<Org>,
+) -> Result<RecordId<Org>, ServerFnError> {
+  use auth_domain::{AuthDomainService, UpdateActiveOrgError};
+
+  let Some(auth_user) = use_context::<AuthUser>() else {
+    return Err(ServerFnError::new("Unauthorized"));
+  };
+
+  let auth_domain_service: AuthDomainService = expect_context();
+
+  auth_domain_service
+    .switch_active_org(auth_user.id, new_active_org)
+    .await
+    .map_err(|e| match e {
+      UpdateActiveOrgError::InvalidOrg(record_id) => {
+        ServerFnError::new(format!("invalid org: {record_id}"))
+      }
+      e => {
+        tracing::error!("failed to fetch org: {e}");
+        ServerFnError::new("internal error")
+      }
+    })
 }

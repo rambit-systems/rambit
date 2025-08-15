@@ -116,7 +116,7 @@ impl AuthDomainService {
     &self,
     user: RecordId<User>,
     new_active_org: RecordId<Org>,
-  ) -> Result<Option<RecordId<Org>>, UpdateActiveOrgError> {
+  ) -> Result<RecordId<Org>, UpdateActiveOrgError> {
     let user = self
       .user_repo
       .fetch_model_by_id(user)
@@ -136,7 +136,7 @@ impl AuthDomainService {
       })
       .await?;
 
-    Ok(Some(new_active_org))
+    Ok(new_active_org)
   }
 
   /// Sign up a [`User`].

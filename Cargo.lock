@@ -3870,6 +3870,7 @@ dependencies = [
 name = "site-app"
 version = "0.1.0"
 dependencies = [
+ "auth-domain",
  "gloo-net",
  "leptos",
  "leptos-fetch",
