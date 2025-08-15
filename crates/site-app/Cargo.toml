@@ -19,6 +19,7 @@ tracing.workspace = true
 
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 leptos-fetch = { version = "0.4", features = [ "devtools" ] }
+leptos-use = { version = "0.16" }
 
 [features]
 default = [  ]
@@ -29,6 +30,7 @@ ssr = [
   "leptos_meta/ssr",
   "leptos_router/ssr",
   "leptos-fetch/ssr",
+  "leptos-use/ssr",
   "dep:leptos_axum",
   "dep:prime-domain",
 ]

@@ -18,6 +18,10 @@
   /* set fonts */
   --font-sans: Funnel Sans, sans-serif;
   --font-display: Funnel Display, sans-serif;
+
+  /* animations */
+  --animate-fade-in: fade-in 0.15s ease-in-out;
+  --animate-fade-out: fade-out 0.15s ease-in-out;
   
   /* product colors */
   --color-product-1: var(--color-orange-1);
@@ -64,6 +68,24 @@
   /* disable larger breakpoints */
   /* --breakpoint-xl: initial; */
   --breakpoint-2xl: initial;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @layer {

@@ -3,6 +3,24 @@ use leptos::prelude::*;
 pub use self::other::*;
 
 #[component]
+pub fn CheckHeroIcon() -> impl IntoView {
+  view! {
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+    </svg>
+  }
+}
+
+#[component]
+pub fn ChevronDownHeroIcon() -> impl IntoView {
+  view! {
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+    </svg>
+  }
+}
+
+#[component]
 pub fn EnvelopeHeroIcon() -> impl IntoView {
   view! {
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
