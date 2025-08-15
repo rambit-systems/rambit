@@ -1,7 +1,7 @@
 use leptos::{either::Either, prelude::*};
 use models::AuthUser;
 
-use crate::{hooks::UserActiveOrgHook, navigation::next_url_hook};
+use crate::{hooks::OrgHook, navigation::next_url_hook};
 
 #[component]
 pub fn Navbar() -> impl IntoView {
@@ -46,17 +46,22 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 
 #[component]
 fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
-  let user_active_org_hook = UserActiveOrgHook::new(user.clone());
-  let org_descriptor = user_active_org_hook.active_org_descriptor();
-  let dash_url = user_active_org_hook.active_org_dash_url();
+  let active_org = user.active_org();
+  let org_hook = OrgHook::new(move || active_org, user.clone());
+  let descriptor = org_hook.descriptor();
+  let dashboard_url = org_hook.dashboard_url();
 
   view! {
     <div class="flex flex-col gap leading-none items-end">
       <span class="text-base-12">{ user.name.to_string() }</span>
-      <span class="text-sm">{ org_descriptor }</span>
+      <span class="text-sm">
+        <Suspense fallback=|| "[loading]">
+          { move || Suspend::new(descriptor) }
+        </Suspense>
+      </span>
     </div>
     <div class="flex flex-row gap-1 items-center">
-      <a href=dash_url class="btn-link btn-link-primary">"Dashboard"</a>
+      <a href=dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
       <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
     </div>
   }

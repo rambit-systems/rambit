@@ -1,16 +1,9 @@
 use leptos::prelude::*;
-use leptos_fetch::{QueryClient, QueryScope};
+use leptos_fetch::QueryScope;
 use models::{dvf::RecordId, Org, PvOrg};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
-
-pub fn org(
-  key: impl Fn() -> RecordId<Org> + Send + Sync + 'static,
-) -> Resource<Result<Option<PvOrg>, ServerFnError>> {
-  let client = expect_context::<QueryClient>();
-  client.resource(org_query_scope(), key)
-}
 
 pub fn org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Option<PvOrg>, ServerFnError>> {

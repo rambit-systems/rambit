@@ -160,6 +160,14 @@ impl AuthUser {
   pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
     once(self.orgs.0).chain(self.orgs.1.iter().copied())
   }
+
+  /// Returns the ID of the currently active org.
+  pub fn active_org(&self) -> RecordId<Org> {
+    self
+      .iter_orgs()
+      .nth(self.active_org_index as _)
+      .expect("active_org_index is out of bounds")
+  }
 }
 
 #[cfg(feature = "auth")]

@@ -1,58 +1,55 @@
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, AuthUser, Org, PvOrg};
 
+use crate::resources::org::org_query_scope;
+
 #[derive(Clone)]
-pub struct UserActiveOrgHook {
+pub struct OrgHook {
+  key:      Callback<(), RecordId<Org>>,
   resource: Resource<Result<Option<PvOrg>, ServerFnError>>,
   user:     AuthUser,
 }
 
-impl UserActiveOrgHook {
-  pub fn new(auth_user: AuthUser) -> Self {
-    let user_orgs = auth_user.iter_orgs().collect::<Vec<_>>();
-    let active_org = *user_orgs
-      .get(auth_user.active_org_index as usize)
-      .expect("active org index out of org list");
-    let active_org_resource = crate::resources::org::org(move || active_org);
+impl OrgHook {
+  pub fn new(
+    key: impl Fn() -> RecordId<Org> + Copy + Send + Sync + 'static,
+    auth_user: AuthUser,
+  ) -> Self {
+    let client = expect_context::<QueryClient>();
+    let resource = client.resource(org_query_scope(), key);
 
-    UserActiveOrgHook {
-      resource: active_org_resource,
-      user:     auth_user,
+    OrgHook {
+      key: Callback::new(move |_| key()),
+      resource,
+      user: auth_user,
     }
   }
 
-  pub fn active_org_id(&self) -> RecordId<Org> {
-    let orgs = self.user.iter_orgs().collect::<Vec<_>>();
-    *orgs
-      .get(self.user.active_org_index as usize)
-      .unwrap_or_else(|| {
-        leptos::logging::error!("active org index was out of bounds");
-        orgs.last().expect("org list is empty")
-      })
-  }
-
-  pub fn active_org_dash_url(&self) -> String {
-    format!(
-      "/dash/{active_org_id}",
-      active_org_id = self.active_org_id()
-    )
-  }
-
-  pub fn active_org_descriptor(&self) -> Memo<Option<String>> {
-    let resource = self.resource;
+  pub fn dashboard_url(&self) -> Memo<String> {
     Memo::new({
-      let user = self.user.clone();
-      move |_| {
-        resource.get().map(|r| {
-          match r.map(|o| o.and_then(|o| o.user_facing_title(&user))) {
-            Ok(Some(title)) => title,
-            Ok(None) => "unknown-org".to_string(),
-            Err(e) => {
-              tracing::error!("failed to get org descriptor: {e}");
-              "unknown-org".to_string()
-            }
-          }
-        })
+      let key = self.key;
+      {
+        move |_| format!("/dash/{}", key.run(()))
+      }
+    })
+  }
+
+  pub fn descriptor(&self) -> AsyncDerived<String> {
+    AsyncDerived::new({
+      let resource = self.resource;
+      let auth_user = self.user.clone();
+      move || {
+        let auth_user = auth_user.clone();
+        async move {
+          resource
+            .await
+            .map(|o| {
+              o.and_then(|o| o.user_facing_title(&auth_user))
+                .unwrap_or("[unknown-org]".to_owned())
+            })
+            .unwrap_or("[error]".to_owned())
+        }
       }
     })
   }
