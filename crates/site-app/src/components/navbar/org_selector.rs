@@ -3,16 +3,16 @@ use leptos_use::{on_click_outside, use_event_listener, use_window};
 use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::{
-  components::{CheckHeroIcon, ChevronDownHeroIcon},
+  components::{CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle},
   hooks::OrgHook,
   navigation::navigate_to,
 };
 
 #[island]
 pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
-  const CONTAINER_CLASS: &str = "relative hover:bg-base-3 active:bg-base-4 \
-                                 px-2 py-1 rounded flex flex-col gap \
-                                 leading-none items-end gap-0.5";
+  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 px-2 py-1 \
+                                 rounded flex flex-col gap leading-none \
+                                 items-end gap-0.5";
 
   let active_org = user.active_org();
   let active_org_hook = OrgHook::new(move || active_org, user.clone());
@@ -43,29 +43,34 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
   });
 
   view! {
-  <div class=CONTAINER_CLASS on:click=toggle>
-    <span class="text-base-12">{ user.name.to_string() }</span>
-    <div class="flex flex-row items-center gap-0.5">
-      <span class="text-sm">
-        <Suspense fallback=|| "[loading]">
-          { move || Suspend::new(active_org_descriptor) }
-        </Suspense>
-      </span>
-      <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
-    </div>
+    <div class="relative">
+      <div class=CONTAINER_CLASS on:click=toggle>
+        <span class="text-base-12">{ user.name.to_string() }</span>
+        <div class="flex flex-row items-center gap-0.5">
+          <span class="text-sm">
+            <Suspense fallback=|| "[loading]">
+              { move || Suspend::new(active_org_descriptor) }
+            </Suspense>
+          </span>
+          <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
+        </div>
+      </div>
 
-    <OrgSelector
-      user={user}
-      {..}
-      class:hidden=move || !is_open()
-      node_ref=popover_ref
-    />
-  </div>
-    }
+      <OrgSelector
+        user=user
+        node_ref={popover_ref}
+        {..}
+        class:hidden=move || !is_open()
+      />
+    </div>
+  }
 }
 
-#[island]
-fn OrgSelector(user: AuthUser) -> impl IntoView {
+#[component]
+fn OrgSelector(
+  user: AuthUser,
+  node_ref: NodeRef<leptos::html::Div>,
+) -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
      elevation-navbar rounded p-2 flex flex-col gap-1";
@@ -77,6 +82,7 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
   let active_org = user.active_org();
 
   let action = Action::new(|o| switch_active_org(*o));
+  let selected = RwSignal::new(None::<RecordId<Org>>);
 
   // reload on successful action
   Effect::new(move || {
@@ -86,26 +92,48 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
     }
   });
 
-  view! {
-  <div class=POPOVER_CLASS>
-    { org_hooks.into_iter().map(move |(id, oh)| view! {
+  let org_row_element = move |(id, oh): (RecordId<Org>, OrgHook)| {
+    let is_active = id == active_org;
+    let handler = move |_| {
+      if !is_active {
+        selected.set(Some(id));
+        action.dispatch(id);
+      }
+    };
+
+    let icon_element = if is_active {
+      view! {
+        <CheckHeroIcon {..} class="size-5 stroke-product-11 stroke-[2.0]" />
+      }
+      .into_any()
+    } else {
+      view! {
+        <LoadingCircle {..} class="size-5" class:invisible=move || selected.get() != Some(id) />
+      }
+      .into_any()
+    };
+
+    view! {
       <div
-        class="hover:bg-base-3 active:bg-base-4 rounded p-2 flex flex-row gap-2 items-center"
-        on:click=move |_| { action.dispatch(id); }
+        class="rounded p-2 flex flex-row gap-2 items-center"
+        class=("hover:bg-base-3 active:bg-base-4", id != active_org)
+        on:click=handler
       >
-        <CheckHeroIcon {..}
-          class="size-5 stroke-product-11 stroke-[2.0]"
-          class:invisible={id != active_org}
-        />
+        { icon_element }
         <span class="flex-1 text-ellipsis">
           <Suspense fallback=|| "[loading]">
             { move || Suspend::new(oh.descriptor())}
           </Suspense>
         </span>
       </div>
-    }).collect_view()}
-  </div>
     }
+  };
+
+  view! {
+    <div class=POPOVER_CLASS node_ref=node_ref>
+      { org_hooks.into_iter().map(org_row_element).collect_view() }
+    </div>
+  }
 }
 
 #[server(prefix = "/api/sfn")]
