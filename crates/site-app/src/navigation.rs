@@ -20,6 +20,7 @@ pub fn url_to_full_path(url: &Url) -> String {
 }
 
 /// Reload the page.
+#[expect(dead_code)]
 pub fn reload() {
   let Some(window) = web_sys::window() else {
     logging::error!("failed to get window");
