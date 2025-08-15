@@ -5,7 +5,7 @@ mod store;
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
 use leptos_router::hooks::use_params_map;
-use models::{dvf::RecordId, AuthUser, Org};
+use models::{dvf::RecordId, AuthUser, Org, PvOrg};
 
 use self::{cache::CacheTable, entry::EntryTable, store::StoreTable};
 use crate::{pages::UnauthorizedPage, resources::org::org_query_scope};
@@ -36,21 +36,15 @@ pub fn DashboardPage() -> impl IntoView {
 #[component]
 fn CurrentOrgTile(org: RecordId<Org>) -> impl IntoView {
   let query_client = expect_context::<QueryClient>();
-  let resource = query_client.resource(org_query_scope(), move || org);
-
   let auth_user = Signal::stored(expect_context::<AuthUser>());
 
-  let org_title_suspend = move || {
-    Suspend::new(async move {
-      let auth_user = auth_user();
-      resource.await.map(|o| {
-        o.map(|o| {
-          o.user_facing_title(&auth_user)
-            .unwrap_or("[unknown-org]".to_owned())
-        })
-        .unwrap_or("[error]".to_owned())
-      })
+  let resource = query_client.resource(org_query_scope(), move || org);
+  let org_title = move |r: Result<Option<PvOrg>, ServerFnError>| {
+    r.map(|o| {
+      o.and_then(|o| o.user_facing_title(&auth_user()))
+        .unwrap_or("[unknown-org]".to_owned())
     })
+    .unwrap_or("[error]".to_owned())
   };
 
   view! {
@@ -59,7 +53,7 @@ fn CurrentOrgTile(org: RecordId<Org>) -> impl IntoView {
         <p class="text-xl">"org"</p>
         <p class="text-3xl text-base-12">
           <Suspense fallback=|| "[loading]">
-            { org_title_suspend }
+            { move || Suspend::new(async move { org_title(resource.await) }) }
           </Suspense>
         </p>
       </div>
