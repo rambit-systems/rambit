@@ -882,6 +882,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.20.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc7f46116c46ff9ab3eb1597a45688b6715c6e628b5c133e288e709a29bcb4ee"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.20.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d00b9596d185e565c2207a0b01f8bd1a135483d02d9b7b0a54b11da8d53412e"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn 2.0.104",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.20.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc34b93ccb385b40dc71c6fceac4b2ad23662c7eeb248cf10d529b7e055b6ead"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn 2.0.104",
+]
+
+[[package]]
 name = "dashmap"
 version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -915,6 +950,18 @@ dependencies = [
  "thiserror 2.0.12",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "default-struct-builder"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0df63c21a4383f94bd5388564829423f35c316aed85dc4f8427aded372c7c0d"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.104",
 ]
 
 [[package]]
@@ -1331,6 +1378,18 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "gloo-timers"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "js-sys",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1789,6 +1848,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+
+[[package]]
 name = "idna"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2042,6 +2107,31 @@ dependencies = [
  "send_wrapper",
  "task-local",
  "tracing",
+ "web-sys",
+]
+
+[[package]]
+name = "leptos-use"
+version = "0.16.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6eac17e7d306b4ad67158aba97c1490884ba304add4321069cb63fe0834c3b1"
+dependencies = [
+ "cfg-if",
+ "chrono",
+ "codee",
+ "cookie",
+ "default-struct-builder",
+ "futures-util",
+ "gloo-timers",
+ "js-sys",
+ "lazy_static",
+ "leptos",
+ "paste",
+ "send_wrapper",
+ "thiserror 2.0.12",
+ "unic-langid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
@@ -3780,9 +3870,11 @@ dependencies = [
 name = "site-app"
 version = "0.1.0"
 dependencies = [
+ "auth-domain",
  "gloo-net",
  "leptos",
  "leptos-fetch",
+ "leptos-use",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
@@ -4649,6 +4741,24 @@ dependencies = [
  "rand 0.9.1",
  "serde",
  "web-time",
+]
+
+[[package]]
+name = "unic-langid"
+version = "0.9.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a28ba52c9b05311f4f6e62d5d9d46f094bd6e84cb8df7b3ef952748d752a7d05"
+dependencies = [
+ "unic-langid-impl",
+]
+
+[[package]]
+name = "unic-langid-impl"
+version = "0.9.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dce1bf08044d4b7a94028c93786f8566047edc11110595914de93362559bc658"
+dependencies = [
+ "tinystr",
 ]
 
 [[package]]

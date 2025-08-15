@@ -19,6 +19,18 @@ pub fn url_to_full_path(url: &Url) -> String {
   path
 }
 
+/// Reload the page.
+pub fn reload() {
+  let Some(window) = web_sys::window() else {
+    logging::error!("failed to get window");
+    return;
+  };
+  let result = window.location().reload();
+  if let Err(e) = result {
+    logging::error!("failed to reload: {:?}", e);
+  }
+}
+
 /// Navigate to a new page.
 pub fn navigate_to(path: &str) {
   logging::log!("navigating to: {}", path);

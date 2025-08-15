@@ -11,6 +11,7 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta.workspace = true
 leptos_router.workspace = true
 
+auth-domain = { path = "../auth-domain", optional = true }
 models = { path = "../models", default-features = false }
 prime-domain = { path = "../prime-domain", optional = true }
 
@@ -19,6 +20,7 @@ tracing.workspace = true
 
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 leptos-fetch = { version = "0.4", features = [ "devtools" ] }
+leptos-use = { version = "0.16" }
 
 [features]
 default = [  ]
@@ -29,6 +31,8 @@ ssr = [
   "leptos_meta/ssr",
   "leptos_router/ssr",
   "leptos-fetch/ssr",
+  "leptos-use/ssr",
   "dep:leptos_axum",
   "dep:prime-domain",
+  "dep:auth-domain",
 ]
