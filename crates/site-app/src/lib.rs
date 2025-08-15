@@ -15,6 +15,7 @@ use leptos_router::{
   components::{Route, Router, Routes},
   path, StaticSegment,
 };
+use models::AuthUser;
 
 use self::pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage};
 
@@ -51,7 +52,7 @@ pub fn App() -> impl IntoView {
   view! {
     <Title text="Rambit Labs — Never waste another build"/>
 
-    <IslandContextProvider>
+    <IslandContextProvider auth_user={ use_context() }>
       <Router>
         <PageContainer>
           <Routes fallback=|| "Page not found.".into_view()>
@@ -80,7 +81,14 @@ fn PageContainer(children: Children) -> impl IntoView {
 }
 
 #[island]
-fn IslandContextProvider(children: Children) -> impl IntoView {
+fn IslandContextProvider(
+  auth_user: Option<AuthUser>,
+  children: Children,
+) -> impl IntoView {
+  if let Some(auth_user) = auth_user {
+    provide_context(auth_user);
+  }
   QueryClient::new().provide();
+
   children()
 }
