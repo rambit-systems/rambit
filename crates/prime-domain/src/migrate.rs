@@ -67,9 +67,7 @@ impl PrimeDomainService {
         id:          RecordId::from_str("01JXGXVF0MVQNGRM565YHM20BC").unwrap(),
         org:         federation.id,
         credentials: match ephemeral_storage {
-          true => {
-            models::StorageCredentials::Memory(MemoryStorageCredentials).into()
-          }
+          true => models::StorageCredentials::Memory(MemoryStorageCredentials),
           false => models::StorageCredentials::Local(LocalStorageCredentials(
             PathBuf::from("/tmp/rambit-albert-store"),
           )),
