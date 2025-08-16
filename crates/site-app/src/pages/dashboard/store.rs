@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Org, PvStore};
+use models::{dvf::RecordId, Org, PvStorageCredentials, PvStore};
 
 use crate::{
   components::{DataTable, DataTableRefreshButton, StoreItemLink},
@@ -23,6 +23,7 @@ pub(super) fn StoreTable(org: RecordId<Org>) -> impl IntoView {
     <table class="table">
       <thead>
         <th>"Name"</th>
+        <th>"Storage Type"</th>
       </thead>
       <DataTable
         key_fn=key_fn query_scope=query_scope
@@ -38,9 +39,16 @@ pub(super) fn StoreTable(org: RecordId<Org>) -> impl IntoView {
 
 #[component]
 fn StoreDataRow(store: PvStore) -> impl IntoView {
+  let storage_type = match store.credentials {
+    PvStorageCredentials::Local(_) => view! { "Local (DEBUG)" }.into_any(),
+    PvStorageCredentials::R2(_) => view! { "R2" }.into_any(),
+    PvStorageCredentials::Memory(_) => view! { "Memory (DEBUG)" }.into_any(),
+  };
+
   view! {
     <tr>
       <th scope="row"><StoreItemLink id=store.id extra_class="btn-link-primary"/></th>
+      <td>{ storage_type }</td>
     </tr>
   }
 }
