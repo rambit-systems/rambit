@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-@import "tailwindcss-radix-colors/dist/orange.css";
-@import "tailwindcss-radix-colors/dist/sand.css";
-@import "tailwindcss-radix-colors/dist/red.css";
+@import "tailwindcss-radix-colors/dist/orange-colors-only.css";
+@import "tailwindcss-radix-colors/dist/sand-colors-only.css";
+@import "tailwindcss-radix-colors/dist/red-colors-only.css";
 
 @import "./components/btn.css";
 @import "./components/btn-link.css";
