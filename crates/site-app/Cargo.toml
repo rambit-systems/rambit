@@ -12,6 +12,7 @@ leptos_meta.workspace = true
 leptos_router.workspace = true
 
 auth-domain = { path = "../auth-domain", optional = true }
+css-minify-macro = { path = "../css-minify-macro" }
 models = { path = "../models", default-features = false }
 prime-domain = { path = "../prime-domain", optional = true }
 

@@ -1,9 +1,12 @@
+mod creds;
+
 use std::fmt;
 
-use dvf::{EitherSlug, EntityName, LaxSlug, RecordId, StorageCredentials};
+use dvf::{EitherSlug, EntityName, LaxSlug, RecordId};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
+pub use self::creds::*;
 use crate::Org;
 
 /// A store.
@@ -33,22 +36,25 @@ impl Store {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PvStore {
   /// The store's ID.
-  pub id:     RecordId<Store>,
+  pub id:          RecordId<Store>,
   /// The store's org.
-  pub org:    RecordId<Org>,
+  pub org:         RecordId<Org>,
+  /// The store's credentials.
+  pub credentials: PvStorageCredentials,
   /// The store's configuration.
-  pub config: StoreConfiguration,
+  pub config:      StoreConfiguration,
   /// The store's nickname.
-  pub name:   EntityName,
+  pub name:        EntityName,
 }
 
 impl From<Store> for PvStore {
   fn from(value: Store) -> Self {
     PvStore {
-      id:     value.id,
-      org:    value.org,
-      config: value.config,
-      name:   value.name,
+      id:          value.id,
+      org:         value.org,
+      credentials: value.credentials.into(),
+      config:      value.config,
+      name:        value.name,
     }
   }
 }

@@ -207,10 +207,11 @@ impl PrimeDomainService {
       tracing::warn!("no self-reference found in entry {entry_id}");
     }
 
-    let store_client =
-      storage::StorageClient::new_from_storage_creds(target_store.credentials)
-        .await
-        .map_err(UploadError::InternalError)?;
+    let store_client = storage::StorageClient::new_from_storage_creds(
+      target_store.credentials.into(),
+    )
+    .await
+    .map_err(UploadError::InternalError)?;
 
     let storage_path = PathBuf::from(req.store_path.to_string());
     let file_size = store_client

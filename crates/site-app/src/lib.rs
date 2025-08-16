@@ -6,6 +6,7 @@ mod pages;
 mod reactive_utils;
 mod resources;
 
+use css_minify_macro::include_css;
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
 use leptos_meta::{
@@ -30,8 +31,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HydrationScripts options={options.clone()} islands=true />
 
         <HashedStylesheet options id="leptos" />
-        <Style>{include_str!("../style/fonts/funnel_sans.css")}</Style>
-        <Style>{include_str!("../style/fonts/funnel_display.css")}</Style>
+        <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
+        <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
