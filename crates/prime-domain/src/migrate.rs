@@ -2,10 +2,10 @@ use std::{path::PathBuf, str::FromStr};
 
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
-  Cache, Org, OrgIdent, Store, StoreConfiguration, User,
+  Cache, LocalStorageCredentials, MemoryStorageCredentials, Org, OrgIdent,
+  Store, StoreConfiguration, User,
   dvf::{
-    EmailAddress, EntityName, HumanName, LocalStorageCredentials,
-    MemoryStorageCredentials, RecordId, StrictSlug, Visibility,
+    EmailAddress, EntityName, HumanName, RecordId, StrictSlug, Visibility,
   },
 };
 
@@ -68,11 +68,11 @@ impl PrimeDomainService {
         org:         federation.id,
         credentials: match ephemeral_storage {
           true => {
-            models::dvf::StorageCredentials::Memory(MemoryStorageCredentials)
+            models::StorageCredentials::Memory(MemoryStorageCredentials).into()
           }
-          false => models::dvf::StorageCredentials::Local(
-            LocalStorageCredentials(PathBuf::from("/tmp/rambit-albert-store")),
-          ),
+          false => models::StorageCredentials::Local(LocalStorageCredentials(
+            PathBuf::from("/tmp/rambit-albert-store"),
+          )),
         },
         config:      StoreConfiguration {},
         name:        EntityName::new(StrictSlug::new("albert")),

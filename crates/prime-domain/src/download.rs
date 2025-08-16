@@ -135,7 +135,7 @@ impl PrimeDomainService {
       .map_err(DownloadError::InternalError)?;
 
     let store_client =
-      storage::StorageClient::new_from_storage_creds(store.credentials)
+      storage::StorageClient::new_from_storage_creds(store.credentials.into())
         .await
         .map_err(DownloadError::InternalError)?;
 
