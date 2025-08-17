@@ -1,3 +1,5 @@
+#![feature(impl_trait_in_fn_trait_return)]
+
 mod components;
 mod hooks;
 mod join_classes;
@@ -14,11 +16,14 @@ use leptos_meta::{
 };
 use leptos_router::{
   components::{Route, Router, Routes},
-  path, StaticSegment,
+  path,
 };
 use models::AuthUser;
 
-use self::pages::{DashboardPage, HomePage, LoginPage, LogoutPage, SignupPage};
+use self::pages::{
+  DashboardPage, HomePage, LoginPage, LogoutPage, ProtectedByOrgPage,
+  SignupPage,
+};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -57,8 +62,8 @@ pub fn App() -> impl IntoView {
       <Router>
         <PageContainer>
           <Routes fallback=|| "Page not found.".into_view()>
-            <Route path=StaticSegment("") view=HomePage/>
-            <Route path=path!("/dash/:org") view=DashboardPage />
+            <Route path=path!("") view=HomePage/>
+            <Route path=path!("/dash/:org") view=protect_by_org(DashboardPage) />
             <Route path=path!("/auth/signup") view=SignupPage/>
             <Route path=path!("/auth/login") view=LoginPage/>
             <Route path=path!("/auth/logout") view=LogoutPage/>
@@ -79,6 +84,15 @@ fn PageContainer(children: Children) -> impl IntoView {
       </div>
     </main>
   }
+}
+
+fn protect_by_org<
+  F: Fn() -> O + Send + Sync + Copy + 'static,
+  O: IntoView + 'static,
+>(
+  func: F,
+) -> impl Send + Clone + 'static + Fn() -> impl IntoAny {
+  move || view! { <ProtectedByOrgPage> { func() } </ProtectedByOrgPage> }
 }
 
 #[island]

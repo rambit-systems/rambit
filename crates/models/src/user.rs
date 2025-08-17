@@ -161,6 +161,11 @@ impl AuthUser {
     once(self.orgs.0).chain(self.orgs.1.iter().copied())
   }
 
+  /// Returns whether the user belongs to the given org.
+  pub fn belongs_to_org(&self, org: RecordId<Org>) -> bool {
+    self.orgs.0 == org || self.orgs.1.contains(&org)
+  }
+
   /// Returns the ID of the currently active org.
   pub fn active_org(&self) -> RecordId<Org> {
     self
