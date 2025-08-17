@@ -128,6 +128,7 @@
     };
   in {
     packages = {
+      default = server;
       "${leptos-options.bin-package}" = server;
       "${leptos-options.bin-package}-container" = server-container;
     };
