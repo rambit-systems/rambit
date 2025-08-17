@@ -16,10 +16,10 @@ pub fn DashboardPage() -> impl IntoView {
   let org: RecordId<Org> = expect_context();
 
   view! {
-    <div class="grid grid-cols-[320px_minmax(0,_1fr)] gap-4 place-items-start">
-      <p class="title col-start-2">"Dashboard"</p>
-      <CurrentOrgTile org={org} {..} class="w-80" />
-      <div class="flex-1 grid gap-4 grid-cols-2 place-self-stretch">
+    <div class="flex flex-col md:grid lg:grid-cols-[320px_minmax(0,_1fr)] gap-4 md:place-items-start">
+      <p class="title lg:col-start-2">"Dashboard"</p>
+      <CurrentOrgTile org={org} {..} class="md:place-self-end lg:place-self-auto md:w-80" />
+      <div class="flex-1 md:col-span-2 lg:col-span-1 flex flex-col md:grid gap-4 md:grid-cols-2 md:place-self-stretch">
         <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
           <EntryTable org=org />
         </div>
