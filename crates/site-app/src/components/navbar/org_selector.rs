@@ -10,9 +10,9 @@ use crate::{
 
 #[island]
 pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
-  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 px-2 py-1 \
-                                 rounded flex flex-col gap leading-none \
-                                 items-end gap-0.5";
+  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 \
+                                 cursor-pointer px-2 py-1 rounded flex \
+                                 flex-col gap leading-none items-end gap-0.5";
 
   let active_org = user.active_org();
   let active_org_hook = OrgHook::new(move || active_org, user.clone());
@@ -116,7 +116,7 @@ fn OrgSelector(
     view! {
       <div
         class="rounded p-2 flex flex-row gap-2 items-center"
-        class=("hover:bg-base-3 active:bg-base-4", id != active_org)
+        class=("cursor-pointer hover:bg-base-3 active:bg-base-4", id != active_org)
         on:click=handler
       >
         { icon_element }
