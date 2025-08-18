@@ -16,9 +16,9 @@
 
 @theme inline {
   /* set fonts */
-  --font-sans: Funnel Sans, sans-serif;
-  --font-display: Funnel Display, sans-serif;
-  --font-mono: JetBrains Mono, ui-monospace;
+  --font-sans: Funnel Sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: Funnel Display, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* animations */
   --animate-fade-in: fade-in 0.15s ease-in-out;
