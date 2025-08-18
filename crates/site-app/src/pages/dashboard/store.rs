@@ -47,7 +47,7 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
 
   view! {
     <tr>
-      <th scope="row"><StoreItemLink id=store.id extra_class="btn-link-primary"/></th>
+      <th scope="row"><StoreItemLink id=store.id extra_class="text-link-primary"/></th>
       <td>{ storage_type }</td>
     </tr>
   }

@@ -11,6 +11,6 @@
 
   .text-link-primary {
     /* color */
-    @apply text-product-11 hover:text-product-12;
+    @apply text-product-11;
   }
 }
