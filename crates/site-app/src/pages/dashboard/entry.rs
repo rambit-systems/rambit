@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use models::{dvf::RecordId, Entry, Org};
 
 use crate::{
-  components::{CacheItemLink, DataTable, DataTableRefreshButton},
+  components::{CacheItemLink, DataTable, DataTableRefreshButton, StorePath},
   resources::entry::entries_in_org_query_scope,
 };
 
@@ -45,7 +45,7 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
     <tr>
       <th scope="row">
         <a class="text-link text-link-primary">
-          { entry.store_path.to_string() }
+          <StorePath sp=entry.store_path />
         </a>
       </th>
       <td>
