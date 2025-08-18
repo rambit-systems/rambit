@@ -38,6 +38,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HashedStylesheet options id="leptos" />
         <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
         <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
+        <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
