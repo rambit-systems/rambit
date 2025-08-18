@@ -20,6 +20,11 @@
   --font-display: Funnel Display, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
+  /* shadows */
+  --shadow-elevation-lv1: rgba(79, 94, 113, 0.1) 0px 8px 24px -5px, rgba(79, 94, 113, 0.12) 0px 5px 16px -3px, rgba(79, 94, 113, 0.12) 0px 1px 4px 0px, rgba(41, 47, 55, 0.3) 0px 0px 1px 0px;
+  --shadow-elevation-lv2: rgba(79, 94, 113, 0.1) 0px 8px 24px -5px, rgba(79, 94, 113, 0.12) 0px 5px 16px -3px, rgba(79, 94, 113, 0.12) 0px 1px 4px 0px, rgba(41, 47, 55, 0.3) 0px 0px 1px 0px;
+  --shadow-elevation-navbar: rgba(27, 50, 73, 0.08) 0px 2px 12px 0px;
+
   /* animations */
   --animate-fade-in: fade-in 0.15s ease-in-out;
   --animate-fade-out: fade-out 0.15s ease-in-out;

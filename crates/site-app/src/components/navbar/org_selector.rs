@@ -73,7 +73,7 @@ fn OrgSelector(
 ) -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
-     elevation-navbar rounded p-2 flex flex-col gap-1";
+     elevation-lv1 transition p-2 flex flex-col gap-1";
 
   let org_hooks = Signal::stored(
     user
