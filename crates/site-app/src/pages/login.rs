@@ -110,6 +110,11 @@ fn LoginIsland() -> impl IntoView {
       class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8"
     >
       <p class="title">"Login"</p>
+
+      <p class="max-w-prose">
+        "Welcome back to the most satisfying part of your CI/CD pipeline."
+      </p>
+
       <div class="flex flex-col gap-4">
         <EmailInputField
           autofocus=true
