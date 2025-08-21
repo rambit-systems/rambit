@@ -44,7 +44,7 @@ pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
 fn CacheDataRow(cache: PvCache) -> impl IntoView {
   view! {
     <tr>
-      <th scope="row"><CacheItemLink id=cache.id extra_class="btn-link-primary"/></th>
+      <th scope="row"><CacheItemLink id=cache.id extra_class="text-link-primary"/></th>
       <td>{ cache.visibility.to_string() }</td>
       <td><StoreItemLink id=cache.default_store /></td>
     </tr>

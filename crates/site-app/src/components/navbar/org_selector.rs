@@ -10,9 +10,9 @@ use crate::{
 
 #[island]
 pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
-  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 px-2 py-1 \
-                                 rounded flex flex-col gap leading-none \
-                                 items-end gap-0.5";
+  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 \
+                                 cursor-pointer px-2 py-1 rounded flex \
+                                 flex-col gap leading-none items-end gap-0.5";
 
   let active_org = user.active_org();
   let active_org_hook = OrgHook::new(move || active_org, user.clone());
@@ -73,12 +73,14 @@ fn OrgSelector(
 ) -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
-     elevation-navbar rounded p-2 flex flex-col gap-1";
+     elevation-lv1 transition p-2 flex flex-col gap-1";
 
-  let org_hooks = user
-    .iter_orgs()
-    .map(|o| (o, OrgHook::new(move || o, user.clone())))
-    .collect::<Vec<_>>();
+  let org_hooks = Signal::stored(
+    user
+      .iter_orgs()
+      .map(|o| (o, OrgHook::new(move || o, user.clone())))
+      .collect::<Vec<_>>(),
+  );
   let active_org = user.active_org();
 
   let action = Action::new(|o| switch_active_org(*o));
@@ -87,7 +89,13 @@ fn OrgSelector(
   // reload on successful action
   Effect::new(move || {
     if let Some(Ok(new_org)) = action.value().get() {
-      let new_dash_url = format!("/dash/{new_org}");
+      let org_hook = org_hooks
+        .get()
+        .into_iter()
+        .find(|(o, _)| new_org == *o)
+        .expect("failed to find new org's hook")
+        .1;
+      let new_dash_url = org_hook.dashboard_url()();
       navigate_to(&new_dash_url)
     }
   });
@@ -116,7 +124,7 @@ fn OrgSelector(
     view! {
       <div
         class="rounded p-2 flex flex-row gap-2 items-center"
-        class=("hover:bg-base-3 active:bg-base-4", id != active_org)
+        class=("cursor-pointer hover:bg-base-3 active:bg-base-4", id != active_org)
         on:click=handler
       >
         { icon_element }
@@ -131,7 +139,7 @@ fn OrgSelector(
 
   view! {
     <div class=POPOVER_CLASS node_ref=node_ref>
-      { org_hooks.into_iter().map(org_row_element).collect_view() }
+      { org_hooks().into_iter().map(org_row_element).collect_view() }
     </div>
   }
 }

@@ -77,7 +77,12 @@ fn LoginIsland() -> impl IntoView {
     }
   });
 
-  let loading = action.pending();
+  // loading represents both the action and the redirect, so we will continue
+  // loading for the life of the page, if the action completed successfully
+  let loading = {
+    let (pending, value) = (action.pending(), action.value());
+    move || pending() || matches!(value.get(), Some(Ok(true)))
+  };
 
   // submit callback
   let submit_action = move |ev: SubmitEvent| {
@@ -105,6 +110,11 @@ fn LoginIsland() -> impl IntoView {
       class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8"
     >
       <p class="title">"Login"</p>
+
+      <p class="max-w-prose">
+        "Welcome back to the most satisfying part of your CI/CD pipeline."
+      </p>
+
       <div class="flex flex-col gap-4">
         <EmailInputField
           autofocus=true
@@ -119,7 +129,7 @@ fn LoginIsland() -> impl IntoView {
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
-        <button class="btn btn-primary w-full max-w-80">
+        <button class="btn btn-primary-subtle w-full max-w-80">
           <div class="flex-1" />
           <div class="flex-1 flex flex-row justify-center items-center">
             "Log in"

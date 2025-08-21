@@ -55,9 +55,7 @@ fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
 
   view! {
     <OrgSelectorPopover user=user />
-    <div class="flex flex-row gap-1 items-center">
-      <a href=active_org_dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
-      <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
-    </div>
+    <a href=active_org_dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
+    <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
   }
 }

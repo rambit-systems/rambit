@@ -38,7 +38,13 @@ pub fn LogoutButton() -> impl IntoView {
       s => Err(format!("status error: got unknown status {s}")),
     }
   });
-  let loading = action.pending();
+
+  // loading represents both the action and the redirect, so we will continue
+  // loading for the life of the page, if the action completed successfully
+  let loading = {
+    let (pending, value) = (action.pending(), action.value());
+    move || pending() || matches!(value.get(), Some(Ok(true)))
+  };
 
   let button_action = move |_| {
     action.dispatch_local(());
@@ -51,14 +57,17 @@ pub fn LogoutButton() -> impl IntoView {
   });
 
   view! {
-    <button
-      class="btn btn-critical"
-      on:click=button_action
-    >
-      "Log out"
-      { move || loading().then_some(view! {
-        <LoadingCircle {..} class="size-4" />
-      })}
+    <button class="btn btn-critical-subtle w-full max-w-80" on:click=button_action>
+      <div class="flex-1" />
+      <div class="flex-1 flex flex-row justify-center items-center">
+        "Log out"
+      </div>
+      <div class="flex-1 flex flex-row justify-end items-center">
+        <LoadingCircle {..}
+          class="size-4 transition-opacity"
+          class=("opacity-0", move || { !loading() })
+        />
+      </div>
     </button>
   }
 }

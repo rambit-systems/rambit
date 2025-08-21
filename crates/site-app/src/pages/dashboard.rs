@@ -4,44 +4,22 @@ mod entry;
 mod store;
 
 use leptos::prelude::*;
-use leptos_router::hooks::use_params_map;
-use models::{dvf::RecordId, AuthUser, Org};
+use models::{dvf::RecordId, Org};
 
 use self::{
   cache::CacheTable, current_org::CurrentOrgTile, entry::EntryTable,
   store::StoreTable,
 };
-use crate::pages::UnauthorizedPage;
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {
-  let params = use_params_map();
-  let authorized_org = Memo::new(move |_| {
-    let allowed_orgs = use_context::<AuthUser>()
-      .map(|au| au.iter_orgs().collect::<Vec<_>>())
-      .unwrap_or_default();
-    let requested_org = params()
-      .get("org")
-      .expect("missing org path param")
-      .parse::<RecordId<_>>()
-      .ok()?;
-    allowed_orgs
-      .contains(&requested_org)
-      .then_some(requested_org)
-  });
+  let org: RecordId<Org> = expect_context();
 
-  move || match authorized_org() {
-    Some(org) => view! { <DashboardInner org=org /> }.into_any(),
-    None => view! { <UnauthorizedPage /> }.into_any(),
-  }
-}
-
-#[component]
-fn DashboardInner(org: RecordId<Org>) -> impl IntoView {
   view! {
-    <div class="flex flex-row items-start gap-4">
-      <CurrentOrgTile org=org />
-      <div class="flex-1 grid gap-4 grid-cols-2">
+    <div class="flex flex-col md:grid lg:grid-cols-[320px_minmax(0,_1fr)] gap-4 md:place-items-start">
+      <p class="title lg:col-start-2">"Dashboard"</p>
+      <CurrentOrgTile org={org} {..} class="md:place-self-end lg:place-self-auto md:w-80" />
+      <div class="flex-1 md:col-span-2 lg:col-span-1 flex flex-col md:grid gap-4 md:grid-cols-2 md:place-self-stretch">
         <div class="col-span-2 p-6 elevation-flat flex flex-col gap-4">
           <EntryTable org=org />
         </div>

@@ -30,7 +30,7 @@ impl OrgHook {
     Memo::new({
       let key = self.key;
       {
-        move |_| format!("/dash/{}", key.run(()))
+        move |_| format!("/org/{}/dash", key.run(()))
       }
     })
   }

@@ -110,7 +110,12 @@ fn SignupIsland() -> impl IntoView {
     }
   });
 
-  let loading = action.pending();
+  // loading represents both the action and the redirect, so we will continue
+  // loading for the life of the page, if the action completed successfully
+  let loading = {
+    let (pending, value) = (action.pending(), action.value());
+    move || pending() || matches!(value.get(), Some(Ok(true)))
+  };
 
   // submit callback
   let submit_action = move |ev: SubmitEvent| {
