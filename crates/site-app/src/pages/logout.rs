@@ -57,14 +57,17 @@ pub fn LogoutButton() -> impl IntoView {
   });
 
   view! {
-    <button
-      class="btn btn-critical"
-      on:click=button_action
-    >
-      "Log out"
-      { move || loading().then_some(view! {
-        <LoadingCircle {..} class="size-4" />
-      })}
+    <button class="btn btn-critical w-full max-w-80" on:click=button_action>
+      <div class="flex-1" />
+      <div class="flex-1 flex flex-row justify-center items-center">
+        "Log out"
+      </div>
+      <div class="flex-1 flex flex-row justify-end items-center">
+        <LoadingCircle {..}
+          class="size-4 transition-opacity"
+          class=("opacity-0", move || { !loading() })
+        />
+      </div>
     </button>
   }
 }
