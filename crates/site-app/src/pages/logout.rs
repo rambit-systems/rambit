@@ -57,7 +57,7 @@ pub fn LogoutButton() -> impl IntoView {
   });
 
   view! {
-    <button class="btn btn-critical w-full max-w-80" on:click=button_action>
+    <button class="btn btn-critical-subtle w-full max-w-80" on:click=button_action>
       <div class="flex-1" />
       <div class="flex-1 flex flex-row justify-center items-center">
         "Log out"
