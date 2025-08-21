@@ -4,7 +4,7 @@ use models::{EntryIndexSelector, Store, dvf::RecordId};
 use crate::PrimeDomainService;
 
 impl PrimeDomainService {
-  /// Counts the number of [`Entry`]s in a [`Store`].
+  /// Counts the number of [`Entry`](models::Entry)s in a [`Store`].
   pub async fn count_entries_in_store(
     &self,
     store: RecordId<Store>,
