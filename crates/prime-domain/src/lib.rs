@@ -1,5 +1,6 @@
 //! Entrypoint for domain logic.
 
+mod counts;
 pub mod download;
 mod fetch_by_id;
 mod fetch_by_org;

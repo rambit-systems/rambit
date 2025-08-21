@@ -65,3 +65,35 @@ pub async fn fetch_stores_in_org(
       ServerFnError::new("internal error")
     })
 }
+
+pub fn entry_count_in_store_query_scope(
+) -> QueryScope<RecordId<Store>, Result<u32, ServerFnError>> {
+  QueryScope::new(count_entries_in_store)
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn count_entries_in_store(
+  store: RecordId<Store>,
+) -> Result<u32, ServerFnError> {
+  use prime_domain::PrimeDomainService;
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+  let store = prime_domain_service
+    .fetch_store_by_id(store)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch store: {e}");
+      ServerFnError::new("internal error")
+    })?
+    .ok_or(ServerFnError::new("store does not exist"))?;
+
+  authorize_for_org(store.org)?;
+
+  prime_domain_service
+    .count_entries_in_store(store.id)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to count entries in store ({}): {e}", store.id);
+      ServerFnError::new("internal error")
+    })
+}
