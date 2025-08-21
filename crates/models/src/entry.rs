@@ -91,12 +91,18 @@ impl fmt::Display for EntryUniqueIndexSelector {
 pub enum EntryIndexSelector {
   /// The `org` index.
   Org,
+  /// The `store` index.
+  Store,
+  /// The `cache` index.
+  Cache,
 }
 
 impl fmt::Display for EntryIndexSelector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
       EntryIndexSelector::Org => write!(f, "org"),
+      EntryIndexSelector::Store => write!(f, "store"),
+      EntryIndexSelector::Cache => write!(f, "cache"),
     }
   }
 }
@@ -125,10 +131,20 @@ impl Model for Entry {
   type IndexSelector = EntryIndexSelector;
   type UniqueIndexSelector = EntryUniqueIndexSelector;
 
-  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] =
-    &[(EntryIndexSelector::Org, |e| {
+  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] = &[
+    (EntryIndexSelector::Org, |e| {
       vec![LaxSlug::new(e.org.to_string()).into()]
-    })];
+    }),
+    (EntryIndexSelector::Store, |e| {
+      vec![LaxSlug::new(e.storage_data.store.to_string()).into()]
+    }),
+    (EntryIndexSelector::Cache, |e| {
+      e.caches
+        .iter()
+        .map(|c| LaxSlug::new(c.to_string()).into())
+        .collect()
+    }),
+  ];
   const TABLE_NAME: &'static str = "entry";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,
