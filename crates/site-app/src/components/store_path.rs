@@ -15,8 +15,6 @@ pub fn StorePath(sp: models::StorePath<String>) -> impl IntoView {
   );
 
   view! {
-    <a class="text-link">
-      { display }
-    </a>
+    { display }
   }
 }
