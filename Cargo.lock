@@ -539,7 +539,7 @@ dependencies = [
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "async-compression",
  "bytes",
@@ -1162,7 +1162,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -1290,7 +1290,7 @@ dependencies = [
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "email_address",
  "nutype",
@@ -1745,7 +1745,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "async-trait",
  "futures",
@@ -1767,7 +1767,7 @@ checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "health",
  "tokio",
@@ -2216,15 +2216,6 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
@@ -2282,7 +2273,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "async-trait",
  "hex 0.1.0",
@@ -2819,7 +2810,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "dvf",
  "serde",
@@ -3425,7 +3416,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
 dependencies = [
  "anyhow",
- "itertools 0.12.1",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 2.0.104",
@@ -4421,7 +4412,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "deunicode",
  "nutype",
@@ -4469,12 +4460,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#3663acd97672d99dcdd93d58dfda64c38dcbd5e4"
+source = "git+https://github.com/johnbchron/app-core#5ad45a986401baf7ee45009286d90a596cdc6578"
 dependencies = [
  "async-trait",
  "belt",
