@@ -43,10 +43,19 @@ pub(super) fn EntryTable() -> impl IntoView {
 
 #[component]
 fn EntryDataRow(entry: Entry) -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let entry_href = move || {
+    format!(
+      "/org/{org}/entry/{entry}",
+      org = org_hook.key()(),
+      entry = entry.id
+    )
+  };
+
   view! {
     <tr>
       <th scope="row">
-        <a class="text-link text-link-primary">
+        <a class="text-link text-link-primary" href=entry_href>
           <StorePath sp=entry.store_path />
         </a>
       </th>

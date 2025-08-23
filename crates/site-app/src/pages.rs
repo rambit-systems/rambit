@@ -1,4 +1,5 @@
 mod dashboard;
+mod entry;
 mod homepage;
 mod login;
 mod logout;
@@ -7,6 +8,6 @@ mod signup;
 mod unauthorized;
 
 pub use self::{
-  dashboard::*, homepage::*, login::*, logout::*, protected::*, signup::*,
-  unauthorized::*,
+  dashboard::*, entry::*, homepage::*, login::*, logout::*, protected::*,
+  signup::*, unauthorized::*,
 };
