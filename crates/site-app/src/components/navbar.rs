@@ -49,8 +49,7 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 
 #[component]
 fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
-  let active_org = user.active_org();
-  let active_org_hook = OrgHook::new(move || active_org, user.clone());
+  let active_org_hook = OrgHook::new_active();
   let active_org_dashboard_url = active_org_hook.dashboard_url();
 
   view! {

@@ -12,10 +12,11 @@ pub struct OrgHook {
 }
 
 impl OrgHook {
+  /// Creates a new [`OrgHook`]. Requires [`AuthUser`] in context.
   pub fn new(
     key: impl Fn() -> RecordId<Org> + Copy + Send + Sync + 'static,
-    auth_user: AuthUser,
   ) -> Self {
+    let auth_user = expect_context();
     let client = expect_context::<QueryClient>();
     let resource = client.resource(org_query_scope(), key);
 
@@ -24,6 +25,13 @@ impl OrgHook {
       resource,
       user: auth_user,
     }
+  }
+
+  /// Creates a new [`OrgHook`] using the [`AuthUser`]'s active org.
+  pub fn new_active() -> Self {
+    let auth_user = expect_context::<AuthUser>();
+    let active_org = auth_user.active_org();
+    Self::new(move || active_org)
   }
 
   pub fn dashboard_url(&self) -> Memo<String> {

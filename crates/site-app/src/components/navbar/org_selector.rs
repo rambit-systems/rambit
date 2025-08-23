@@ -14,8 +14,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
                                  cursor-pointer px-2 py-1 rounded flex \
                                  flex-col gap leading-none items-end gap-0.5";
 
-  let active_org = user.active_org();
-  let active_org_hook = OrgHook::new(move || active_org, user.clone());
+  let active_org_hook = OrgHook::new_active();
   let active_org_descriptor = active_org_hook.descriptor();
 
   let is_open = RwSignal::new(false);
@@ -78,7 +77,7 @@ fn OrgSelector(
   let org_hooks = Signal::stored(
     user
       .iter_orgs()
-      .map(|o| (o, OrgHook::new(move || o, user.clone())))
+      .map(|o| (o, OrgHook::new(move || o)))
       .collect::<Vec<_>>(),
   );
   let active_org = user.active_org();
