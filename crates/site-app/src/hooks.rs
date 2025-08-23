@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_fetch::QueryClient;
 use models::{dvf::RecordId, AuthUser, Org, PvOrg};
 
-use crate::resources::org::org_query_scope;
+use crate::{pages::RequestedOrg, resources::org::org_query_scope};
 
 #[derive(Clone)]
 pub struct OrgHook {
@@ -32,6 +32,19 @@ impl OrgHook {
     let auth_user = expect_context::<AuthUser>();
     let active_org = auth_user.active_org();
     Self::new(move || active_org)
+  }
+
+  /// Creates a new [`OrgHook`] using the [`RequestedOrg`] in context.
+  pub fn new_requested() -> Self {
+    let RequestedOrg(requested_org) = expect_context();
+    Self::new(move || requested_org)
+  }
+
+  pub fn key(
+    &self,
+  ) -> impl Fn() -> RecordId<Org> + Copy + Send + Sync + 'static {
+    let key = self.key;
+    move || key.run(())
   }
 
   pub fn dashboard_url(&self) -> Memo<String> {

@@ -1,11 +1,10 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Org};
 
 use crate::hooks::OrgHook;
 
 #[component]
-pub(super) fn CurrentOrgTile(org: RecordId<Org>) -> impl IntoView {
-  let org_hook = OrgHook::new(move || org);
+pub(super) fn CurrentOrgTile() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
   let descriptor = org_hook.descriptor();
 
   view! {

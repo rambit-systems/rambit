@@ -1,14 +1,16 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Entry, Org};
+use models::Entry;
 
 use crate::{
   components::{CacheItemLink, DataTable, DataTableRefreshButton, StorePath},
+  hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
 };
 
 #[island]
-pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
-  let key_fn = move || org;
+pub(super) fn EntryTable() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
   let query_scope = entries_in_org_query_scope();
 
   view! {

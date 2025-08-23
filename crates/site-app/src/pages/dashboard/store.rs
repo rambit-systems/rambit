@@ -1,17 +1,19 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::RecordId, Org, PvStorageCredentials, PvStore};
+use models::{PvStorageCredentials, PvStore};
 
 use crate::{
   components::{DataTable, DataTableRefreshButton, StoreItemLink},
+  hooks::OrgHook,
   resources::store::{
     entry_count_in_store_query_scope, stores_in_org_query_scope,
   },
 };
 
 #[island]
-pub(super) fn StoreTable(org: RecordId<Org>) -> impl IntoView {
-  let key_fn = move || org;
+pub(super) fn StoreTable() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
   let query_scope = stores_in_org_query_scope();
 
   view! {

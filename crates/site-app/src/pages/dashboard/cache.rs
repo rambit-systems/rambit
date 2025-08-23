@@ -1,16 +1,18 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Org, PvCache};
+use models::PvCache;
 
 use crate::{
   components::{
     CacheItemLink, DataTable, DataTableRefreshButton, StoreItemLink,
   },
+  hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
 
 #[island]
-pub(super) fn CacheTable(org: RecordId<Org>) -> impl IntoView {
-  let key_fn = move || org;
+pub(super) fn CacheTable() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
   let query_scope = caches_in_org_query_scope();
 
   view! {
