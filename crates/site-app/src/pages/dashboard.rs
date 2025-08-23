@@ -4,16 +4,16 @@ mod entry;
 mod store;
 
 use leptos::prelude::*;
-use models::{dvf::RecordId, Org};
 
 use self::{
   cache::CacheTable, current_org::CurrentOrgTile, entry::EntryTable,
   store::StoreTable,
 };
+use crate::pages::RequestedOrg;
 
 #[component]
 pub fn DashboardPage() -> impl IntoView {
-  let org: RecordId<Org> = expect_context();
+  let RequestedOrg(org) = expect_context();
 
   view! {
     <div class="flex flex-col md:grid lg:grid-cols-[320px_minmax(0,_1fr)] gap-4 md:place-items-start">
