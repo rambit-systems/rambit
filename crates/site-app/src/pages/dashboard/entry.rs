@@ -30,7 +30,7 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
       <DataTable
         key_fn=key_fn query_scope=query_scope
         view_fn=move |e| view! {
-          <tbody class="min-h-10">
+          <tbody class="min-h-10 animate-fade-in">
             <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
           </tbody>
         }
