@@ -21,8 +21,8 @@ use leptos_router::{
 use models::AuthUser;
 
 use self::pages::{
-  DashboardPage, HomePage, LoginPage, LogoutPage, ProtectedByOrgPage,
-  SignupPage,
+  DashboardPage, EntryPage, HomePage, LoginPage, LogoutPage,
+  ProtectedByOrgPage, SignupPage,
 };
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -65,6 +65,7 @@ pub fn App() -> impl IntoView {
           <Routes fallback=|| "Page not found.".into_view()>
             <Route path=path!("") view=HomePage/>
             <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
+            <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
             <Route path=path!("/auth/signup") view=SignupPage/>
             <Route path=path!("/auth/login") view=LoginPage/>
             <Route path=path!("/auth/logout") view=LogoutPage/>

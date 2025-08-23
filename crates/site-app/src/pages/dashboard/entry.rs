@@ -1,14 +1,16 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Entry, Org};
+use models::Entry;
 
 use crate::{
   components::{CacheItemLink, DataTable, DataTableRefreshButton, StorePath},
+  hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
 };
 
 #[island]
-pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
-  let key_fn = move || org;
+pub(super) fn EntryTable() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
   let query_scope = entries_in_org_query_scope();
 
   view! {
@@ -30,7 +32,7 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
       <DataTable
         key_fn=key_fn query_scope=query_scope
         view_fn=move |e| view! {
-          <tbody class="min-h-10">
+          <tbody class="min-h-10 animate-fade-in">
             <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
           </tbody>
         }
@@ -41,10 +43,19 @@ pub(super) fn EntryTable(org: RecordId<Org>) -> impl IntoView {
 
 #[component]
 fn EntryDataRow(entry: Entry) -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let entry_href = move || {
+    format!(
+      "/org/{org}/entry/{entry}",
+      org = org_hook.key()(),
+      entry = entry.id
+    )
+  };
+
   view! {
     <tr>
       <th scope="row">
-        <a class="text-link text-link-primary">
+        <a class="text-link text-link-primary" href=entry_href>
           <StorePath sp=entry.store_path />
         </a>
       </th>
