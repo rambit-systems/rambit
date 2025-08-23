@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use crate::hooks::OrgHook;
 
 #[component]
-pub(super) fn CurrentOrgTile() -> impl IntoView {
+pub(super) fn RequestedOrgTile() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let descriptor = org_hook.descriptor();
 
