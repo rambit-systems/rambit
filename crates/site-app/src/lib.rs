@@ -71,7 +71,17 @@ pub fn App() -> impl IntoView {
           </Routes>
         </PageContainer>
       </Router>
+      // <LeptosFetchDevtools />
     </IslandContextProvider>
+  }
+}
+
+#[allow(dead_code)]
+#[island]
+fn LeptosFetchDevtools() -> impl IntoView {
+  let query_client = expect_context::<QueryClient>();
+  view! {
+    <leptos_fetch::QueryDevtools client=query_client/>
   }
 }
 

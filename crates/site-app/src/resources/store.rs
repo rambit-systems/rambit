@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, Org, PvStore, Store};
+use models::{dvf::RecordId, model::Model, Entry, Org, PvStore, Store};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
@@ -14,7 +14,9 @@ pub fn store(
 
 pub fn store_query_scope(
 ) -> QueryScope<RecordId<Store>, Result<Option<PvStore>, ServerFnError>> {
-  QueryScope::new(fetch_store)
+  QueryScope::new(fetch_store).with_invalidation_link(move |s| {
+    [Store::TABLE_NAME.to_string(), s.to_string()]
+  })
 }
 
 #[server(prefix = "/api/sfn")]
@@ -44,6 +46,7 @@ async fn fetch_store(
 pub fn stores_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<PvStore>, ServerFnError>> {
   QueryScope::new(fetch_stores_in_org)
+    .with_invalidation_link(move |_| [Store::TABLE_NAME])
 }
 
 #[server(prefix = "/api/sfn")]
@@ -68,7 +71,13 @@ pub async fn fetch_stores_in_org(
 
 pub fn entry_count_in_store_query_scope(
 ) -> QueryScope<RecordId<Store>, Result<u32, ServerFnError>> {
-  QueryScope::new(count_entries_in_store)
+  QueryScope::new(count_entries_in_store).with_invalidation_link(move |s| {
+    [
+      Store::TABLE_NAME.to_string(),
+      s.to_string(),
+      Entry::TABLE_NAME.to_string(),
+    ]
+  })
 }
 
 #[server(prefix = "/api/sfn")]

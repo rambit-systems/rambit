@@ -6,18 +6,13 @@ pub mod store;
 #[cfg(feature = "ssr")]
 use leptos::prelude::*;
 #[cfg(feature = "ssr")]
-use models::{dvf::RecordId, Org};
+use models::{dvf::RecordId, AuthUser, Org};
 
 #[cfg(feature = "ssr")]
-fn authorize_for_org(org: RecordId<Org>) -> Result<(), ServerFnError> {
-  use models::AuthUser;
-
-  let auth_user: Option<AuthUser> = use_context();
-  let cleared_orgs = auth_user
-    .map(|au| au.iter_orgs().collect::<Vec<_>>())
-    .unwrap_or_default();
-  if !cleared_orgs.contains(&org) {
-    return Err(ServerFnError::new("Unauthorized"));
+fn authorize_for_org(org: RecordId<Org>) -> Result<AuthUser, ServerFnError> {
+  match use_context::<AuthUser>() {
+    Some(auth_user) if auth_user.belongs_to_org(org) => Ok(auth_user),
+    Some(_) => Err(ServerFnError::new("Unauthorized")),
+    None => Err(ServerFnError::new("Unauthenticated")),
   }
-  Ok(())
 }

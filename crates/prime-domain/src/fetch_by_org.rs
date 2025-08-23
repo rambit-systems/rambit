@@ -20,7 +20,7 @@ macro_rules! impl_fetch_by_org {
       id: RecordId<Org>,
     ) -> Result<Vec<$model_ty>, FetchModelByIndexError> {
       self.$repo_field
-        .fetch_model_by_index(
+        .fetch_models_by_index(
           <$index_selector>::Org,
           LaxSlug::new(id.to_string()).into(),
         )

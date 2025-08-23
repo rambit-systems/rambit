@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, Cache, Org, PvCache};
+use models::{dvf::RecordId, model::Model, Cache, Org, PvCache};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
@@ -14,7 +14,9 @@ pub fn cache(
 
 pub fn cache_query_scope(
 ) -> QueryScope<RecordId<Cache>, Result<Option<PvCache>, ServerFnError>> {
-  QueryScope::new(fetch_cache)
+  QueryScope::new(fetch_cache).with_invalidation_link(move |c| {
+    [Cache::TABLE_NAME.to_string(), c.to_string()]
+  })
 }
 
 #[server(prefix = "/api/sfn")]
@@ -44,6 +46,7 @@ pub async fn fetch_cache(
 pub fn caches_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<PvCache>, ServerFnError>> {
   QueryScope::new(fetch_caches_in_org)
+    .with_invalidation_link(move |_| [Cache::TABLE_NAME])
 }
 
 #[server(prefix = "/api/sfn")]

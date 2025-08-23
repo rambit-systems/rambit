@@ -1,13 +1,15 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryScope;
-use models::{dvf::RecordId, Org, PvOrg};
+use models::{dvf::RecordId, model::Model, Org, PvOrg};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
 pub fn org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Option<PvOrg>, ServerFnError>> {
-  QueryScope::new(fetch_org)
+  QueryScope::new(fetch_org).with_invalidation_link(move |o| {
+    [Org::TABLE_NAME.to_string(), o.to_string()]
+  })
 }
 
 #[server(prefix = "/api/sfn")]

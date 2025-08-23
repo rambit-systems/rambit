@@ -129,7 +129,7 @@ fn LoginIsland() -> impl IntoView {
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
-        <button class="btn btn-primary-subtle w-full max-w-80">
+        <button class="btn btn-primary w-full max-w-80">
           <div class="flex-1" />
           <div class="flex-1 flex flex-row justify-center items-center">
             "Log in"
