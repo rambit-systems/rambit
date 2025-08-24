@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, Entry};
 
-use crate::pages::UnauthorizedPage;
+use crate::{hooks::EntryHook, pages::UnauthorizedPage};
 
 #[component]
 pub fn EntryPage() -> impl IntoView {
@@ -20,6 +20,8 @@ pub fn EntryPage() -> impl IntoView {
 
 #[component]
 fn EntryTile(id: RecordId<Entry>) -> impl IntoView {
+  let entry_hook = EntryHook::new(move || id);
+
   view! {
     <div class="elevation-flat p-4 flex flex-col gap-4">
       <p class="title">"Entry"</p>
