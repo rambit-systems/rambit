@@ -1,3 +1,4 @@
+mod abbreviate;
 mod nar_data;
 
 use std::{fmt, str::FromStr};
@@ -10,7 +11,7 @@ pub use nix_compat::{
 use nix_compat::{nixbase32, store_path::DIGEST_SIZE};
 use serde::{Deserialize, Serialize};
 
-pub use self::nar_data::*;
+pub use self::{abbreviate::*, nar_data::*};
 use crate::{Org, Store, cache::Cache};
 
 /// A store path digest.
