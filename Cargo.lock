@@ -2855,7 +2855,7 @@ checksum = "60993920e071b0c9b66f14e2b32740a4e27ffc82854dcd72035887f336a09a28"
 [[package]]
 name = "nix-compat"
 version = "0.1.0"
-source = "git+https://github.com/tvlfyi/tvix#f8848d93068ee640a5afa28fa2c0c26246d47de3"
+source = "git+https://github.com/johnbchron/tvix#74a4e282e7cb1bb9575b1191a0c80cc5af4a3f9e"
 dependencies = [
  "bitflags 2.9.1",
  "bstr",

@@ -37,7 +37,7 @@ clap = { version = "4.5", features = [ "derive" ] }
 miette = { git = "https://github.com/zkat/miette", default-features = false, features = [
   "derive",
 ] }
-nix-compat = { git = "https://github.com/tvlfyi/tvix", default-features = false }
+nix-compat = { git = "https://github.com/johnbchron/tvix", default-features = false }
 
 # async
 async-trait = { version = "0.1" }
