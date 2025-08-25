@@ -1,7 +1,5 @@
-use std::time::Duration;
-
 use leptos::prelude::*;
-use leptos_fetch::{QueryOptions, QueryScope};
+use leptos_fetch::QueryScope;
 use models::{dvf::RecordId, model::Model, Entry, Org};
 
 #[cfg(feature = "ssr")]
@@ -41,9 +39,6 @@ pub async fn fetch_entry(
 pub fn entries_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<Entry>, ServerFnError>> {
   QueryScope::new(fetch_entries_in_org)
-    .with_options(
-      QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
-    )
     .with_invalidation_link(move |_| [Entry::TABLE_NAME.to_string()])
 }
 
