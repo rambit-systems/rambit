@@ -82,7 +82,7 @@ fn OrgSelector(
   );
   let active_org = user.active_org();
 
-  let action = Action::new(|o| switch_active_org(*o));
+  let action = ServerAction::<SwitchActiveOrg>::new();
   let selected = RwSignal::new(None::<RecordId<Org>>);
 
   // reload on successful action
@@ -104,7 +104,7 @@ fn OrgSelector(
     let handler = move |_| {
       if !is_active {
         selected.set(Some(id));
-        action.dispatch(id);
+        action.dispatch(SwitchActiveOrg { new_active_org: id });
       }
     };
 

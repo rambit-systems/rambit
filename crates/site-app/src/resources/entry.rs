@@ -1,18 +1,44 @@
-use std::time::Duration;
-
 use leptos::prelude::*;
-use leptos_fetch::{QueryOptions, QueryScope};
+use leptos_fetch::QueryScope;
 use models::{dvf::RecordId, model::Model, Entry, Org};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
+pub fn entry_query_scope(
+) -> QueryScope<RecordId<Entry>, Result<Option<Entry>, ServerFnError>> {
+  QueryScope::new(fetch_entry).with_invalidation_link(move |e| {
+    [Entry::TABLE_NAME.to_string(), e.to_string()]
+  })
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn fetch_entry(
+  id: RecordId<Entry>,
+) -> Result<Option<Entry>, ServerFnError> {
+  use prime_domain::PrimeDomainService;
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+
+  let entry =
+    prime_domain_service
+      .fetch_entry_by_id(id)
+      .await
+      .map_err(|e| {
+        tracing::error!("failed to fetch entry: {e}");
+        ServerFnError::new("internal error")
+      })?;
+
+  if let Some(entry) = &entry {
+    authorize_for_org(entry.org)?;
+  }
+
+  Ok(entry)
+}
+
 pub fn entries_in_org_query_scope(
 ) -> QueryScope<RecordId<Org>, Result<Vec<Entry>, ServerFnError>> {
   QueryScope::new(fetch_entries_in_org)
-    .with_options(
-      QueryOptions::new().with_refetch_interval(Duration::from_secs(5)),
-    )
     .with_invalidation_link(move |_| [Entry::TABLE_NAME.to_string()])
 }
 

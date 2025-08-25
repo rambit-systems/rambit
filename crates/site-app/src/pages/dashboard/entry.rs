@@ -2,7 +2,10 @@ use leptos::prelude::*;
 use models::Entry;
 
 use crate::{
-  components::{CacheItemLink, DataTable, DataTableRefreshButton, StorePath},
+  components::{
+    CacheItemLink, DataTable, DataTableRefreshButton, RefetchWhileFocused,
+    StorePathAbbreviated, StorePathCopyButton,
+  },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
 };
@@ -14,6 +17,12 @@ pub(super) fn EntryTable() -> impl IntoView {
   let query_scope = entries_in_org_query_scope();
 
   view! {
+    <RefetchWhileFocused
+      query_scope=query_scope.clone()
+      key_fn=key_fn
+      period={std::time::Duration::from_secs(30)}
+    />
+
     <div class="flex flex-row items-center gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
@@ -54,10 +63,11 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
 
   view! {
     <tr>
-      <th scope="row">
+      <th scope="row" class="flex flex-row items-center gap-1">
         <a class="text-link text-link-primary" href=entry_href>
-          <StorePath sp=entry.store_path />
+          <StorePathAbbreviated sp=entry.store_path.clone() />
         </a>
+        <StorePathCopyButton sp=entry.store_path />
       </th>
       <td>
         { entry.caches.clone().into_iter().map(|id| view! {
