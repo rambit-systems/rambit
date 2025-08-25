@@ -4,7 +4,7 @@ use models::Entry;
 use crate::{
   components::{
     CacheItemLink, DataTable, DataTableRefreshButton, RefetchWhileFocused,
-    StorePath,
+    StorePathAbbreviated, StorePathCopyButton,
   },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
@@ -63,10 +63,11 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
 
   view! {
     <tr>
-      <th scope="row">
+      <th scope="row" class="flex flex-row items-center gap-1">
         <a class="text-link text-link-primary" href=entry_href>
-          <StorePath sp=entry.store_path />
+          <StorePathAbbreviated sp=entry.store_path.clone() />
         </a>
+        <StorePathCopyButton sp=entry.store_path />
       </th>
       <td>
         { entry.caches.clone().into_iter().map(|id| view! {
