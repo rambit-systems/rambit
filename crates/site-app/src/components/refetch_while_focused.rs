@@ -37,5 +37,7 @@ pub fn RefetchWhileFocused<
   );
 
   #[expect(clippy::unused_unit)]
-  view! {}
+  {
+    view! {}
+  }
 }

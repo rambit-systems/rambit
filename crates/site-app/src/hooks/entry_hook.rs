@@ -6,7 +6,7 @@ use crate::resources::entry::entry_query_scope;
 
 #[derive(Clone)]
 pub struct EntryHook {
-  key:      Callback<(), RecordId<Entry>>,
+  _key:     Callback<(), RecordId<Entry>>,
   resource: Resource<Result<Option<Entry>, ServerFnError>>,
 }
 
@@ -19,7 +19,7 @@ impl EntryHook {
     let resource = client.resource(entry_query_scope(), key);
 
     Self {
-      key: Callback::new(move |_| key()),
+      _key: Callback::new(move |_| key()),
       resource,
     }
   }
