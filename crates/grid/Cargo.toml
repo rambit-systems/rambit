@@ -38,6 +38,7 @@ tower-sessions.workspace = true
 
 [features]
 default = [  ]
+json-tracing = [ "tracing-subscriber/json", "tracing-subscriber/valuable" ]
 tikv = [ "kv/tikv" ]
 
 [lints]

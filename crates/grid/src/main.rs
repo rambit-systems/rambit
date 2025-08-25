@@ -38,8 +38,18 @@ async fn main() -> Result<()> {
   let env_filter = EnvFilter::builder()
     .with_default_directive(LevelFilter::INFO.into())
     .from_env_lossy();
+  let formatter = {
+    #[cfg(not(feature = "json-tracing"))]
+    {
+      tracing_subscriber::fmt::layer()
+    }
+    #[cfg(feature = "json-tracing")]
+    {
+      tracing_subscriber::fmt::layer().json()
+    }
+  };
   tracing_subscriber::registry()
-    .with(tracing_subscriber::fmt::layer())
+    .with(formatter)
     .with(env_filter)
     .init();
 
