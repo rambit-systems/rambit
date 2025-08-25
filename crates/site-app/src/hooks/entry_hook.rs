@@ -23,4 +23,11 @@ impl EntryHook {
       resource,
     }
   }
+
+  pub fn all(&self) -> AsyncDerived<Result<Option<Entry>, ServerFnError>> {
+    AsyncDerived::new({
+      let resource = self.resource;
+      move || async move { resource.await }
+    })
+  }
 }

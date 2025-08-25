@@ -21,10 +21,17 @@ pub fn EntryPage() -> impl IntoView {
 #[component]
 fn EntryTile(id: RecordId<Entry>) -> impl IntoView {
   let entry_hook = EntryHook::new(move || id);
+  let all = entry_hook.all();
+  let all_suspend =
+    move || Suspend::new(async move { format!("{:#?}", all.await) });
 
   view! {
     <div class="elevation-flat p-4 flex flex-col gap-4">
       <p class="title">"Entry"</p>
+
+      <div class="bg-base-2 rounded border-[1.5px] border-base-6 p-4 overflow-x-auto"><pre>
+        <Suspense fallback=|| ()>{ all_suspend }</Suspense>
+      </pre></div>
     </div>
   }
 }
