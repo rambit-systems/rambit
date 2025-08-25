@@ -3,13 +3,13 @@
     inherit (rust-toolchain) craneLib;
     inherit (rust-workspace) workspace-args;
 
-    cli = craneLib.buildPackage (workspace-args // {
-      pname = "cli";
-      cargoExtraArgs = "-p cli";
+    junk-cli = craneLib.buildPackage (workspace-args // {
+      pname = "junk-cli";
+      cargoExtraArgs = "-p junk-cli";
     });
   in {
     packages = {
-      inherit cli;
+      inherit junk-cli;
     };
   };
 }

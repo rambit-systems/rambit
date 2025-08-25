@@ -20,6 +20,7 @@ pub fn Navbar() -> impl IntoView {
   }
 }
 
+#[component]
 fn NavbarLogo() -> impl IntoView {
   let href = match use_context::<AuthUser>() {
     Some(_) => OrgHook::new_active().dashboard_url(),

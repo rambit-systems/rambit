@@ -2,7 +2,7 @@
   imports = [
     ./workspace.nix
     ./crate-graph.nix
-    ./cli.nix
+    ./junk-cli.nix
     ./grid.nix
   ];
 }

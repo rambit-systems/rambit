@@ -29,7 +29,7 @@
   client-node = { pkgs, ... }: {
     environment.systemPackages = with pkgs; [
       curl jq
-      config.packages.cli
+      config.packages.junk-cli
     ];
     nix.extraOptions = "experimental-features = nix-command";
   };
