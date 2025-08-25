@@ -49,7 +49,7 @@ where
       let mut response = future.await?;
 
       // Check if the response status is successful (2xx range)
-      if response.status().is_success() {
+      if response.status().is_success() && cfg!(not(debug_assertions)) {
         // Set Cache-Control header
         let cache_control_value =
           HeaderValue::from_static("max-age=31536000, immutable");
