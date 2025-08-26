@@ -65,6 +65,7 @@
         cargo build \
           --package=${leptos-options.bin-package} \
           --no-default-features \
+          --features json-tracing \
           --release
       '';
     });
@@ -84,7 +85,7 @@
       
       # enable hash_files again, so we generate `hash.txt`
       buildPhaseCargoCommand = ''
-        LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
+        LEPTOS_HASH_FILES=true cargo leptos build --bin-features json-tracing --release -vvv
       '';
       doNotPostBuildInstallCargoBinaries = true;
 

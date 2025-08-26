@@ -13,14 +13,27 @@ pub fn Navbar() -> impl IntoView {
 
   view! {
     <div class=class >
-      <a href="/" class="cursor-pointer font-display font-bold text-xl text-product-11">
-        "Rambit"
-      </a>
+      <NavbarLogo />
       <div class="flex-1" />
       <NavbarUserArea />
     </div>
   }
 }
+
+#[component]
+fn NavbarLogo() -> impl IntoView {
+  let href = match use_context::<AuthUser>() {
+    Some(_) => OrgHook::new_active().dashboard_url(),
+    None => Memo::new(move |_| "/".to_owned()),
+  };
+
+  view! {
+    <a href=href class="cursor-pointer font-display font-bold text-xl text-product-11">
+      "Rambit"
+    </a>
+  }
+}
+
 #[component]
 fn NavbarUserArea() -> impl IntoView {
   let auth_user = use_context::<AuthUser>();

@@ -5,8 +5,7 @@ use leptos_fetch::{QueryClient, QueryScope};
 use leptos_use::{use_interval_fn, use_window_focus};
 use serde::{de::DeserializeOwned, Serialize};
 
-#[component]
-pub fn RefetchWhileFocused<
+pub fn refetch_while_focused<
   K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
   KF: Fn() -> K + Copy + Send + Sync + 'static,
   R: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
@@ -14,7 +13,7 @@ pub fn RefetchWhileFocused<
   key_fn: KF,
   query_scope: QueryScope<K, R>,
   period: Duration,
-) -> impl IntoView {
+) {
   let query_client = expect_context::<QueryClient>();
   let period_ms = Signal::stored(period.as_millis() as u64);
 
@@ -35,9 +34,4 @@ pub fn RefetchWhileFocused<
     },
     period_ms,
   );
-
-  #[expect(clippy::unused_unit)]
-  {
-    view! {}
-  }
 }
