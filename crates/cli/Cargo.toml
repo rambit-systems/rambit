@@ -1,0 +1,31 @@
+[package]
+name = "cli"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+
+[dependencies]
+models = { path = "../models" }
+
+belt.workspace = true
+
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "fs", "io-util" ] }
+
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
+
+clap.workspace = true
+miette = { workspace = true, features = [ "fancy" ] }
+
+reqwest = { version = "0.12", default-features = false, features = [
+  "http2",
+  "rustls-tls",
+  "stream",
+  "json",
+  "cookies",
+] }
+serde.workspace = true
+
+[lints]
+workspace = true
