@@ -777,6 +777,8 @@ dependencies = [
  "models",
  "reqwest",
  "serde",
+ "serde_json",
+ "sha256",
  "tokio",
  "tracing",
  "tracing-subscriber",

@@ -1,7 +1,10 @@
 //! The CLI entrypoint for Rambit.
 
+#![feature(never_type)]
+
 mod app_state;
 mod authenticate;
+mod upload;
 
 use clap::{Parser, Subcommand};
 use miette::{Context, Result};
@@ -10,8 +13,11 @@ use tracing_subscriber::{
   EnvFilter, layer::SubscriberExt, util::SubscriberInitExt,
 };
 
-use self::{app_state::AppState, authenticate::AuthenticateCommand};
+use self::{
+  app_state::AppState, authenticate::AuthenticateCommand, upload::UploadCommand,
+};
 
+#[expect(dead_code)]
 #[derive(Debug, Clone)]
 struct SessionCreds {
   user_id:        RecordId<User>,
@@ -40,6 +46,7 @@ pub(crate) struct CliArgs {
 #[derive(Subcommand, Debug)]
 pub(crate) enum SubCommand {
   Authenticate(AuthenticateCommand),
+  Upload(UploadCommand),
 }
 
 impl SubCommand {
@@ -50,6 +57,12 @@ impl SubCommand {
           .execute(app_state)
           .await
           .context("failed to execute `authenticate` subcommand")?;
+      }
+      SubCommand::Upload(upload) => {
+        upload
+          .execute(app_state)
+          .await
+          .context("failed to execute `upload` subcommand")?;
       }
     }
 
