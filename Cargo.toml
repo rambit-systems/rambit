@@ -28,6 +28,7 @@ storage = { git = "https://github.com/johnbchron/app-core" }
 # essentials
 bytes = { version = "1" }
 serde = { version = "1", features = [ "derive" ] }
+serde_json = { version = "1" }
 thiserror = { version = "2" }
 tracing = { version = "0.1" }
 ulid = { version = "1.1", features = [ "serde" ] }
@@ -38,6 +39,8 @@ miette = { git = "https://github.com/zkat/miette", default-features = false, fea
   "derive",
 ] }
 nix-compat = { git = "https://github.com/johnbchron/tvix", default-features = false }
+nix-nar = { version = "0.3" }
+sha256 = { version = "1.6", default-features = false }
 
 # async
 async-trait = { version = "0.1" }

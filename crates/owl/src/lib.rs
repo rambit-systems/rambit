@@ -76,9 +76,8 @@ impl NarInterrogator {
     }
     let references = captures
       .into_iter()
-      .map(|p| {
-        StorePath::<String>::from_absolute_path(p.as_bytes())
-          .expect("failed to convert to store path")
+      .filter_map(|p| {
+        StorePath::<String>::from_absolute_path(p.as_bytes()).ok()
       })
       .collect();
 

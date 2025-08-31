@@ -539,7 +539,7 @@ dependencies = [
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "async-compression",
  "bytes",
@@ -766,6 +766,26 @@ name = "clap_lex"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b94f61472cee1439c0b966b47e3aca9ae07e45d070759512cd390ea2bebc6675"
+
+[[package]]
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "belt",
+ "bytes",
+ "clap",
+ "miette",
+ "models",
+ "nix-nar",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha256",
+ "thiserror 2.0.12",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "codee"
@@ -1147,7 +1167,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -1275,7 +1295,7 @@ dependencies = [
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "email_address",
  "nutype",
@@ -1730,7 +1750,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "async-trait",
  "futures",
@@ -1752,7 +1772,7 @@ checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "health",
  "tokio",
@@ -2273,7 +2293,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "async-trait",
  "hex 0.1.0",
@@ -2810,7 +2830,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "dvf",
  "serde",
@@ -4412,7 +4432,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "deunicode",
  "nutype",
@@ -4460,12 +4480,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/app-core#41bf9f5dbb2af3241a5348d9e5407cd25e951ac5"
+source = "git+https://github.com/johnbchron/app-core#8af79168c39f3eaaf8e660c846a9ee984faab64a"
 dependencies = [
  "async-trait",
  "belt",
