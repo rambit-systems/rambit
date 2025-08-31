@@ -15,6 +15,7 @@ tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "fs", "io-
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
 
+bytes.workspace = true
 clap.workspace = true
 miette = { workspace = true, features = [ "fancy" ] }
 nix-nar.workspace = true
@@ -29,7 +30,6 @@ serde.workspace = true
 serde_json.workspace = true
 sha256.workspace = true
 thiserror.workspace = true
-bytes.workspace = true
 
 [lints]
 workspace = true

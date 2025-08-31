@@ -1,5 +1,3 @@
-use std::net::SocketAddr;
-
 use miette::{Context, IntoDiagnostic, Result};
 use models::dvf::EmailAddress;
 use reqwest::Client;
