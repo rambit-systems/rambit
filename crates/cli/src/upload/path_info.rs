@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use miette::{Context, IntoDiagnostic, Result, bail, ensure};
+use miette::{Result, miette};
 use models::{CAHash, StorePath, dvf::FileSize};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
@@ -25,8 +25,24 @@ pub(crate) struct PathInfoResult {
   data:       Option<PathInfo>,
 }
 
+#[derive(thiserror::Error, miette::Diagnostic, Debug)]
+pub(crate) enum PathInfoError {
+  #[error("failed to spawn `nix path-info` process: {0}")]
+  Process(std::io::Error),
+  #[error("failed to deserialize JSON from `nix path-info` output: {0}")]
+  JsonParse(serde_json::Error),
+  #[error("`nix path-info` JSON output form is unexpected: {0}")]
+  JsonValidation(miette::Report),
+  #[error("failed to deserialize store path: {0}")]
+  StorePathDeserialization(models::nix_compat::store_path::Error),
+  #[error("failed to deserialize path info: {0}")]
+  PathInfoDeserialization(serde_json::Error),
+}
+
 impl PathInfo {
-  pub(crate) async fn get(installable: &Installable) -> Result<PathInfoResult> {
+  pub(crate) async fn get(
+    installable: &Installable,
+  ) -> Result<PathInfoResult, PathInfoError> {
     tracing::debug!(%installable, "getting path-info");
 
     let mut command = Command::new("nix");
@@ -38,47 +54,38 @@ impl PathInfo {
     command.args(["--option", "warn-dirty", "false"]);
     command.arg(installable.to_string());
 
-    let output = command
-      .output()
-      .await
-      .into_diagnostic()
-      .context("failed to spawn `nix path-info` process")?;
+    let output = command.output().await.map_err(PathInfoError::Process)?;
 
     let root = serde_json::from_slice::<serde_json::Value>(&output.stdout)
-      .into_diagnostic()
-      .context("failed to deserialize JSON from `nix path-info` output")?;
+      .map_err(PathInfoError::JsonParse)?;
 
-    ensure!(
-      root.is_object(),
-      "`nix path-info` JSON output is not an object"
-    );
+    if !root.is_object() {
+      Err(PathInfoError::JsonValidation(miette!(
+        "`nix path-info` JSON output is not an object"
+      )))?;
+    }
     let root_object = root.as_object().unwrap();
-    ensure!(
-      root_object.len() == 1,
-      "`nix path-info` JSON output does not have 1 key"
-    );
+    if root_object.len() != 1 {
+      Err(PathInfoError::JsonValidation(miette!(
+        "`nix path-info` JSON output does not have 1 key"
+      )))?;
+    }
 
     let store_path_string = root_object.keys().nth(0).unwrap();
     let store_path =
       StorePath::from_absolute_path(store_path_string.as_bytes())
-        .into_diagnostic()
-        .context(
-          "failed to deserialize store path from `nix path-info` JSON output",
-        )?;
+        .map_err(PathInfoError::StorePathDeserialization)?;
 
     let data = match root_object.get(store_path_string).unwrap() {
       serde_json::Value::Null => None,
       serde_json::Value::Object(map) => Some(
         PathInfo::deserialize(&serde_json::Value::Object(map.to_owned()))
-          .into_diagnostic()
-          .context(
-            "failed to deserialize path data from `nix path-info` JSON output",
-          )?,
+          .map_err(PathInfoError::PathInfoDeserialization)?,
       ),
-      v => bail!(
+      v => Err(PathInfoError::JsonValidation(miette!(
         "got unexpected data from store-path key in `nix path-info` JSON \
          output: {v}"
-      ),
+      )))?,
     };
 
     Ok(PathInfoResult { store_path, data })

@@ -17,6 +17,7 @@ tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
 
 clap.workspace = true
 miette = { workspace = true, features = [ "fancy" ] }
+thiserror.workspace = true
 
 reqwest = { version = "0.12", default-features = false, features = [
   "http2",
