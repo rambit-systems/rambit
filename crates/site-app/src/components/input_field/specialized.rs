@@ -10,10 +10,10 @@ pub fn NameInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-Some(Box::new(|| view!{ <UserHeroIcon {..} class="size-6" /> }.into_any()))
+    Some(view!{ <UserHeroIcon {..} class="size-6" /> }.into_any())
   )]
-  before: Option<Children>,
-  #[prop(optional)] after: Option<Children>,
+  before: Option<AnyView>,
+  #[prop(optional)] after: Option<AnyView>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -37,10 +37,10 @@ pub fn EmailInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-Some(Box::new(|| view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()))
+    Some(view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any())
   )]
-  before: Option<Children>,
-  #[prop(optional)] after: Option<Children>,
+  before: Option<AnyView>,
+  #[prop(optional)] after: Option<AnyView>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -64,10 +64,10 @@ pub fn PasswordInputField(
   #[prop(default = "password")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-Some(Box::new(|| view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any()))
+    Some(view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any())
   )]
-  before: Option<Children>,
-  #[prop(optional)] after: Option<Children>,
+  before: Option<AnyView>,
+  #[prop(optional)] after: Option<AnyView>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
