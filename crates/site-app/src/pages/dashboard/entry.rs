@@ -18,7 +18,7 @@ pub(super) fn EntryTable() -> impl IntoView {
   let key_fn = org_hook.key();
   let query_scope = entries_in_org_query_scope();
 
-  refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(30));
+  refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(10));
 
   view! {
     <div class="flex flex-row items-center gap-2">
