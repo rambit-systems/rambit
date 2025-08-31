@@ -11,7 +11,7 @@ use super::Installable;
 pub(crate) struct PathInfo {
   #[serde(alias = "ca")]
   ca_hash:    Option<CAHash>,
-  // deriver:    String,
+  deriver:    String,
   #[serde(alias = "narHash")]
   nar_hash:   String,
   #[serde(alias = "narSize")]
@@ -29,6 +29,12 @@ impl PathInfoResult {
   pub(crate) fn get(&self) -> &Option<PathInfo> { &self.data }
 
   pub(crate) fn store_path(&self) -> &StorePath<String> { &self.store_path }
+
+  pub(crate) fn nar_encoder(
+    &self,
+  ) -> Result<nix_nar::Encoder, nix_nar::NarError> {
+    nix_nar::Encoder::new(self.store_path.to_absolute_path())
+  }
 }
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
@@ -46,6 +52,8 @@ pub(crate) enum PathInfoError {
 }
 
 impl PathInfo {
+  pub(crate) fn deriver(&self) -> &str { &self.deriver }
+
   pub(crate) async fn calculate(
     installable: &Installable,
   ) -> Result<PathInfoResult, PathInfoError> {
@@ -70,10 +78,30 @@ impl PathInfo {
         "`nix path-info` JSON output is not an object"
       )))?;
     }
-    let root_object = root.as_object().unwrap();
+    let mut root_object = root.as_object().unwrap().clone();
+
+    if root_object.len() == 2 {
+      let keys = root_object
+        .keys()
+        .map(|p| {
+          StorePath::<String>::from_absolute_path(p.as_bytes())
+            .expect("failed to parse key as store path")
+        })
+        .collect::<Vec<_>>();
+      if keys[0].name().strip_prefix(keys[1].name()) == Some("-man") {
+        root_object.remove(&keys[0].to_absolute_path());
+        tracing::warn!(store_path = %keys[0], "removed `-man` path from `nix path-info` output");
+      }
+      if keys[1].name().strip_prefix(keys[0].name()) == Some("-man") {
+        root_object.remove(&keys[1].to_absolute_path());
+        tracing::warn!(store_path = %keys[1], "removed `-man` path from `nix path-info` output");
+      }
+    }
+
     if root_object.len() != 1 {
       Err(PathInfoError::JsonValidation(miette!(
-        "`nix path-info` JSON output does not have 1 key"
+        "`nix path-info` JSON output does not have 1 key: found keys: {:?}",
+        root_object.keys().collect::<Vec<_>>()
       )))?;
     }
 

@@ -51,20 +51,13 @@ impl Action for AuthenticateCommand {
 
     tracing::debug!("authenticating as \"{email}\"");
 
-    let client = reqwest::Client::new();
+    let client = app_state.http_client();
 
     let params = AuthenticateRequestParams {
       email:    email.clone().into_inner(),
       password: password.into(),
     };
-    let protocol = match app_state.http_only {
-      true => "http",
-      false => "https",
-    };
-    let url = format!(
-      "{protocol}://{addr}/api/v1/authenticate",
-      addr = app_state.rambit_addr,
-    );
+    let url = format!("{}/authenticate", app_state.api_url_base());
 
     let req = client
       .post(url)

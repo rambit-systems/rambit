@@ -1,5 +1,6 @@
 //! The CLI entrypoint for Rambit.
 
+#![feature(exit_status_error)]
 #![feature(never_type)]
 
 mod app_state;
