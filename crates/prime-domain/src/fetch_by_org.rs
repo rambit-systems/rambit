@@ -18,9 +18,9 @@ macro_rules! impl_fetch_by_org {
     $vis async fn $method_name(
       &self,
       id: RecordId<Org>,
-    ) -> Result<Vec<$model_ty>, FetchModelByIndexError> {
+    ) -> Result<Vec<RecordId<$model_ty>>, FetchModelByIndexError> {
       self.$repo_field
-        .fetch_models_by_index(
+        .fetch_ids_by_index(
           <$index_selector>::Org,
           LaxSlug::new(id.to_string()).into(),
         )

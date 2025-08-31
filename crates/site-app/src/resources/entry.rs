@@ -52,11 +52,30 @@ pub async fn fetch_entries_in_org(
 
   let prime_domain_service: PrimeDomainService = expect_context();
 
-  prime_domain_service
+  let ids = prime_domain_service
     .fetch_entries_by_org(org)
     .await
     .map_err(|e| {
       tracing::error!("failed to fetch entries by org: {e}");
       ServerFnError::new("internal error")
-    })
+    })?;
+  let mut models = Vec::with_capacity(ids.len());
+
+  for id in ids {
+    models.push(
+      prime_domain_service
+        .fetch_entry_by_id(id)
+        .await
+        .map_err(|e| {
+          tracing::error!("failed to fetch entry by id: {e}");
+          ServerFnError::new("internal error")
+        })?
+        .ok_or_else(|| {
+          tracing::error!("could not find entry just found by org index: {id}");
+          ServerFnError::new("internal error")
+        })?,
+    );
+  }
+
+  Ok(models)
 }
