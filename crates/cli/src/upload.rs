@@ -3,7 +3,7 @@ mod path_info;
 use std::{fmt, str::FromStr};
 
 use clap::Args;
-use miette::Context;
+use miette::{Context, bail};
 
 use self::path_info::PathInfo;
 use crate::{Action, app_state::AppState};
@@ -36,14 +36,19 @@ impl Action for UploadCommand {
     self,
     _app_state: &AppState,
   ) -> Result<Self::Output, Self::Error> {
-    let pathinfo = PathInfo::get(&self.installable).await.context(format!(
-      "failed to get path-info for installable `{}`",
-      self.installable
-    ))?;
-    tracing::info!(
-      pathinfo = serde_json::to_string(&pathinfo).unwrap(),
-      "got path-info"
-    );
+    let pathinfo_result = PathInfo::calculate(&self.installable)
+      .await
+      .context(format!(
+        "failed to get path-info for installable `{}`",
+        self.installable
+      ))?;
+    let Some(pathinfo) = pathinfo_result.get().as_ref() else {
+      bail!(
+        "specified installable has not been built or fetched on this system: \
+         `{installable}`",
+        installable = self.installable
+      );
+    };
 
     Ok(())
   }

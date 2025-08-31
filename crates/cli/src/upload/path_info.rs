@@ -25,6 +25,12 @@ pub(crate) struct PathInfoResult {
   data:       Option<PathInfo>,
 }
 
+impl PathInfoResult {
+  pub(crate) fn get(&self) -> &Option<PathInfo> { &self.data }
+
+  pub(crate) fn store_path(&self) -> &StorePath<String> { &self.store_path }
+}
+
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub(crate) enum PathInfoError {
   #[error("failed to spawn `nix path-info` process: {0}")]
@@ -40,7 +46,7 @@ pub(crate) enum PathInfoError {
 }
 
 impl PathInfo {
-  pub(crate) async fn get(
+  pub(crate) async fn calculate(
     installable: &Installable,
   ) -> Result<PathInfoResult, PathInfoError> {
     tracing::debug!(%installable, "getting path-info");
