@@ -775,6 +775,7 @@ dependencies = [
  "clap",
  "miette",
  "models",
+ "nix-nar",
  "reqwest",
  "serde",
  "serde_json",
