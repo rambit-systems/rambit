@@ -6,7 +6,7 @@ use models::Entry;
 use crate::{
   components::{
     refetch_while_focused, CacheItemLink, DataTable, DataTableRefreshButton,
-    StorePathAbbreviated, StorePathCopyButton,
+    StorePathAbbreviated, StorePathCopyButton, TableEmptyBody,
   },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
@@ -19,6 +19,19 @@ pub(super) fn EntryTable() -> impl IntoView {
   let query_scope = entries_in_org_query_scope();
 
   refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(10));
+
+  let view_fn = move |e: Signal<Vec<Entry>>| {
+    match e().len() {
+      0 => view! {
+        <EntryTableEmptyBody />
+      }.into_any(),
+      _ => view! {
+        <tbody class="min-h-10 animate-fade-in">
+          <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+        </tbody>
+      }.into_any()
+    }
+  };
 
   view! {
     <div class="flex flex-row items-center gap-2">
@@ -38,13 +51,19 @@ pub(super) fn EntryTable() -> impl IntoView {
       </thead>
       <DataTable
         key_fn=key_fn query_scope=query_scope
-        view_fn=move |e| view! {
-          <tbody class="min-h-10 animate-fade-in">
-            <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
-          </tbody>
-        }
+        view_fn=view_fn
       />
     </table>
+  }
+}
+
+#[component]
+fn EntryTableEmptyBody() -> impl IntoView {
+  view! {
+    <TableEmptyBody>
+      <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
+      <p class="text-sm">"Upload some entries to see them here."</p>
+    </TableEmptyBody>
   }
 }
 
