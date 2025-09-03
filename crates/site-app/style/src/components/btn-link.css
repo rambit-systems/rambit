@@ -1,6 +1,6 @@
 /* based off https://orbit.kiwi/components/action/buttonlink/ */
 
-@layer base {
+@layer components {
   .btn-link {
     /* behavior */
     @apply cursor-pointer transition-colors select-none;

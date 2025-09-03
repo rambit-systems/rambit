@@ -1,6 +1,6 @@
 /* based off https://orbit.kiwi/components/input/inputfield/ */
 
-@layer base {
+@layer components {
   .input-field {
     /* behavior */
     @apply transition;

@@ -1,6 +1,6 @@
 /* based off https://orbit.kiwi/components/action/button/ */
 
-@layer base {
+@layer components {
   .btn {
     /* behavior */
     @apply cursor-pointer transition select-none;

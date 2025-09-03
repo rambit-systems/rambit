@@ -1,5 +1,5 @@
 
-@layer base {
+@layer components {
   .page-container {
     @apply mx-4 sm:container sm:mx-auto;
   }
