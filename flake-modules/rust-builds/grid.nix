@@ -1,6 +1,7 @@
 { ... }: {
   perSystem = { pkgs, rust-toolchain, rust-workspace, system, ... }: let
     inherit (rust-workspace.workspace-base-args) src;
+    inherit (rust-workspace) workspace-cargo-artifacts;
     inherit (rust-toolchain) craneLib;
 
     # get the leptos options from the Cargo.toml
@@ -40,7 +41,7 @@
     frontend-deps = craneLib.mkCargoDerivation (common-args // {
       pname = "${leptos-options.lib-package}-deps";
       src = craneLib.mkDummySrc common-args;
-      cargoArtifacts = null;
+      cargoArtifacts = workspace-cargo-artifacts;
       doInstallCargoArtifacts = true;
 
       buildPhaseCargoCommand = ''

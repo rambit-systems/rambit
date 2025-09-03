@@ -59,14 +59,34 @@ pub async fn fetch_stores_in_org(
 
   let prime_domain_service: PrimeDomainService = expect_context();
 
-  prime_domain_service
+  let ids = prime_domain_service
     .fetch_stores_by_org(org)
     .await
-    .map(|v| v.into_iter().map(PvStore::from).collect())
     .map_err(|e| {
       tracing::error!("failed to fetch stores by org: {e}");
       ServerFnError::new("internal error")
-    })
+    })?;
+
+  let mut models = Vec::with_capacity(ids.len());
+
+  for id in ids {
+    models.push(
+      prime_domain_service
+        .fetch_store_by_id(id)
+        .await
+        .map_err(|e| {
+          tracing::error!("failed to fetch store by id: {e}");
+          ServerFnError::new("internal error")
+        })?
+        .ok_or_else(|| {
+          tracing::error!("could not find store just found by org index: {id}");
+          ServerFnError::new("internal error")
+        })?
+        .into(),
+    );
+  }
+
+  Ok(models)
 }
 
 pub fn entry_count_in_store_query_scope(

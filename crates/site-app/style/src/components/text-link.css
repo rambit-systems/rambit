@@ -1,6 +1,6 @@
 /* based off https://orbit.kiwi/components/action/textlink/ */
  
-@layer base {
+@layer components {
   .text-link {
     /* behavior */
     @apply cursor-pointer transition-colors;

@@ -1,6 +1,6 @@
 /* based off https://orbit.kiwi/components/structure/table/ */
 
-@layer base {
+@layer components {
   .table {
     /* table-specific */
     @apply border-collapse border-spacing-0;

@@ -59,12 +59,32 @@ pub async fn fetch_caches_in_org(
 
   let prime_domain_service: PrimeDomainService = expect_context();
 
-  prime_domain_service
+  let ids = prime_domain_service
     .fetch_caches_by_org(org)
     .await
-    .map(|v| v.into_iter().map(PvCache::from).collect())
     .map_err(|e| {
       tracing::error!("failed to fetch caches by org: {e}");
       ServerFnError::new("internal error")
-    })
+    })?;
+
+  let mut models = Vec::with_capacity(ids.len());
+
+  for id in ids {
+    models.push(
+      prime_domain_service
+        .fetch_cache_by_id(id)
+        .await
+        .map_err(|e| {
+          tracing::error!("failed to fetch cache by id: {e}");
+          ServerFnError::new("internal error")
+        })?
+        .ok_or_else(|| {
+          tracing::error!("could not find cache just found by org index: {id}");
+          ServerFnError::new("internal error")
+        })?
+        .into(),
+    );
+  }
+
+  Ok(models)
 }
