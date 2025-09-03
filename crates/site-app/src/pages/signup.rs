@@ -148,7 +148,7 @@ fn SignupIsland() -> impl IntoView {
     >
       <p class="title">"Sign Up"</p>
 
-      <p class="max-w-prose">
+      <p class="max-w-80">
         "Thanks so much for trying us out — we can't wait to get you up and \
         running in no time. Prepare for magical iteration cycle times."
       </p>

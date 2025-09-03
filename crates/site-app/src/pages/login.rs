@@ -111,7 +111,7 @@ fn LoginIsland() -> impl IntoView {
     >
       <p class="title">"Login"</p>
 
-      <p class="max-w-prose">
+      <p class="max-w-80">
         "Welcome back to the most satisfying part of your CI/CD pipeline."
       </p>
 
