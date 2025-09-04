@@ -1,10 +1,9 @@
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use models::PvCache;
 
 use crate::{
-  components::{
-    CacheItemLink, DataTable, DataTableRefreshButton, StoreItemLink,
-  },
+  components::{CacheItemLink, DataTableRefreshButton, StoreItemLink},
   hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
@@ -14,6 +13,25 @@ pub(super) fn CacheTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let key_fn = org_hook.key();
   let query_scope = caches_in_org_query_scope();
+
+  let resource =
+    expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
+
+  let body_view = move |caches: Vec<PvCache>| {
+    view! {
+      <tbody class="min-h-10">
+        <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
+      </tbody>
+    }
+  };
+  let suspend = move || {
+    Suspend::new(async move {
+      match resource.await {
+        Ok(caches) => body_view(caches).into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }
+    })
+  };
 
   view! {
     <div class="flex flex-row items-center gap-2">
@@ -30,14 +48,9 @@ pub(super) fn CacheTable() -> impl IntoView {
         <th>"Visibility"</th>
         <th>"Default Store"</th>
       </thead>
-      <DataTable
-        key_fn=key_fn query_scope=query_scope
-        view_fn=move |c| view! {
-          <tbody class="min-h-10 animate-fade-in">
-            <For each=c key=|c| c.id children=|c| view! { <CacheDataRow cache=c /> } />
-          </tbody>
-        }
-      />
+      <Transition fallback=|| ()>
+        { suspend }
+      </Transition>
     </table>
   }
 }
