@@ -9,7 +9,9 @@ use leptos::prelude::*;
 use models::{dvf::RecordId, AuthUser, Org};
 
 #[cfg(feature = "ssr")]
-fn authorize_for_org(org: RecordId<Org>) -> Result<AuthUser, ServerFnError> {
+pub fn authorize_for_org(
+  org: RecordId<Org>,
+) -> Result<AuthUser, ServerFnError> {
   match authenticate() {
     Ok(auth_user) if auth_user.belongs_to_org(org) => Ok(auth_user),
     Ok(_) => Err(ServerFnError::new("Unauthorized")),
@@ -18,6 +20,6 @@ fn authorize_for_org(org: RecordId<Org>) -> Result<AuthUser, ServerFnError> {
 }
 
 #[cfg(feature = "ssr")]
-fn authenticate() -> Result<AuthUser, ServerFnError> {
+pub fn authenticate() -> Result<AuthUser, ServerFnError> {
   use_context::<AuthUser>().ok_or(ServerFnError::new("Unauthorized"))
 }
