@@ -1,6 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 
-use super::InputField;
+use super::{InputField, InputFieldIcon};
 use crate::components::{EnvelopeHeroIcon, LockClosedHeroIcon, UserHeroIcon};
 
 #[component]
@@ -10,10 +10,10 @@ pub fn NameInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <UserHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputFieldIcon::User)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputFieldIcon>,
+  #[prop(optional)] after: Option<InputFieldIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -37,10 +37,10 @@ pub fn EmailInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputFieldIcon::Envelope)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputFieldIcon>,
+  #[prop(optional)] after: Option<InputFieldIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -64,10 +64,10 @@ pub fn PasswordInputField(
   #[prop(default = "password")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputFieldIcon::LockClosed)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputFieldIcon>,
+  #[prop(optional)] after: Option<InputFieldIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
