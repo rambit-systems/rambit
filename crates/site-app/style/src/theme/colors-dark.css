@@ -33,6 +33,20 @@
       --color-base-11: var(--color-sanddark-11);
       --color-base-12: var(--color-sanddark-12);
 
+      /* warn colors */
+      --color-warn-1: var(--color-orangedark-1);
+      --color-warn-2: var(--color-orangedark-2);
+      --color-warn-3: var(--color-orangedark-3);
+      --color-warn-4: var(--color-orangedark-4);
+      --color-warn-5: var(--color-orangedark-5);
+      --color-warn-6: var(--color-orangedark-6);
+      --color-warn-7: var(--color-orangedark-7);
+      --color-warn-8: var(--color-orangedark-8);
+      --color-warn-9: var(--color-orangedark-9);
+      --color-warn-10: var(--color-orangedark-10);
+      --color-warn-11: var(--color-orangedark-11);
+      --color-warn-12: var(--color-orangedark-12);
+
       /* critical colors */
       --color-critical-1: var(--color-reddark-1);
       --color-critical-2: var(--color-reddark-2);
