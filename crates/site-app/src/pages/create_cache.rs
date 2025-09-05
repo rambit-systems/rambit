@@ -1,7 +1,17 @@
-use leptos::prelude::*;
+mod visibility_selector;
 
+use leptos::prelude::*;
+use leptos_fetch::QueryClient;
+use models::{
+  dvf::{EntityName, RecordId, StrictSlug, Visibility},
+  Cache, Org,
+};
+
+use self::visibility_selector::VisibilitySelector;
 use crate::{
-  components::{InputField, InputFieldIcon},
+  components::{InputField, InputIcon, LoadingCircle},
+  hooks::OrgHook,
+  navigation::navigate_to,
   reactive_utils::touched_input_bindings,
 };
 
@@ -17,24 +27,75 @@ const CACHE_DESCRIPTION: &str =
 
 #[island]
 pub fn CreateCachePage() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+
   let name = RwSignal::new(String::new());
+  let sanitized_name = Memo::new(move |_| {
+    Some(EntityName::new(StrictSlug::new(name())))
+      .filter(|n| !n.to_string().is_empty())
+  });
   let (read_name, write_name) = touched_input_bindings(name);
+  let visibility = RwSignal::new(Visibility::Private);
+  let submit_touched = RwSignal::new(false);
+
+  let is_available_query_scope =
+    crate::resources::cache::cache_name_is_available_query_scope();
+  let is_available_resource = expect_context::<QueryClient>()
+    .local_resource(is_available_query_scope, move || {
+      sanitized_name().map(|n| n.to_string())
+    });
+
+  let action = ServerAction::<CreateCache>::new();
+  // loading if the result is unpopulated or successful
+  let loading = move || {
+    submit_touched() && matches!(action.value().get(), None | Some(Ok(_)))
+  };
 
   // error text for name field
-  // let name_hint = move || {
-  //   let name = name.get();
-  //   if name.is_empty() {
-  //     return Some("Your name is required.");
-  //   }
-  //   EntityName::new(StrictSlug::new(name)) {
-  //     Ok(_) => None,
-  //     Err(HumanNameError::LenCharMaxViolated) => {
-  //       Some("The name you entered is too long.")
-  //     }
-  //     Err(HumanNameError::NotEmptyViolated) => Some("Your name is
-  // required."),   }
-  // };
-  let name_hint = MaybeProp::derive(|| None);
+  let name_warn_hint = MaybeProp::derive(move || {
+    let (name, Some(sanitized_name)) = (name.get(), sanitized_name()) else {
+      return None;
+    };
+    if name != sanitized_name.clone().to_string() {
+      return Some(format!(
+        "This name will be converted to \"{sanitized_name}\"."
+      ));
+    }
+    None
+  });
+  let name_error_hint = MaybeProp::derive(move || {
+    if let (Some(Some(Ok(false))), Some(sanitized_name)) =
+      (is_available_resource.get(), sanitized_name())
+    {
+      Some(format!("The name \"{sanitized_name}\" is unavailable."))
+    } else {
+      None
+    }
+  });
+
+  // submit callback
+  let org = org_hook.key();
+  let submit_action = move |_| {
+    submit_touched.set(true);
+
+    // the name has been checked and is available
+    if sanitized_name().is_some()
+      && matches!(is_available_resource.get(), Some(Some(Ok(true))))
+    {
+      action.dispatch_local(CreateCache {
+        org:        org(),
+        name:       sanitized_name().unwrap().to_string(),
+        visibility: visibility(),
+      });
+    }
+  };
+
+  let dashboard_url = org_hook.dashboard_url();
+  Effect::new(move || {
+    if matches!(action.value().get(), Some(Ok(_))) {
+      navigate_to(&dashboard_url());
+    }
+  });
 
   view! {
     <div class="flex-1" />
@@ -45,13 +106,61 @@ pub fn CreateCachePage() -> impl IntoView {
 
       <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
 
-      <InputField
-        id="name" label_text="Cache Name" input_type="text" placeholder=""
-        before=Some(InputFieldIcon::ArchiveBox)
-        input_signal=read_name output_signal=write_name
-        error_hint=name_hint warn_hint=name_hint autofocus=true
-      />
+      <div class="flex flex-col gap-4">
+        <InputField
+          id="name" label_text="Cache Name" input_type="text" placeholder=""
+          before=Some(InputIcon::ArchiveBox)
+          input_signal=read_name output_signal=write_name
+          error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+        />
+
+        <div class="flex flex-col gap-1">
+          <p class="text-11-base">"Visibility"</p>
+          <VisibilitySelector signal=visibility />
+        </div>
+      </div>
+
+      <label class="flex flex-row gap-2">
+        <input type="submit" class="hidden" />
+        <button
+          class="btn btn-primary w-full max-w-80 justify-between"
+          on:click=submit_action
+        >
+          <div class="size-4" />
+          "Create Cache"
+          <LoadingCircle {..}
+            class="size-4 transition-opacity"
+            class=("opacity-0", move || { !loading() })
+          />
+        </button>
+      </label>
     </div>
     <div class="flex-1" />
   }
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn create_cache(
+  org: RecordId<Org>,
+  name: String,
+  visibility: Visibility,
+) -> Result<RecordId<Cache>, ServerFnError> {
+  use prime_domain::PrimeDomainService;
+
+  crate::resources::authorize_for_org(org)?;
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+
+  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  if name != sanitized_name.clone().to_string() {
+    return Err(ServerFnError::new("name is unsanitized"));
+  }
+
+  prime_domain_service
+    .create_cache(org, sanitized_name, visibility)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch org: {e}");
+      ServerFnError::new("internal error")
+    })
 }
