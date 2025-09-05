@@ -182,17 +182,13 @@ fn SignupIsland() -> impl IntoView {
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
-        <button class="btn btn-primary w-full max-w-80">
-          <div class="flex-1" />
-          <div class="flex-1 flex flex-row justify-center items-center">
-            "Log in"
-          </div>
-          <div class="flex-1 flex flex-row justify-end items-center">
-            <LoadingCircle {..}
-              class="size-4 transition-opacity"
-              class=("opacity-0", move || { !loading() })
-            />
-          </div>
+        <button class="btn btn-primary w-full max-w-80 justify-between">
+          <div class="size-4" />
+          "Log in"
+          <LoadingCircle {..}
+            class="size-4 transition-opacity"
+            class=("opacity-0", move || { !loading() })
+          />
         </button>
       </label>
     </form>
