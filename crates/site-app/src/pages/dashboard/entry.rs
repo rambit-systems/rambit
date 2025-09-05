@@ -54,17 +54,19 @@ pub(super) fn EntryTable() -> impl IntoView {
       />
     </div>
 
-    <table class="table">
-      <thead>
-        <th>"Store Path"</th>
-        <th>"Caches"</th>
-        <th>"File Size"</th>
-        <th>"Ref Count"</th>
-      </thead>
-      <Transition fallback=|| ()>
-        { suspend }
-      </Transition>
-    </table>
+    <div class="w-full overflow-x-scroll">
+      <table class="table">
+        <thead>
+          <th>"Store Path"</th>
+          <th>"Caches"</th>
+          <th>"File Size"</th>
+          <th>"Ref Count"</th>
+        </thead>
+        <Transition fallback=|| ()>
+          { suspend }
+        </Transition>
+      </table>
+    </div>
   }
 }
 

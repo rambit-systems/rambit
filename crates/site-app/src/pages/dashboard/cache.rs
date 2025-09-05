@@ -42,16 +42,18 @@ pub(super) fn CacheTable() -> impl IntoView {
       />
     </div>
 
-    <table class="table">
-      <thead>
-        <th>"Name"</th>
-        <th>"Visibility"</th>
-        <th>"Default Store"</th>
-      </thead>
-      <Transition fallback=|| ()>
-        { suspend }
-      </Transition>
-    </table>
+    <div class="w-full overflow-x-scroll">
+      <table class="table">
+        <thead>
+          <th>"Name"</th>
+          <th>"Visibility"</th>
+          <th>"Default Store"</th>
+        </thead>
+        <Transition fallback=|| ()>
+          { suspend }
+        </Transition>
+      </table>
+    </div>
   }
 }
 

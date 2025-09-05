@@ -43,16 +43,18 @@ pub(super) fn StoreTable() -> impl IntoView {
       />
     </div>
 
-    <table class="table">
-      <thead>
-        <th>"Name"</th>
-        <th>"Entry Count"</th>
-        <th>"Storage Type"</th>
-      </thead>
-      <Transition fallback=|| ()>
-        { suspend }
-      </Transition>
-    </table>
+    <div class="w-full overflow-x-scroll">
+      <table class="table">
+        <thead>
+          <th>"Name"</th>
+          <th>"Entry Count"</th>
+          <th>"Storage Type"</th>
+        </thead>
+        <Transition fallback=|| ()>
+          { suspend }
+        </Transition>
+      </table>
+    </div>
   }
 }
 
