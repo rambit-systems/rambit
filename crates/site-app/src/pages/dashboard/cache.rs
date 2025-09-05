@@ -40,7 +40,7 @@ pub(super) fn CacheTable() -> impl IntoView {
       <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
-      <CreateCacheButton />
+      <CreateCacheButton text="Create..." />
     </div>
 
     <div class="w-full overflow-x-scroll">

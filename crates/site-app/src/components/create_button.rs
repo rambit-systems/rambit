@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use crate::hooks::OrgHook;
 
 #[component]
-pub fn CreateCacheButton() -> impl IntoView {
+pub fn CreateCacheButton(text: &'static str) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let base_url = org_hook.base_url();
   let href =
@@ -11,7 +11,7 @@ pub fn CreateCacheButton() -> impl IntoView {
 
   view! {
     <a href=href class="btn btn-primary-subtle">
-      "Create"
+      { text }
     </a>
   }
 }
