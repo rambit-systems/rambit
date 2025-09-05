@@ -1,10 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{
-  dvf::{EntityName, RecordId, StrictSlug},
-  model::Model,
-  Cache, Org, PvCache,
-};
+use models::{dvf::RecordId, model::Model, Cache, Org, PvCache};
 
 #[cfg(feature = "ssr")]
 use crate::resources::{authenticate, authorize_for_org};
@@ -103,14 +99,20 @@ pub fn cache_name_is_available_query_scope(
 pub async fn check_if_cache_name_is_available(
   name: String,
 ) -> Result<bool, ServerFnError> {
+  use models::dvf::{EntityName, StrictSlug};
   use prime_domain::PrimeDomainService;
 
   authenticate()?;
 
+  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  if name != sanitized_name.clone().to_string() {
+    return Err(ServerFnError::new("name is unsanitized"));
+  }
+
   let prime_domain_service: PrimeDomainService = expect_context();
 
   let occupied = prime_domain_service
-    .fetch_cache_by_name(EntityName::new(StrictSlug::new(name)))
+    .fetch_cache_by_name(sanitized_name)
     .await
     .map_err(|e| {
       tracing::error!("failed to fetch cache by name: {e}");
