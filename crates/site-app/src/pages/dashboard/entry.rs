@@ -83,12 +83,9 @@ fn EntryTableEmptyBody() -> impl IntoView {
 #[component]
 fn EntryDataRow(entry: Entry) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
+  let base_url = org_hook.base_url();
   let entry_href = move || {
-    format!(
-      "/org/{org}/entry/{entry}",
-      org = org_hook.key()(),
-      entry = entry.id
-    )
+    format!("{base}/entry/{entry}", base = base_url(), entry = entry.id)
   };
 
   view! {
