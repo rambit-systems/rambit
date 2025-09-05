@@ -3,6 +3,7 @@
 mod counts;
 pub mod download;
 mod fetch_by_id;
+mod fetch_by_name;
 mod fetch_by_org;
 mod migrate;
 pub mod narinfo;
