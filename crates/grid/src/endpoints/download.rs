@@ -3,10 +3,13 @@ use std::collections::HashMap;
 use axum::{
   body::Body,
   extract::{Path, State},
-  http::StatusCode,
+  http::{StatusCode, header::CONTENT_LENGTH},
   response::IntoResponse,
 };
-use prime_domain::{download::DownloadRequest, models::StorePath};
+use prime_domain::{
+  download::{DownloadRequest, DownloadResponse},
+  models::StorePath,
+};
 
 use super::extractors::{CacheNameExtractor, UserAuthExtractor};
 use crate::app_state::AppState;
@@ -42,7 +45,11 @@ pub async fn download(
   let download_resp = app_state.prime_domain.download(download_req).await;
 
   match download_resp {
-    Ok(resp) => Body::from_stream(resp.data).into_response(),
+    Ok(DownloadResponse { data, file_size }) => (
+      [(CONTENT_LENGTH, file_size.into_inner().to_string())],
+      Body::from_stream(data),
+    )
+      .into_response(),
     Err(err) => format!("{err:#?}").into_response(),
   }
 }

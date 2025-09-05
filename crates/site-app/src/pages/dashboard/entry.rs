@@ -1,11 +1,12 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
+use leptos_fetch::QueryClient;
 use models::Entry;
 
 use crate::{
   components::{
-    refetch_while_focused, CacheItemLink, DataTable, DataTableRefreshButton,
+    refetch_while_focused, CacheItemLink, DataTableRefreshButton,
     StorePathAbbreviated, StorePathCopyButton, TableEmptyBody,
   },
   hooks::OrgHook,
@@ -20,17 +21,28 @@ pub(super) fn EntryTable() -> impl IntoView {
 
   refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(10));
 
-  let view_fn = move |e: Signal<Vec<Entry>>| {
-    match e().len() {
+  let resource =
+    expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
+
+  let body_view = move |e: Vec<Entry>| {
+    match e.len() {
       0 => view! {
         <EntryTableEmptyBody />
       }.into_any(),
       _ => view! {
-        <tbody class="min-h-10 animate-fade-in">
-          <For each=e key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+        <tbody class="min-h-10">
+          <For each=move || e.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
         </tbody>
       }.into_any()
     }
+  };
+  let suspend = move || {
+    Suspend::new(async move {
+      match resource.await {
+        Ok(entries) => body_view(entries).into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }
+    })
   };
 
   view! {
@@ -49,10 +61,9 @@ pub(super) fn EntryTable() -> impl IntoView {
         <th>"File Size"</th>
         <th>"Ref Count"</th>
       </thead>
-      <DataTable
-        key_fn=key_fn query_scope=query_scope
-        view_fn=view_fn
-      />
+      <Transition fallback=|| ()>
+        { suspend }
+      </Transition>
     </table>
   }
 }

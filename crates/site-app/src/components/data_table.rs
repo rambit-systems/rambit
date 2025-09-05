@@ -7,32 +7,6 @@ use serde::{de::DeserializeOwned, Serialize};
 use crate::components::LoadingCircle;
 
 #[component]
-pub fn DataTable<
-  K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
-  KF: Fn() -> K + Copy + Send + Sync + 'static,
-  O: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
-  VF: Fn(Signal<Vec<O>>) -> V + Copy + Send + Sync + 'static,
-  V: IntoView,
->(
-  key_fn: KF,
-  query_scope: QueryScope<K, Result<Vec<O>, ServerFnError>>,
-  view_fn: VF,
-) -> impl IntoView {
-  let query_client = expect_context::<QueryClient>();
-
-  let resource = query_client.local_resource(query_scope, key_fn);
-
-  view! {
-    <Transition fallback=|| ()>
-      { move || Suspend::new(async move { match resource.await {
-        Ok(output) => view_fn(Signal::stored(output)).into_any(),
-        Err(e) => format!("Error: {e}").into_any(),
-      }})}
-    </Transition>
-  }
-}
-
-#[component]
 pub fn DataTableRefreshButton<
   K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
   KF: Fn() -> K + Copy + Send + Sync + 'static,
@@ -65,7 +39,7 @@ pub fn DataTableRefreshButton<
 #[component]
 pub fn TableEmptyBody(children: Children) -> impl IntoView {
   view! {
-    <tr class="h-20 animate-fade-in relative border-[2px] border-t-0 border-base-6 border-dashed rounded-b">
+    <tr class="h-20 relative border-[2px] border-t-0 border-base-6 border-dashed rounded-b">
       <td></td><td></td><td></td><td></td>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         { children() }

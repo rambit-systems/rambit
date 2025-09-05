@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../../../../crates");
 
 @import "tailwindcss-radix-colors/dist/orange-colors-only.css";
 @import "tailwindcss-radix-colors/dist/sand-colors-only.css";

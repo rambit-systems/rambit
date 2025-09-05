@@ -3,7 +3,7 @@ use leptos_fetch::QueryClient;
 use models::{PvStorageCredentials, PvStore};
 
 use crate::{
-  components::{DataTable, DataTableRefreshButton, StoreItemLink},
+  components::{DataTableRefreshButton, StoreItemLink},
   hooks::OrgHook,
   resources::store::{
     entry_count_in_store_query_scope, stores_in_org_query_scope,
@@ -15,6 +15,24 @@ pub(super) fn StoreTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let key_fn = org_hook.key();
   let query_scope = stores_in_org_query_scope();
+  let resource =
+    expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
+
+  let body_view = move |stores: Vec<PvStore>| {
+    view! {
+      <tbody class="min-h-10">
+        <For each=move || stores.clone() key=|r| r.id children=|r| view! { <StoreDataRow store=r /> } />
+      </tbody>
+    }
+  };
+  let suspend = move || {
+    Suspend::new(async move {
+      match resource.await {
+        Ok(stores) => body_view(stores).into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }
+    })
+  };
 
   view! {
     <div class="flex flex-row items-center gap-2">
@@ -31,14 +49,9 @@ pub(super) fn StoreTable() -> impl IntoView {
         <th>"Entry Count"</th>
         <th>"Storage Type"</th>
       </thead>
-      <DataTable
-        key_fn=key_fn query_scope=query_scope
-        view_fn=move |c| view! {
-          <tbody class="min-h-10 animate-fade-in">
-            <For each=c key=|c| c.id children=|c| view! { <StoreDataRow store=c /> } />
-          </tbody>
-        }
-      />
+      <Transition fallback=|| ()>
+        { suspend }
+      </Transition>
     </table>
   }
 }
@@ -69,9 +82,9 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><StoreItemLink id=store.id extra_class="text-link-primary"/></th>
-      <td><Suspense fallback=|| "[loading]">
+      <td><Transition fallback=|| "[loading]">
         { entry_count_suspend }
-      </Suspense></td>
+      </Transition></td>
       <td>{ storage_type }</td>
     </tr>
   }
