@@ -11,7 +11,7 @@ pub fn LogoutPage() -> impl IntoView {
     >
       <p class="title">"Log out"</p>
 
-      <p class="max-w-80">
+      <p class="max-w-prose">
         "Are you sure you want to log out? We're sad to see you go but excited for you to come back."
       </p>
 
