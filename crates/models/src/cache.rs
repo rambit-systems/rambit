@@ -4,46 +4,41 @@ use dvf::{EitherSlug, EntityName, LaxSlug, RecordId, Visibility};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
-use crate::{Org, Store};
+use crate::Org;
 
 /// A cache.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Cache {
   /// The cache's ID.
-  pub id:            RecordId<Cache>,
+  pub id:         RecordId<Cache>,
   /// The cache's org.
-  pub org:           RecordId<Org>,
+  pub org:        RecordId<Org>,
   /// The cache's name.
-  pub name:          EntityName,
-  /// The cache's default [`Store`].
-  pub default_store: RecordId<Store>,
+  pub name:       EntityName,
   /// The cache's base visibility.
-  pub visibility:    Visibility,
+  pub visibility: Visibility,
 }
 
 /// The public view of [`Cache`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PvCache {
   /// The cache's ID.
-  pub id:            RecordId<Cache>,
+  pub id:         RecordId<Cache>,
   /// The cache's org.
-  pub org:           RecordId<Org>,
+  pub org:        RecordId<Org>,
   /// The cache's name.
-  pub name:          EntityName,
-  /// The cache's default [`Store`].
-  pub default_store: RecordId<Store>,
+  pub name:       EntityName,
   /// The cache's base visibility.
-  pub visibility:    Visibility,
+  pub visibility: Visibility,
 }
 
 impl From<Cache> for PvCache {
   fn from(value: Cache) -> Self {
     PvCache {
-      id:            value.id,
-      org:           value.org,
-      name:          value.name,
-      default_store: value.default_store,
-      visibility:    value.visibility,
+      id:         value.id,
+      org:        value.org,
+      name:       value.name,
+      visibility: value.visibility,
     }
   }
 }

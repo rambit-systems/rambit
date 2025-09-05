@@ -61,7 +61,7 @@ impl PrimeDomainService {
       .into_diagnostic()
       .context("failed to create user")?;
 
-    let albert_store = self
+    let _albert_store = self
       .store_repo
       .create_model(Store {
         id:          RecordId::from_str("01JXGXVF0MVQNGRM565YHM20BC").unwrap(),
@@ -82,12 +82,10 @@ impl PrimeDomainService {
     let _aaron_cache = self
       .cache_repo
       .create_model(Cache {
-        id:            RecordId::from_str("01JXGXVVE6J16590YJT3SP2P6M")
-          .unwrap(),
-        org:           federation.id,
-        name:          EntityName::new(StrictSlug::new("aaron")),
-        default_store: albert_store.id,
-        visibility:    Visibility::Public,
+        id:         RecordId::from_str("01JXGXVVE6J16590YJT3SP2P6M").unwrap(),
+        org:        federation.id,
+        name:       EntityName::new(StrictSlug::new("aaron")),
+        visibility: Visibility::Public,
       })
       .await
       .into_diagnostic()

@@ -3,7 +3,7 @@ use leptos_fetch::QueryClient;
 use models::PvCache;
 
 use crate::{
-  components::{CacheItemLink, DataTableRefreshButton, StoreItemLink},
+  components::{CacheItemLink, DataTableRefreshButton},
   hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
@@ -47,7 +47,6 @@ pub(super) fn CacheTable() -> impl IntoView {
         <thead>
           <th>"Name"</th>
           <th>"Visibility"</th>
-          <th>"Default Store"</th>
         </thead>
         <Transition fallback=|| ()>
           { suspend }
@@ -63,7 +62,6 @@ fn CacheDataRow(cache: PvCache) -> impl IntoView {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="text-link-primary"/></th>
       <td>{ cache.visibility.to_string() }</td>
-      <td><StoreItemLink id=cache.default_store /></td>
     </tr>
   }
 }
