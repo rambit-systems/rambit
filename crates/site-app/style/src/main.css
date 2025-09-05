@@ -67,4 +67,7 @@
   leptos-island {
     display: contents;
   }
+  leptos-children {
+    display: contents;
+  }
 }
