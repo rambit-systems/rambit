@@ -4,6 +4,9 @@
 @import "tailwindcss-radix-colors/dist/sand-colors-only.css";
 @import "tailwindcss-radix-colors/dist/red-colors-only.css";
 
+@import "./theme/colors.css";
+/* @import "./theme/colors-dark.css"; */
+
 @import "./components/btn.css";
 @import "./components/btn-link.css";
 @import "./components/input-field.css";
@@ -15,12 +18,15 @@
 @import "./utilities.css";
 
 @theme {
-  /* set fonts */
+  /* fonts */
   --font-sans: Funnel Sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-display: Funnel Display, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* shadows */
+  /* disable larger breakpoints */
+  --breakpoint-2xl: initial;
+
+  /* shadows, taken from orbit (roughly) */
   --shadow-elevation-lv1:
     rgba(79, 94, 113, 0.1) 0px 8px 24px -5px,
     rgba(79, 94, 113, 0.12) 0px 5px 16px -3px,
@@ -35,106 +41,8 @@
     rgba(27, 50, 73, 0.08) 0px 2px 12px 0px;
 
   /* animations */
-  --animate-fade-in: fade-in 0.15s ease-in-out;
-  --animate-fade-out: fade-out 0.15s ease-in-out;
-  
-  /* product colors */
-  --color-product-1: var(--color-orange-1);
-  --color-product-2: var(--color-orange-2);
-  --color-product-3: var(--color-orange-3);
-  --color-product-4: var(--color-orange-4);
-  --color-product-5: var(--color-orange-5);
-  --color-product-6: var(--color-orange-6);
-  --color-product-7: var(--color-orange-7);
-  --color-product-8: var(--color-orange-8);
-  --color-product-9: var(--color-orange-9);
-  --color-product-10: var(--color-orange-10);
-  --color-product-11: var(--color-orange-11);
-  --color-product-12: var(--color-orange-12);
-
-  /* base colors */
-  --color-base-1: var(--color-sand-1);
-  --color-base-2: var(--color-sand-2);
-  --color-base-3: var(--color-sand-3);
-  --color-base-4: var(--color-sand-4);
-  --color-base-5: var(--color-sand-5);
-  --color-base-6: var(--color-sand-6);
-  --color-base-7: var(--color-sand-7);
-  --color-base-8: var(--color-sand-8);
-  --color-base-9: var(--color-sand-9);
-  --color-base-10: var(--color-sand-10);
-  --color-base-11: var(--color-sand-11);
-  --color-base-12: var(--color-sand-12);
-
-  /* critical colors */
-  --color-critical-1: var(--color-red-1);
-  --color-critical-2: var(--color-red-2);
-  --color-critical-3: var(--color-red-3);
-  --color-critical-4: var(--color-red-4);
-  --color-critical-5: var(--color-red-5);
-  --color-critical-6: var(--color-red-6);
-  --color-critical-7: var(--color-red-7);
-  --color-critical-8: var(--color-red-8);
-  --color-critical-9: var(--color-red-9);
-  --color-critical-10: var(--color-red-10);
-  --color-critical-11: var(--color-red-11);
-  --color-critical-12: var(--color-red-12);
-
-  /* disable larger breakpoints */
-  /* --breakpoint-xl: initial; */
-  --breakpoint-2xl: initial;
-}
-
-@layer theme {
-  :root {
-    color-scheme: light dark;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      /* product colors */
-      --color-product-1: var(--color-orangedark-1);
-      --color-product-2: var(--color-orangedark-2);
-      --color-product-3: var(--color-orangedark-3);
-      --color-product-4: var(--color-orangedark-4);
-      --color-product-5: var(--color-orangedark-5);
-      --color-product-6: var(--color-orangedark-6);
-      --color-product-7: var(--color-orangedark-7);
-      --color-product-8: var(--color-orangedark-8);
-      --color-product-9: var(--color-orangedark-9);
-      --color-product-10: var(--color-orangedark-10);
-      --color-product-11: var(--color-orangedark-11);
-      --color-product-12: var(--color-orangedark-12);
-
-      /* base colors */
-      --color-base-1: var(--color-sanddark-1);
-      --color-base-2: var(--color-sanddark-2);
-      --color-base-3: var(--color-sanddark-3);
-      --color-base-4: var(--color-sanddark-4);
-      --color-base-5: var(--color-sanddark-5);
-      --color-base-6: var(--color-sanddark-6);
-      --color-base-7: var(--color-sanddark-7);
-      --color-base-8: var(--color-sanddark-8);
-      --color-base-9: var(--color-sanddark-9);
-      --color-base-10: var(--color-sanddark-10);
-      --color-base-11: var(--color-sanddark-11);
-      --color-base-12: var(--color-sanddark-12);
-
-      /* critical colors */
-      --color-critical-1: var(--color-reddark-1);
-      --color-critical-2: var(--color-reddark-2);
-      --color-critical-3: var(--color-reddark-3);
-      --color-critical-4: var(--color-reddark-4);
-      --color-critical-5: var(--color-reddark-5);
-      --color-critical-6: var(--color-reddark-6);
-      --color-critical-7: var(--color-reddark-7);
-      --color-critical-8: var(--color-reddark-8);
-      --color-critical-9: var(--color-reddark-9);
-      --color-critical-10: var(--color-reddark-10);
-      --color-critical-11: var(--color-reddark-11);
-      --color-critical-12: var(--color-reddark-12);
-    }
-  }
+  --animate-fade-in: fade-in 0.15s ease-out;
+  --animate-fade-out: fade-out 0.15s ease-in;
 }
 
 @keyframes fade-in {

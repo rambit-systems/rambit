@@ -1,0 +1,51 @@
+@layer theme {
+  :root {
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-product-1: var(--color-orangedark-1);
+      /* product colors */
+      --color-product-2: var(--color-orangedark-2);
+      --color-product-3: var(--color-orangedark-3);
+      --color-product-4: var(--color-orangedark-4);
+      --color-product-5: var(--color-orangedark-5);
+      --color-product-6: var(--color-orangedark-6);
+      --color-product-7: var(--color-orangedark-7);
+      --color-product-8: var(--color-orangedark-8);
+      --color-product-9: var(--color-orangedark-9);
+      --color-product-10: var(--color-orangedark-10);
+      --color-product-11: var(--color-orangedark-11);
+      --color-product-12: var(--color-orangedark-12);
+
+      /* base colors */
+      --color-base-1: var(--color-sanddark-1);
+      --color-base-2: var(--color-sanddark-2);
+      --color-base-3: var(--color-sanddark-3);
+      --color-base-4: var(--color-sanddark-4);
+      --color-base-5: var(--color-sanddark-5);
+      --color-base-6: var(--color-sanddark-6);
+      --color-base-7: var(--color-sanddark-7);
+      --color-base-8: var(--color-sanddark-8);
+      --color-base-9: var(--color-sanddark-9);
+      --color-base-10: var(--color-sanddark-10);
+      --color-base-11: var(--color-sanddark-11);
+      --color-base-12: var(--color-sanddark-12);
+
+      /* critical colors */
+      --color-critical-1: var(--color-reddark-1);
+      --color-critical-2: var(--color-reddark-2);
+      --color-critical-3: var(--color-reddark-3);
+      --color-critical-4: var(--color-reddark-4);
+      --color-critical-5: var(--color-reddark-5);
+      --color-critical-6: var(--color-reddark-6);
+      --color-critical-7: var(--color-reddark-7);
+      --color-critical-8: var(--color-reddark-8);
+      --color-critical-9: var(--color-reddark-9);
+      --color-critical-10: var(--color-reddark-10);
+      --color-critical-11: var(--color-reddark-11);
+      --color-critical-12: var(--color-reddark-12);
+    }
+  }
+}
