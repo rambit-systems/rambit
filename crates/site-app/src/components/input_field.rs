@@ -8,26 +8,26 @@ use crate::components::{
 };
 
 #[derive(Clone, Copy)]
-pub enum InputFieldIcon {
+pub enum InputIcon {
   ArchiveBox,
   Envelope,
   LockClosed,
   User,
 }
 
-impl IntoAny for InputFieldIcon {
+impl IntoAny for InputIcon {
   fn into_any(self) -> AnyView {
     match self {
-      InputFieldIcon::ArchiveBox => {
+      InputIcon::ArchiveBox => {
         view! { <ArchiveBoxHeroIcon {..} class="size-6" /> }.into_any()
       }
-      InputFieldIcon::Envelope => {
+      InputIcon::Envelope => {
         view! { <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()
       }
-      InputFieldIcon::LockClosed => {
+      InputIcon::LockClosed => {
         view! { <LockClosedHeroIcon {..} class="size-6" /> }.into_any()
       }
-      InputFieldIcon::User => {
+      InputIcon::User => {
         view! { <UserHeroIcon {..} class="size-6" /> }.into_any()
       }
     }
@@ -40,8 +40,8 @@ pub fn InputField(
   label_text: &'static str,
   input_type: &'static str,
   placeholder: &'static str,
-  #[prop(optional_no_strip)] before: Option<InputFieldIcon>,
-  #[prop(optional_no_strip)] after: Option<InputFieldIcon>,
+  #[prop(optional_no_strip)] before: Option<InputIcon>,
+  #[prop(optional_no_strip)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,

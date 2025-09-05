@@ -1,6 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 
-use super::{InputField, InputFieldIcon};
+use super::{InputField, InputIcon};
 
 #[component]
 pub fn NameInputField(
@@ -9,10 +9,10 @@ pub fn NameInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(InputFieldIcon::User)
+    Some(InputIcon::User)
   )]
-  before: Option<InputFieldIcon>,
-  #[prop(optional)] after: Option<InputFieldIcon>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -37,10 +37,10 @@ pub fn EmailInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(InputFieldIcon::Envelope)
+    Some(InputIcon::Envelope)
   )]
-  before: Option<InputFieldIcon>,
-  #[prop(optional)] after: Option<InputFieldIcon>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -65,10 +65,10 @@ pub fn PasswordInputField(
   #[prop(default = "password")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(InputFieldIcon::LockClosed)
+    Some(InputIcon::LockClosed)
   )]
-  before: Option<InputFieldIcon>,
-  #[prop(optional)] after: Option<InputFieldIcon>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
