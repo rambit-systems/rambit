@@ -20,7 +20,7 @@ pub(super) fn StoreTable() -> impl IntoView {
 
   let body_view = move |stores: Vec<PvStore>| {
     view! {
-      <tbody class="min-h-10">
+      <tbody class="animate-fade-in min-h-10">
         <For each=move || stores.clone() key=|r| r.id children=|r| view! { <StoreDataRow store=r /> } />
       </tbody>
     }

@@ -39,7 +39,7 @@ pub fn DataTableRefreshButton<
 #[component]
 pub fn TableEmptyBody(children: Children) -> impl IntoView {
   view! {
-    <tr class="h-20 relative border-[2px] border-t-0 border-base-6 border-dashed rounded-b">
+    <tr class="animate-fade-in h-20 relative border-[2px] border-t-0 border-base-6 border-dashed rounded-b">
       <td></td><td></td><td></td><td></td>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         { children() }

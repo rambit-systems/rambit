@@ -19,7 +19,7 @@ pub(super) fn CacheTable() -> impl IntoView {
 
   let body_view = move |caches: Vec<PvCache>| {
     view! {
-      <tbody class="min-h-10">
+      <tbody class="animate-fade-in min-h-10">
         <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
       </tbody>
     }

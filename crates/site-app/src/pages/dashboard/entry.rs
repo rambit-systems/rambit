@@ -30,7 +30,7 @@ pub(super) fn EntryTable() -> impl IntoView {
         <EntryTableEmptyBody />
       }.into_any(),
       _ => view! {
-        <tbody class="min-h-10">
+        <tbody class="animate-fade-in min-h-10">
           <For each=move || e.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
         </tbody>
       }.into_any()
