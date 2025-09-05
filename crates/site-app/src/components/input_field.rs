@@ -52,6 +52,7 @@ pub fn InputField(
   const LABEL_CLASS: &str = "text-base-11";
   const INPUT_WRAPPER_CLASS: &str = "input-field max-w-80";
   const INPUT_CLASS: &str = "w-full py-2 focus-visible:outline-none";
+  const HINT_WRAPPER_CLASS: &str = "flex flex-col";
   const ERROR_HINT_CLASS: &str = "text-critical-11 text-sm";
   const WARN_HINT_CLASS: &str = "text-warn-11 text-sm";
 
@@ -67,12 +68,14 @@ pub fn InputField(
         />
         { move || after.map(|i| i.into_any()).unwrap_or(().into_any()) }
       </div>
-      { move || error_hint().map(|e| view! {
-        <p class=ERROR_HINT_CLASS>{ e }</p>
-      })}
-      { move || warn_hint().map(|e| view! {
-        <p class=WARN_HINT_CLASS>{ e }</p>
-      })}
+      <div class=HINT_WRAPPER_CLASS>
+        { move || error_hint().map(|e| view! {
+          <p class=ERROR_HINT_CLASS>{ e }</p>
+        })}
+        { move || warn_hint().map(|e| view! {
+          <p class=WARN_HINT_CLASS>{ e }</p>
+        })}
+      </div>
     </div>
   }
 }
