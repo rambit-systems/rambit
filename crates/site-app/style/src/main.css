@@ -2,6 +2,7 @@
 
 @import "tailwindcss-radix-colors/dist/orange-colors-only.css";
 @import "tailwindcss-radix-colors/dist/sand-colors-only.css";
+@import "tailwindcss-radix-colors/dist/yellow-colors-only.css";
 @import "tailwindcss-radix-colors/dist/red-colors-only.css";
 
 @import "./theme/colors.css";
