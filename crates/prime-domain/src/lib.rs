@@ -1,6 +1,7 @@
 //! Entrypoint for domain logic.
 
 mod counts;
+mod create;
 pub mod download;
 mod fetch_by_id;
 mod fetch_by_name;
