@@ -1,7 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 
 use super::{InputField, InputFieldIcon};
-use crate::components::{EnvelopeHeroIcon, LockClosedHeroIcon, UserHeroIcon};
 
 #[component]
 pub fn NameInputField(
@@ -17,7 +16,8 @@ pub fn NameInputField(
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -25,7 +25,7 @@ pub fn NameInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }
@@ -44,7 +44,8 @@ pub fn EmailInputField(
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -52,7 +53,7 @@ pub fn EmailInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }
@@ -71,7 +72,8 @@ pub fn PasswordInputField(
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -79,7 +81,7 @@ pub fn PasswordInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }

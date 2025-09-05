@@ -38,14 +38,16 @@ fn SignupIsland() -> impl IntoView {
   let name_hint = move || {
     let name = name.get();
     if name.is_empty() {
-      return Some("Your name is required.");
+      return Some("Your name is required.".into());
     }
     match HumanName::try_new(name) {
       Ok(_) => None,
       Err(HumanNameError::LenCharMaxViolated) => {
-        Some("The name you entered is too long.")
+        Some("The name you entered is too long.".into())
       }
-      Err(HumanNameError::NotEmptyViolated) => Some("Your name is required."),
+      Err(HumanNameError::NotEmptyViolated) => {
+        Some("Your name is required.".into())
+      }
     }
   };
 
@@ -53,15 +55,15 @@ fn SignupIsland() -> impl IntoView {
   let email_hint = move || {
     let email = email.get();
     if email.is_empty() {
-      return Some("Email address required.");
+      return Some("Email address required.".into());
     }
     match EmailAddress::try_new(email) {
       Ok(_) => None,
       Err(EmailAddressError::LenCharMaxViolated) => {
-        Some("That email address looks too long.")
+        Some("That email address looks too long.".into())
       }
       Err(EmailAddressError::PredicateViolated) => {
-        Some("That email address doesn't look right.")
+        Some("That email address doesn't look right.".into())
       }
     }
   };
@@ -70,7 +72,7 @@ fn SignupIsland() -> impl IntoView {
   let password_hint = move || {
     let password = password.get();
     if password.is_empty() {
-      return Some("Password required.");
+      return Some("Password required.".into());
     }
     None
   };
@@ -80,7 +82,7 @@ fn SignupIsland() -> impl IntoView {
     let password = password.get();
     let confirm_password = confirm_password.get();
     if confirm_password != password {
-      return Some("Passwords don't match.");
+      return Some("Passwords don't match.".into());
     }
     None
   };
@@ -158,19 +160,23 @@ fn SignupIsland() -> impl IntoView {
           autofocus=true
           input_signal=read_name output_signal=write_name
           error_hint={MaybeProp::derive(move || submit_touched().then_some(name_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
         <EmailInputField
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
         <PasswordInputField
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
         <PasswordInputField
           id="confirm_password" label_text="Confirm Password"
           input_signal=read_confirm_password output_signal=write_confirm_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(confirm_password_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
       </div>
 

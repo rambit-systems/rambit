@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 use crate::{
-  components::{ArchiveBoxHeroIcon, InputField, InputFieldIcon},
+  components::{InputField, InputFieldIcon},
   reactive_utils::touched_input_bindings,
 };
 
@@ -49,7 +49,7 @@ pub fn CreateCachePage() -> impl IntoView {
         id="name" label_text="Cache Name" input_type="text" placeholder=""
         before=Some(InputFieldIcon::ArchiveBox)
         input_signal=read_name output_signal=write_name
-        error_hint=name_hint autofocus=true
+        error_hint=name_hint warn_hint=name_hint autofocus=true
       />
     </div>
     <div class="flex-1" />
