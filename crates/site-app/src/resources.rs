@@ -10,9 +10,14 @@ use models::{dvf::RecordId, AuthUser, Org};
 
 #[cfg(feature = "ssr")]
 fn authorize_for_org(org: RecordId<Org>) -> Result<AuthUser, ServerFnError> {
-  match use_context::<AuthUser>() {
-    Some(auth_user) if auth_user.belongs_to_org(org) => Ok(auth_user),
-    Some(_) => Err(ServerFnError::new("Unauthorized")),
-    None => Err(ServerFnError::new("Unauthenticated")),
+  match authenticate() {
+    Ok(auth_user) if auth_user.belongs_to_org(org) => Ok(auth_user),
+    Ok(_) => Err(ServerFnError::new("Unauthorized")),
+    Err(e) => Err(e),
   }
+}
+
+#[cfg(feature = "ssr")]
+fn authenticate() -> Result<AuthUser, ServerFnError> {
+  use_context::<AuthUser>().ok_or(ServerFnError::new("Unauthorized"))
 }
