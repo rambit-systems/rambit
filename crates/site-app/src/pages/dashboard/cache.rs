@@ -3,7 +3,7 @@ use leptos_fetch::QueryClient;
 use models::PvCache;
 
 use crate::{
-  components::{CacheItemLink, DataTableRefreshButton},
+  components::{CacheItemLink, CreateCacheButton, DataTableRefreshButton},
   hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
@@ -40,6 +40,7 @@ pub(super) fn CacheTable() -> impl IntoView {
       <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
+      <CreateCacheButton />
     </div>
 
     <div class="w-full overflow-x-scroll">
