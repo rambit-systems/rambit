@@ -1,9 +1,12 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::PvCache;
+use models::{dvf::Visibility, PvCache};
 
 use crate::{
-  components::{CacheItemLink, DataTableRefreshButton, StoreItemLink},
+  components::{
+    CacheItemLink, CreateCacheButton, DataTableRefreshButton,
+    LockClosedHeroIcon,
+  },
   hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
@@ -19,7 +22,7 @@ pub(super) fn CacheTable() -> impl IntoView {
 
   let body_view = move |caches: Vec<PvCache>| {
     view! {
-      <tbody class="min-h-10">
+      <tbody class="animate-fade-in min-h-10">
         <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
       </tbody>
     }
@@ -40,18 +43,20 @@ pub(super) fn CacheTable() -> impl IntoView {
       <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
+      <CreateCacheButton text="Create..." />
     </div>
 
-    <table class="table">
-      <thead>
-        <th>"Name"</th>
-        <th>"Visibility"</th>
-        <th>"Default Store"</th>
-      </thead>
-      <Transition fallback=|| ()>
-        { suspend }
-      </Transition>
-    </table>
+    <div class="w-full overflow-x-scroll">
+      <table class="table">
+        <thead>
+          <th>"Name"</th>
+          <th>"Visibility"</th>
+        </thead>
+        <Transition fallback=|| ()>
+          { suspend }
+        </Transition>
+      </table>
+    </div>
   }
 }
 
@@ -60,8 +65,12 @@ fn CacheDataRow(cache: PvCache) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="text-link-primary"/></th>
-      <td>{ cache.visibility.to_string() }</td>
-      <td><StoreItemLink id=cache.default_store /></td>
+      <td class="flex flex-row items-center gap-1">
+        { cache.visibility.to_string() }
+        { matches!(cache.visibility, Visibility::Private).then_some(view! {
+          <LockClosedHeroIcon {..} class="size-4 stroke-base-11/75 stroke-[2.0]" />
+        })}
+      </td>
     </tr>
   }
 }

@@ -1,4 +1,5 @@
 #![feature(impl_trait_in_fn_trait_return)]
+#![feature(iter_intersperse)]
 
 mod components;
 mod hooks;
@@ -20,10 +21,7 @@ use leptos_router::{
 };
 use models::AuthUser;
 
-use self::pages::{
-  DashboardPage, EntryPage, HomePage, LoginPage, LogoutPage,
-  ProtectedByOrgPage, SignupPage,
-};
+use self::pages::*;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -66,6 +64,7 @@ pub fn App() -> impl IntoView {
             <Route path=path!("") view=HomePage/>
             <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
             <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
+            <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
             <Route path=path!("/auth/signup") view=SignupPage/>
             <Route path=path!("/auth/login") view=LoginPage/>
             <Route path=path!("/auth/logout") view=LogoutPage/>

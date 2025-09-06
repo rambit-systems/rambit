@@ -1,0 +1,59 @@
+@theme {
+  /* product colors */
+  --color-product-1: var(--color-orange-1);
+  --color-product-2: var(--color-orange-2);
+  --color-product-3: var(--color-orange-3);
+  --color-product-4: var(--color-orange-4);
+  --color-product-5: var(--color-orange-5);
+  --color-product-6: var(--color-orange-6);
+  --color-product-7: var(--color-orange-7);
+  --color-product-8: var(--color-orange-8);
+  --color-product-9: var(--color-orange-9);
+  --color-product-10: var(--color-orange-10);
+  --color-product-11: var(--color-orange-11);
+  --color-product-12: var(--color-orange-12);
+
+  /* base colors */
+  --color-base-1: var(--color-sand-1);
+  --color-base-2: var(--color-sand-2);
+  --color-base-3: var(--color-sand-3);
+  --color-base-4: var(--color-sand-4);
+  --color-base-5: var(--color-sand-5);
+  --color-base-6: var(--color-sand-6);
+  --color-base-7: var(--color-sand-7);
+  --color-base-8: var(--color-sand-8);
+  --color-base-9: var(--color-sand-9);
+  --color-base-10: var(--color-sand-10);
+  --color-base-11: var(--color-sand-11);
+  --color-base-12: var(--color-sand-12);
+
+  /* warn colors */
+  --color-warn-1: var(--color-yellow-1);
+  --color-warn-2: var(--color-yellow-2);
+  --color-warn-3: var(--color-yellow-3);
+  --color-warn-4: var(--color-yellow-4);
+  --color-warn-5: var(--color-yellow-5);
+  --color-warn-6: var(--color-yellow-6);
+  --color-warn-7: var(--color-yellow-7);
+  --color-warn-8: var(--color-yellow-8);
+  --color-warn-9: var(--color-yellow-9);
+  --color-warn-10: var(--color-yellow-10);
+  --color-warn-11: var(--color-yellow-11);
+  --color-warn-12: var(--color-yellow-12);
+
+  /* critical colors */
+  --color-critical-1: var(--color-red-1);
+  --color-critical-2: var(--color-red-2);
+  --color-critical-3: var(--color-red-3);
+  --color-critical-4: var(--color-red-4);
+  --color-critical-5: var(--color-red-5);
+  --color-critical-6: var(--color-red-6);
+  --color-critical-7: var(--color-red-7);
+  --color-critical-8: var(--color-red-8);
+  --color-critical-9: var(--color-red-9);
+  --color-critical-10: var(--color-red-10);
+  --color-critical-11: var(--color-red-11);
+  --color-critical-12: var(--color-red-12);
+}
+
+

@@ -149,9 +149,7 @@ pub async fn switch_active_org(
 ) -> Result<RecordId<Org>, ServerFnError> {
   use auth_domain::{AuthDomainService, UpdateActiveOrgError};
 
-  let Some(auth_user) = use_context::<AuthUser>() else {
-    return Err(ServerFnError::new("Unauthorized"));
-  };
+  let auth_user = crate::resources::authenticate()?;
 
   let auth_domain_service: AuthDomainService = expect_context();
 

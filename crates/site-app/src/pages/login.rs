@@ -31,15 +31,15 @@ fn LoginIsland() -> impl IntoView {
   let email_hint = move || {
     let email = email.get();
     if email.is_empty() {
-      return Some("Email address required.");
+      return Some("Email address required.".into());
     }
     match EmailAddress::try_new(email) {
       Ok(_) => None,
       Err(EmailAddressError::LenCharMaxViolated) => {
-        Some("That email address looks too long.")
+        Some("That email address looks too long.".into())
       }
       Err(EmailAddressError::PredicateViolated) => {
-        Some("That email address doesn't look right.")
+        Some("That email address doesn't look right.".into())
       }
     }
   };
@@ -48,7 +48,7 @@ fn LoginIsland() -> impl IntoView {
   let password_hint = move || {
     let password = password.get();
     if password.is_empty() {
-      return Some("Password required.");
+      return Some("Password required.".into());
     }
     None
   };
@@ -111,7 +111,7 @@ fn LoginIsland() -> impl IntoView {
     >
       <p class="title">"Login"</p>
 
-      <p class="max-w-80">
+      <p class="max-w-prose">
         "Welcome back to the most satisfying part of your CI/CD pipeline."
       </p>
 
@@ -120,26 +120,24 @@ fn LoginIsland() -> impl IntoView {
           autofocus=true
           input_signal=read_email output_signal=write_email
           error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
         <PasswordInputField
           input_signal=read_password output_signal=write_password
           error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
+          warn_hint={MaybeProp::from(None::<String>)}
         />
       </div>
 
       <label class="flex flex-row gap-2">
         <input type="submit" class="hidden" />
-        <button class="btn btn-primary w-full max-w-80">
-          <div class="flex-1" />
-          <div class="flex-1 flex flex-row justify-center items-center">
-            "Log in"
-          </div>
-          <div class="flex-1 flex flex-row justify-end items-center">
-            <LoadingCircle {..}
-              class="size-4 transition-opacity"
-              class=("opacity-0", move || { !loading() })
-            />
-          </div>
+        <button class="btn btn-primary w-full max-w-80 justify-between">
+          <div class="size-4" />
+          "Log in"
+          <LoadingCircle {..}
+            class="size-4 transition-opacity"
+            class=("opacity-0", move || { !loading() })
+          />
         </button>
       </label>
     </form>

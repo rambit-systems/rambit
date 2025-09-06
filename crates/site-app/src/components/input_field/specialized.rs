@@ -1,7 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 
-use super::InputField;
-use crate::components::{EnvelopeHeroIcon, LockClosedHeroIcon, UserHeroIcon};
+use super::{InputField, InputIcon};
 
 #[component]
 pub fn NameInputField(
@@ -10,14 +9,15 @@ pub fn NameInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <UserHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputIcon::User)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -25,7 +25,7 @@ pub fn NameInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }
@@ -37,14 +37,15 @@ pub fn EmailInputField(
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <EnvelopeHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputIcon::Envelope)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -52,7 +53,7 @@ pub fn EmailInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }
@@ -64,14 +65,15 @@ pub fn PasswordInputField(
   #[prop(default = "password")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(default =
-    Some(view!{ <LockClosedHeroIcon {..} class="size-6" /> }.into_any())
+    Some(InputIcon::LockClosed)
   )]
-  before: Option<AnyView>,
-  #[prop(optional)] after: Option<AnyView>,
+  before: Option<InputIcon>,
+  #[prop(optional)] after: Option<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<&'static str>,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
     <InputField
@@ -79,7 +81,7 @@ pub fn PasswordInputField(
       input_type=input_type placeholder=placeholder autofocus=autofocus
       before=before after=after
       input_signal=input_signal output_signal=output_signal
-      error_hint=error_hint
+      error_hint=error_hint warn_hint=warn_hint
     />
   }
 }

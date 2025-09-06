@@ -30,7 +30,7 @@ pub(super) fn EntryTable() -> impl IntoView {
         <EntryTableEmptyBody />
       }.into_any(),
       _ => view! {
-        <tbody class="min-h-10">
+        <tbody class="animate-fade-in min-h-10">
           <For each=move || e.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
         </tbody>
       }.into_any()
@@ -54,17 +54,19 @@ pub(super) fn EntryTable() -> impl IntoView {
       />
     </div>
 
-    <table class="table">
-      <thead>
-        <th>"Store Path"</th>
-        <th>"Caches"</th>
-        <th>"File Size"</th>
-        <th>"Ref Count"</th>
-      </thead>
-      <Transition fallback=|| ()>
-        { suspend }
-      </Transition>
-    </table>
+    <div class="w-full overflow-x-scroll">
+      <table class="table">
+        <thead>
+          <th>"Store Path"</th>
+          <th>"Caches"</th>
+          <th>"File Size"</th>
+          <th>"Ref Count"</th>
+        </thead>
+        <Transition fallback=|| ()>
+          { suspend }
+        </Transition>
+      </table>
+    </div>
   }
 }
 
@@ -81,13 +83,29 @@ fn EntryTableEmptyBody() -> impl IntoView {
 #[component]
 fn EntryDataRow(entry: Entry) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
+  let base_url = org_hook.base_url();
   let entry_href = move || {
-    format!(
-      "/org/{org}/entry/{entry}",
-      org = org_hook.key()(),
-      entry = entry.id
-    )
+    format!("{base}/entry/{entry}", base = base_url(), entry = entry.id)
   };
+
+  const ABBREVIATE_AFTER_COUNT: usize = 5;
+  let mut caches = entry.caches.clone();
+  caches.sort_unstable();
+  let cache_count = caches.len();
+  let mut caches = caches
+    .into_iter()
+    .take(ABBREVIATE_AFTER_COUNT)
+    .map(|id| {
+      view! {
+        <CacheItemLink id=id />
+      }
+      .into_any()
+    })
+    .intersperse_with(|| ", ".into_any())
+    .collect_view();
+  if cache_count > ABBREVIATE_AFTER_COUNT {
+    caches.push(", ...".into_any());
+  }
 
   view! {
     <tr>
@@ -98,9 +116,7 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
         <StorePathCopyButton sp=entry.store_path />
       </th>
       <td>
-        { entry.caches.clone().into_iter().map(|id| view! {
-          <CacheItemLink id=id />
-        }).collect_view()}
+        { caches }
       </td>
       <td>{ entry.intrensic_data.nar_size.to_string() }</td>
       <td>{ entry.intrensic_data.references.len().to_string() }</td>

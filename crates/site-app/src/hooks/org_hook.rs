@@ -47,13 +47,18 @@ impl OrgHook {
     move || key.run(())
   }
 
-  pub fn dashboard_url(&self) -> Memo<String> {
+  pub fn base_url(&self) -> Memo<String> {
     Memo::new({
       let key = self.key;
       {
-        move |_| format!("/org/{}/dash", key.run(()))
+        move |_| format!("/org/{}", key.run(()))
       }
     })
+  }
+
+  pub fn dashboard_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/dash", base_url()))
   }
 
   pub fn descriptor(&self) -> AsyncDerived<String> {

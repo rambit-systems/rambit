@@ -11,7 +11,7 @@ pub fn LogoutPage() -> impl IntoView {
     >
       <p class="title">"Log out"</p>
 
-      <p class="max-w-80">
+      <p class="max-w-prose">
         "Are you sure you want to log out? We're sad to see you go but excited for you to come back."
       </p>
 
@@ -57,17 +57,13 @@ pub fn LogoutButton() -> impl IntoView {
   });
 
   view! {
-    <button class="btn btn-critical-subtle w-full max-w-80" on:click=button_action>
-      <div class="flex-1" />
-      <div class="flex-1 flex flex-row justify-center items-center">
-        "Log out"
-      </div>
-      <div class="flex-1 flex flex-row justify-end items-center">
-        <LoadingCircle {..}
-          class="size-4 transition-opacity"
-          class=("opacity-0", move || { !loading() })
-        />
-      </div>
+    <button class="btn btn-critical-subtle w-full max-w-80 justify-between" on:click=button_action>
+      <div class="size-4" />
+      "Log out"
+      <LoadingCircle {..}
+        class="size-4 transition-opacity"
+        class=("opacity-0", move || { !loading() })
+      />
     </button>
   }
 }
