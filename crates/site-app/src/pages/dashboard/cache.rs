@@ -1,9 +1,12 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::PvCache;
+use models::{dvf::Visibility, PvCache};
 
 use crate::{
-  components::{CacheItemLink, CreateCacheButton, DataTableRefreshButton},
+  components::{
+    CacheItemLink, CreateCacheButton, DataTableRefreshButton,
+    LockClosedHeroIcon,
+  },
   hooks::OrgHook,
   resources::cache::caches_in_org_query_scope,
 };
@@ -62,7 +65,12 @@ fn CacheDataRow(cache: PvCache) -> impl IntoView {
   view! {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="text-link-primary"/></th>
-      <td>{ cache.visibility.to_string() }</td>
+      <td class="flex flex-row items-center gap-1">
+        { cache.visibility.to_string() }
+        { matches!(cache.visibility, Visibility::Private).then_some(view! {
+          <LockClosedHeroIcon {..} class="size-4 stroke-base-11/75 stroke-[2.0]" />
+        })}
+      </td>
     </tr>
   }
 }
