@@ -88,6 +88,25 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
     format!("{base}/entry/{entry}", base = base_url(), entry = entry.id)
   };
 
+  const ABBREVIATE_AFTER_COUNT: usize = 5;
+  let mut caches = entry.caches.clone();
+  caches.sort_unstable();
+  let cache_count = caches.len();
+  let mut caches = caches
+    .into_iter()
+    .take(ABBREVIATE_AFTER_COUNT)
+    .map(|id| {
+      view! {
+        <CacheItemLink id=id />
+      }
+      .into_any()
+    })
+    .intersperse_with(|| ", ".into_any())
+    .collect_view();
+  if cache_count > ABBREVIATE_AFTER_COUNT {
+    caches.push(", ...".into_any());
+  }
+
   view! {
     <tr>
       <th scope="row" class="flex flex-row items-center gap-1">
@@ -97,9 +116,7 @@ fn EntryDataRow(entry: Entry) -> impl IntoView {
         <StorePathCopyButton sp=entry.store_path />
       </th>
       <td>
-        { entry.caches.clone().into_iter().map(|id| view! {
-          <CacheItemLink id=id />
-        }).collect_view()}
+        { caches }
       </td>
       <td>{ entry.intrensic_data.nar_size.to_string() }</td>
       <td>{ entry.intrensic_data.references.len().to_string() }</td>

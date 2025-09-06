@@ -1,4 +1,5 @@
 #![feature(impl_trait_in_fn_trait_return)]
+#![feature(iter_intersperse)]
 
 mod components;
 mod hooks;
