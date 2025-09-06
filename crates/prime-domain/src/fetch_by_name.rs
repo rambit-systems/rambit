@@ -4,7 +4,7 @@ use models::{Cache, CacheUniqueIndexSelector, dvf::EntityName};
 use crate::PrimeDomainService;
 
 impl PrimeDomainService {
-  /// Fetches a [`Cache`] by its [name](CacheIndexSelector::Name).
+  /// Fetches a [`Cache`] by its [name](CacheUniqueIndexSelector::Name).
   pub async fn fetch_cache_by_name(
     &self,
     name: EntityName,
