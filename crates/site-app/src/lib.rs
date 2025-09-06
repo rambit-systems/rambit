@@ -23,6 +23,11 @@ use models::AuthUser;
 
 use self::pages::*;
 
+const PRELOAD_FONT_PATHS: &[&str] = &[
+  "/fonts/funnel_sans/OpNIno8Dg9bX6Bsp3Wq69Tpyfhg.woff2",
+  "/fonts/funnel_display/B50WF7FGv37QNVWgE0ga--4Pbb6dDYs.woff2",
+];
+
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
     <!DOCTYPE html>
@@ -32,6 +37,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <AutoReload options=options.clone() />
         <HydrationScripts options={options.clone()} islands=true />
+
+        { PRELOAD_FONT_PATHS.iter().map(|p| view! {
+          <link rel="preload" href={*p} as="font" type="font/woff2" crossorigin="anonymous" />
+        }).collect_view() }
 
         <HashedStylesheet options id="leptos" />
         <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
