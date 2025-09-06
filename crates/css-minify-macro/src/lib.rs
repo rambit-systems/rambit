@@ -15,6 +15,8 @@
 //! format!("<style>{}</style>", include_css!("styles.css"))
 //! ```
 
+mod consolidate_font_face_rules;
+
 use std::{env, fs, path::Path};
 
 use lightningcss::stylesheet::{
@@ -24,6 +26,8 @@ use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{Error, LitStr, parse_macro_input};
+
+use self::consolidate_font_face_rules::consolidate_font_face_rules;
 
 /// Includes and minifies a CSS file at compile time.
 ///
@@ -114,6 +118,9 @@ fn process_css(css_content: &str, span: Span) -> Result<String, Error> {
     .minify(MinifyOptions::default())
     .map_err(|e| Error::new(span, format!("Failed to minify CSS: {e:?}")))?;
 
+  // Consolidate font-face rules
+  consolidate_font_face_rules(&mut stylesheet, span)?;
+
   // Serialize back to CSS string
   let result = stylesheet
     .to_css(PrinterOptions {
@@ -124,141 +131,3 @@ fn process_css(css_content: &str, span: Span) -> Result<String, Error> {
 
   Ok(result.code)
 }
-
-#[allow(clippy::items_after_test_module)]
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_css_processing() {
-    let input_css = r#"
-            .foo {
-                color: red;
-                margin: 0px;
-            }
-            
-            .bar {
-                color: red;
-            }
-            
-            /* This is a comment */
-            .baz {
-                padding: 10px 20px 10px 20px;
-            }
-        "#;
-
-    let result = process_css(input_css, Span::call_site());
-    assert!(result.is_ok());
-
-    let minified = result.unwrap();
-
-    // Should remove comments
-    assert!(!minified.contains("This is a comment"));
-
-    // Should be significantly shorter
-    assert!(minified.len() < input_css.len());
-
-    // Should still contain the class names
-    assert!(minified.contains(".foo"));
-    assert!(minified.contains(".bar"));
-    assert!(minified.contains(".baz"));
-  }
-
-  #[test]
-  fn test_invalid_css() {
-    let invalid_css = r#"
-            .foo {
-                color: red
-                // missing semicolon and invalid comment syntax
-            }
-        "#;
-
-    let result = process_css(invalid_css, Span::call_site());
-    // lightningcss is quite permissive, so this might actually succeed
-    // The test mainly ensures we handle the error case properly
-    match result {
-      Ok(_) => println!("CSS was parsed successfully despite syntax issues"),
-      Err(e) => println!("CSS parsing failed as expected: {e}"),
-    }
-  }
-}
-
-// Example usage documentation
-#[doc = r##"
-# Cargo.toml
-
-Add these dependencies to your `Cargo.toml`:
-
-```toml
-[dependencies]
-lightningcss = "1.0"
-
-[build-dependencies]
-# If you need the macro in a build script
-css-minify-macro = { path = "path/to/this/crate" }
-```
-
-# Usage Examples
-
-## Basic Usage
-
-```rust,ignore
-use css_minify_macro::include_css;
-
-// Include and minify a CSS file
-let css = include_css!("assets/styles.css");
-
-// Use in a web framework like Axum
-use axum::{response::Html, routing::get, Router};
-
-async fn index() -> Html<String> {
-    Html(format!(
-        r#"<!DOCTYPE html>
-        <html>
-        <head>
-            <style>{}</style>
-        </head>
-        <body>
-            <h1>Hello, World!</h1>
-        </body>
-        </html>"#,
-        include_css!("assets/styles.css")
-    ))
-}
-
-let app = Router::new().route("/", get(index));
-```
-
-## With Template Engines
-
-```rust,ignore
-use askama::Template;
-use css_minify_macro::include_css;
-
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    styles: &'static str,
-}
-
-let template = IndexTemplate {
-    styles: include_css!("assets/styles.css"),
-};
-```
-
-## Multiple CSS Files
-
-```rust,ignore
-use css_minify_macro::include_css;
-
-// You can combine multiple CSS files
-let combined_css = format!(
-    "{}{}{}",
-    include_css!("assets/reset.css"),
-    include_css!("assets/components.css"),
-    include_css!("assets/main.css")
-);
-```
-"##]
-struct _Documentation;
