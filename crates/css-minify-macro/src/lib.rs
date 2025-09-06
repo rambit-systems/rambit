@@ -15,6 +15,8 @@
 //! format!("<style>{}</style>", include_css!("styles.css"))
 //! ```
 
+mod consolidate_font_face_rules;
+
 use std::{env, fs, path::Path};
 
 use lightningcss::stylesheet::{
@@ -24,6 +26,8 @@ use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{Error, LitStr, parse_macro_input};
+
+use self::consolidate_font_face_rules::consolidate_font_face_rules;
 
 /// Includes and minifies a CSS file at compile time.
 ///
@@ -113,6 +117,9 @@ fn process_css(css_content: &str, span: Span) -> Result<String, Error> {
   stylesheet
     .minify(MinifyOptions::default())
     .map_err(|e| Error::new(span, format!("Failed to minify CSS: {e:?}")))?;
+
+  // Consolidate font-face rules
+  consolidate_font_face_rules(&mut stylesheet, span)?;
 
   // Serialize back to CSS string
   let result = stylesheet
