@@ -43,7 +43,7 @@ pub(super) fn StoreTable() -> impl IntoView {
       />
     </div>
 
-    <div class="w-full overflow-x-scroll">
+    <div class="w-full overflow-x-auto">
       <table class="table">
         <thead>
           <th>"Name"</th>

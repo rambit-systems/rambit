@@ -46,7 +46,7 @@ pub(super) fn CacheTable() -> impl IntoView {
       <CreateCacheButton text="Create..." />
     </div>
 
-    <div class="w-full overflow-x-scroll">
+    <div class="w-full overflow-x-auto">
       <table class="table">
         <thead>
           <th>"Name"</th>
