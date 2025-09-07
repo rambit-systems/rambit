@@ -4,6 +4,7 @@ use models::{PvStorageCredentials, PvStore};
 
 use crate::{
   components::{DataTableRefreshButton, StoreItemLink},
+  formatting_utils::ThousandsSeparated,
   hooks::OrgHook,
   resources::store::{
     entry_count_in_store_query_scope, stores_in_org_query_scope,
@@ -69,7 +70,7 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
   let entry_count_suspend = move || {
     Suspend::new(async move {
       match entry_count_resource.await {
-        Ok(count) => format_with_commas(count).into_any(),
+        Ok(count) => ThousandsSeparated(count).to_string().into_any(),
         Err(_) => "[error]".into_any(),
       }
     })
@@ -90,19 +91,4 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
       <td>{ storage_type }</td>
     </tr>
   }
-}
-
-fn format_with_commas(n: u32) -> String {
-  let s = n.to_string();
-  let chars: Vec<char> = s.chars().collect();
-  let mut result = String::new();
-
-  for (i, ch) in chars.iter().enumerate() {
-    if i > 0 && (chars.len() - i).is_multiple_of(3) {
-      result.push(',');
-    }
-    result.push(*ch);
-  }
-
-  result
 }
