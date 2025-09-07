@@ -1,14 +1,10 @@
-use std::collections::HashMap;
-
 use leptos::{ev::SubmitEvent, prelude::*};
-use models::dvf::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
 
 use crate::{
   components::{
     EmailInputField, LoadingCircle, NameInputField, PasswordInputField,
   },
-  navigation::{navigate_to, next_url_hook},
-  reactive_utils::touched_input_bindings,
+  hooks::SignupHook,
 };
 
 #[component]
@@ -22,126 +18,21 @@ pub fn SignupPage() -> impl IntoView {
 
 #[island]
 fn SignupIsland() -> impl IntoView {
-  let name = RwSignal::new(String::new());
-  let email = RwSignal::new(String::new());
-  let password = RwSignal::new(String::new());
-  let confirm_password = RwSignal::new(String::new());
-  let (read_name, write_name) = touched_input_bindings(name);
-  let (read_email, write_email) = touched_input_bindings(email);
-  let (read_password, write_password) = touched_input_bindings(password);
-  let (read_confirm_password, write_confirm_password) =
-    touched_input_bindings(confirm_password);
-  let submit_touched = RwSignal::new(false);
-  let next_url = next_url_hook();
+  let signup_hook = SignupHook::new();
 
-  // error text for name field
-  let name_hint = move || {
-    let name = name.get();
-    if name.is_empty() {
-      return Some("Your name is required.".into());
-    }
-    match HumanName::try_new(name) {
-      Ok(_) => None,
-      Err(HumanNameError::LenCharMaxViolated) => {
-        Some("The name you entered is too long.".into())
-      }
-      Err(HumanNameError::NotEmptyViolated) => {
-        Some("Your name is required.".into())
-      }
-    }
-  };
+  let name_bindings = signup_hook.name_bindings();
+  let email_bindings = signup_hook.email_bindings();
+  let password_bindings = signup_hook.password_bindings();
+  let confirm_password_bindings = signup_hook.confirm_password_bindings();
 
-  // error text for email field
-  let email_hint = move || {
-    let email = email.get();
-    if email.is_empty() {
-      return Some("Email address required.".into());
-    }
-    match EmailAddress::try_new(email) {
-      Ok(_) => None,
-      Err(EmailAddressError::LenCharMaxViolated) => {
-        Some("That email address looks too long.".into())
-      }
-      Err(EmailAddressError::PredicateViolated) => {
-        Some("That email address doesn't look right.".into())
-      }
-    }
-  };
-
-  // error text for password field
-  let password_hint = move || {
-    let password = password.get();
-    if password.is_empty() {
-      return Some("Password required.".into());
-    }
-    None
-  };
-
-  // error text for confirm password field
-  let confirm_password_hint = move || {
-    let password = password.get();
-    let confirm_password = confirm_password.get();
-    if confirm_password != password {
-      return Some("Passwords don't match.".into());
-    }
-    None
-  };
-
-  // action to perform login
-  let action = Action::new_local(move |(): &()| {
-    // json body for authenticate endpoint
-    let body = HashMap::<_, String>::from_iter([
-      ("name", name.get()),
-      ("email", email.get()),
-      ("password", password.get()),
-    ]);
-    async move {
-      let resp = gloo_net::http::Request::post("/api/v1/signup")
-        .json(&body)
-        .expect("failed to build json authenticate payload")
-        .send()
-        .await
-        .map_err(|e| format!("request error: {e}"))?;
-
-      match resp.status() {
-        200 => Ok(true),
-        401 => Ok(false),
-        400 => Err(format!("response error: {}", resp.text().await.unwrap())),
-        s => Err(format!("status error: got unknown status {s}")),
-      }
-    }
-  });
-
-  // loading represents both the action and the redirect, so we will continue
-  // loading for the life of the page, if the action completed successfully
-  let loading = {
-    let (pending, value) = (action.pending(), action.value());
-    move || pending() || matches!(value.get(), Some(Ok(true)))
-  };
-
-  // submit callback
+  let signup_trigger = signup_hook.action_trigger();
   let submit_action = move |ev: SubmitEvent| {
     ev.prevent_default();
-
-    submit_touched.set(true);
-
-    if name_hint().is_some()
-      || email_hint().is_some()
-      || password_hint().is_some()
-      || confirm_password_hint().is_some()
-    {
-      return;
-    }
-
-    action.dispatch_local(());
+    signup_trigger();
   };
+  let show_spinner = signup_hook.show_spinner();
 
-  // redirect on successful login
-  Effect::new(move || {
-    if action.value().get() == Some(Ok(true)) {
-      navigate_to(&next_url());
-    }
-  });
+  let _ = signup_hook.create_redirect_effect();
 
   view! {
     <form
@@ -158,24 +49,24 @@ fn SignupIsland() -> impl IntoView {
       <div class="flex flex-col gap-4">
         <NameInputField
           autofocus=true
-          input_signal=read_name output_signal=write_name
-          error_hint={MaybeProp::derive(move || submit_touched().then_some(name_hint()).flatten())}
+          input_signal=name_bindings.0 output_signal=name_bindings.1
+          error_hint={MaybeProp::derive(signup_hook.name_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
         <EmailInputField
-          input_signal=read_email output_signal=write_email
-          error_hint={MaybeProp::derive(move || submit_touched().then_some(email_hint()).flatten())}
+          input_signal=email_bindings.0 output_signal=email_bindings.1
+          error_hint={MaybeProp::derive(signup_hook.email_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
         <PasswordInputField
-          input_signal=read_password output_signal=write_password
-          error_hint={MaybeProp::derive(move || submit_touched().then_some(password_hint()).flatten())}
+          input_signal=password_bindings.0 output_signal=password_bindings.1
+          error_hint={MaybeProp::derive(signup_hook.password_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
         <PasswordInputField
           id="confirm_password" label_text="Confirm Password"
-          input_signal=read_confirm_password output_signal=write_confirm_password
-          error_hint={MaybeProp::derive(move || submit_touched().then_some(confirm_password_hint()).flatten())}
+          input_signal=confirm_password_bindings.0 output_signal=confirm_password_bindings.1
+          error_hint={MaybeProp::derive(signup_hook.confirm_password_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
       </div>
@@ -184,10 +75,10 @@ fn SignupIsland() -> impl IntoView {
         <input type="submit" class="hidden" />
         <button class="btn btn-primary w-full max-w-80 justify-between">
           <div class="size-4" />
-          "Log in"
+          { signup_hook.button_text() }
           <LoadingCircle {..}
             class="size-4 transition-opacity"
-            class=("opacity-0", move || { !loading() })
+            class=("opacity-0", move || { !show_spinner() })
           />
         </button>
       </label>
