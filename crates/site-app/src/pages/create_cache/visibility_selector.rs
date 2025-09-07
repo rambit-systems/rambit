@@ -15,19 +15,41 @@ pub(super) fn VisibilitySelector(
   let set_private = move |_| signal.set(Visibility::Private);
   let set_public = move |_| signal.set(Visibility::Public);
 
-  const OPTION_CLASS: &str = "flex-1 flex flex-col gap-2 px-4 py-3 \
-                              hover:elevation-lv1 transition-shadow \
-                              transition-colors rounded border-2 \
-                              border-base-7 hover:border-base-8";
-  const TITLE_CLASS: &str = "text-lg font-semibold leading-none";
+  const OUTER_CLASS: &str = "flex-1 flex flex-col gap-2 px-4 py-3 \
+                             hover:elevation-lv1 transition rounded border-2 \
+                             border-base-7 hover:border-base-8 \
+                             bg-gradient-to-tr to-transparent to-50%";
+  const OUTER_ACTIVE_CLASS: &str =
+    "border-product-7 hover:border-product-8 from-product-3";
+  const OUTER_INACTIVE_CLASS: &str = "from-transparent";
+  const TITLE_CLASS: &str = "text-base-12 text-lg font-semibold leading-none";
   const DESCRIPTION_CLASS: &str = "text-sm leading-[1.1]";
 
+  let outer_private_class = move || {
+    format!(
+      "{OUTER_CLASS} {}",
+      if is_private() {
+        OUTER_ACTIVE_CLASS
+      } else {
+        OUTER_INACTIVE_CLASS
+      }
+    )
+  };
+  let outer_public_class = move || {
+    format!(
+      "{OUTER_CLASS} {}",
+      if is_public() {
+        OUTER_ACTIVE_CLASS
+      } else {
+        OUTER_INACTIVE_CLASS
+      }
+    )
+  };
+
   view! {
-    <div class="flex flex-row gap-4">
+    <div class="flex flex-col sm:flex-row gap-4">
       <div
-        class=OPTION_CLASS
-        class=("border-product-7", is_private)
-        class=("hover:border-product-8", is_private)
+        class=outer_private_class
         on:click=set_private
       >
         <div class="flex flex-row justify-between items-center">
@@ -49,9 +71,7 @@ pub(super) fn VisibilitySelector(
       </div>
 
       <div
-        class=OPTION_CLASS
-        class=("border-product-7", is_public)
-        class=("hover:border-product-8", is_public)
+        class=outer_public_class
         on:click=set_public
       >
         <div class="flex flex-row justify-between items-center">
