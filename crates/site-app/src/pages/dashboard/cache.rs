@@ -7,8 +7,11 @@ use crate::{
     CacheItemLink, CreateCacheButton, DataTableRefreshButton,
     LockClosedHeroIcon,
   },
+  formatting_utils::ThousandsSeparated,
   hooks::OrgHook,
-  resources::cache::caches_in_org_query_scope,
+  resources::cache::{
+    caches_in_org_query_scope, entry_count_in_cache_query_scope,
+  },
 };
 
 #[island]
@@ -51,6 +54,7 @@ pub(super) fn CacheTable() -> impl IntoView {
         <thead>
           <th>"Name"</th>
           <th>"Visibility"</th>
+          <th>"Entry Count"</th>
         </thead>
         <Transition fallback=|| ()>
           { suspend }
@@ -62,6 +66,21 @@ pub(super) fn CacheTable() -> impl IntoView {
 
 #[component]
 fn CacheDataRow(cache: PvCache) -> impl IntoView {
+  let query_client = expect_context::<QueryClient>();
+
+  let entry_count_query_scope = entry_count_in_cache_query_scope();
+  let entry_count_key = move || cache.id;
+  let entry_count_resource =
+    query_client.resource(entry_count_query_scope, entry_count_key);
+  let entry_count_suspend = move || {
+    Suspend::new(async move {
+      match entry_count_resource.await {
+        Ok(count) => ThousandsSeparated(count).to_string().into_any(),
+        Err(_) => "[error]".into_any(),
+      }
+    })
+  };
+
   view! {
     <tr>
       <th scope="row"><CacheItemLink id=cache.id extra_class="text-link-primary"/></th>
@@ -71,6 +90,9 @@ fn CacheDataRow(cache: PvCache) -> impl IntoView {
           <LockClosedHeroIcon {..} class="size-4 stroke-base-11/75 stroke-[2.0]" />
         })}
       </td>
+      <td><Transition fallback=|| "[loading]">
+        { entry_count_suspend }
+      </Transition></td>
     </tr>
   }
 }

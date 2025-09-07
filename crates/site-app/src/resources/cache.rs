@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, model::Model, Cache, Org, PvCache};
+use models::{dvf::RecordId, model::Model, Cache, Entry, Org, PvCache};
 
 #[cfg(feature = "ssr")]
 use crate::resources::{authenticate, authorize_for_org};
@@ -121,4 +121,42 @@ pub async fn check_if_cache_name_is_available(
     .is_some();
 
   Ok(!occupied)
+}
+
+pub fn entry_count_in_cache_query_scope(
+) -> QueryScope<RecordId<Cache>, Result<u32, ServerFnError>> {
+  QueryScope::new(count_entries_in_cache).with_invalidation_link(move |s| {
+    [
+      Cache::TABLE_NAME.to_string(),
+      s.to_string(),
+      Entry::TABLE_NAME.to_string(),
+    ]
+  })
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn count_entries_in_cache(
+  cache: RecordId<Cache>,
+) -> Result<u32, ServerFnError> {
+  use prime_domain::PrimeDomainService;
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+  let cache = prime_domain_service
+    .fetch_cache_by_id(cache)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch cache: {e}");
+      ServerFnError::new("internal error")
+    })?
+    .ok_or(ServerFnError::new("cache does not exist"))?;
+
+  authorize_for_org(cache.org)?;
+
+  prime_domain_service
+    .count_entries_in_cache(cache.id)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to count entries in cache ({}): {e}", cache.id);
+      ServerFnError::new("internal error")
+    })
 }

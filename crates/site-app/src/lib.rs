@@ -2,6 +2,7 @@
 #![feature(iter_intersperse)]
 
 mod components;
+mod formatting_utils;
 mod hooks;
 mod join_classes;
 mod navigation;
