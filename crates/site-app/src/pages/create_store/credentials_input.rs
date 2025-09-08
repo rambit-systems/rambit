@@ -77,7 +77,7 @@ pub fn CredentialsInput(
 
   // synchronize inputs to signal
   Effect::watch(
-    move || final_product(),
+    final_product,
     move |final_product, _, _| signal.set(final_product.clone()),
     false,
   );
