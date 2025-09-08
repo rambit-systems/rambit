@@ -36,7 +36,6 @@ pub fn CreateCachePage() -> impl IntoView {
   });
   let (read_name, write_name) = touched_input_bindings(name);
   let visibility = RwSignal::new(Visibility::Private);
-  let submit_touched = RwSignal::new(false);
 
   let is_available_query_scope =
     crate::resources::cache::cache_name_is_available_query_scope();
@@ -46,9 +45,9 @@ pub fn CreateCachePage() -> impl IntoView {
     });
 
   let action = ServerAction::<CreateCache>::new();
-  // loading if the result is unpopulated or successful
-  let loading = move || {
-    submit_touched() && matches!(action.value().get(), None | Some(Ok(_)))
+  let loading = {
+    let (pending, value) = (action.pending(), action.value());
+    move || pending() || matches!(value.get(), Some(Ok(_)))
   };
 
   // error text for name field
@@ -76,8 +75,6 @@ pub fn CreateCachePage() -> impl IntoView {
   // submit callback
   let org = org_hook.key();
   let submit_action = move |_| {
-    submit_touched.set(true);
-
     // the name has been checked and is available
     if sanitized_name().is_some()
       && matches!(is_available_resource.get(), Some(Some(Ok(true))))
@@ -160,7 +157,7 @@ pub async fn create_cache(
     .create_cache(org, sanitized_name, visibility)
     .await
     .map_err(|e| {
-      tracing::error!("failed to fetch org: {e}");
+      tracing::error!("failed to create cache: {e}");
       ServerFnError::new("internal error")
     })
 }
