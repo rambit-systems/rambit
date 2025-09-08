@@ -4,6 +4,7 @@
   .btn {
     /* behavior */
     @apply cursor-pointer transition select-none;
+    @apply active:scale-[0.98] ease-out;
 
     /* appearance */
     @apply rounded-md;
