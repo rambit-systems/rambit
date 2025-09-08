@@ -89,6 +89,42 @@ pub async fn fetch_stores_in_org(
   Ok(models)
 }
 
+pub fn store_name_is_available_query_scope(
+) -> QueryScope<(RecordId<Org>, String), Result<bool, ServerFnError>> {
+  QueryScope::new(check_if_store_name_is_available)
+    .with_invalidation_link(move |_| [Store::TABLE_NAME])
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn check_if_store_name_is_available(
+  org_and_name: (RecordId<Org>, String),
+) -> Result<bool, ServerFnError> {
+  use models::dvf::{EntityName, StrictSlug};
+  use prime_domain::PrimeDomainService;
+
+  let (org, name) = org_and_name;
+
+  authorize_for_org(org)?;
+
+  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  if name != sanitized_name.clone().to_string() {
+    return Err(ServerFnError::new("name is unsanitized"));
+  }
+
+  let prime_domain_service: PrimeDomainService = expect_context();
+
+  let occupied = prime_domain_service
+    .fetch_store_by_org_and_name(org, sanitized_name)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch store by name: {e}");
+      ServerFnError::new("internal error")
+    })?
+    .is_some();
+
+  Ok(!occupied)
+}
+
 pub fn entry_count_in_store_query_scope(
 ) -> QueryScope<RecordId<Store>, Result<u32, ServerFnError>> {
   QueryScope::new(count_entries_in_store).with_invalidation_link(move |s| {
