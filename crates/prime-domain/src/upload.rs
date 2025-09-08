@@ -6,14 +6,13 @@ use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Cache, CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector,
-  NarAuthenticityData, NarDeriverData, NarStorageData, StorePath,
-  StoreUniqueIndexSelector, User,
+  NarAuthenticityData, NarDeriverData, NarStorageData, Org, StorePath, User,
   dvf::{CompressionStatus, EitherSlug, EntityName, RecordId},
   model::Model,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::PrimeDomainService;
+use crate::{PrimeDomainService, search_by_user::SearchByUserError};
 
 /// The request struct for the [`upload`](PrimeDomainService::upload) fn.
 #[derive(Debug)]
@@ -51,6 +50,12 @@ pub enum UploadError {
   /// The target store was not found.
   #[error("The target store was not found: \"{0}\"")]
   TargetStoreNotFound(EntityName),
+  /// Multiple stores were found with the given name in different organizations.
+  #[error(
+    "The target store name \"{1}\" is ambiguous: multiple results found in \
+     orgs {0:?}"
+  )]
+  TargetStoreAmbiguous(Vec<RecordId<Org>>, EntityName),
   /// An entry with that path already exists in the target store.
   #[error("An entry with that path already exists in the target store: {0}")]
   DuplicateEntryInStore(RecordId<Entry>),
@@ -98,18 +103,37 @@ impl PrimeDomainService {
       .ok_or(miette!("authenticated user not found"))
       .map_err(UploadError::InternalError)?;
 
-    // find the given store
-    let target_store = self
-      .store_repo
-      .fetch_model_by_unique_index(
-        StoreUniqueIndexSelector::Name,
-        EitherSlug::Strict(req.target_store.clone().into_inner()),
-      )
+    // find the stores the user could be referring to
+    let possible_stores = self
+      .search_stores_by_name_and_user(user.id, req.target_store.clone())
       .await
-      .into_diagnostic()
-      .context("failed to search for target store")
-      .map_err(UploadError::InternalError)?
-      .ok_or(UploadError::TargetStoreNotFound(req.target_store))?;
+      .map_err(|e| match e {
+        SearchByUserError::MissingUser(u) => {
+          unreachable!("user {u} was already fetched")
+        }
+        SearchByUserError::FetchError(e) => UploadError::InternalError(
+          Err::<(), _>(e)
+            .into_diagnostic()
+            .context("failed to search for stores by user")
+            .unwrap_err(),
+        ),
+        SearchByUserError::FetchByIndexError(e) => UploadError::InternalError(
+          Err::<(), _>(e)
+            .into_diagnostic()
+            .context("failed to search for stores by user")
+            .unwrap_err(),
+        ),
+      })?;
+
+    // make sure there's only one
+    let target_store = match possible_stores.len() {
+      0 => Err(UploadError::TargetStoreNotFound(req.target_store)),
+      1 => Ok(possible_stores.first().unwrap().clone()),
+      _ => Err(UploadError::TargetStoreAmbiguous(
+        possible_stores.iter().map(|s| s.org).collect(),
+        req.target_store,
+      )),
+    }?;
 
     // org is assigned by the store
     let org = target_store.org;
