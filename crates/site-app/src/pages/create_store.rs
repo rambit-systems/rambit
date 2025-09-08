@@ -4,7 +4,7 @@ use leptos::{prelude::*, server_fn::codec::Json};
 use leptos_fetch::QueryClient;
 use models::{
   dvf::{EntityName, RecordId, StrictSlug},
-  Org, R2StorageCredentials, StorageCredentials, Store, StoreConfiguration,
+  Org, R2StorageCredentials, Store, StoreConfiguration,
 };
 
 use self::credentials_input::CredentialsInput;
@@ -160,6 +160,7 @@ pub async fn create_store(
   credentials: R2StorageCredentials,
   configuration: StoreConfiguration,
 ) -> Result<RecordId<Store>, ServerFnError> {
+  use models::StorageCredentials;
   use prime_domain::PrimeDomainService;
 
   crate::resources::authorize_for_org(org)?;
