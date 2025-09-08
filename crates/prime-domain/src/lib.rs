@@ -8,6 +8,7 @@ mod fetch_by_name;
 mod fetch_by_org;
 mod migrate;
 pub mod narinfo;
+mod search_by_user;
 pub mod upload;
 
 pub use belt;

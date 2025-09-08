@@ -1,6 +1,6 @@
 use db::CreateModelError;
 use models::{
-  Cache, Org,
+  Cache, Org, StorageCredentials, Store, StoreConfiguration,
   dvf::{EntityName, RecordId, Visibility},
 };
 
@@ -24,5 +24,26 @@ impl PrimeDomainService {
       })
       .await
       .map(|c| c.id)
+  }
+
+  /// Creates a [`Store`].
+  pub async fn create_store(
+    &self,
+    org: RecordId<Org>,
+    name: EntityName,
+    credentials: StorageCredentials,
+    config: StoreConfiguration,
+  ) -> Result<RecordId<Store>, CreateModelError> {
+    self
+      .store_repo
+      .create_model(Store {
+        id: RecordId::new(),
+        org,
+        credentials,
+        config,
+        name,
+      })
+      .await
+      .map(|s| s.id)
   }
 }

@@ -22,7 +22,7 @@
 
   .table tbody > tr {
     /* behavior */
-    @apply transition-colors;
+    /* @apply transition-colors; */
 
     /* color */
     @apply bg-base-1 even:bg-base-3 hover:bg-base-4;

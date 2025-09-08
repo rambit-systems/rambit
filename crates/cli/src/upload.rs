@@ -147,13 +147,19 @@ impl Action for UploadCommand {
       .into_diagnostic()
       .context("failed to send upload request")?;
 
-    let json_resp = resp
-      .json::<serde_json::Value>()
+    let text_resp = resp
+      .text()
       .await
+      .into_diagnostic()
+      .context("failed to read response body")?;
+
+    tracing::debug!(body = text_resp, "got upload response");
+
+    let json_resp: serde_json::Value = serde_json::from_str(&text_resp)
       .into_diagnostic()
       .context("failed to deserialize response body as JSON")?;
 
-    tracing::debug!(body = ?json_resp, "got upload response");
+    tracing::debug!(body = ?json_resp, "parsed upload response");
 
     Ok(())
   }

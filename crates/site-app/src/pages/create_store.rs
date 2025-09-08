@@ -1,13 +1,13 @@
-mod visibility_selector;
+mod credentials_input;
 
-use leptos::prelude::*;
+use leptos::{prelude::*, server_fn::codec::Json};
 use leptos_fetch::QueryClient;
 use models::{
-  dvf::{EntityName, RecordId, StrictSlug, Visibility},
-  Cache, Org,
+  dvf::{EntityName, RecordId, StrictSlug},
+  Org, R2StorageCredentials, StorageCredentials, Store, StoreConfiguration,
 };
 
-use self::visibility_selector::VisibilitySelector;
+use self::credentials_input::CredentialsInput;
 use crate::{
   components::{InputField, InputIcon, LoadingCircle},
   hooks::OrgHook,
@@ -15,19 +15,19 @@ use crate::{
   reactive_utils::touched_input_bindings,
 };
 
-const CACHE_DESCRIPTION: &str =
-  "A cache is a container and access-control mechanism for entries, and is \
-   the primary namespace through which users will consume your entries. It \
-   has a publicly-accessible name which must be globally unique (across \
-   organizations). The cache's visibility controls whether its entries are \
-   accessible outside of your organization.
+const STORE_DESCRIPTION: &str =
+  "A store represents a storage location for entries, for example an S3 \
+   bucket. The store holds credentials for the storage location, and \
+   configuration specifying how the entries it contains will be encoded.
 
-   Generally cache names are on a first-come-first-served basis, but contact \
-   us if you have concerns.";
+   Stores are immutable. To change a store's credentials or encoding \
+   configuration, you will need to create a new store and migrate the old \
+   store's entries to it. This incurs compute costs.";
 
 #[island]
-pub fn CreateCachePage() -> impl IntoView {
+pub fn CreateStorePage() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
+  let org_key = org_hook.key();
 
   let name = RwSignal::new(String::new());
   let sanitized_name = Memo::new(move |_| {
@@ -35,16 +35,17 @@ pub fn CreateCachePage() -> impl IntoView {
       .filter(|n| !n.to_string().is_empty())
   });
   let (read_name, write_name) = touched_input_bindings(name);
-  let visibility = RwSignal::new(Visibility::Private);
+  let credentials = RwSignal::<Option<R2StorageCredentials>>::new(None);
+  let submit_touched = RwSignal::new(false);
 
   let is_available_query_scope =
-    crate::resources::cache::cache_name_is_available_query_scope();
+    crate::resources::store::store_name_is_available_query_scope();
   let is_available_resource = expect_context::<QueryClient>()
     .local_resource(is_available_query_scope, move || {
-      sanitized_name().map(|n| n.to_string())
+      sanitized_name().map(|n| (org_key(), n.to_string()))
     });
 
-  let action = ServerAction::<CreateCache>::new();
+  let action = ServerAction::<CreateStore>::new();
   let loading = {
     let (pending, value) = (action.pending(), action.value());
     move || pending() || matches!(value.get(), Some(Ok(_)))
@@ -66,25 +67,36 @@ pub fn CreateCachePage() -> impl IntoView {
     if let (Some(Some(Ok(false))), Some(sanitized_name)) =
       (is_available_resource.get(), sanitized_name())
     {
-      Some(format!("The name \"{sanitized_name}\" is unavailable."))
+      Some(format!(
+        "A store named \"{sanitized_name}\" already exists in this \
+         organization."
+      ))
     } else {
       None
     }
   });
 
-  // submit callback
   let org = org_hook.key();
   let submit_action = move |_| {
+    submit_touched.set(true);
+
     // the name has been checked and is available
-    if sanitized_name().is_some()
-      && matches!(is_available_resource.get(), Some(Some(Ok(true))))
+    if !(sanitized_name().is_some()
+      && matches!(is_available_resource.get(), Some(Some(Ok(true)))))
     {
-      action.dispatch_local(CreateCache {
-        org:        org(),
-        name:       sanitized_name().unwrap().to_string(),
-        visibility: visibility(),
-      });
+      return;
     }
+
+    let Some(credentials) = credentials() else {
+      return;
+    };
+
+    action.dispatch_local(CreateStore {
+      org: org(),
+      name: sanitized_name().unwrap().to_string(),
+      credentials,
+      configuration: StoreConfiguration {},
+    });
   };
 
   let dashboard_url = org_hook.dashboard_url();
@@ -97,24 +109,29 @@ pub fn CreateCachePage() -> impl IntoView {
   view! {
     <div class="flex-1" />
     <div class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8">
-      <p class="title">"Create a Cache"</p>
+      <p class="title">"Create a Store"</p>
 
-      <p class="max-w-prose whitespace-pre-line">{ CACHE_DESCRIPTION }</p>
+      <p class="max-w-prose whitespace-pre-line">{ STORE_DESCRIPTION }</p>
 
       <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
 
-      <div class="flex flex-col gap-4">
-        <InputField
-          id="name" label_text="Cache Name" input_type="text" placeholder=""
-          before=Some(InputIcon::ArchiveBox)
-          input_signal=read_name output_signal=write_name
-          error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
-        />
+      <InputField
+        id="name" label_text="Cache Name" input_type="text" placeholder=""
+        before=Some(InputIcon::ArchiveBox)
+        input_signal=read_name output_signal=write_name
+        error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+      />
 
-        <div class="flex flex-col gap-1">
-          <p class="text-11-base">"Visibility"</p>
-          <VisibilitySelector signal=visibility />
+      <div class="flex flex-col gap-4">
+        <div>
+          <p class="text-base-12 text-lg font-semibold">
+            "Storage Credentials"
+          </p>
+          <p class="max-w-prose">
+            "These credentials are for the storage location where your data will sit."
+          </p>
         </div>
+        <CredentialsInput signal=credentials show_hints={ move || submit_touched() } />
       </div>
 
       <label class="flex flex-row gap-2">
@@ -136,12 +153,13 @@ pub fn CreateCachePage() -> impl IntoView {
   }
 }
 
-#[server(prefix = "/api/sfn")]
-pub async fn create_cache(
+#[server(prefix = "/api/sfn", input = Json)]
+pub async fn create_store(
   org: RecordId<Org>,
   name: String,
-  visibility: Visibility,
-) -> Result<RecordId<Cache>, ServerFnError> {
+  credentials: R2StorageCredentials,
+  configuration: StoreConfiguration,
+) -> Result<RecordId<Store>, ServerFnError> {
   use prime_domain::PrimeDomainService;
 
   crate::resources::authorize_for_org(org)?;
@@ -154,10 +172,15 @@ pub async fn create_cache(
   }
 
   prime_domain_service
-    .create_cache(org, sanitized_name, visibility)
+    .create_store(
+      org,
+      sanitized_name,
+      StorageCredentials::R2(credentials),
+      configuration,
+    )
     .await
     .map_err(|e| {
-      tracing::error!("failed to create cache: {e}");
+      tracing::error!("failed to create store: {e}");
       ServerFnError::new("internal error")
     })
 }

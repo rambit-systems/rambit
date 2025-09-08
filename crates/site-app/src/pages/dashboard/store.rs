@@ -3,7 +3,7 @@ use leptos_fetch::QueryClient;
 use models::{PvStorageCredentials, PvStore};
 
 use crate::{
-  components::{DataTableRefreshButton, StoreItemLink},
+  components::{CreateStoreButton, DataTableRefreshButton, StoreItemLink},
   formatting_utils::ThousandsSeparated,
   hooks::OrgHook,
   resources::store::{
@@ -42,6 +42,7 @@ pub(super) fn StoreTable() -> impl IntoView {
       <DataTableRefreshButton
         key_fn=key_fn query_scope=query_scope.clone()
       />
+      <CreateStoreButton text="Create..." />
     </div>
 
     <div class="w-full overflow-x-auto">

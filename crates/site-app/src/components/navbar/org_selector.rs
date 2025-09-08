@@ -10,9 +10,9 @@ use crate::{
 
 #[island]
 pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
-  const CONTAINER_CLASS: &str = "hover:bg-base-3 active:bg-base-4 \
+  const CONTAINER_CLASS: &str = "transition hover:bg-base-3 active:bg-base-4 \
                                  cursor-pointer px-2 py-1 rounded flex \
-                                 flex-col gap leading-none items-end gap-0.5";
+                                 flex-col gap leading-none items-end gap-0";
 
   let active_org_hook = OrgHook::new_active();
   let active_org_descriptor = active_org_hook.descriptor();
@@ -44,7 +44,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
   view! {
     <div class="relative">
       <div class=CONTAINER_CLASS on:click=toggle>
-        <span class="text-base-12">{ user.name.to_string() }</span>
+        <span class="text-base-12 text-sm">{ user.name.to_string() }</span>
         <div class="flex flex-row items-center gap-0.5">
           <span class="text-sm">
             <Suspense fallback=|| "[loading]">

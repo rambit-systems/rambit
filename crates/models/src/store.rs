@@ -26,9 +26,14 @@ pub struct Store {
 
 impl Store {
   /// Generates the value of the unique [`Store`] index
-  /// `name`.
-  pub fn unique_index_name(&self) -> Vec<EitherSlug> {
-    vec![self.name.clone().into_inner().into()]
+  /// `name_by_org`.
+  pub fn unique_index_name_by_org(&self) -> EitherSlug {
+    LaxSlug::new(format!(
+      "{org_id}-{name}",
+      org_id = self.org,
+      name = self.name
+    ))
+    .into()
   }
 }
 
@@ -62,14 +67,14 @@ impl From<Store> for PvStore {
 /// The unique index selector for [`Store`].
 #[derive(Debug, Clone, Copy)]
 pub enum StoreUniqueIndexSelector {
-  /// The `name` index.
-  Name,
+  /// The `name-by-org` index.
+  NameByOrg,
 }
 
 impl fmt::Display for StoreUniqueIndexSelector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      StoreUniqueIndexSelector::Name => write!(f, "name"),
+      StoreUniqueIndexSelector::NameByOrg => write!(f, "name-by-org"),
     }
   }
 }
@@ -107,7 +112,9 @@ impl Model for Store {
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,
     SlugFieldGetter<Self>,
-  )] = &[(StoreUniqueIndexSelector::Name, Store::unique_index_name)];
+  )] = &[(StoreUniqueIndexSelector::NameByOrg, |s| {
+    vec![Store::unique_index_name_by_org(s)]
+  })];
 
   fn id(&self) -> dvf::RecordId<Self> { self.id }
 }
