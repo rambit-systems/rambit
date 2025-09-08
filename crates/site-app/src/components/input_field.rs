@@ -57,8 +57,8 @@ pub fn InputField(
   const WARN_HINT_CLASS: &str = "text-warn-11 text-sm";
 
   view! {
-    <div class=OUTER_WRAPPER_CLASS>
-      <label class=LABEL_CLASS for=id>{ label_text }</label>
+    <label for=id class=OUTER_WRAPPER_CLASS>
+      <p class=LABEL_CLASS>{ label_text }</p>
       <div class=INPUT_WRAPPER_CLASS>
         { move || before.map(|i| i.into_any()).unwrap_or(().into_any()) }
         <input
@@ -76,6 +76,6 @@ pub fn InputField(
           <p class=WARN_HINT_CLASS>{ e }</p>
         })}
       </div>
-    </div>
+    </label>
   }
 }
