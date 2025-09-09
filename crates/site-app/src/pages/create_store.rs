@@ -116,8 +116,8 @@ pub fn CreateStorePage() -> impl IntoView {
       <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
 
       <InputField
-        id="name" label_text="Cache Name" input_type="text" placeholder=""
-        before=Some(InputIcon::ArchiveBox)
+        id="name" label_text="Store Name" input_type="text" placeholder=""
+        before={InputIcon::ArchiveBox}
         input_signal=read_name output_signal=write_name
         error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
       />
@@ -141,7 +141,7 @@ pub fn CreateStorePage() -> impl IntoView {
           on:click=submit_action
         >
           <div class="size-4" />
-          "Create Cache"
+          "Create Store"
           <LoadingCircle {..}
             class="size-4 transition-opacity"
             class=("opacity-0", move || { !loading() })

@@ -1,47 +1,79 @@
 mod specialized;
 
-use leptos::{ev::Event, prelude::*};
+use leptos::{
+  ev::{Event, MouseEvent},
+  prelude::*,
+};
 
 pub use self::specialized::*;
 use crate::components::{
-  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon, UserHeroIcon,
+  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon, EyeHeroIcon,
+  EyeSlashHeroIcon, GlobeAltHeroIcon, KeyHeroIcon, UserHeroIcon,
 };
 
 #[derive(Clone, Copy)]
 pub enum InputIcon {
   ArchiveBox,
   Envelope,
+  Eye,
+  EyeSlash,
+  GlobeAlt,
+  Key,
   LockClosed,
   User,
 }
 
-impl IntoAny for InputIcon {
-  fn into_any(self) -> AnyView {
-    match self {
-      InputIcon::ArchiveBox => {
-        view! { <ArchiveBoxHeroIcon {..} class="size-6" /> }.into_any()
-      }
-      InputIcon::Envelope => {
-        view! { <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()
-      }
-      InputIcon::LockClosed => {
-        view! { <LockClosedHeroIcon {..} class="size-6" /> }.into_any()
-      }
-      InputIcon::User => {
-        view! { <UserHeroIcon {..} class="size-6" /> }.into_any()
-      }
+macro_rules! icon_match {
+  ($self_expr:expr, $click_handler:expr, $icon_class:expr, {
+      $($variant:ident => $component:ident),* $(,)?
+  }) => {
+    match $self_expr {
+      $(
+        InputIcon::$variant => view! {
+          <$component {..} class=$icon_class on:click=$click_handler />
+        }.into_any(),
+      )*
     }
+  };
+}
+
+impl InputIcon {
+  fn into_any(self, click_handler: Option<Callback<MouseEvent>>) -> AnyView {
+    const ICON_CLASS: &str = "size-6";
+
+    let click_handler = move |e| {
+      if let Some(h) = click_handler {
+        h.run(e)
+      }
+    };
+
+    icon_match!(self, click_handler, ICON_CLASS, {
+        ArchiveBox => ArchiveBoxHeroIcon,
+        Envelope => EnvelopeHeroIcon,
+        Eye => EyeHeroIcon,
+        EyeSlash => EyeSlashHeroIcon,
+        GlobeAlt => GlobeAltHeroIcon,
+        Key => KeyHeroIcon,
+        LockClosed => LockClosedHeroIcon,
+        User => UserHeroIcon,
+    })
   }
 }
 
 #[component]
 pub fn InputField(
-  id: &'static str,
-  label_text: &'static str,
-  input_type: &'static str,
-  placeholder: &'static str,
-  #[prop(optional_no_strip)] before: Option<InputIcon>,
-  #[prop(optional_no_strip)] after: Option<InputIcon>,
+  #[prop(into)] id: Signal<&'static str>,
+  #[prop(into)] label_text: Signal<&'static str>,
+  #[prop(into)] input_type: Signal<&'static str>,
+  #[prop(into)] placeholder: Signal<&'static str>,
+  #[prop(into, optional_no_strip)] before: MaybeProp<InputIcon>,
+  #[prop(into, optional_no_strip)] after: MaybeProp<InputIcon>,
+  #[prop(into, optional_no_strip)] before_click_callback: Option<
+    Callback<MouseEvent>,
+  >,
+  #[prop(into, optional_no_strip)] after_click_callback: Option<
+    Callback<MouseEvent>,
+  >,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -60,13 +92,13 @@ pub fn InputField(
     <label for=id class=OUTER_WRAPPER_CLASS>
       <p class=LABEL_CLASS>{ label_text }</p>
       <div class=INPUT_WRAPPER_CLASS>
-        { move || before.map(|i| i.into_any()).unwrap_or(().into_any()) }
+        { move || before().map(|i| i.into_any(before_click_callback)) }
         <input
           class=INPUT_CLASS type=input_type autofocus=autofocus
           placeholder=placeholder id=id
           on:input={move |ev| output_signal(ev)} prop:value={move || input_signal()}
         />
-        { move || after.map(|i| i.into_any()).unwrap_or(().into_any()) }
+        { move || after().map(|i| i.into_any(after_click_callback)) }
       </div>
       <div class=HINT_WRAPPER_CLASS>
         { move || error_hint().map(|e| view! {
@@ -77,5 +109,49 @@ pub fn InputField(
         })}
       </div>
     </label>
+  }
+}
+
+#[component]
+pub fn HideableInputField(
+  #[prop(default = true)] hidden_by_default: bool,
+  id: &'static str,
+  label_text: &'static str,
+  unhidden_input_type: &'static str,
+  placeholder: &'static str,
+  #[prop(into, optional_no_strip)] before: MaybeProp<InputIcon>,
+  #[prop(into, optional_no_strip)] before_click_callback: Option<
+    Callback<MouseEvent>,
+  >,
+  input_signal: impl Fn() -> String + Send + 'static,
+  output_signal: impl Fn(Event) + Send + 'static,
+  #[prop(default = false)] autofocus: bool,
+  #[prop(into)] error_hint: MaybeProp<String>,
+  #[prop(into)] warn_hint: MaybeProp<String>,
+) -> impl IntoView {
+  let input_visible = RwSignal::new(!hidden_by_default);
+  let input_type = Signal::derive(move || match input_visible() {
+    true => unhidden_input_type,
+    false => "password",
+  });
+  let after = Signal::derive(move || match input_visible() {
+    true => InputIcon::Eye,
+    false => InputIcon::EyeSlash,
+  });
+  let after_click_callback = Callback::new(move |_| {
+    input_visible.update(move |v| {
+      *v = !*v;
+    })
+  });
+
+  view! {
+    <InputField
+      id=id label_text=label_text input_type=input_type placeholder=placeholder
+      before=before after=after
+      before_click_callback=before_click_callback after_click_callback=after_click_callback
+      input_signal=input_signal output_signal=output_signal
+      autofocus=autofocus
+      error_hint=error_hint warn_hint=warn_hint
+    />
   }
 }

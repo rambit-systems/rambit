@@ -1,7 +1,10 @@
 use leptos::prelude::*;
 use models::R2StorageCredentials;
 
-use crate::{components::InputField, reactive_utils::touched_input_bindings};
+use crate::{
+  components::{HideableInputField, InputField, InputIcon},
+  reactive_utils::touched_input_bindings,
+};
 
 #[component]
 pub fn CredentialsInput(
@@ -84,25 +87,29 @@ pub fn CredentialsInput(
 
   view! {
     <div class="flex flex-col gap-2">
-      <InputField
-        id="access_key" label_text="Access Key" input_type="password" placeholder=""
+      <HideableInputField
+        id="access_key" label_text="Access Key" unhidden_input_type="text" placeholder=""
         input_signal=read_access_key output_signal=write_access_key
         error_hint=access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
+        before={InputIcon::Key}
       />
-      <InputField
-        id="secret_access_key" label_text="Secret Access Key" input_type="password" placeholder=""
+      <HideableInputField
+        id="secret_access_key" label_text="Secret Access Key" unhidden_input_type="text" placeholder=""
         input_signal=read_secret_access_key output_signal=write_secret_access_key
         error_hint=secret_access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
+        before={InputIcon::Key}
       />
       <InputField
         id="bucket" label_text="Bucket" input_type="text" placeholder=""
         input_signal=read_bucket output_signal=write_bucket
         error_hint=bucket_error_hint warn_hint={ MaybeProp::derive(|| None) }
+        before={InputIcon::ArchiveBox}
       />
       <InputField
         id="endpoint" label_text="Endpoint" input_type="text" placeholder=""
         input_signal=read_endpoint output_signal=write_endpoint
         error_hint=endpoint_error_hint warn_hint={ MaybeProp::derive(|| None) }
+        before={InputIcon::GlobeAlt}
       />
     </div>
   }
