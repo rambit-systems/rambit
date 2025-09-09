@@ -106,7 +106,7 @@ pub fn CreateCachePage() -> impl IntoView {
       <div class="flex flex-col gap-4">
         <InputField
           id="name" label_text="Cache Name" input_type="text" placeholder=""
-          before=Some(InputIcon::ArchiveBox)
+          before=InputIcon::ArchiveBox
           input_signal=read_name output_signal=write_name
           error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
         />

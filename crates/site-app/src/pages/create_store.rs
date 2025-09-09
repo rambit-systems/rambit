@@ -117,7 +117,7 @@ pub fn CreateStorePage() -> impl IntoView {
 
       <InputField
         id="name" label_text="Store Name" input_type="text" placeholder=""
-        before=Some(InputIcon::ArchiveBox)
+        before={InputIcon::ArchiveBox}
         input_signal=read_name output_signal=write_name
         error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
       />

@@ -8,11 +8,11 @@ pub fn NameInputField(
   #[prop(default = "Full Name")] label_text: &'static str,
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
-  #[prop(default =
-    Some(InputIcon::User)
+  #[prop(into, default =
+    InputIcon::User.into()
   )]
-  before: Option<InputIcon>,
-  #[prop(optional)] after: Option<InputIcon>,
+  before: MaybeProp<InputIcon>,
+  #[prop(optional)] after: MaybeProp<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -36,11 +36,11 @@ pub fn EmailInputField(
   #[prop(default = "Email Address")] label_text: &'static str,
   #[prop(default = "text")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
-  #[prop(default =
-    Some(InputIcon::Envelope)
+  #[prop(into, default =
+    InputIcon::Envelope.into()
   )]
-  before: Option<InputIcon>,
-  #[prop(optional)] after: Option<InputIcon>,
+  before: MaybeProp<InputIcon>,
+  #[prop(into, optional)] after: MaybeProp<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -64,11 +64,11 @@ pub fn PasswordInputField(
   #[prop(default = "Password")] label_text: &'static str,
   #[prop(default = "password")] input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
-  #[prop(default =
-    Some(InputIcon::LockClosed)
+  #[prop(into, default =
+    InputIcon::LockClosed.into()
   )]
-  before: Option<InputIcon>,
-  #[prop(optional)] after: Option<InputIcon>,
+  before: MaybeProp<InputIcon>,
+  #[prop(into, optional)] after: MaybeProp<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,

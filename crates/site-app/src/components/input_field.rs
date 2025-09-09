@@ -4,31 +4,41 @@ use leptos::{ev::Event, prelude::*};
 
 pub use self::specialized::*;
 use crate::components::{
-  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon, UserHeroIcon,
+  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon,
+  GlobeAltHeroIcon, KeyHeroIcon, UserHeroIcon,
 };
 
 #[derive(Clone, Copy)]
 pub enum InputIcon {
   ArchiveBox,
   Envelope,
+  GlobeAlt,
+  Key,
   LockClosed,
   User,
 }
 
 impl IntoAny for InputIcon {
   fn into_any(self) -> AnyView {
+    const ICON_CLASS: &str = "size-6";
     match self {
       InputIcon::ArchiveBox => {
-        view! { <ArchiveBoxHeroIcon {..} class="size-6" /> }.into_any()
+        view! { <ArchiveBoxHeroIcon {..} class=ICON_CLASS /> }.into_any()
       }
       InputIcon::Envelope => {
-        view! { <EnvelopeHeroIcon {..} class="size-6" /> }.into_any()
+        view! { <EnvelopeHeroIcon {..} class=ICON_CLASS /> }.into_any()
+      }
+      InputIcon::GlobeAlt => {
+        view! { <GlobeAltHeroIcon {..} class=ICON_CLASS /> }.into_any()
+      }
+      InputIcon::Key => {
+        view! { <KeyHeroIcon {..} class=ICON_CLASS /> }.into_any()
       }
       InputIcon::LockClosed => {
-        view! { <LockClosedHeroIcon {..} class="size-6" /> }.into_any()
+        view! { <LockClosedHeroIcon {..} class=ICON_CLASS /> }.into_any()
       }
       InputIcon::User => {
-        view! { <UserHeroIcon {..} class="size-6" /> }.into_any()
+        view! { <UserHeroIcon {..} class=ICON_CLASS /> }.into_any()
       }
     }
   }
@@ -40,8 +50,8 @@ pub fn InputField(
   label_text: &'static str,
   input_type: &'static str,
   placeholder: &'static str,
-  #[prop(optional_no_strip)] before: Option<InputIcon>,
-  #[prop(optional_no_strip)] after: Option<InputIcon>,
+  #[prop(into, optional_no_strip)] before: MaybeProp<InputIcon>,
+  #[prop(into, optional_no_strip)] after: MaybeProp<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
@@ -60,13 +70,13 @@ pub fn InputField(
     <label for=id class=OUTER_WRAPPER_CLASS>
       <p class=LABEL_CLASS>{ label_text }</p>
       <div class=INPUT_WRAPPER_CLASS>
-        { move || before.map(|i| i.into_any()).unwrap_or(().into_any()) }
+        { move || before().map(|i| i.into_any()) }
         <input
           class=INPUT_CLASS type=input_type autofocus=autofocus
           placeholder=placeholder id=id
           on:input={move |ev| output_signal(ev)} prop:value={move || input_signal()}
         />
-        { move || after.map(|i| i.into_any()).unwrap_or(().into_any()) }
+        { move || after().map(|i| i.into_any()) }
       </div>
       <div class=HINT_WRAPPER_CLASS>
         { move || error_hint().map(|e| view! {
