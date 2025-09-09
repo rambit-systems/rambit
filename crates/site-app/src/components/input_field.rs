@@ -27,8 +27,8 @@ pub fn InputField(
   #[prop(into)] output_signal: Callback<Event>,
 
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<String>,
-  #[prop(into)] warn_hint: MaybeProp<String>,
+  #[prop(into, optional_no_strip)] error_hint: MaybeProp<String>,
+  #[prop(into, optional_no_strip)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   const OUTER_WRAPPER_CLASS: &str = "flex flex-col gap-1";
   const LABEL_CLASS: &str = "text-base-11";
@@ -82,8 +82,8 @@ pub fn HideableInputField(
   #[prop(into)] output_signal: Callback<Event>,
 
   #[prop(default = false)] autofocus: bool,
-  #[prop(into)] error_hint: MaybeProp<String>,
-  #[prop(into)] warn_hint: MaybeProp<String>,
+  #[prop(into, optional_no_strip)] error_hint: MaybeProp<String>,
+  #[prop(into, optional_no_strip)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   let input_visible = RwSignal::new(!hidden_by_default);
   let input_type = Signal::derive(move || match input_visible() {
