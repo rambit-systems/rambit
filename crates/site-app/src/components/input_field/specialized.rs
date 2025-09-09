@@ -69,7 +69,6 @@ pub fn PasswordInputField(
     InputIcon::LockClosed.into()
   )]
   before: MaybeProp<InputIcon>,
-  #[prop(into, optional)] after: MaybeProp<InputIcon>,
   input_signal: impl Fn() -> String + Send + 'static,
   output_signal: impl Fn(Event) + Send + 'static,
   #[prop(default = false)] autofocus: bool,
