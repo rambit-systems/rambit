@@ -2,11 +2,11 @@ use leptos::{ev::Event, prelude::*};
 
 pub fn touched_input_bindings(
   s: RwSignal<String>,
-) -> (impl Fn() -> String, impl Fn(Event)) {
+) -> (Callback<(), String>, Callback<Event>) {
   (
-    move || s.get(),
-    move |e| {
+    Callback::new(move |_| s.get()),
+    Callback::new(move |e| {
       s.set(event_target_value(&e));
-    },
+    }),
   )
 }

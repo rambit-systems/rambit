@@ -62,21 +62,21 @@ impl SignupHook {
     }
   }
 
-  pub fn name_bindings(&self) -> (impl Fn() -> String, impl Fn(Event)) {
+  pub fn name_bindings(&self) -> (Callback<(), String>, Callback<Event>) {
     touched_input_bindings(self.name_signal)
   }
 
-  pub fn email_bindings(&self) -> (impl Fn() -> String, impl Fn(Event)) {
+  pub fn email_bindings(&self) -> (Callback<(), String>, Callback<Event>) {
     touched_input_bindings(self.email_signal)
   }
 
-  pub fn password_bindings(&self) -> (impl Fn() -> String, impl Fn(Event)) {
+  pub fn password_bindings(&self) -> (Callback<(), String>, Callback<Event>) {
     touched_input_bindings(self.password_signal)
   }
 
   pub fn confirm_password_bindings(
     &self,
-  ) -> (impl Fn() -> String, impl Fn(Event)) {
+  ) -> (Callback<(), String>, Callback<Event>) {
     touched_input_bindings(self.confirm_password_signal)
   }
 

@@ -1,9 +1,7 @@
 use leptos::{ev::SubmitEvent, prelude::*};
 
 use crate::{
-  components::{
-    EmailInputField, LoadingCircle, NameInputField, PasswordInputField,
-  },
+  components::{HideableInputField, InputField, InputIcon, LoadingCircle},
   hooks::SignupHook,
 };
 
@@ -47,25 +45,32 @@ fn SignupIsland() -> impl IntoView {
       </p>
 
       <div class="flex flex-col gap-4">
-        <NameInputField
+        <InputField
+          id="name" label_text="Full Name" input_type="text"
           autofocus=true
           input_signal=name_bindings.0 output_signal=name_bindings.1
+          before={InputIcon::User}
           error_hint={MaybeProp::derive(signup_hook.name_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
-        <EmailInputField
+        <InputField
+          id="email" label_text="Email Address" input_type="text"
           input_signal=email_bindings.0 output_signal=email_bindings.1
+          before={InputIcon::Envelope}
           error_hint={MaybeProp::derive(signup_hook.email_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
-        <PasswordInputField
+        <HideableInputField
+          id="password" label_text="Password"
           input_signal=password_bindings.0 output_signal=password_bindings.1
+          before={InputIcon::LockClosed}
           error_hint={MaybeProp::derive(signup_hook.password_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
-        <PasswordInputField
+        <HideableInputField
           id="confirm_password" label_text="Confirm Password"
           input_signal=confirm_password_bindings.0 output_signal=confirm_password_bindings.1
+          before={InputIcon::LockClosed}
           error_hint={MaybeProp::derive(signup_hook.confirm_password_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />

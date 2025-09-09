@@ -1,71 +1,19 @@
-mod specialized;
+mod icon;
 
 use leptos::{
   ev::{Event, MouseEvent},
   prelude::*,
 };
 
-pub use self::specialized::*;
-use crate::components::{
-  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon, EyeHeroIcon,
-  EyeSlashHeroIcon, GlobeAltHeroIcon, KeyHeroIcon, UserHeroIcon,
-};
-
-#[derive(Clone, Copy)]
-pub enum InputIcon {
-  ArchiveBox,
-  Envelope,
-  Eye,
-  EyeSlash,
-  GlobeAlt,
-  Key,
-  LockClosed,
-  User,
-}
-
-macro_rules! icon_match {
-  ($self_expr:expr, $click_handler:expr, $icon_class:expr, {
-      $($variant:ident => $component:ident),* $(,)?
-  }) => {
-    match $self_expr {
-      $(
-        InputIcon::$variant => view! {
-          <$component {..} class=$icon_class on:click=$click_handler />
-        }.into_any(),
-      )*
-    }
-  };
-}
-
-impl InputIcon {
-  fn into_any(self, click_handler: Option<Callback<MouseEvent>>) -> AnyView {
-    const ICON_CLASS: &str = "size-6";
-
-    let click_handler = move |e| {
-      if let Some(h) = click_handler {
-        h.run(e)
-      }
-    };
-
-    icon_match!(self, click_handler, ICON_CLASS, {
-        ArchiveBox => ArchiveBoxHeroIcon,
-        Envelope => EnvelopeHeroIcon,
-        Eye => EyeHeroIcon,
-        EyeSlash => EyeSlashHeroIcon,
-        GlobeAlt => GlobeAltHeroIcon,
-        Key => KeyHeroIcon,
-        LockClosed => LockClosedHeroIcon,
-        User => UserHeroIcon,
-    })
-  }
-}
+pub use self::icon::*;
 
 #[component]
 pub fn InputField(
   #[prop(into)] id: Signal<&'static str>,
-  #[prop(into)] label_text: Signal<&'static str>,
+  #[prop(into, optional_no_strip)] label_text: MaybeProp<&'static str>,
   #[prop(into)] input_type: Signal<&'static str>,
-  #[prop(into)] placeholder: Signal<&'static str>,
+  #[prop(into, optional_no_strip)] placeholder: MaybeProp<&'static str>,
+
   #[prop(into, optional_no_strip)] before: MaybeProp<InputIcon>,
   #[prop(into, optional_no_strip)] after: MaybeProp<InputIcon>,
   #[prop(into, optional_no_strip)] before_click_callback: Option<
@@ -74,8 +22,10 @@ pub fn InputField(
   #[prop(into, optional_no_strip)] after_click_callback: Option<
     Callback<MouseEvent>,
   >,
-  input_signal: impl Fn() -> String + Send + 'static,
-  output_signal: impl Fn(Event) + Send + 'static,
+
+  #[prop(into)] input_signal: Callback<(), String>,
+  #[prop(into)] output_signal: Callback<Event>,
+
   #[prop(default = false)] autofocus: bool,
   #[prop(into)] error_hint: MaybeProp<String>,
   #[prop(into)] warn_hint: MaybeProp<String>,
@@ -96,7 +46,7 @@ pub fn InputField(
         <input
           class=INPUT_CLASS type=input_type autofocus=autofocus
           placeholder=placeholder id=id
-          on:input={move |ev| output_signal(ev)} prop:value={move || input_signal()}
+          on:input={move |ev| output_signal.run(ev)} prop:value={move || input_signal.run(())}
         />
         { move || after().map(|i| i.into_any(after_click_callback)) }
       </div>
@@ -115,23 +65,29 @@ pub fn InputField(
 #[component]
 pub fn HideableInputField(
   #[prop(default = true)] hidden_by_default: bool,
-  id: &'static str,
-  label_text: &'static str,
-  unhidden_input_type: &'static str,
-  placeholder: &'static str,
+
+  #[prop(into)] id: Signal<&'static str>,
+  #[prop(into, optional_no_strip)] label_text: MaybeProp<&'static str>,
+  #[prop(into, default = "text".into())] unhidden_input_type: Signal<
+    &'static str,
+  >,
+  #[prop(into, optional_no_strip)] placeholder: MaybeProp<&'static str>,
+
   #[prop(into, optional_no_strip)] before: MaybeProp<InputIcon>,
   #[prop(into, optional_no_strip)] before_click_callback: Option<
     Callback<MouseEvent>,
   >,
-  input_signal: impl Fn() -> String + Send + 'static,
-  output_signal: impl Fn(Event) + Send + 'static,
+
+  #[prop(into)] input_signal: Callback<(), String>,
+  #[prop(into)] output_signal: Callback<Event>,
+
   #[prop(default = false)] autofocus: bool,
   #[prop(into)] error_hint: MaybeProp<String>,
   #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   let input_visible = RwSignal::new(!hidden_by_default);
   let input_type = Signal::derive(move || match input_visible() {
-    true => unhidden_input_type,
+    true => unhidden_input_type(),
     false => "password",
   });
   let after = Signal::derive(move || match input_visible() {

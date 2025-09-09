@@ -88,13 +88,13 @@ pub fn CredentialsInput(
   view! {
     <div class="flex flex-col gap-2">
       <HideableInputField
-        id="access_key" label_text="Access Key" unhidden_input_type="text" placeholder=""
+        id="access_key" label_text="Access Key" placeholder=""
         input_signal=read_access_key output_signal=write_access_key
         error_hint=access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::Key}
       />
       <HideableInputField
-        id="secret_access_key" label_text="Secret Access Key" unhidden_input_type="text" placeholder=""
+        id="secret_access_key" label_text="Secret Access Key" placeholder=""
         input_signal=read_secret_access_key output_signal=write_secret_access_key
         error_hint=secret_access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::Key}
