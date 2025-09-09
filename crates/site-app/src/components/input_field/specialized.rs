@@ -1,6 +1,7 @@
 use leptos::{ev::Event, prelude::*};
 
 use super::{InputField, InputIcon};
+use crate::components::HideableInputField;
 
 #[component]
 pub fn NameInputField(
@@ -62,7 +63,7 @@ pub fn EmailInputField(
 pub fn PasswordInputField(
   #[prop(default = "password")] id: &'static str,
   #[prop(default = "Password")] label_text: &'static str,
-  #[prop(default = "password")] input_type: &'static str,
+  #[prop(default = "text")] unhidden_input_type: &'static str,
   #[prop(default = "")] placeholder: &'static str,
   #[prop(into, default =
     InputIcon::LockClosed.into()
@@ -76,10 +77,10 @@ pub fn PasswordInputField(
   #[prop(into)] warn_hint: MaybeProp<String>,
 ) -> impl IntoView {
   view! {
-    <InputField
-      id=id label_text=label_text
-      input_type=input_type placeholder=placeholder autofocus=autofocus
-      before=before after=after
+    <HideableInputField
+      id=id label_text=label_text unhidden_input_type=unhidden_input_type
+      placeholder=placeholder autofocus=autofocus
+      before=before
       input_signal=input_signal output_signal=output_signal
       error_hint=error_hint warn_hint=warn_hint
     />
