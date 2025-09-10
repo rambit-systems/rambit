@@ -40,12 +40,9 @@ fn SignupIsland() -> impl IntoView {
 
   let _ = signup_hook.create_redirect_effect();
 
-  // unbroken class
-  //   md:grid-cols-[calc(48_*_var(--spacing))_minmax(0,_1fr)]
   const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-3xl \
                             elevation-flat flex flex-col md:grid \
-                            md:grid-cols-[calc(48_*_var(--spacing))_minmax(0,\
-                            _1fr)] gap-x-8 gap-y-12";
+                            md:grid-cols-form gap-x-8 gap-y-12";
 
   view! {
     <form on:submit=submit_action class=FORM_CLASS>
