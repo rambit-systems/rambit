@@ -1,7 +1,7 @@
 use leptos::{ev::SubmitEvent, prelude::*};
 
 use crate::{
-  components::{EmailInputField, LoadingCircle, PasswordInputField},
+  components::{HideableInputField, InputField, InputIcon, LoadingCircle},
   hooks::LoginHook,
 };
 
@@ -42,14 +42,18 @@ fn LoginIsland() -> impl IntoView {
       </p>
 
       <div class="flex flex-col gap-4">
-        <EmailInputField
+        <InputField
+          id="email" label_text="Email Address" input_type="text"
           autofocus=true
           input_signal=email_bindings.0 output_signal=email_bindings.1
+          before={InputIcon::Envelope}
           error_hint={MaybeProp::derive(login_hook.email_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />
-        <PasswordInputField
+        <HideableInputField
+          id="password" label_text="Password"
           input_signal=password_bindings.0 output_signal=password_bindings.1
+          before={InputIcon::LockClosed}
           error_hint={MaybeProp::derive(login_hook.password_error_hint())}
           warn_hint={MaybeProp::from(None::<String>)}
         />

@@ -44,6 +44,13 @@
   /* animations */
   --animate-fade-in: fade-in 0.15s ease-out;
   --animate-fade-out: fade-out 0.15s ease-in;
+
+  /* custom grid template columns */
+  --form-grid-cols: calc(48 * var(--spacing)) minmax(0, 1fr)
+}
+
+@utility grid-cols-form {
+  grid-template-columns: var(--form-grid-cols);
 }
 
 @keyframes fade-in {
