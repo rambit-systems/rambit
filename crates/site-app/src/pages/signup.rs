@@ -1,7 +1,9 @@
 use leptos::{ev::SubmitEvent, prelude::*};
 
 use crate::{
-  components::{HideableInputField, InputField, InputIcon, LoadingCircle},
+  components::{
+    form_layout::*, HideableInputField, InputField, InputIcon, LoadingCircle,
+  },
   hooks::SignupHook,
 };
 
@@ -123,36 +125,5 @@ fn SignupIsland() -> impl IntoView {
         </label>
       </GridRow>
     </form>
-  }
-}
-
-#[component]
-fn GridRow(children: Children) -> impl IntoView {
-  view! {
-    <div class="flex flex-col gap-2 md:contents">
-      { children() }
-    </div>
-  }
-}
-
-#[component]
-fn GridRowFull(children: Children) -> impl IntoView {
-  view! {
-    <div class="flex flex-col gap-2 md:col-span-2">
-      { children() }
-    </div>
-  }
-}
-
-#[component]
-fn GridRowLabel(
-  #[prop(into)] title: String,
-  #[prop(into)] desc: String,
-) -> impl IntoView {
-  view! {
-    <div class="flex flex-col gap-0.5">
-      <p class="text-base-12">{ title }</p>
-      <p class="text-sm max-w-prose">{ desc }</p>
-    </div>
   }
 }
