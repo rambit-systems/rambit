@@ -21,7 +21,14 @@ tracing.workspace = true
 
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 leptos-fetch = { version = "0.4", features = [ "devtools" ] }
-leptos-use = { version = "0.16" }
+leptos-use = { version = "0.16", default-features = false, features = [
+  "on_click_outside",
+  "use_event_listener",
+  "use_window",
+  "use_interval_fn",
+  "use_window_focus",
+  "use_clipboard",
+] }
 
 [features]
 default = [  ]
