@@ -37,12 +37,23 @@ pub fn CreateCachePage() -> impl IntoView {
   let (read_name, write_name) = touched_input_bindings(name);
   let visibility = RwSignal::new(Visibility::Private);
 
+  let query_client = expect_context::<QueryClient>();
+  let is_available_key_fn = move || sanitized_name().map(|n| n.to_string());
   let is_available_query_scope =
     crate::resources::cache::cache_name_is_available_query_scope();
   let is_available_resource = expect_context::<QueryClient>()
-    .local_resource(is_available_query_scope, move || {
-      sanitized_name().map(|n| n.to_string())
-    });
+    .local_resource(is_available_query_scope.clone(), is_available_key_fn);
+  let is_available_fetching = query_client
+    .subscribe_is_fetching(is_available_query_scope, is_available_key_fn);
+
+  let name_after_icon = Memo::new(move |_| {
+    match (is_available_fetching(), is_available_resource.get()) {
+      (true, _) => Some(InputIcon::Loading),
+      (_, Some(Some(Ok(true)))) => Some(InputIcon::Check),
+      (_, Some(Some(Ok(false)))) => Some(InputIcon::XMark),
+      _ => None,
+    }
+  });
 
   let action = ServerAction::<CreateCache>::new();
   let loading = {
@@ -63,12 +74,14 @@ pub fn CreateCachePage() -> impl IntoView {
     None
   });
   let name_error_hint = MaybeProp::derive(move || {
-    if let (Some(Some(Ok(false))), Some(sanitized_name)) =
-      (is_available_resource.get(), sanitized_name())
-    {
-      Some(format!("The name \"{sanitized_name}\" is unavailable."))
-    } else {
-      None
+    match (is_available_resource.get(), sanitized_name()) {
+      (Some(Some(Ok(false))), Some(sanitized_name)) => {
+        Some(format!("The name \"{sanitized_name}\" is unavailable."))
+      }
+      (Some(Some(Err(_))), _) => {
+        Some("Sorry, something went wrong.".to_owned())
+      }
+      _ => None,
     }
   });
 
@@ -107,6 +120,7 @@ pub fn CreateCachePage() -> impl IntoView {
         <InputField
           id="name" label_text="Cache Name" input_type="text" placeholder=""
           before=InputIcon::ArchiveBox
+          after=name_after_icon
           input_signal=read_name output_signal=write_name
           error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
         />

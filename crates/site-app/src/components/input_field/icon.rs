@@ -1,58 +1,45 @@
-use leptos::{ev::MouseEvent, prelude::*};
+use leptos::{either::EitherOf11, prelude::*};
 
 use crate::components::{
-  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, EnvelopeHeroIcon, EyeHeroIcon,
-  EyeSlashHeroIcon, GlobeAltHeroIcon, KeyHeroIcon, UserHeroIcon,
+  icons::LockClosedHeroIcon, ArchiveBoxHeroIcon, ArrowPathHeroIcon,
+  CheckHeroIcon, EnvelopeHeroIcon, EyeHeroIcon, EyeSlashHeroIcon,
+  GlobeAltHeroIcon, KeyHeroIcon, UserHeroIcon, XMarkHeroIcon,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum InputIcon {
   ArchiveBox,
+  Check,
   Envelope,
   Eye,
   EyeSlash,
   GlobeAlt,
   Key,
+  Loading,
   LockClosed,
   User,
+  XMark,
 }
 
-macro_rules! icon_match {
-  ($self_expr:expr, $click_handler:expr, $icon_class:expr, {
-  $($variant:ident => $component:ident),* $(,)?
-  }) => {
-match $self_expr {
-  $(
-    InputIcon::$variant => view! {
-      <$component {..} class=$icon_class on:click=$click_handler />
-    }.into_any(),
-  )*
-}
+#[component]
+pub fn InputIconComponent(icon: InputIcon) -> impl IntoView {
+  let icon = match icon {
+    InputIcon::ArchiveBox => EitherOf11::A(view! { <ArchiveBoxHeroIcon />}),
+    InputIcon::Check => EitherOf11::B(view! { <CheckHeroIcon /> }),
+    InputIcon::Envelope => EitherOf11::C(view! { <EnvelopeHeroIcon /> }),
+    InputIcon::Eye => EitherOf11::D(view! { <EyeHeroIcon /> }),
+    InputIcon::EyeSlash => EitherOf11::E(view! { <EyeSlashHeroIcon /> }),
+    InputIcon::GlobeAlt => EitherOf11::F(view! { <GlobeAltHeroIcon /> }),
+    InputIcon::Key => EitherOf11::G(view! { <KeyHeroIcon /> }),
+    InputIcon::Loading => EitherOf11::H(view! { <ArrowPathHeroIcon /> }),
+    InputIcon::LockClosed => EitherOf11::I(view! { <LockClosedHeroIcon /> }),
+    InputIcon::User => EitherOf11::J(view! { <UserHeroIcon /> }),
+    InputIcon::XMark => EitherOf11::K(view! { <XMarkHeroIcon /> }),
   };
-}
 
-impl InputIcon {
-  pub fn into_any(
-    self,
-    click_handler: Option<Callback<MouseEvent>>,
-  ) -> AnyView {
-    const ICON_CLASS: &str = "size-6";
-
-    let click_handler = move |e| {
-      if let Some(h) = click_handler {
-        h.run(e)
-      }
-    };
-
-    icon_match!(self, click_handler, ICON_CLASS, {
-        ArchiveBox => ArchiveBoxHeroIcon,
-        Envelope => EnvelopeHeroIcon,
-        Eye => EyeHeroIcon,
-        EyeSlash => EyeSlashHeroIcon,
-        GlobeAlt => GlobeAltHeroIcon,
-        Key => KeyHeroIcon,
-        LockClosed => LockClosedHeroIcon,
-        User => UserHeroIcon,
-    })
+  view! {
+    <div class="size-6 shrink-0">
+      { icon }
+    </div>
   }
 }
