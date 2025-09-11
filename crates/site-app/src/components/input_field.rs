@@ -35,9 +35,8 @@ pub fn InputField(
   const INPUT_WRAPPER_CLASS: &str = "input-field max-w-80";
   const INPUT_CLASS: &str = "w-full py-2 focus-visible:outline-none";
   const HINT_WRAPPER_CLASS: &str = "flex flex-col";
-  const ERROR_HINT_CLASS: &str =
-    "animate-fade-in overflow-hidden text-critical-11 text-sm";
-  const WARN_HINT_CLASS: &str = "text-warn-11 text-sm";
+  const ERROR_HINT_CLASS: &str = "animate-fade-down text-critical-11 text-sm";
+  const WARN_HINT_CLASS: &str = "animate-fade-down text-warn-11 text-sm";
 
   let before_click_callback = move |ce| {
     if let Some(callback) = before_click_callback {

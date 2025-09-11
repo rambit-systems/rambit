@@ -42,8 +42,8 @@
     rgba(27, 50, 73, 0.08) 0px 2px 12px 0px;
 
   /* animations */
-  --animate-fade-in: fade-in 0.15s ease-out;
-  --animate-fade-out: fade-out 0.15s ease-in;
+  --animate-fade-in: fade-in 0.15s linear;
+  --animate-fade-down: fade-down 0.10s linear;
 
   /* custom grid template columns */
   --form-grid-cols: calc(48 * var(--spacing)) minmax(0, 1fr)
@@ -62,12 +62,14 @@
   }
 }
 
-@keyframes fade-out {
+@keyframes fade-down {
   from {
-    opacity: 1;
+    opacity: 0;
+    transform: scaleY(0);
   }
   to {
-    opacity: 0;
+    opacity: 1;
+    transform: scaleY(1);
   }
 }
 
