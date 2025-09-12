@@ -35,20 +35,35 @@ pub fn InputField(
   const INPUT_WRAPPER_CLASS: &str = "input-field max-w-80";
   const INPUT_CLASS: &str = "w-full py-2 focus-visible:outline-none";
   const HINT_WRAPPER_CLASS: &str = "flex flex-col";
-  const ERROR_HINT_CLASS: &str = "text-critical-11 text-sm";
-  const WARN_HINT_CLASS: &str = "text-warn-11 text-sm";
+  const ERROR_HINT_CLASS: &str = "animate-fade-down text-critical-11 text-sm";
+  const WARN_HINT_CLASS: &str = "animate-fade-down text-warn-11 text-sm";
+
+  let before_click_callback = move |ce| {
+    if let Some(callback) = before_click_callback {
+      callback.run(ce);
+    }
+  };
+  let after_click_callback = move |ce| {
+    if let Some(callback) = after_click_callback {
+      callback.run(ce);
+    }
+  };
 
   view! {
     <label for=id class=OUTER_WRAPPER_CLASS>
       <p class=LABEL_CLASS>{ label_text }</p>
       <div class=INPUT_WRAPPER_CLASS>
-        { move || before().map(|i| i.into_any(before_click_callback)) }
+        { move || before().map(move |i| view! {
+          <InputIconComponent icon={i} {..} on:click=before_click_callback />
+        }) }
         <input
           class=INPUT_CLASS type=input_type autofocus=autofocus
           placeholder=placeholder id=id
           on:input={move |ev| output_signal.run(ev)} prop:value={move || input_signal.run(())}
         />
-        { move || after().map(|i| i.into_any(after_click_callback)) }
+        { move || after().map(move |i| view! {
+          <InputIconComponent icon={i} {..} on:click=after_click_callback />
+        }) }
       </div>
       <div class=HINT_WRAPPER_CLASS>
         { move || error_hint().map(|e| view! {

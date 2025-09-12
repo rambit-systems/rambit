@@ -45,7 +45,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
     <div class="relative">
       <div class=CONTAINER_CLASS on:click=toggle>
         <span class="text-base-12 text-sm">{ user.name.to_string() }</span>
-        <div class="flex flex-row items-center gap-0.5">
+        <div class="flex flex-row items-center gap-0">
           <span class="text-sm">
             <Suspense fallback=|| "[loading]">
               { move || Suspend::new(active_org_descriptor) }
