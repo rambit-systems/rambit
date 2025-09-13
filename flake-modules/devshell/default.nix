@@ -4,6 +4,9 @@
       packages = with pkgs; [
         (rust-toolchain.dev-toolchain pkgs)
 
+        # database
+        postgresql_18
+
         # libraries used in local rust builds
         pkg-config
 
