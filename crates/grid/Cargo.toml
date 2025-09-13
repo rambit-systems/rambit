@@ -12,7 +12,9 @@ prime-domain = { path = "../prime-domain" }
 site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
 tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 
-kv = { workspace = true, features = [ "redb" ] }
+kv = { workspace = true }
+kv-redb-impl = { workspace = true }
+kv-tikv-impl = { workspace = true, optional = true }
 
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
 
@@ -39,7 +41,7 @@ tower-sessions.workspace = true
 [features]
 default = [  ]
 json-tracing = [ "tracing-subscriber/json", "tracing-subscriber/valuable" ]
-tikv = [ "kv/tikv" ]
+tikv = [ "dep:kv-tikv-impl" ]
 
 [lints]
 workspace = true

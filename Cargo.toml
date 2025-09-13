@@ -15,15 +15,10 @@ belt = { git = "https://github.com/johnbchron/app-core" }
 db = { git = "https://github.com/johnbchron/app-core" }
 dvf = { git = "https://github.com/johnbchron/app-core" }
 kv = { git = "https://github.com/johnbchron/app-core" }
+kv-redb-impl = { git = "https://github.com/johnbchron/app-core" }
+kv-tikv-impl = { git = "https://github.com/johnbchron/app-core" }
 model = { git = "https://github.com/johnbchron/app-core" }
 storage = { git = "https://github.com/johnbchron/app-core" }
-
-# belt = { path = "../app-core/crates/belt" }
-# db = { path = "../app-core/crates/db" }
-# dvf = { path = "../app-core/crates/dvf" }
-# kv = { path = "../app-core/crates/kv" }
-# model = { path = "../app-core/crates/model" }
-# storage = { path = "../app-core/crates/storage" }
 
 # essentials
 bytes = { version = "1" }

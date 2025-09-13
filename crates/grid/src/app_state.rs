@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use leptos::config::LeptosOptions;
@@ -20,10 +22,14 @@ impl AppState {
       let kv_store_location = std::path::PathBuf::from(
         std::env::var("REDB_STORE_PATH").unwrap_or("/tmp/rambit-db".to_owned()),
       );
-      kv::KeyValueStore::new_redb(&kv_store_location)?
+      kv::KeyValueStore::new(Arc::new(kv_redb_impl::RedbClient::new(
+        &kv_store_location,
+      )?))
     };
     #[cfg(feature = "tikv")]
-    let kv_store = kv::KeyValueStore::new_tikv_from_env().await?;
+    let kv_store = kv::KeyValueStore::new(Arc::new(
+      kv_tikv_impl::TikvClient::new_from_env().await?,
+    ));
 
     let org_db = Database::new_from_kv(kv_store.clone());
     let user_db = Database::new_from_kv(kv_store.clone());
