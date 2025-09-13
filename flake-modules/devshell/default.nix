@@ -4,9 +4,6 @@
       packages = with pkgs; [
         (rust-toolchain.dev-toolchain pkgs)
 
-        # database
-        postgresql_18
-
         # libraries used in local rust builds
         pkg-config
 
@@ -43,6 +40,14 @@
             docker run --rm --network host grid:latest --migrate
           '';
           help = "Runs the site binary in a container.";
+        }
+
+        {
+          name = "db";
+          command = ''
+            docker run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 5432:5432 $@ postgres
+          '';
+          help = "Runs PostgreSQL in a container.";
         }
 
         {
