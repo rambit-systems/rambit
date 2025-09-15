@@ -1,4 +1,4 @@
-{ config, ... }: {
+{ config, pkgs, ... }: {
   # from ../../crates/prime-domain/src/migrate.rs
   test-data = {
     archive = ../../crates/owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0;
@@ -14,14 +14,48 @@
   grid-node = {
     networking.firewall.allowedTCPPorts = [ 3000 ];
 
+    services.postgresql = {
+      enable = true;
+      package = pkgs.postgresql_16;
+      initialScript = pkgs.writeText "init-postgres.sql" ''
+        CREATE USER grid WITH PASSWORD 'grid_password';
+        CREATE DATABASE grid OWNER grid;
+        GRANT ALL PRIVILEGES ON DATABASE grid TO grid;
+      '';
+    };
+
     systemd.services.grid = {
       description = "Grid Server";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" "postgresql.service" "postgresql-setup.service" ];
+      requires = [ "postgresql.service" ];
 
       serviceConfig = {
         Type = "simple";
         ExecStart = "${config.packages.grid}/bin/grid --migrate --host 0.0.0.0 --no-secure-cookies";
+        ExecStartPost = pkgs.writeShellScript "grid-health-check" ''
+          timeout=20
+          interval=1
+          elapsed=0
+          
+          # echo "Waiting for grid service to become healthy..."
+          while [ $elapsed -lt $timeout ]; do
+            if ${pkgs.curl}/bin/curl -s -f http://localhost:3000/api/v1/health >/dev/null 2>&1; then
+              # echo "Grid service is healthy!"
+              exit 0
+            fi
+            # echo "Health check failed, retrying in $interval seconds... ($elapsed/$timeout)"
+            sleep $interval
+            elapsed=$((elapsed + interval))
+          done
+          
+          echo "Grid service failed to become healthy within $timeout seconds"
+          exit 1
+        '';
+      };
+
+      environment = {
+        POSTGRES_URL = "postgresql://grid:grid_password@localhost:5432/grid";
       };
     };
   };

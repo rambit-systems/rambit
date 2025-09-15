@@ -27,24 +27,6 @@
 
       commands = [
         {
-          name = "test";
-          command = "cargo nextest run";
-          help = "Run tests with nextest";
-          category = "[testing]";
-        }
-        {
-          name = "test-all";
-          command = "cargo nextest run --run-ignored all";
-          help = "Run all tests, including ones that require other services";
-          category = "[testing]";
-        }
-        {
-          name = "clippy";
-          command = "cargo clippy --all-targets --no-deps";
-          help = "Run clippy on all targets";
-          category = "[cargo actions]";
-        }
-        {
           name = "check";
           command = "nix flake check -L";
           help = "Run nix checks";
@@ -58,6 +40,14 @@
             docker run --rm --network host grid:latest --migrate
           '';
           help = "Runs the site binary in a container.";
+        }
+
+        {
+          name = "db";
+          command = ''
+            docker run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 5432:5432 $@ postgres
+          '';
+          help = "Runs PostgreSQL in a container.";
         }
 
         {

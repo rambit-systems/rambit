@@ -117,7 +117,7 @@ impl Model for User {
       .map(|id| LaxSlug::new(id.to_string()).into())
       .collect()
   })];
-  const TABLE_NAME: &'static str = "user";
+  const TABLE_NAME: &'static str = "users";
   const UNIQUE_INDICES: &'static [(
     Self::UniqueIndexSelector,
     SlugFieldGetter<Self>,
