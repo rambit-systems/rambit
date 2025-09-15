@@ -7,7 +7,7 @@ mod signup;
 mod upload;
 
 use axum::{
-  Router,
+  Json, Router,
   http::StatusCode,
   response::IntoResponse,
   routing::{get, post},
@@ -30,6 +30,9 @@ pub async fn root() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
+pub async fn health() -> impl IntoResponse { Json(true) }
+
+#[axum::debug_handler]
 pub async fn fallback() -> impl IntoResponse {
   (StatusCode::NOT_FOUND, "endpoint not found")
 }
@@ -37,6 +40,7 @@ pub async fn fallback() -> impl IntoResponse {
 pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
+    .route("/health", get(health).post(health))
     .route("/signup", post(signup))
     .route("/authenticate", post(authenticate))
     .route("/deauthenticate", post(deauthenticate))
