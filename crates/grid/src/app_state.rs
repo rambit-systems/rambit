@@ -1,3 +1,4 @@
+#[cfg(not(feature = "postgres"))]
 use std::sync::Arc;
 
 use auth_domain::AuthDomainService;
@@ -48,14 +49,18 @@ impl AppState {
       let url = std::env::var("POSTGRES_URL")
         .into_diagnostic()
         .context("`POSTGRES_URL` env var not populated")?;
+      let pool = db::PgPool::connect(&url)
+        .await
+        .into_diagnostic()
+        .context("failed to connect to postgres")?;
 
       (
-        Database::new_from_postgres(&url).await?,
-        Database::new_from_postgres(&url).await?,
-        Database::new_from_postgres(&url).await?,
-        Database::new_from_postgres(&url).await?,
-        Database::new_from_postgres(&url).await?,
-        Database::new_from_postgres(&url).await?,
+        Database::new_from_postgres(pool.clone()).await?,
+        Database::new_from_postgres(pool.clone()).await?,
+        Database::new_from_postgres(pool.clone()).await?,
+        Database::new_from_postgres(pool.clone()).await?,
+        Database::new_from_postgres(pool.clone()).await?,
+        Database::new_from_postgres(pool).await?,
       )
     };
 
