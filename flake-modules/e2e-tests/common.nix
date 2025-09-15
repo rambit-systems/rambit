@@ -14,10 +14,21 @@
   grid-node = {
     networking.firewall.allowedTCPPorts = [ 3000 ];
 
+    services.postgresql = {
+      enable = true;
+      package = pkgs.postgresql_16;
+      initialScript = pkgs.writeText "init-postgres.sql" ''
+        CREATE USER grid WITH PASSWORD 'grid_password';
+        CREATE DATABASE grid OWNER grid;
+        GRANT ALL PRIVILEGES ON DATABASE grid TO grid;
+      '';
+    };
+
     systemd.services.grid = {
       description = "Grid Server";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" "postgresql.service" "postgresql-setup.service" ];
+      requires = [ "postgresql.service" ];
 
       serviceConfig = {
         Type = "simple";
