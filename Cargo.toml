@@ -91,9 +91,9 @@ tailwind-input-file = "crates/site-app/style/src/main.css"
 env = "DEV"
 watch = false
 
-bin-default-features = false
+bin-default-features = true
 bin-features = [  ]
 # bin-profile-dev = "dev"
-lib-default-features = false
+lib-default-features = true
 lib-features = [  ]
 lib-profile-release = "wasm-release"
