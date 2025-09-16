@@ -10,13 +10,14 @@ use crate::{
 
 const CACHE_DESCRIPTION: &str =
   "A cache is a container and access-control mechanism for entries, and is \
-   the primary namespace through which users will consume your entries. It \
-   has a publicly-accessible name which must be globally unique (across \
-   organizations). The cache's visibility controls whether its entries are \
-   accessible outside of your organization.
+   the primary namespace through which users will consume your entries.
 
-   Generally cache names are on a first-come-first-served basis, but contact \
-   us if you have concerns.";
+   A cache's name must be globally unique (across organizations), even if the \
+   cache is set to private. The visibility of the cache controls whether its \
+   entries are accessible outside of your organization.
+
+   Generally cache names are on a first-come-first-served basis, but please \
+   contact us if you have concerns.";
 
 #[component]
 pub fn CreateCachePage() -> impl IntoView {
