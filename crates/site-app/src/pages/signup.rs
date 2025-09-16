@@ -34,7 +34,7 @@ fn SignupIsland() -> impl IntoView {
   let signup_trigger = signup_hook.action_trigger();
   let submit_action = move |ev: SubmitEvent| {
     ev.prevent_default();
-    signup_trigger();
+    signup_trigger.run(());
   };
   let show_spinner = signup_hook.show_spinner();
 
