@@ -64,10 +64,10 @@ impl LoginHook {
     touched_input_bindings(self.password_signal)
   }
 
-  pub fn email_error_hint(&self) -> impl Fn() -> Option<String> {
+  pub fn email_error_hint(&self) -> Signal<Option<String>> {
     let (email_signal, submit_touched_signal) =
       (self.email_signal, self.submit_touched_signal);
-    move || {
+    Signal::derive(move || {
       let email = email_signal.get();
       if !submit_touched_signal() {
         return None;
@@ -84,13 +84,13 @@ impl LoginHook {
           Some("That email address doesn't look right.".into())
         }
       }
-    }
+    })
   }
 
-  pub fn password_error_hint(&self) -> impl Fn() -> Option<String> {
+  pub fn password_error_hint(&self) -> Signal<Option<String>> {
     let (password_signal, submit_touched_signal) =
       (self.password_signal, self.submit_touched_signal);
-    move || {
+    Signal::derive(move || {
       let password = password_signal.get();
       if !submit_touched_signal() {
         return None;
@@ -99,34 +99,34 @@ impl LoginHook {
         return Some("Password required.".into());
       }
       None
-    }
+    })
   }
 
-  pub fn show_spinner(&self) -> impl Fn() -> bool {
+  pub fn show_spinner(&self) -> Signal<bool> {
     let (pending, value) = (self.action.pending(), self.action.value());
     // show if the action is loading or completed successfully
-    move || pending() || matches!(value.get(), Some(Ok(true)))
+    Signal::derive(move || pending() || matches!(value.get(), Some(Ok(true))))
   }
 
-  pub fn button_text(&self) -> impl Fn() -> &'static str {
+  pub fn button_text(&self) -> Signal<&'static str> {
     let (pending, value) = (self.action.pending(), self.action.value());
-    move || match (value.get(), pending()) {
+    Signal::derive(move || match (value.get(), pending()) {
       // if the action is loading at all
       (_, true) => "Loading...",
       // if it's completed successfully
       (Some(Ok(true)), _) => "Redirecting...",
       // any other state
       _ => "Log In",
-    }
+    })
   }
 
-  pub fn action_trigger(&self) -> impl Fn() {
+  pub fn action_trigger(&self) -> Callback<()> {
     let submit_touched_signal = self.submit_touched_signal;
     let email_error_hint = self.email_error_hint();
     let password_error_hint = self.password_error_hint();
     let action = self.action;
 
-    move || {
+    Callback::new(move |()| {
       submit_touched_signal.set(true);
 
       if email_error_hint().is_some() || password_error_hint().is_some() {
@@ -134,7 +134,7 @@ impl LoginHook {
       }
 
       action.dispatch_local(());
-    }
+    })
   }
 
   pub fn create_redirect_effect(&self) -> Effect<LocalStorage> {

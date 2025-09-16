@@ -15,7 +15,7 @@ pub(super) fn VisibilitySelector(
   let set_private = move |_| signal.set(Visibility::Private);
   let set_public = move |_| signal.set(Visibility::Public);
 
-  const OUTER_CLASS: &str = "flex-1 flex flex-col gap-2 px-4 py-3 \
+  const OUTER_CLASS: &str = "flex-1 flex flex-col gap-2 px-4 py-3 max-w-80 \
                              hover:elevation-lv1 transition rounded border-2 \
                              border-base-7 hover:border-base-8 \
                              bg-gradient-to-tr to-transparent to-50%";
@@ -47,7 +47,7 @@ pub(super) fn VisibilitySelector(
   };
 
   view! {
-    <div class="flex flex-col sm:flex-row gap-4">
+    <div class="flex flex-col gap-4">
       <div
         class=outer_private_class
         on:click=set_private
