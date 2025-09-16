@@ -58,7 +58,10 @@ pub fn LogoutButton() -> impl IntoView {
 
 #[server(prefix = "/api/sfn")]
 pub async fn logout() -> Result<(), ServerFnError> {
-  let mut auth_session = expect_context::<auth_domain::AuthSession>();
+  let Some(mut auth_session) = use_context::<auth_domain::AuthSession>() else {
+    return Ok(());
+  };
+
   match auth_session.logout().await {
     Ok(_) => Ok(()),
     Err(e) => {
