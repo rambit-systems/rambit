@@ -2,18 +2,8 @@ app = 'rambit'
 primary_region = 'dfw'
 swap_size_mb = 2048
 
-experimental.cmd = [ "--migrate" ]
-
 [build]
 image = 'grid:latest'
-
-[env]
-REDB_STORE_PATH = '/data/rambit-db'
-
-[[mounts]]
-destination = '/data'
-initial_size = '1gb'
-source = 'rambit_db'
 
 [http_service]
 auto_start_machines = false
