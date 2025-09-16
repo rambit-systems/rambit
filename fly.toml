@@ -20,6 +20,8 @@ auto_start_machines = false
 auto_stop_machines = 'off'
 internal_port = 3000
 min_machines_running = 0
+# axum is http2-enabled
+http_options.h2_backend = true
 
 [[vm]]
 size = 'shared-cpu-1x'
