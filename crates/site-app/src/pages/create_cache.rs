@@ -4,7 +4,7 @@ use leptos::prelude::*;
 
 use self::visibility_selector::VisibilitySelector;
 use crate::{
-  components::{InputField, InputIcon, LoadingCircle},
+  components::{form_layout::*, InputField, InputIcon, LoadingCircle},
   hooks::CreateCacheHook,
 };
 
@@ -18,11 +18,26 @@ const CACHE_DESCRIPTION: &str =
    Generally cache names are on a first-come-first-served basis, but contact \
    us if you have concerns.";
 
-#[island]
+#[component]
 pub fn CreateCachePage() -> impl IntoView {
+  view! {
+    <div class="flex-1" />
+    <CreateCacheIsland />
+    <div class="flex-1" />
+  }
+}
+
+#[island]
+pub fn CreateCacheIsland() -> impl IntoView {
   let hook = CreateCacheHook::new();
 
-  let name_bindings = hook.name_bindings();
+  let (name_bindings, name_error_hint, name_warn_hint, name_after_icon) = (
+    hook.name_bindings(),
+    hook.name_error_hint(),
+    hook.name_warn_hint(),
+    hook.name_after_icon(),
+  );
+  let visibility_signal = hook.visibility_signal();
 
   let action_trigger = hook.action_trigger();
   let submit_action = move |_| {
@@ -33,45 +48,60 @@ pub fn CreateCachePage() -> impl IntoView {
 
   let _ = hook.create_redirect_effect();
 
+  const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-3xl \
+                            elevation-flat flex flex-col md:grid \
+                            md:grid-cols-form gap-x-8 gap-y-12";
+
   view! {
-    <div class="flex-1" />
-    <div class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8">
-      <p class="title">"Create a Cache"</p>
+    <div class=FORM_CLASS>
+      <GridRowFull>
+        <div class="flex flex-col gap-2">
+          <p class="title">"Create a Cache"</p>
+          <p class="max-w-prose whitespace-pre-line">{ CACHE_DESCRIPTION }</p>
+        </div>
+      </GridRowFull>
 
-      <p class="max-w-prose whitespace-pre-line">{ CACHE_DESCRIPTION }</p>
-
-      <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
-
-      <div class="flex flex-col gap-4">
-        <InputField
-          id="name" label_text="Cache Name" input_type="text" placeholder=""
-          before=InputIcon::ArchiveBox
-          after={ hook.name_after_icon() }
-          input_signal=name_bindings.0 output_signal=name_bindings.1
-          error_hint={ hook.name_error_hint() } warn_hint={ hook.name_warn_hint() } autofocus=true
+      <GridRow>
+        <GridRowLabel
+          title="Cache name"
+          desc="Think of it like a username."
         />
 
-        <div class="flex flex-col gap-1">
-          <p class="text-11-base">"Visibility"</p>
-          <VisibilitySelector signal={ hook.visibility_signal() } />
-        </div>
-      </div>
+        <InputField
+          id="name" label_text="" input_type="text" placeholder="Your name"
+          before=InputIcon::ArchiveBox
+          after=name_after_icon
+          input_signal=name_bindings.0 output_signal=name_bindings.1
+          error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+        />
+      </GridRow>
 
-      <label class="flex flex-row gap-2">
-        <input type="submit" class="hidden" />
-        <button
-          class="btn btn-primary w-full max-w-80 justify-between"
-          on:click=submit_action
-        >
-          <div class="size-4" />
-          "Create Cache"
-          <LoadingCircle {..}
-            class="size-4 transition-opacity"
-            class=("opacity-0", move || { !show_spinner() })
-          />
-        </button>
-      </label>
+      <GridRow>
+        <GridRowLabel
+          title="Visibility"
+          desc="For the public good or just your team?"
+        />
+
+        <VisibilitySelector signal=visibility_signal />
+      </GridRow>
+
+      <GridRow>
+        <div />
+        <label>
+          <input type="submit" class="hidden" />
+          <button
+            class="btn btn-primary w-full max-w-80 justify-between"
+            on:click=submit_action
+          >
+            <div class="size-4" />
+            "Create Cache"
+            <LoadingCircle {..}
+              class="size-4 transition-opacity"
+              class=("opacity-0", move || { !show_spinner() })
+            />
+          </button>
+        </label>
+      </GridRow>
     </div>
-    <div class="flex-1" />
   }
 }
