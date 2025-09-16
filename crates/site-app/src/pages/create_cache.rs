@@ -62,6 +62,10 @@ pub fn CreateCacheIsland() -> impl IntoView {
         </div>
       </GridRowFull>
 
+      <GridRowFull>
+        <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
+      </GridRowFull>
+
       <GridRow>
         <GridRowLabel
           title="Cache name"
