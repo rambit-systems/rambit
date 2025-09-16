@@ -40,7 +40,7 @@ fn SignupIsland() -> impl IntoView {
 
   let _ = signup_hook.create_redirect_effect();
 
-  const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-3xl \
+  const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-2xl \
                             elevation-flat flex flex-col md:grid \
                             md:grid-cols-form gap-x-8 gap-y-12";
 
