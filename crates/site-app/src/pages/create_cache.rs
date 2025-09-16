@@ -1,18 +1,11 @@
 mod visibility_selector;
 
 use leptos::prelude::*;
-use leptos_fetch::QueryClient;
-use models::{
-  dvf::{EntityName, RecordId, StrictSlug, Visibility},
-  Cache, Org,
-};
 
 use self::visibility_selector::VisibilitySelector;
 use crate::{
   components::{InputField, InputIcon, LoadingCircle},
-  hooks::OrgHook,
-  navigation::navigate_to,
-  reactive_utils::touched_input_bindings,
+  hooks::CreateCacheHook,
 };
 
 const CACHE_DESCRIPTION: &str =
@@ -27,85 +20,18 @@ const CACHE_DESCRIPTION: &str =
 
 #[island]
 pub fn CreateCachePage() -> impl IntoView {
-  let org_hook = OrgHook::new_requested();
+  let hook = CreateCacheHook::new();
 
-  let name = RwSignal::new(String::new());
-  let sanitized_name = Memo::new(move |_| {
-    Some(EntityName::new(StrictSlug::new(name())))
-      .filter(|n| !n.to_string().is_empty())
-  });
-  let (read_name, write_name) = touched_input_bindings(name);
-  let visibility = RwSignal::new(Visibility::Private);
+  let name_bindings = hook.name_bindings();
 
-  let query_client = expect_context::<QueryClient>();
-  let is_available_key_fn = move || sanitized_name().map(|n| n.to_string());
-  let is_available_query_scope =
-    crate::resources::cache::cache_name_is_available_query_scope();
-  let is_available_resource = expect_context::<QueryClient>()
-    .local_resource(is_available_query_scope.clone(), is_available_key_fn);
-  let is_available_fetching = query_client
-    .subscribe_is_fetching(is_available_query_scope, is_available_key_fn);
-
-  let name_after_icon = Memo::new(move |_| {
-    match (is_available_fetching(), is_available_resource.get()) {
-      (true, _) => Some(InputIcon::Loading),
-      (_, Some(Some(Ok(true)))) => Some(InputIcon::Check),
-      (_, Some(Some(Ok(false)))) => Some(InputIcon::XMark),
-      _ => None,
-    }
-  });
-
-  let action = ServerAction::<CreateCache>::new();
-  let loading = {
-    let (pending, value) = (action.pending(), action.value());
-    move || pending() || matches!(value.get(), Some(Ok(_)))
-  };
-
-  // error text for name field
-  let name_warn_hint = MaybeProp::derive(move || {
-    let (name, Some(sanitized_name)) = (name.get(), sanitized_name()) else {
-      return None;
-    };
-    if name != sanitized_name.clone().to_string() {
-      return Some(format!(
-        "This name will be converted to \"{sanitized_name}\"."
-      ));
-    }
-    None
-  });
-  let name_error_hint = MaybeProp::derive(move || {
-    match (is_available_resource.get(), sanitized_name()) {
-      (Some(Some(Ok(false))), Some(sanitized_name)) => {
-        Some(format!("The name \"{sanitized_name}\" is unavailable."))
-      }
-      (Some(Some(Err(_))), _) => {
-        Some("Sorry, something went wrong.".to_owned())
-      }
-      _ => None,
-    }
-  });
-
-  // submit callback
-  let org = org_hook.key();
+  let action_trigger = hook.action_trigger();
   let submit_action = move |_| {
-    // the name has been checked and is available
-    if sanitized_name().is_some()
-      && matches!(is_available_resource.get(), Some(Some(Ok(true))))
-    {
-      action.dispatch_local(CreateCache {
-        org:        org(),
-        name:       sanitized_name().unwrap().to_string(),
-        visibility: visibility(),
-      });
-    }
+    action_trigger.run(());
   };
 
-  let dashboard_url = org_hook.dashboard_url();
-  Effect::new(move || {
-    if matches!(action.value().get(), Some(Ok(_))) {
-      navigate_to(&dashboard_url());
-    }
-  });
+  let show_spinner = hook.show_spinner();
+
+  let _ = hook.create_redirect_effect();
 
   view! {
     <div class="flex-1" />
@@ -120,14 +46,14 @@ pub fn CreateCachePage() -> impl IntoView {
         <InputField
           id="name" label_text="Cache Name" input_type="text" placeholder=""
           before=InputIcon::ArchiveBox
-          after=name_after_icon
-          input_signal=read_name output_signal=write_name
-          error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+          after={ hook.name_after_icon() }
+          input_signal=name_bindings.0 output_signal=name_bindings.1
+          error_hint={ hook.name_error_hint() } warn_hint={ hook.name_warn_hint() } autofocus=true
         />
 
         <div class="flex flex-col gap-1">
           <p class="text-11-base">"Visibility"</p>
-          <VisibilitySelector signal=visibility />
+          <VisibilitySelector signal={ hook.visibility_signal() } />
         </div>
       </div>
 
@@ -141,37 +67,11 @@ pub fn CreateCachePage() -> impl IntoView {
           "Create Cache"
           <LoadingCircle {..}
             class="size-4 transition-opacity"
-            class=("opacity-0", move || { !loading() })
+            class=("opacity-0", move || { !show_spinner() })
           />
         </button>
       </label>
     </div>
     <div class="flex-1" />
   }
-}
-
-#[server(prefix = "/api/sfn")]
-pub async fn create_cache(
-  org: RecordId<Org>,
-  name: String,
-  visibility: Visibility,
-) -> Result<RecordId<Cache>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
-
-  crate::resources::authorize_for_org(org)?;
-
-  let prime_domain_service: PrimeDomainService = expect_context();
-
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
-  if name != sanitized_name.clone().to_string() {
-    return Err(ServerFnError::new("name is unsanitized"));
-  }
-
-  prime_domain_service
-    .create_cache(org, sanitized_name, visibility)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to create cache: {e}");
-      ServerFnError::new("internal error")
-    })
 }
