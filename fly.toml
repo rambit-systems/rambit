@@ -6,19 +6,12 @@ swap_size_mb = 2048
 image = 'grid:latest'
 
 [http_service]
-auto_start_machines = true
-auto_stop_machines = "stop"
+auto_start_machines = false
+auto_stop_machines = "off"
 internal_port = 3000
 min_machines_running = 0
 # axum is http2-enabled
 http_options.h2_backend = true
-
-[[http_service.checks]]
-grace_period = "8s"
-interval = "30s"
-method = "GET"
-path = "/api/v1/health"
-timeout = "5s"
 
 [[vm]]
 size = 'shared-cpu-1x'
