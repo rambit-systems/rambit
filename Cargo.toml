@@ -61,6 +61,12 @@ leptos_router = { version = "0.8", features = [ "nightly" ] }
 console_error_panic_hook = "0.1"
 wasm-bindgen = "=0.2.100"
 
+[patch.crates-io]
+leptos = { git = 'https://github.com/johnbchron/leptos.git' }
+leptos_axum = { git = 'https://github.com/johnbchron/leptos.git' }
+leptos_meta = { git = 'https://github.com/johnbchron/leptos.git' }
+leptos_router = { git = 'https://github.com/johnbchron/leptos.git' }
+
 [profile.wasm-release]
 codegen-units = 1
 inherits = "release"
