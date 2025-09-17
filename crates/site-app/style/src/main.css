@@ -6,7 +6,7 @@
 @import "tailwindcss-radix-colors/dist/red-colors-only.css";
 
 @import "./theme/colors.css";
-/* @import "./theme/colors-dark.css"; */
+@import "./theme/colors-dark.css";
 
 @import "./components/btn.css";
 @import "./components/btn-link.css";
