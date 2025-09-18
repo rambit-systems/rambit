@@ -56,8 +56,6 @@ pub fn next_url_string_hook() -> Signal<String> {
   let current_url = leptos_router::location::BrowserUrl::current()
     .expect("failed to get current browser url");
 
-  leptos::logging::log!("current_url = {current_url:?}");
-
   Signal::stored(
     current_url
       .search_params()
