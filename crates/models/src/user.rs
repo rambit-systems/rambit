@@ -15,8 +15,10 @@ use crate::Org;
 pub struct User {
   /// The user's ID.
   pub id:               RecordId<User>,
-  /// The user's orgs, guaranteed to be at least one.
-  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
+  /// The user's personal org.
+  pub personal_org:     RecordId<Org>,
+  /// The user's named orgs.
+  pub orgs:             Vec<RecordId<Org>>,
   /// The user's name.
   pub name:             HumanName,
   /// The user's email address.
@@ -42,12 +44,12 @@ impl User {
 
   /// Returns an iterator of the user's orgs.
   pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
-    once(self.orgs.0).chain(self.orgs.1.iter().copied())
+    once(self.personal_org).chain(self.orgs.iter().copied())
   }
 
   /// Returns whether the user belongs to the given org.
   pub fn belongs_to_org(&self, org: RecordId<Org>) -> bool {
-    self.orgs.0 == org || self.orgs.1.contains(&org)
+    self.personal_org == org || self.orgs.contains(&org)
   }
 }
 
@@ -131,8 +133,10 @@ impl Model for User {
 pub struct AuthUser {
   /// The user's ID.
   pub id:               RecordId<User>,
-  /// The user's orgs, guaranteed to be at least one.
-  pub orgs:             (RecordId<Org>, Vec<RecordId<Org>>),
+  /// The user's personal org.
+  pub personal_org:     RecordId<Org>,
+  /// The user's named orgs.
+  pub orgs:             Vec<RecordId<Org>>,
   /// The user's name.
   pub name:             HumanName,
   /// The hash of the user's authentication secrets.
@@ -147,6 +151,7 @@ impl From<User> for AuthUser {
       user.auth_hash().to_be_bytes().to_vec().into_boxed_slice();
     Self {
       id: user.id,
+      personal_org: user.personal_org,
       orgs: user.orgs,
       name: user.name,
       auth_hash_bytes,
@@ -158,12 +163,12 @@ impl From<User> for AuthUser {
 impl AuthUser {
   /// Returns an iterator of the user's orgs.
   pub fn iter_orgs(&self) -> impl Iterator<Item = RecordId<Org>> {
-    once(self.orgs.0).chain(self.orgs.1.iter().copied())
+    once(self.personal_org).chain(self.orgs.iter().copied())
   }
 
   /// Returns whether the user belongs to the given org.
   pub fn belongs_to_org(&self, org: RecordId<Org>) -> bool {
-    self.orgs.0 == org || self.orgs.1.contains(&org)
+    self.personal_org == org || self.orgs.contains(&org)
   }
 
   /// Returns the ID of the currently active org.
