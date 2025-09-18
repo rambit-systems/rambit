@@ -4,7 +4,7 @@ use leptos::{either::Either, prelude::*};
 use models::AuthUser;
 
 use self::org_selector::OrgSelectorPopover;
-use crate::{hooks::OrgHook, navigation::next_url_hook};
+use crate::{hooks::OrgHook, navigation::next_url_encoded_hook};
 
 #[component]
 pub fn Navbar() -> impl IntoView {
@@ -46,7 +46,7 @@ fn NavbarUserArea() -> impl IntoView {
 
 #[component]
 fn LoggedOutUserAuthActions() -> impl IntoView {
-  let next_url = next_url_hook();
+  let next_url = next_url_encoded_hook();
   let signup_url =
     Signal::derive(move || format!("/auth/signup?next={}", next_url()));
   let login_url =

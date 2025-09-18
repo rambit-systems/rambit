@@ -4,7 +4,7 @@ use leptos::{ev::Event, prelude::*};
 use models::dvf::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
 
 use crate::{
-  navigation::{navigate_to, next_url_hook},
+  navigation::{navigate_to, next_url_string_hook},
   reactive_utils::touched_input_bindings,
 };
 
@@ -14,7 +14,7 @@ pub struct SignupHook {
   password_signal:         RwSignal<String>,
   confirm_password_signal: RwSignal<String>,
   submit_touched_signal:   RwSignal<bool>,
-  next_url_memo:           Memo<String>,
+  next_url_memo:           Signal<String>,
   action:                  Action<(), Result<bool, String>>,
 }
 
@@ -25,7 +25,7 @@ impl SignupHook {
     let password_signal = RwSignal::new(String::new());
     let confirm_password_signal = RwSignal::new(String::new());
     let submit_touched_signal = RwSignal::new(false);
-    let next_url_memo = next_url_hook();
+    let next_url_memo = next_url_string_hook();
 
     let action = Action::new_local(move |(): &()| {
       // json body for authenticate endpoint
@@ -203,6 +203,10 @@ impl SignupHook {
 
   pub fn create_redirect_effect(&self) -> Effect<LocalStorage> {
     let (action, next_url_memo) = (self.action, self.next_url_memo);
+    leptos::logging::log!(
+      "redirect effect set to navigate to {:?}",
+      next_url_memo()
+    );
     Effect::new(move || {
       if action.value().get() == Some(Ok(true)) {
         navigate_to(&next_url_memo());

@@ -46,18 +46,34 @@ pub fn navigate_to(path: &str) {
 }
 
 /// Gets the next URL if it's already set or sets it to the current page.
-#[allow(unused_variables)]
-pub fn next_url_hook() -> Memo<String> {
+pub fn next_url_string_hook() -> Signal<String> {
+  #[cfg(not(feature = "ssr"))]
+  use leptos_router::location::LocationProvider;
+
   #[cfg(feature = "ssr")]
   let current_url = leptos_router::hooks::use_url()();
-  #[cfg(feature = "hydrate")]
-  let current_url = <leptos_router::location::BrowserUrl as leptos_router::location::LocationProvider>::current().unwrap();
+  #[cfg(not(feature = "ssr"))]
+  let current_url = leptos_router::location::BrowserUrl::current()
+    .expect("failed to get current browser url");
 
-  // set it to the existing next url or the current URL escaped
-  Memo::new(move |_| {
+  leptos::logging::log!("current_url = {current_url:?}");
+
+  Signal::stored(
     current_url
       .search_params()
+      .clone()
       .get("next")
-      .unwrap_or(Url::escape(&url_to_full_path(&current_url)))
+      .unwrap_or(url_to_full_path(&current_url)),
+  )
+}
+
+/// Url-enccodes the next URL if it's already set or sets it to the current
+/// page. Suitable for propagating the next URL by setting the param to this
+/// value in links.
+pub fn next_url_encoded_hook() -> Signal<String> {
+  let next_url = next_url_string_hook();
+  Signal::derive(move || {
+    let next_url = next_url();
+    Url::escape(&next_url)
   })
 }
