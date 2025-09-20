@@ -49,6 +49,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" sizes="64x64" href="/favicon-64x64.png" />
 
         <MetaTags/>
       </head>
