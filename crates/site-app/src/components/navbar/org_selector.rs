@@ -56,9 +56,9 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
       </div>
 
       <OrgSelector
-        user=user
-        node_ref={popover_ref}
+        user={user}
         {..}
+        node_ref={popover_ref}
         class:hidden=move || !is_open()
       />
     </div>
@@ -66,10 +66,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 }
 
 #[component]
-fn OrgSelector(
-  user: AuthUser,
-  node_ref: NodeRef<leptos::html::Div>,
-) -> impl IntoView {
+fn OrgSelector(user: AuthUser) -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
      elevation-lv1 transition p-2 flex flex-col gap-1";
@@ -137,7 +134,9 @@ fn OrgSelector(
   };
 
   view! {
-    <div class=POPOVER_CLASS node_ref=node_ref>
+    <div
+      class=POPOVER_CLASS
+    >
       { org_hooks().into_iter().map(org_row_element).collect_view() }
     </div>
   }
