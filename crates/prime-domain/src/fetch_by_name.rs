@@ -1,6 +1,7 @@
 use db::{FetchModelByIndexError, kv::LaxSlug};
 use models::{
-  Cache, CacheUniqueIndexSelector, Org, Store, StoreUniqueIndexSelector,
+  Cache, CacheUniqueIndexSelector, Org, OrgIdent, OrgUniqueIndexSelector,
+  Store, StoreUniqueIndexSelector,
   dvf::{EntityName, RecordId},
 };
 
@@ -32,6 +33,20 @@ impl PrimeDomainService {
       .fetch_model_by_unique_index(
         StoreUniqueIndexSelector::NameByOrg,
         LaxSlug::new(format!("{org}-{store_name}")).into(),
+      )
+      .await
+  }
+
+  /// Fetches an [`Org`] by its [`OrgIdent`].
+  pub async fn fetch_org_by_ident(
+    &self,
+    org_ident: OrgIdent,
+  ) -> Result<Option<Org>, FetchModelByIndexError> {
+    self
+      .org_repo
+      .fetch_model_by_unique_index(
+        OrgUniqueIndexSelector::Ident,
+        org_ident.index_value().into(),
       )
       .await
   }
