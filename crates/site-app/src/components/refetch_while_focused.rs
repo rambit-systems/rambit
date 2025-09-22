@@ -3,16 +3,18 @@ use std::{fmt::Debug, hash::Hash, time::Duration};
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
 use leptos_use::{use_interval_fn, use_window_focus};
-use serde::{de::DeserializeOwned, Serialize};
 
 pub fn refetch_while_focused<
-  K: Clone + Hash + PartialEq + Debug + Send + Sync + 'static,
-  KF: Fn() -> K + Copy + Send + Sync + 'static,
-  R: Clone + Debug + DeserializeOwned + Serialize + Send + Sync + 'static,
+  K: Clone + Hash + PartialEq + Debug + 'static,
+  KF: Fn() -> K + Copy + 'static,
+  R: Clone + Debug + 'static,
 >(
-  key_fn: KF,
-  query_scope: QueryScope<K, R>,
-  period: Duration,
+  #[cfg_attr(feature = "hydrate", allow(dead_code))] key_fn: KF,
+  #[cfg_attr(feature = "hydrate", allow(dead_code))] query_scope: QueryScope<
+    K,
+    R,
+  >,
+  #[cfg_attr(feature = "hydrate", allow(dead_code))] period: Duration,
 ) {
   #[cfg(feature = "hydrate")]
   {

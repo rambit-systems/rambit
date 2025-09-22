@@ -27,6 +27,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
   };
 
   // close on click outside
+  #[cfg(feature = "hydrate")]
   let _ = on_click_outside(popover_ref, move |_| {
     if is_open() {
       is_open.set(false);
@@ -34,8 +35,8 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
   });
 
   // close on `Escape` key
-  let window = use_window();
-  let _ = use_event_listener(window, keydown, move |evt| {
+  #[cfg(feature = "hydrate")]
+  let _ = use_event_listener(use_window(), keydown, move |evt| {
     if evt.key() == "Escape" && is_open.get() {
       is_open.set(false);
     }
