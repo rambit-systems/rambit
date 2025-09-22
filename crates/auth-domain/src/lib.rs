@@ -183,7 +183,8 @@ impl AuthDomainService {
 
     let user = User {
       id: user_id,
-      orgs: (org.id, Vec::new()),
+      personal_org: org.id,
+      orgs: Vec::new(),
       name,
       email,
       auth,

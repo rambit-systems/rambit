@@ -88,25 +88,25 @@ pub fn CredentialsInput(
   view! {
     <div class="flex flex-col gap-2">
       <HideableInputField
-        id="access_key" label_text="Access Key" placeholder=""
+        id="access_key" label_text="" placeholder="Access Key"
         input_signal=read_access_key output_signal=write_access_key
         error_hint=access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::Key}
       />
       <HideableInputField
-        id="secret_access_key" label_text="Secret Access Key" placeholder=""
+        id="secret_access_key" label_text="" placeholder="Secret Access Key"
         input_signal=read_secret_access_key output_signal=write_secret_access_key
         error_hint=secret_access_key_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::Key}
       />
       <InputField
-        id="bucket" label_text="Bucket" input_type="text" placeholder=""
+        id="bucket" label_text="" input_type="text" placeholder="Bucket"
         input_signal=read_bucket output_signal=write_bucket
         error_hint=bucket_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::ArchiveBox}
       />
       <InputField
-        id="endpoint" label_text="Endpoint" input_type="text" placeholder=""
+        id="endpoint" label_text="" input_type="text" placeholder="Endpoint"
         input_signal=read_endpoint output_signal=write_endpoint
         error_hint=endpoint_error_hint warn_hint={ MaybeProp::derive(|| None) }
         before={InputIcon::GlobeAlt}

@@ -9,7 +9,7 @@ use models::{
 
 use self::credentials_input::CredentialsInput;
 use crate::{
-  components::{InputField, InputIcon, LoadingCircle},
+  components::{form_layout::*, InputField, InputIcon, LoadingCircle},
   hooks::OrgHook,
   navigation::navigate_to,
   reactive_utils::touched_input_bindings,
@@ -20,9 +20,9 @@ const STORE_DESCRIPTION: &str =
    bucket. The store holds credentials for the storage location, and \
    configuration specifying how the entries it contains will be encoded.
 
-   Stores are immutable. To change a store's credentials or encoding \
-   configuration, you will need to create a new store and migrate the old \
-   store's entries to it. This incurs compute costs.";
+   Stores are immutable aside from their entry list. To change a store's \
+   credentials or encoding configuration, you will need to create a new store \
+   and migrate the old store's entries to it. This incurs compute costs.";
 
 #[island]
 pub fn CreateStorePage() -> impl IntoView {
@@ -106,48 +106,62 @@ pub fn CreateStorePage() -> impl IntoView {
     }
   });
 
+  const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-2xl \
+                            elevation-flat flex flex-col md:grid \
+                            md:grid-cols-form gap-x-8 gap-y-12";
+
   view! {
     <div class="flex-1" />
-    <div class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8">
-      <p class="title">"Create a Store"</p>
-
-      <p class="max-w-prose whitespace-pre-line">{ STORE_DESCRIPTION }</p>
-
-      <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
-
-      <InputField
-        id="name" label_text="Store Name" input_type="text" placeholder=""
-        before={InputIcon::ArchiveBox}
-        input_signal=read_name output_signal=write_name
-        error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
-      />
-
-      <div class="flex flex-col gap-4">
-        <div>
-          <p class="text-base-12 text-lg font-semibold">
-            "Storage Credentials"
-          </p>
-          <p class="max-w-prose">
-            "These credentials are for the storage location where your data will sit."
-          </p>
+    <div class=FORM_CLASS>
+      <GridRowFull>
+        <div class="flex flex-col gap-2">
+          <p class="title">"Create a Store"</p>
+          <p class="max-w-prose whitespace-pre-line">{ STORE_DESCRIPTION }</p>
         </div>
-        <CredentialsInput signal=credentials show_hints={ move || submit_touched() } />
-      </div>
+      </GridRowFull>
 
-      <label class="flex flex-row gap-2">
-        <input type="submit" class="hidden" />
-        <button
-          class="btn btn-primary w-full max-w-80 justify-between"
-          on:click=submit_action
-        >
-          <div class="size-4" />
-          "Create Store"
-          <LoadingCircle {..}
-            class="size-4 transition-opacity"
-            class=("opacity-0", move || { !loading() })
-          />
-        </button>
-      </label>
+      <GridRowFull>
+        <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
+      </GridRowFull>
+
+      <GridRow>
+        <GridRowLabel
+          title="Store name"
+          desc="Use something memorable."
+        />
+        <InputField
+          id="name" label_text="" input_type="text" placeholder="Store Name"
+          before={InputIcon::ArchiveBox}
+          input_signal=read_name output_signal=write_name
+          error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+        />
+      </GridRow>
+
+      <GridRow>
+        <GridRowLabel
+          title="Storage credentials"
+          desc="These credentials are for the storage location where your data will sit."
+        />
+        <CredentialsInput signal=credentials show_hints={ move || submit_touched() } />
+      </GridRow>
+
+      <GridRow>
+        <div />
+        <label>
+          <input type="submit" class="hidden" />
+          <button
+            class="btn btn-primary w-full max-w-80 justify-between"
+            on:click=submit_action
+          >
+            <div class="size-4" />
+            "Create Store"
+            <LoadingCircle {..}
+              class="size-4 transition-opacity"
+              class=("opacity-0", move || { !loading() })
+            />
+          </button>
+        </label>
+      </GridRow>
     </div>
     <div class="flex-1" />
   }

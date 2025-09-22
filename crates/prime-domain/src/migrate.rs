@@ -42,7 +42,8 @@ impl PrimeDomainService {
       .user_repo
       .create_model(User {
         id:               user_id,
-        orgs:             (personal_org.id, vec![federation.id]),
+        personal_org:     personal_org.id,
+        orgs:             vec![federation.id],
         email:            EmailAddress::try_new("jpicard@federation.gov")
           .unwrap(),
         name:             HumanName::try_new("Jean-Luc Picard")
