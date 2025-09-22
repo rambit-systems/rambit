@@ -1,6 +1,6 @@
 use std::fmt;
 
-use dvf::{EitherSlug, RecordId};
+use dvf::{EitherSlug, RecordId, StrictSlug};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -20,9 +20,11 @@ impl Org {
   pub fn unique_index_ident(&self) -> Vec<EitherSlug> {
     match self.org_ident {
       OrgIdent::Named(ref entity_name) => {
-        vec![entity_name.clone().into_inner().into()]
+        vec![StrictSlug::new(format!("named-{}", entity_name)).into()]
       }
-      OrgIdent::UserOrg(_) => Vec::new(),
+      OrgIdent::UserOrg(u) => {
+        vec![StrictSlug::new(format!("user-{}", u)).into()]
+      }
     }
   }
 }
