@@ -46,4 +46,19 @@ impl PrimeDomainService {
       .await
       .map(|s| s.id)
   }
+
+  /// Creates an [`Org`].
+  pub async fn create_org(
+    &self,
+    name: EntityName,
+  ) -> Result<RecordId<Org>, CreateModelError> {
+    self
+      .org_repo
+      .create_model(Org {
+        id:        RecordId::new(),
+        org_ident: models::OrgIdent::Named(name),
+      })
+      .await
+      .map(|s| s.id)
+  }
 }
