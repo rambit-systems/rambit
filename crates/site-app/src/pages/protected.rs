@@ -4,6 +4,15 @@ use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::pages::UnauthorizedPage;
 
+pub fn protect_by_org<
+  F: Fn() -> O + Send + Sync + Copy + 'static,
+  O: IntoView + 'static,
+>(
+  func: F,
+) -> impl Send + Clone + 'static + Fn() -> impl IntoAny {
+  move || view! { <ProtectedByOrgPage> { func() } </ProtectedByOrgPage> }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct RequestedOrg(pub RecordId<Org>);
 

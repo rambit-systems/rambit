@@ -110,15 +110,6 @@ fn PageContainer(children: Children) -> impl IntoView {
   }
 }
 
-fn protect_by_org<
-  F: Fn() -> O + Send + Sync + Copy + 'static,
-  O: IntoView + 'static,
->(
-  func: F,
-) -> impl Send + Clone + 'static + Fn() -> impl IntoAny {
-  move || view! { <ProtectedByOrgPage> { func() } </ProtectedByOrgPage> }
-}
-
 #[island]
 fn IslandContextProvider(
   auth_user: Option<AuthUser>,
