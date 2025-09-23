@@ -43,6 +43,7 @@
 
   /* animations */
   --animate-fade-in: fade-in 0.15s linear;
+  --animate-fade-out: fade-out 0.15s linear;
   --animate-fade-down: fade-down 0.10s linear;
 
   /* custom grid template columns */
@@ -54,12 +55,13 @@
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes fade-down {

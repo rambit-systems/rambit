@@ -60,7 +60,8 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
         user={user}
         {..}
         node_ref={popover_ref}
-        class:hidden=move || !is_open()
+        class:opacity-0=move || !is_open()
+        class:pointer-events-none=move || !is_open()
       />
     </div>
   }
@@ -70,7 +71,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 fn OrgSelector(user: AuthUser) -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
-     elevation-lv1 transition p-2 flex flex-col gap-1";
+     elevation-lv1 transition p-2 flex flex-col gap-1 opacity-0";
 
   let org_hooks = Signal::stored(
     user
