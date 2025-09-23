@@ -73,7 +73,7 @@ pub fn CreateCacheIsland() -> impl IntoView {
       />
 
       <InputField
-        id="name" label_text="" input_type="text" placeholder="Your name"
+        id="name" label_text="" input_type="text" placeholder="Cache Name"
         before=InputIcon::ArchiveBox
         after=name_after_icon
         input_signal=name_bindings.0 output_signal=name_bindings.1

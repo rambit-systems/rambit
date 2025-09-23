@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 
-use crate::components::form_layout::*;
+use crate::{
+  components::{form_layout::*, InputField, InputIcon, LoadingCircle},
+  hooks::CreateOrgHook,
+};
 
 const ORG_DESCRIPTION: &str =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \
@@ -30,8 +33,62 @@ pub fn CreateOrgPage() -> impl IntoView {
         <div class="h-0 border-t-[1.5px] border-base-6 w-full" />
       </GridRowFull>
 
-      // <CreateCacheIsland />
+      <CreateOrgIsland />
     </div>
     <div class="flex-1" />
+  }
+}
+
+#[island]
+pub fn CreateOrgIsland() -> impl IntoView {
+  let hook = CreateOrgHook::new();
+
+  let name_bindings = hook.name_bindings();
+  let name_error_hint = hook.name_error_hint();
+  let name_warn_hint = hook.name_warn_hint();
+  let name_after_icon = hook.name_after_icon();
+
+  let action_trigger = hook.action_trigger();
+  let submit_action = move |_| {
+    action_trigger.run(());
+  };
+
+  let show_spinner = hook.show_spinner();
+
+  let _ = hook.create_redirect_effect();
+
+  view! {
+    <GridRow>
+      <GridRowLabel
+        title="Org name"
+        desc="Think of it like a username."
+      />
+
+      <InputField
+        id="name" label_text="" input_type="text" placeholder="Org Name"
+        before=InputIcon::BuildingOffice
+        after=name_after_icon
+        input_signal=name_bindings.0 output_signal=name_bindings.1
+        error_hint=name_error_hint warn_hint=name_warn_hint autofocus=true
+      />
+    </GridRow>
+
+    <GridRow>
+      <div />
+      <label>
+        <input type="submit" class="hidden" />
+        <button
+          class="btn btn-primary w-full max-w-80 justify-between"
+          on:click=submit_action
+        >
+          <div class="size-4" />
+          "Create Org"
+          <LoadingCircle {..}
+            class="size-4 transition-opacity"
+            class=("opacity-0", move || { !show_spinner() })
+          />
+        </button>
+      </label>
+    </GridRow>
   }
 }

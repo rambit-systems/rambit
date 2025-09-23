@@ -1,6 +1,6 @@
 use std::fmt;
 
-use dvf::{EitherSlug, RecordId};
+use dvf::{EitherSlug, RecordId, StrictSlug};
 use model::{Model, SlugFieldGetter};
 use serde::{Deserialize, Serialize};
 
@@ -18,12 +18,7 @@ pub struct Org {
 impl Org {
   /// Generates the value of the unique [`Org`] index `ident`.
   pub fn unique_index_ident(&self) -> Vec<EitherSlug> {
-    match self.org_ident {
-      OrgIdent::Named(ref entity_name) => {
-        vec![entity_name.clone().into_inner().into()]
-      }
-      OrgIdent::UserOrg(_) => Vec::new(),
-    }
+    vec![self.org_ident.index_value().into()]
   }
 }
 
@@ -81,6 +76,18 @@ pub enum OrgIdent {
   Named(dvf::EntityName),
   /// An [`Org`] identifier using a user ID.
   UserOrg(RecordId<User>),
+}
+
+impl OrgIdent {
+  /// Calculates the unique index value for this org ident.
+  pub fn index_value(&self) -> StrictSlug {
+    match self {
+      OrgIdent::Named(entity_name) => {
+        StrictSlug::new(format!("named-{}", entity_name))
+      }
+      OrgIdent::UserOrg(u) => StrictSlug::new(format!("user-{}", u)),
+    }
+  }
 }
 
 impl Model for Org {
