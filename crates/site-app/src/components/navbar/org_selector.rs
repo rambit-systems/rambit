@@ -1,5 +1,4 @@
-use leptos::{ev::keydown, prelude::*};
-use leptos_use::{on_click_outside, use_event_listener, use_window};
+use leptos::prelude::*;
 use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::{
@@ -28,7 +27,7 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 
   // close on click outside
   #[cfg(feature = "hydrate")]
-  let _ = on_click_outside(popover_ref, move |_| {
+  let _ = leptos_use::on_click_outside(popover_ref, move |_| {
     if is_open() {
       is_open.set(false);
     }
@@ -36,11 +35,15 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 
   // close on `Escape` key
   #[cfg(feature = "hydrate")]
-  let _ = use_event_listener(use_window(), keydown, move |evt| {
-    if evt.key() == "Escape" && is_open.get() {
-      is_open.set(false);
-    }
-  });
+  let _ = leptos_use::use_event_listener(
+    leptos_use::use_window(),
+    leptos::ev::keydown,
+    move |evt| {
+      if evt.key() == "Escape" && is_open.get() {
+        is_open.set(false);
+      }
+    },
+  );
 
   view! {
     <div class="relative">
