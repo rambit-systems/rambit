@@ -15,10 +15,10 @@ pub(super) fn VisibilitySelector(
   let set_private = move |_| signal.set(Visibility::Private);
   let set_public = move |_| signal.set(Visibility::Public);
 
-  const OUTER_CLASS: &str = "flex-1 flex flex-col gap-2 px-4 py-3 max-w-80 \
-                             hover:elevation-lv1 transition rounded border-2 \
-                             border-base-7 hover:border-base-8 \
-                             bg-gradient-to-tr to-transparent to-50%";
+  const OUTER_CLASS: &str =
+    "flex-1 flex flex-col gap-2 px-4 py-3 max-w-80 hover:elevation-lv1 \
+     cursor-pointer transition rounded border-2 border-base-7 \
+     hover:border-base-8 bg-gradient-to-tr to-transparent to-50%";
   const OUTER_ACTIVE_CLASS: &str =
     "border-product-7 hover:border-product-8 from-product-3";
   const OUTER_INACTIVE_CLASS: &str = "from-transparent";

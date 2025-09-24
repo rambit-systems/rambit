@@ -2,7 +2,10 @@ use leptos::prelude::*;
 use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::{
-  components::{CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle},
+  components::{
+    CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle, Popover,
+    PopoverContents, PopoverTrigger,
+  },
   hooks::OrgHook,
   navigation::navigate_to,
 };
@@ -15,66 +18,36 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 
   let active_org_hook = OrgHook::new_active();
   let active_org_descriptor = active_org_hook.descriptor();
-
-  let is_open = RwSignal::new(false);
-  let popover_ref = NodeRef::<leptos::html::Div>::new();
-
-  let toggle = move |_| {
-    is_open.update(|open| {
-      *open = !*open;
-    })
-  };
-
-  // close on click outside
-  #[cfg(feature = "hydrate")]
-  let _ = leptos_use::on_click_outside(popover_ref, move |_| {
-    if is_open() {
-      is_open.set(false);
-    }
-  });
-
-  // close on `Escape` key
-  #[cfg(feature = "hydrate")]
-  let _ = leptos_use::use_event_listener(
-    leptos_use::use_window(),
-    leptos::ev::keydown,
-    move |evt| {
-      if evt.key() == "Escape" && is_open.get() {
-        is_open.set(false);
-      }
-    },
-  );
+  let user_name = Signal::stored(user.name.to_string());
 
   view! {
-    <div class="relative">
-      <div class=CONTAINER_CLASS on:click=toggle>
-        <span class="text-base-12 text-sm">{ user.name.to_string() }</span>
-        <div class="flex flex-row items-center gap-0">
-          <span class="text-sm">
-            <Suspense fallback=|| "[loading]">
-              { move || Suspend::new(active_org_descriptor) }
-            </Suspense>
-          </span>
-          <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
+    <Popover>
+      <PopoverTrigger slot>
+        <div class=CONTAINER_CLASS>
+          <span class="text-base-12 text-sm">{ user_name }</span>
+          <div class="flex flex-row items-center gap-0">
+            <span class="text-sm">
+              <Suspense fallback=|| "[loading]">
+                { move || Suspend::new(active_org_descriptor) }
+              </Suspense>
+            </span>
+            <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
+          </div>
         </div>
-      </div>
+      </PopoverTrigger>
 
-      <OrgSelector
-        user={user}
-        {..}
-        node_ref={popover_ref}
-        class:opacity-0=move || !is_open()
-        class:pointer-events-none=move || !is_open()
-      />
-    </div>
+      <PopoverContents slot>
+        <OrgSelector user=user />
+      </PopoverContents>
+    </Popover>
   }
 }
 
 #[component]
 fn OrgSelector(user: AuthUser) -> impl IntoView {
-  const POPOVER_CLASS: &str =
-    "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
-     elevation-lv1 transition p-2 flex flex-col gap-1 opacity-0";
+  const POPOVER_CLASS: &str = "absolute left-0 \
+                               top-[calc(100%+(var(--spacing)*2))] min-w-56 \
+                               elevation-lv1 p-2 flex flex-col gap-1";
 
   let org_hooks = Signal::stored(
     user

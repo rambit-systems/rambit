@@ -116,6 +116,18 @@ impl CreateCacheHook {
     Signal::derive(move || pending() || matches!(value.get(), Some(Ok(_))))
   }
 
+  pub fn button_text(&self) -> Signal<&'static str> {
+    let (pending, value) = (self.action.pending(), self.action.value());
+    Signal::derive(move || match (value.get(), pending()) {
+      // if the action is loading at all
+      (_, true) => "Creating...",
+      // if it's completed successfully
+      (Some(Ok(_)), _) => "Redirecting...",
+      // any other state
+      _ => "Create Cache",
+    })
+  }
+
   pub fn action_trigger(&self) -> Callback<()> {
     let (
       org,

@@ -61,6 +61,7 @@ pub fn CreateCacheIsland() -> impl IntoView {
     action_trigger.run(());
   };
 
+  let button_text = hook.button_text();
   let show_spinner = hook.show_spinner();
 
   let _ = hook.create_redirect_effect();
@@ -99,7 +100,7 @@ pub fn CreateCacheIsland() -> impl IntoView {
           on:click=submit_action
         >
           <div class="size-4" />
-          "Create Cache"
+          { button_text }
           <LoadingCircle {..}
             class="size-4 transition-opacity"
             class=("opacity-0", move || { !show_spinner() })

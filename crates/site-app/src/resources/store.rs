@@ -129,9 +129,9 @@ pub fn entry_count_in_store_query_scope(
 ) -> QueryScope<RecordId<Store>, Result<u32, ServerFnError>> {
   QueryScope::new(count_entries_in_store).with_invalidation_link(move |s| {
     [
-      Store::TABLE_NAME.to_string(),
-      s.to_string(),
       Entry::TABLE_NAME.to_string(),
+      s.to_string(),
+      Store::TABLE_NAME.to_string(),
     ]
   })
 }
