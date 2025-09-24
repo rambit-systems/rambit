@@ -125,11 +125,11 @@ pub async fn check_if_cache_name_is_available(
 
 pub fn entry_count_in_cache_query_scope(
 ) -> QueryScope<RecordId<Cache>, Result<u32, ServerFnError>> {
-  QueryScope::new(count_entries_in_cache).with_invalidation_link(move |s| {
+  QueryScope::new(count_entries_in_cache).with_invalidation_link(move |c| {
     [
-      Cache::TABLE_NAME.to_string(),
-      s.to_string(),
       Entry::TABLE_NAME.to_string(),
+      c.to_string(),
+      Cache::TABLE_NAME.to_string(),
     ]
   })
 }
