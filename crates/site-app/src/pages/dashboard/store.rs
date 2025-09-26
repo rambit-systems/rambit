@@ -3,7 +3,9 @@ use leptos_fetch::QueryClient;
 use models::{PvR2StorageCredentials, PvStorageCredentials, PvStore};
 
 use crate::{
-  components::{CreateStoreButton, DataTableRefreshButton, StoreItemLink},
+  components::{
+    CreateStoreButton, DataTableRefreshButton, StoreItemLink, TableEmptyBody,
+  },
   formatting_utils::ThousandsSeparated,
   hooks::OrgHook,
   resources::store::{
@@ -20,11 +22,16 @@ pub(super) fn StoreTable() -> impl IntoView {
     expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
 
   let body_view = move |stores: Vec<PvStore>| {
-    view! {
+    match stores.len() {
+    0 => view! {
+      <StoreTableEmptyBody />
+    }.into_any(),
+    _ => view! {
       <tbody class="animate-fade-in min-h-10">
         <For each=move || stores.clone() key=|r| r.id children=|r| view! { <StoreDataRow store=r /> } />
       </tbody>
-    }
+    }.into_any()
+  }
   };
   let suspend = move || {
     Suspend::new(async move {
@@ -57,6 +64,23 @@ pub(super) fn StoreTable() -> impl IntoView {
         </Transition>
       </table>
     </div>
+  }
+}
+
+#[component]
+fn StoreTableEmptyBody() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let create_url =
+    Signal::derive(move || format!("{}/create_store", org_hook.base_url()()));
+
+  view! {
+    <TableEmptyBody>
+      <p class="text-base-12 text-lg">"Looks like you don't have any stores."</p>
+      <p class="text-sm">
+        <a href=create_url class="text-link text-link-primary">"Create one"</a>
+        " to get started."
+      </p>
+    </TableEmptyBody>
   }
 }
 

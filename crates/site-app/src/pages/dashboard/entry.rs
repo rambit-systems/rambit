@@ -75,7 +75,7 @@ fn EntryTableEmptyBody() -> impl IntoView {
   view! {
     <TableEmptyBody>
       <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
-      <p class="text-sm">"Upload some entries to see them here."</p>
+      <p class="text-sm">"Upload some entries from the CLI to see them here."</p>
     </TableEmptyBody>
   }
 }
