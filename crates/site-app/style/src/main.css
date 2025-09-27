@@ -50,6 +50,16 @@
   --form-grid-cols: calc(48 * var(--spacing)) minmax(0, 1fr)
 }
 
+:root {
+  font-size: 85%;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    font-size: inherit;
+  }
+}
+
 @utility grid-cols-form {
   grid-template-columns: var(--form-grid-cols);
 }
