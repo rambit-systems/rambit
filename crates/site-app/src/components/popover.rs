@@ -22,7 +22,6 @@ pub fn Popover(
     })
   };
 
-  #[cfg(feature = "hydrate")]
   let popover_ref = NodeRef::<leptos::html::Div>::new();
 
   // close on click outside
@@ -52,6 +51,7 @@ pub fn Popover(
       </div>
 
       <div
+        node_ref=popover_ref
         class="transition-opacity"
         class:opacity-0=move || !is_open()
         class:pointer-events-none=move || !is_open()

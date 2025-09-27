@@ -34,7 +34,10 @@ impl CreateCacheHook {
 
     let query_client = expect_context::<QueryClient>();
     let is_available_key_fn =
-      move || sanitized_name_memo().map(|n| n.to_string());
+      Signal::derive(move || sanitized_name_memo().map(|n| n.to_string()));
+    #[cfg(feature = "hydrate")]
+    let is_available_key_fn: Signal<Option<String>> =
+      leptos_use::signal_throttled(is_available_key_fn, 250.0);
     let is_available_query_scope =
       crate::resources::cache::cache_name_is_available_query_scope();
     let is_available_resource = expect_context::<QueryClient>()

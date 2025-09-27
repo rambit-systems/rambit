@@ -23,6 +23,7 @@ gloo-net = { version = "0.6", default-features = false, features = [ "http", "js
 leptos-fetch = { version = "0.4", features = [ "devtools" ] }
 leptos-use = { version = "0.16", default-features = false, features = [
   "on_click_outside",
+  "signal_throttled",
   "use_event_listener",
   "use_window",
   "use_interval_fn",

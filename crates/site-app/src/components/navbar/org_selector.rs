@@ -3,7 +3,7 @@ use models::{dvf::RecordId, AuthUser, Org};
 
 use crate::{
   components::{
-    CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle, Popover,
+    CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle, PlusHeroIcon, Popover,
     PopoverContents, PopoverTrigger,
   },
   hooks::OrgHook,
@@ -45,9 +45,9 @@ pub(super) fn OrgSelectorPopover(user: AuthUser) -> impl IntoView {
 
 #[component]
 fn OrgSelector(user: AuthUser) -> impl IntoView {
-  const POPOVER_CLASS: &str = "absolute left-0 \
-                               top-[calc(100%+(var(--spacing)*2))] min-w-56 \
-                               elevation-lv1 p-2 flex flex-col gap-1";
+  const POPOVER_CLASS: &str =
+    "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
+     elevation-lv1 p-2 flex flex-col gap-1 leading-none";
 
   let org_hooks = Signal::stored(
     user
@@ -98,6 +98,7 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
     view! {
       <div
         class="rounded p-2 flex flex-row gap-2 items-center"
+        class=("text-base-12 font-semibold", id == active_org)
         class=("cursor-pointer hover:bg-base-3 active:bg-base-4", id != active_org)
         on:click=handler
       >
@@ -116,7 +117,26 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
       class=POPOVER_CLASS
     >
       { org_hooks().into_iter().map(org_row_element).collect_view() }
+      <div class="p-1">
+        <div class="h-0 border-t-2 border-base-6/75" />
+      </div>
+      <CreateOrgRow />
     </div>
+  }
+}
+
+#[component]
+fn CreateOrgRow() -> impl IntoView {
+  const CLASS: &str = "rounded p-2 flex flex-row gap-2 items-center \
+                       cursor-pointer hover:bg-base-3 active-bg-base-4";
+
+  view! {
+    <a href="/org/create_org" class=CLASS>
+      <PlusHeroIcon {..} class="size-5 stroke-product-11 stroke-[2.0]" />
+      <span class="flex-1 text-ellipsis">
+        "Create Organization..."
+      </span>
+    </a>
   }
 }
 

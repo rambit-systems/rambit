@@ -5,7 +5,7 @@ use models::{dvf::Visibility, PvCache};
 use crate::{
   components::{
     CacheItemLink, CreateCacheButton, DataTableRefreshButton,
-    LockClosedHeroIcon,
+    LockClosedHeroIcon, TableEmptyBody,
   },
   formatting_utils::ThousandsSeparated,
   hooks::OrgHook,
@@ -24,11 +24,16 @@ pub(super) fn CacheTable() -> impl IntoView {
     expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
 
   let body_view = move |caches: Vec<PvCache>| {
-    view! {
+    match caches.len() {
+    0 => view! {
+      <CacheTableEmptyBody />
+    }.into_any(),
+    _ => view! {
       <tbody class="animate-fade-in min-h-10">
         <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
       </tbody>
-    }
+    }.into_any()
+  }
   };
   let suspend = move || {
     Suspend::new(async move {
@@ -61,6 +66,23 @@ pub(super) fn CacheTable() -> impl IntoView {
         </Transition>
       </table>
     </div>
+  }
+}
+
+#[component]
+fn CacheTableEmptyBody() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let create_url =
+    Signal::derive(move || format!("{}/create_cache", org_hook.base_url()()));
+
+  view! {
+    <TableEmptyBody>
+      <p class="text-base-12 text-lg">"Looks like you don't have any caches."</p>
+      <p class="text-sm">
+        <a href=create_url class="text-link text-link-primary">"Create one"</a>
+        " to get started."
+      </p>
+    </TableEmptyBody>
   }
 }
 
