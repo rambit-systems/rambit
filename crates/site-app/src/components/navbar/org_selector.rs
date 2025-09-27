@@ -98,6 +98,7 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
     view! {
       <div
         class="rounded p-2 flex flex-row gap-2 items-center"
+        class=("text-base-12 font-semibold", id == active_org)
         class=("cursor-pointer hover:bg-base-3 active:bg-base-4", id != active_org)
         on:click=handler
       >
@@ -116,6 +117,9 @@ fn OrgSelector(user: AuthUser) -> impl IntoView {
       class=POPOVER_CLASS
     >
       { org_hooks().into_iter().map(org_row_element).collect_view() }
+      <div class="p-1">
+        <div class="h-0 border-t-2 border-base-6/75" />
+      </div>
       <CreateOrgRow />
     </div>
   }
