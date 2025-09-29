@@ -12,7 +12,7 @@ pub(crate) fn CachesTile(entry: Entry) -> impl IntoView {
   let caches = Signal::stored(entry.caches.clone());
   let store_path = Signal::stored(entry.store_path);
   view! {
-    <div class="p-6 elevation-flat flex flex-col gap-4">
+    <div class="flex-1 p-6 elevation-flat flex flex-col gap-4">
       <div class="flex flex-col gap-1">
         <p class="subtitle">
           "Resident Caches"

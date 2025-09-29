@@ -46,11 +46,27 @@ pub fn EntryPage() -> impl IntoView {
 #[component]
 fn EntryInner(entry: Entry) -> impl IntoView {
   view! {
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col md:grid md:grid-cols-[max-content_auto] gap-4">
+      <div class="hidden md:block"/>
       <TitleTile store_path={entry.store_path.clone()} />
-      <div class="grid gap-4 grid-flow-col">
+      <ActionTile />
+      <div class="flex flex-row gap-4 flex-wrap">
         <StorePathTile store_path={entry.store_path.clone()} />
         <CachesTile entry={entry.clone()} />
+      </div>
+    </div>
+  }
+}
+
+#[component]
+fn ActionTile() -> impl IntoView {
+  view! {
+    <div class="md:w-64 lg:w-80 p-6 elevation-flat flex flex-col gap-4 align-self-start">
+      <p class="subtitle">"Actions"</p>
+      <div class="flex flex-col gap-2">
+        <button class="btn btn-critical">
+          "Delete Entry"
+        </button>
       </div>
     </div>
   }

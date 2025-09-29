@@ -27,7 +27,7 @@ pub(crate) fn StorePathTile(store_path: StorePath<String>) -> impl IntoView {
   };
 
   view! {
-    <div class="p-6 elevation-flat flex flex-col gap-2">
+    <div class="flex-1 p-6 elevation-flat flex flex-col gap-2">
       <p class="subtitle">
         "Store Path Breakdown"
       </p>
