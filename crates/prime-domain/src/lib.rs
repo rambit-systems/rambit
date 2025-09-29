@@ -2,6 +2,7 @@
 
 mod counts;
 mod create;
+mod delete_entry;
 pub mod download;
 mod fetch_by_id;
 mod fetch_by_name;
