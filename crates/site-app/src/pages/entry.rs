@@ -50,7 +50,7 @@ fn EntryInner(entry: Entry) -> impl IntoView {
     <div class="flex flex-col md:grid md:grid-cols-[max-content_auto] gap-4">
       <div class="hidden md:block"/>
       <TitleTile store_path={entry.store_path.clone()} />
-      <ActionTile />
+      <ActionTile entry_id=entry.id />
       <div class="flex flex-row gap-4 flex-wrap">
         <StorePathTile store_path={entry.store_path.clone()} />
         <CachesTile entry={entry.clone()} />
