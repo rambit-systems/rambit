@@ -3,4 +3,8 @@
   .title {
     @apply font-display text-3xl font-semibold tracking-tight text-base-12;
   }
+
+  .subtitle {
+    @apply text-xl font-semibold tracking-tight text-base-12;
+  }
 }
