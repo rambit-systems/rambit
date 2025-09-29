@@ -1,3 +1,4 @@
+mod action_tile;
 mod caches_tile;
 mod store_path_tile;
 mod title_tile;
@@ -7,8 +8,8 @@ use leptos_router::hooks::use_params_map;
 use models::{dvf::RecordId, Entry};
 
 use self::{
-  caches_tile::CachesTile, store_path_tile::StorePathTile,
-  title_tile::TitleTile,
+  action_tile::ActionTile, caches_tile::CachesTile,
+  store_path_tile::StorePathTile, title_tile::TitleTile,
 };
 use crate::{hooks::EntryHook, pages::UnauthorizedPage};
 
@@ -53,20 +54,6 @@ fn EntryInner(entry: Entry) -> impl IntoView {
       <div class="flex flex-row gap-4 flex-wrap">
         <StorePathTile store_path={entry.store_path.clone()} />
         <CachesTile entry={entry.clone()} />
-      </div>
-    </div>
-  }
-}
-
-#[component]
-fn ActionTile() -> impl IntoView {
-  view! {
-    <div class="md:w-64 lg:w-80 p-6 elevation-flat flex flex-col gap-4 align-self-start">
-      <p class="subtitle">"Actions"</p>
-      <div class="flex flex-col gap-2">
-        <button class="btn btn-critical">
-          "Delete Entry"
-        </button>
       </div>
     </div>
   }
