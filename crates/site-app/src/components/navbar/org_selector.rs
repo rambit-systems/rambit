@@ -54,7 +54,7 @@ fn OrgSelectorMenu() -> impl IntoView {
   let auth_user = expect_context::<AuthUser>();
 
   const POPOVER_CLASS: &str =
-    "absolute right-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
+    "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
      elevation-lv1 p-2 flex flex-col gap-1 leading-none";
 
   let org_hooks = Signal::stored(
