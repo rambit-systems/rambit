@@ -16,18 +16,18 @@ fn OrgSelectorTrigger() -> impl IntoView {
   let active_org_descriptor = active_org_hook.descriptor();
 
   const CLASS: &str = "transition hover:bg-base-3 active:bg-base-4 \
-                       cursor-pointer px-2 py-1 rounded flex flex-col gap \
-                       leading-none items-end gap-0";
+                       cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
+                       text-sm leading-none items-end gap-0";
 
   view! {
     <div class=CLASS>
-      <span class="text-base-12 text-sm">
+      <p class="text-base/[1] text-base-12">
         <Suspense fallback=|| "[loading]">
           { move || Suspend::new(active_org_descriptor) }
         </Suspense>
-      </span>
-      <div class="flex flex-row items-center gap-0">
-        <span class="text-sm">"Switch Orgs"</span>
+      </p>
+      <div class="flex flex-row items-end gap-0.5">
+        <p>"Switch Orgs"</p>
         <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
       </div>
     </div>
@@ -54,7 +54,7 @@ fn OrgSelectorMenu() -> impl IntoView {
   let auth_user = expect_context::<AuthUser>();
 
   const POPOVER_CLASS: &str =
-    "absolute left-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
+    "absolute right-0 top-[calc(100%+(var(--spacing)*2))] min-w-56 \
      elevation-lv1 p-2 flex flex-col gap-1 leading-none";
 
   let org_hooks = Signal::stored(
@@ -105,9 +105,9 @@ fn OrgSelectorMenu() -> impl IntoView {
 
     view! {
       <div
-        class="rounded p-2 flex flex-row gap-2 items-center"
-        class=("text-base-12 font-semibold", id == active_org)
-        class=("cursor-pointer hover:bg-base-3 active:bg-base-4", id != active_org)
+        class="rounded p-2 flex flex-row gap-2 items-center transition-colors text-base-12"
+        class=("font-bold", id == active_org)
+        class=("cursor-pointer btn-link-secondary", id != active_org)
         on:click=handler
       >
         { icon_element }
@@ -136,7 +136,8 @@ fn OrgSelectorMenu() -> impl IntoView {
 #[component]
 fn CreateOrgRow() -> impl IntoView {
   const CLASS: &str = "rounded p-2 flex flex-row gap-2 items-center \
-                       cursor-pointer hover:bg-base-3 active-bg-base-4";
+                       cursor-pointer btn-link-secondary transition-colors \
+                       text-base-12";
 
   view! {
     <a href="/org/create_org" class=CLASS>
