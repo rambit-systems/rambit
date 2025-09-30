@@ -1,3 +1,4 @@
+mod account_menu;
 mod org_selector;
 
 use leptos::{either::Either, prelude::*};
@@ -66,8 +67,8 @@ fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
   let active_org_dashboard_url = active_org_hook.dashboard_url();
 
   view! {
-    <OrgSelectorPopover user=user />
+    // <OrgSelectorPopover user=user />
     <a href=active_org_dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
-    <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    // <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
   }
 }
