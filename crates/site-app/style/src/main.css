@@ -50,16 +50,17 @@
   --form-grid-cols: calc(48 * var(--spacing)) minmax(0, 1fr)
 }
 
+/* reduce `rem` on small screen sizes */
 :root {
   font-size: 85%;
 }
-
 @media (min-width: 40rem) {
   :root {
     font-size: inherit;
   }
 }
 
+/* custom grid template columns */
 @utility grid-cols-form {
   grid-template-columns: var(--form-grid-cols);
 }
@@ -85,6 +86,7 @@
   }
 }
 
+/* disregard leptos internal components */
 @layer base {
   leptos-island {
     display: contents;
