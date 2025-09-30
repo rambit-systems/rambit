@@ -48,6 +48,9 @@ impl PrimeDomainService {
           .unwrap(),
         name:             HumanName::try_new("Jean-Luc Picard")
           .expect("failed to create name"),
+        name_abbr:        User::abbreviate_name(
+          HumanName::try_new("Jean-Luc Picard").expect("failed to create name"),
+        ),
         auth:             models::UserAuthCredentials::Password {
           // hash for password `password`
           password_hash: models::PasswordHash(
