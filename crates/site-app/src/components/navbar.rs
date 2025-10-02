@@ -1,9 +1,10 @@
+mod account_menu;
 mod org_selector;
 
 use leptos::{either::Either, prelude::*};
 use models::AuthUser;
 
-use self::org_selector::OrgSelectorPopover;
+use self::{account_menu::AccountMenu, org_selector::OrgSelector};
 use crate::{hooks::OrgHook, navigation::next_url_encoded_hook};
 
 #[component]
@@ -39,7 +40,7 @@ fn NavbarUserArea() -> impl IntoView {
   let auth_user = use_context::<AuthUser>();
 
   match auth_user {
-    Some(user) => Either::Left(view! { <LoggedInUserAuthActions user=user /> }),
+    Some(_) => Either::Left(view! { <LoggedInUserAuthActions /> }),
     None => Either::Right(view! { <LoggedOutUserAuthActions /> }),
   }
 }
@@ -61,13 +62,14 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 }
 
 #[component]
-fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
+fn LoggedInUserAuthActions() -> impl IntoView {
   let active_org_hook = OrgHook::new_active();
   let active_org_dashboard_url = active_org_hook.dashboard_url();
 
   view! {
-    <OrgSelectorPopover user=user />
     <a href=active_org_dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
-    <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
+    <OrgSelector />
+    <AccountMenu />
+    // <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
   }
 }

@@ -21,6 +21,8 @@ pub struct User {
   pub orgs:             Vec<RecordId<Org>>,
   /// The user's name.
   pub name:             HumanName,
+  /// An abbreviated form of the user's name.
+  pub name_abbr:        HumanName,
   /// The user's email address.
   pub email:            EmailAddress,
   /// The user's authentication secrets.
@@ -50,6 +52,19 @@ impl User {
   /// Returns whether the user belongs to the given org.
   pub fn belongs_to_org(&self, org: RecordId<Org>) -> bool {
     self.personal_org == org || self.orgs.contains(&org)
+  }
+
+  /// Helper fn that abbreviates a name.
+  pub fn abbreviate_name(name: HumanName) -> HumanName {
+    HumanName::try_new(
+      name
+        .to_string()
+        .split_whitespace()
+        .filter_map(|word| word.chars().next())
+        .map(|c| c.to_uppercase().to_string())
+        .collect::<String>(),
+    )
+    .expect("failed to create name")
   }
 }
 
@@ -139,6 +154,8 @@ pub struct AuthUser {
   pub orgs:             Vec<RecordId<Org>>,
   /// The user's name.
   pub name:             HumanName,
+  /// An abbreviated form of the user's name.
+  pub name_abbr:        HumanName,
   /// The hash of the user's authentication secrets.
   pub auth_hash_bytes:  Box<[u8]>,
   /// The index of the [`Org`] that the user is currently operating as.
@@ -154,6 +171,7 @@ impl From<User> for AuthUser {
       personal_org: user.personal_org,
       orgs: user.orgs,
       name: user.name,
+      name_abbr: user.name_abbr,
       auth_hash_bytes,
       active_org_index: user.active_org_index,
     }
