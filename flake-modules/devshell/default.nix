@@ -45,7 +45,7 @@
         {
           name = "db";
           command = ''
-            docker run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 5432:5432 $@ postgres
+            docker run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 6432:5432 $@ postgres
           '';
           help = "Runs PostgreSQL in a container.";
         }
