@@ -28,6 +28,7 @@ pub async fn fetch_cache(
   let domain_service: DomainService = expect_context();
 
   let cache = domain_service
+    .meta()
     .fetch_cache_by_id(id)
     .await
     .map(|o| o.map(PvCache::from))
@@ -59,16 +60,21 @@ pub async fn fetch_caches_in_org(
 
   let domain_service: DomainService = expect_context();
 
-  let ids = domain_service.fetch_caches_by_org(org).await.map_err(|e| {
-    tracing::error!("failed to fetch caches by org: {e}");
-    ServerFnError::new("internal error")
-  })?;
+  let ids = domain_service
+    .meta()
+    .fetch_caches_by_org(org)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch caches by org: {e}");
+      ServerFnError::new("internal error")
+    })?;
 
   let mut models = Vec::with_capacity(ids.len());
 
   for id in ids {
     models.push(
       domain_service
+        .meta()
         .fetch_cache_by_id(id)
         .await
         .map_err(|e| {
@@ -109,6 +115,7 @@ pub async fn check_if_cache_name_is_available(
   let domain_service: DomainService = expect_context();
 
   let occupied = domain_service
+    .meta()
     .fetch_cache_by_name(sanitized_name)
     .await
     .map_err(|e| {
@@ -139,6 +146,7 @@ pub async fn count_entries_in_cache(
 
   let domain_service: DomainService = expect_context();
   let cache = domain_service
+    .meta()
     .fetch_cache_by_id(cache)
     .await
     .map_err(|e| {
@@ -150,6 +158,7 @@ pub async fn count_entries_in_cache(
   authorize_for_org(cache.org)?;
 
   domain_service
+    .meta()
     .count_entries_in_cache(cache.id)
     .await
     .map_err(|e| {

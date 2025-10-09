@@ -62,10 +62,15 @@ async fn delete_entry(
 
   let domain_service = expect_context::<DomainService>();
 
-  let entry = domain_service.fetch_entry_by_id(id).await.map_err(|e| {
-    tracing::error!("failed to fetch entry to delete: {e}");
-    ServerFnError::new("internal error")
-  })?;
+  let entry =
+    domain_service
+      .meta()
+      .fetch_entry_by_id(id)
+      .await
+      .map_err(|e| {
+        tracing::error!("failed to fetch entry to delete: {e}");
+        ServerFnError::new("internal error")
+      })?;
   let Some(entry) = entry else {
     return Ok(None);
   };

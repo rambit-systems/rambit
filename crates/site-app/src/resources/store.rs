@@ -28,6 +28,7 @@ async fn fetch_store(
   let domain_service: DomainService = expect_context();
 
   let store = domain_service
+    .meta()
     .fetch_store_by_id(id)
     .await
     .map(|o| o.map(PvStore::from))
@@ -59,16 +60,21 @@ pub async fn fetch_stores_in_org(
 
   let domain_service: DomainService = expect_context();
 
-  let ids = domain_service.fetch_stores_by_org(org).await.map_err(|e| {
-    tracing::error!("failed to fetch stores by org: {e}");
-    ServerFnError::new("internal error")
-  })?;
+  let ids = domain_service
+    .meta()
+    .fetch_stores_by_org(org)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch stores by org: {e}");
+      ServerFnError::new("internal error")
+    })?;
 
   let mut models = Vec::with_capacity(ids.len());
 
   for id in ids {
     models.push(
       domain_service
+        .meta()
         .fetch_store_by_id(id)
         .await
         .map_err(|e| {
@@ -111,6 +117,7 @@ pub async fn check_if_store_name_is_available(
   let domain_service: DomainService = expect_context();
 
   let occupied = domain_service
+    .meta()
     .fetch_store_by_org_and_name(org, sanitized_name)
     .await
     .map_err(|e| {
@@ -141,6 +148,7 @@ pub async fn count_entries_in_store(
 
   let domain_service: DomainService = expect_context();
   let store = domain_service
+    .meta()
     .fetch_store_by_id(store)
     .await
     .map_err(|e| {
@@ -152,6 +160,7 @@ pub async fn count_entries_in_store(
   authorize_for_org(store.org)?;
 
   domain_service
+    .meta()
     .count_entries_in_store(store.id)
     .await
     .map_err(|e| {

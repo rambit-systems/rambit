@@ -21,6 +21,7 @@ async fn fetch_org(id: RecordId<Org>) -> Result<Option<PvOrg>, ServerFnError> {
   let domain_service: DomainService = expect_context();
 
   domain_service
+    .meta()
     .fetch_org_by_id(id)
     .await
     .map(|o| o.map(PvOrg::from))
@@ -53,6 +54,7 @@ pub async fn check_if_org_name_is_available(
   let domain_service: DomainService = expect_context();
 
   let occupied = domain_service
+    .meta()
     .fetch_org_by_ident(models::OrgIdent::Named(sanitized_name))
     .await
     .map_err(|e| {

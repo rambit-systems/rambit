@@ -12,7 +12,7 @@ use models::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{DomainService, search_by_user::SearchByUserError};
+use crate::{DomainService, meta::SearchByUserError};
 
 /// The request struct for the [`upload`](DomainService::upload) fn.
 #[derive(Debug)]
@@ -105,6 +105,7 @@ impl DomainService {
 
     // find the stores the user could be referring to
     let possible_stores = self
+      .meta
       .search_stores_by_name_and_user(user.id, req.target_store.clone())
       .await
       .map_err(|e| match e {

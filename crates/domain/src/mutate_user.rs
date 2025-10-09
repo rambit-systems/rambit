@@ -39,6 +39,7 @@ impl DomainService {
     org: RecordId<Org>,
   ) -> Result<(), AddOrgToUserError> {
     let user = self
+      .meta
       .fetch_user_by_id(user)
       .await
       .map_err(AddOrgToUserError::InternalFetchError)?
@@ -49,6 +50,7 @@ impl DomainService {
     }
 
     let org = self
+      .meta
       .fetch_org_by_id(org)
       .await
       .map_err(AddOrgToUserError::InternalFetchError)?
