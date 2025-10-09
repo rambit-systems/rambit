@@ -4,7 +4,7 @@ use models::{
   StoreIndexSelector, dvf::RecordId,
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
 macro_rules! impl_fetch_by_org {
   (
@@ -29,7 +29,7 @@ macro_rules! impl_fetch_by_org {
   };
 }
 
-impl PrimeDomainService {
+impl DomainService {
   impl_fetch_by_org!(
     /// Fetches all [`Cache`]s by org.
     pub fn fetch_caches_by_org,

@@ -1,5 +1,5 @@
 { config, pkgs, ... }: {
-  # from ../../crates/prime-domain/src/migrate.rs
+  # from ../../crates/domain/src/migrate.rs
   test-data = {
     archive = ../../crates/owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0;
     store-path = "ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";

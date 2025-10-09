@@ -1326,6 +1326,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "belt",
+ "bytes",
+ "db",
+ "futures",
+ "miette",
+ "models",
+ "owl",
+ "serde",
+ "storage",
+ "thiserror 2.0.16",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1764,6 +1782,7 @@ dependencies = [
  "axum-login",
  "clap",
  "db",
+ "domain",
  "http 1.3.1",
  "http-body 1.0.1",
  "http-body-util",
@@ -1774,7 +1793,6 @@ dependencies = [
  "leptos_axum",
  "leptos_router",
  "miette",
- "prime-domain",
  "serde",
  "site-app",
  "tokio",
@@ -3571,24 +3589,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "prime-domain"
-version = "0.1.0"
-dependencies = [
- "belt",
- "bytes",
- "db",
- "futures",
- "miette",
- "models",
- "owl",
- "serde",
- "storage",
- "thiserror 2.0.16",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "proc-macro-crate"
 version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4624,6 +4624,7 @@ version = "0.1.0"
 dependencies = [
  "auth-domain",
  "css-minify-macro",
+ "domain",
  "gloo-net",
  "leptos",
  "leptos-fetch",
@@ -4632,7 +4633,6 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "models",
- "prime-domain",
  "serde",
  "tracing",
 ]

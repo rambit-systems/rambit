@@ -7,7 +7,7 @@ use axum::{
   http::StatusCode,
   response::IntoResponse,
 };
-use prime_domain::{
+use domain::{
   belt::{self, Belt, StreamExt},
   models::NarDeriverData,
   upload::UploadRequest,
@@ -62,7 +62,7 @@ pub async fn upload(
     deriver_data,
   };
 
-  let upload_resp = app_state.prime_domain.upload(upload_req).await;
+  let upload_resp = app_state.domain.upload(upload_req).await;
 
   match upload_resp {
     Ok(resp) => Json(resp).into_response(),

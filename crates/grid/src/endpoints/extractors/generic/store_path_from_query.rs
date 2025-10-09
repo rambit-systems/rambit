@@ -4,7 +4,7 @@ use axum::{
   extract::{FromRequestParts, Query},
   http::{StatusCode, request::Parts},
 };
-use prime_domain::models::StorePath;
+use domain::models::StorePath;
 
 use super::QueryParameter;
 

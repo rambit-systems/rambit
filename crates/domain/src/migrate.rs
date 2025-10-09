@@ -9,9 +9,9 @@ use models::{
   },
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-impl PrimeDomainService {
+impl DomainService {
   /// Add test data to databases.
   pub async fn migrate_test_data(&self, ephemeral_storage: bool) -> Result<()> {
     let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();

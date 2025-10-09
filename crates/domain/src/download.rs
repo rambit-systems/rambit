@@ -11,9 +11,9 @@ use models::{
   },
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-/// The request struct for the [`download`](PrimeDomainService::download) fn.
+/// The request struct for the [`download`](DomainService::download) fn.
 #[derive(Debug)]
 pub struct DownloadRequest {
   /// The downloading user's authentication.
@@ -24,7 +24,7 @@ pub struct DownloadRequest {
   pub store_path: StorePath<String>,
 }
 
-/// The response struct for the [`download`](PrimeDomainService::download) fn.
+/// The response struct for the [`download`](DomainService::download) fn.
 #[derive(Debug)]
 pub struct DownloadResponse {
   /// The data being downloaded.
@@ -33,7 +33,7 @@ pub struct DownloadResponse {
   pub file_size: FileSize,
 }
 
-/// The error enum for the [`download`](PrimeDomainService::download) fn.
+/// The error enum for the [`download`](DomainService::download) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadError {
   /// The user is unauthorized to download from this cache.
@@ -61,7 +61,7 @@ pub enum DownloadError {
   InternalError(miette::Report),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Downloads an entry's payload from storage.
   pub async fn download(
     &self,
@@ -177,12 +177,12 @@ mod tests {
   };
 
   use crate::{
-    PrimeDomainService, download::DownloadRequest, upload::UploadRequest,
+    DomainService, download::DownloadRequest, upload::UploadRequest,
   };
 
   #[tokio::test]
   async fn test_download() {
-    let pds = PrimeDomainService::mock_prime_domain().await;
+    let pds = DomainService::mock_domain().await;
 
     let input_bytes = Bytes::from_static(include_bytes!(
       "../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"

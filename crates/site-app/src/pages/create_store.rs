@@ -174,19 +174,19 @@ pub async fn create_store(
   credentials: R2StorageCredentials,
   configuration: StoreConfiguration,
 ) -> Result<RecordId<Store>, ServerFnError> {
+  use domain::DomainService;
   use models::StorageCredentials;
-  use prime_domain::PrimeDomainService;
 
   crate::resources::authorize_for_org(org)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
   let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  prime_domain_service
+  domain_service
     .create_store(
       org,
       sanitized_name,

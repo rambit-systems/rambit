@@ -16,18 +16,14 @@ pub fn entry_query_scope(
 pub async fn fetch_entry(
   id: RecordId<Entry>,
 ) -> Result<Option<Entry>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let entry =
-    prime_domain_service
-      .fetch_entry_by_id(id)
-      .await
-      .map_err(|e| {
-        tracing::error!("failed to fetch entry: {e}");
-        ServerFnError::new("internal error")
-      })?;
+  let entry = domain_service.fetch_entry_by_id(id).await.map_err(|e| {
+    tracing::error!("failed to fetch entry: {e}");
+    ServerFnError::new("internal error")
+  })?;
 
   if let Some(entry) = &entry {
     authorize_for_org(entry.org)?;
@@ -46,13 +42,13 @@ pub fn entries_in_org_query_scope(
 pub async fn fetch_entries_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<Entry>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   authorize_for_org(org)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let ids = prime_domain_service
+  let ids = domain_service
     .fetch_entries_by_org(org)
     .await
     .map_err(|e| {
@@ -63,7 +59,7 @@ pub async fn fetch_entries_in_org(
 
   for id in ids {
     models.push(
-      prime_domain_service
+      domain_service
         .fetch_entry_by_id(id)
         .await
         .map_err(|e| {

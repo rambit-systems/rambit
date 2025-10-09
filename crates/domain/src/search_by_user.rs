@@ -4,7 +4,7 @@ use models::{
   dvf::{EntityName, RecordId},
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SearchByUserError {
@@ -19,7 +19,7 @@ pub enum SearchByUserError {
   FetchByIndexError(#[from] FetchModelByIndexError),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Find all stores with the given name across all a user's orgs.
   pub async fn search_stores_by_name_and_user(
     &self,

@@ -12,9 +12,9 @@ use models::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{PrimeDomainService, search_by_user::SearchByUserError};
+use crate::{DomainService, search_by_user::SearchByUserError};
 
-/// The request struct for the [`upload`](PrimeDomainService::upload) fn.
+/// The request struct for the [`upload`](DomainService::upload) fn.
 #[derive(Debug)]
 pub struct UploadRequest {
   /// The data to be uploaded.
@@ -31,14 +31,14 @@ pub struct UploadRequest {
   pub deriver_data: NarDeriverData,
 }
 
-/// The response struct for the [`upload`](PrimeDomainService::upload) fn.
+/// The response struct for the [`upload`](DomainService::upload) fn.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadResponse {
   /// The ID of the created entry.
   pub entry_id: RecordId<Entry>,
 }
 
-/// The error enum for the [`upload`](PrimeDomainService::upload) fn.
+/// The error enum for the [`upload`](DomainService::upload) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum UploadError {
   /// The user is unauthorized to upload to this cache.
@@ -84,7 +84,7 @@ pub enum UploadError {
   InternalError(miette::Report),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Uploads a payload to storage, creates an entry, and adds it to a cache.
   pub async fn upload(
     &self,
@@ -291,11 +291,11 @@ mod tests {
   };
 
   use super::UploadRequest;
-  use crate::PrimeDomainService;
+  use crate::DomainService;
 
   #[tokio::test]
   async fn test_upload() {
-    let pds = PrimeDomainService::mock_prime_domain().await;
+    let pds = DomainService::mock_domain().await;
 
     let bytes = Bytes::from_static(include_bytes!(
       "../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"

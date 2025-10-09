@@ -58,25 +58,21 @@ impl DeleteEntryHook {
 async fn delete_entry(
   id: RecordId<Entry>,
 ) -> Result<Option<RecordId<Entry>>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service = expect_context::<PrimeDomainService>();
+  let domain_service = expect_context::<DomainService>();
 
-  let entry =
-    prime_domain_service
-      .fetch_entry_by_id(id)
-      .await
-      .map_err(|e| {
-        tracing::error!("failed to fetch entry to delete: {e}");
-        ServerFnError::new("internal error")
-      })?;
+  let entry = domain_service.fetch_entry_by_id(id).await.map_err(|e| {
+    tracing::error!("failed to fetch entry to delete: {e}");
+    ServerFnError::new("internal error")
+  })?;
   let Some(entry) = entry else {
     return Ok(None);
   };
 
   crate::resources::authorize_for_org(entry.org)?;
 
-  prime_domain_service.delete_entry(id).await.map_err(|e| {
+  domain_service.delete_entry(id).await.map_err(|e| {
     tracing::error!("failed to delete entry: {e}");
     ServerFnError::new("internal error")
   })

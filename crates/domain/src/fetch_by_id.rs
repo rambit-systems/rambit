@@ -1,9 +1,9 @@
 use db::FetchModelError;
 use models::{Cache, Entry, Org, Store, User, dvf::RecordId};
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-impl PrimeDomainService {
+impl DomainService {
   /// Fetches an [`Org`] by its ID.
   pub async fn fetch_org_by_id(
     &self,

@@ -23,11 +23,11 @@ pub fn cache_query_scope(
 pub async fn fetch_cache(
   id: RecordId<Cache>,
 ) -> Result<Option<PvCache>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let cache = prime_domain_service
+  let cache = domain_service
     .fetch_cache_by_id(id)
     .await
     .map(|o| o.map(PvCache::from))
@@ -53,25 +53,22 @@ pub fn caches_in_org_query_scope(
 pub async fn fetch_caches_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<PvCache>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   authorize_for_org(org)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let ids = prime_domain_service
-    .fetch_caches_by_org(org)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to fetch caches by org: {e}");
-      ServerFnError::new("internal error")
-    })?;
+  let ids = domain_service.fetch_caches_by_org(org).await.map_err(|e| {
+    tracing::error!("failed to fetch caches by org: {e}");
+    ServerFnError::new("internal error")
+  })?;
 
   let mut models = Vec::with_capacity(ids.len());
 
   for id in ids {
     models.push(
-      prime_domain_service
+      domain_service
         .fetch_cache_by_id(id)
         .await
         .map_err(|e| {
@@ -99,8 +96,8 @@ pub fn cache_name_is_available_query_scope(
 pub async fn check_if_cache_name_is_available(
   name: String,
 ) -> Result<bool, ServerFnError> {
+  use domain::DomainService;
   use models::dvf::{EntityName, StrictSlug};
-  use prime_domain::PrimeDomainService;
 
   authenticate()?;
 
@@ -109,9 +106,9 @@ pub async fn check_if_cache_name_is_available(
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let occupied = prime_domain_service
+  let occupied = domain_service
     .fetch_cache_by_name(sanitized_name)
     .await
     .map_err(|e| {
@@ -138,10 +135,10 @@ pub fn entry_count_in_cache_query_scope(
 pub async fn count_entries_in_cache(
   cache: RecordId<Cache>,
 ) -> Result<u32, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
-  let cache = prime_domain_service
+  let domain_service: DomainService = expect_context();
+  let cache = domain_service
     .fetch_cache_by_id(cache)
     .await
     .map_err(|e| {
@@ -152,7 +149,7 @@ pub async fn count_entries_in_cache(
 
   authorize_for_org(cache.org)?;
 
-  prime_domain_service
+  domain_service
     .count_entries_in_cache(cache.id)
     .await
     .map_err(|e| {

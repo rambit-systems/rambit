@@ -14,13 +14,13 @@ pub fn org_query_scope(
 
 #[server(prefix = "/api/sfn")]
 async fn fetch_org(id: RecordId<Org>) -> Result<Option<PvOrg>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   authorize_for_org(id)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  prime_domain_service
+  domain_service
     .fetch_org_by_id(id)
     .await
     .map(|o| o.map(PvOrg::from))
@@ -40,8 +40,8 @@ pub fn org_name_is_available_query_scope(
 pub async fn check_if_org_name_is_available(
   name: String,
 ) -> Result<bool, ServerFnError> {
+  use domain::DomainService;
   use models::dvf::{EntityName, StrictSlug};
-  use prime_domain::PrimeDomainService;
 
   authenticate()?;
 
@@ -50,9 +50,9 @@ pub async fn check_if_org_name_is_available(
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let occupied = prime_domain_service
+  let occupied = domain_service
     .fetch_org_by_ident(models::OrgIdent::Named(sanitized_name))
     .await
     .map_err(|e| {

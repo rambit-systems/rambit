@@ -8,9 +8,9 @@ use models::{
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-/// The request struct for the [`narinfo`](PrimeDomainService::narinfo) fn.
+/// The request struct for the [`narinfo`](DomainService::narinfo) fn.
 #[derive(Debug)]
 pub struct NarinfoRequest {
   /// The user's authentication.
@@ -21,7 +21,7 @@ pub struct NarinfoRequest {
   pub digest:     Digest,
 }
 
-/// The response struct for the [`narinfo`](PrimeDomainService::narinfo) fn.
+/// The response struct for the [`narinfo`](DomainService::narinfo) fn.
 #[derive(Debug)]
 pub struct NarinfoResponse {
   entry:            Entry,
@@ -71,7 +71,7 @@ impl NarinfoResponse {
   }
 }
 
-/// The error enum for the [`narinfo`](PrimeDomainService::narinfo) fn.
+/// The error enum for the [`narinfo`](DomainService::narinfo) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum NarinfoError {
   /// The user is unauthorized to read from this cache.
@@ -88,7 +88,7 @@ pub enum NarinfoError {
   InternalError(miette::Report),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Calculates the narinfo for a given entry.
   pub async fn narinfo(
     &self,

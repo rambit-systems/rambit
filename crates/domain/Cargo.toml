@@ -1,5 +1,5 @@
 [package]
-name = "prime-domain"
+name = "domain"
 version = "0.1.0"
 
 edition = "2024"

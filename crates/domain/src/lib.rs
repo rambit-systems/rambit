@@ -20,9 +20,9 @@ use db::Database;
 pub use models;
 use models::{Cache, Entry, Org, Store, User};
 
-/// The prime domain service type.
+/// The domain service type.
 #[derive(Debug, Clone)]
-pub struct PrimeDomainService {
+pub struct DomainService {
   org_repo:   Database<Org>,
   user_repo:  Database<User>,
   store_repo: Database<Store>,
@@ -30,8 +30,8 @@ pub struct PrimeDomainService {
   cache_repo: Database<Cache>,
 }
 
-impl PrimeDomainService {
-  /// Create a new [`PrimeDomainService`].
+impl DomainService {
+  /// Create a new [`DomainService`].
   pub fn new(
     org_repo: Database<Org>,
     user_repo: Database<User>,
@@ -53,11 +53,11 @@ impl PrimeDomainService {
 mod tests {
   use db::Database;
 
-  use crate::PrimeDomainService;
+  use crate::DomainService;
 
-  impl PrimeDomainService {
-    pub(crate) async fn mock_prime_domain() -> PrimeDomainService {
-      let pds = PrimeDomainService {
+  impl DomainService {
+    pub(crate) async fn mock_domain() -> DomainService {
+      let pds = DomainService {
         org_repo:   Database::new_mock(),
         user_repo:  Database::new_mock(),
         store_repo: Database::new_mock(),

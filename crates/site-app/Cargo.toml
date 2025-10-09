@@ -13,8 +13,8 @@ leptos_router.workspace = true
 
 auth-domain = { path = "../auth-domain", optional = true }
 css-minify-macro = { path = "../css-minify-macro" }
+domain = { path = "../domain", optional = true }
 models = { path = "../models", default-features = false }
-prime-domain = { path = "../prime-domain", optional = true }
 
 serde.workspace = true
 tracing.workspace = true
@@ -42,6 +42,6 @@ ssr = [
   "leptos-fetch/ssr",
   "leptos-use/ssr",
   "dep:leptos_axum",
-  "dep:prime-domain",
+  "dep:domain",
   "dep:auth-domain",
 ]

@@ -154,11 +154,11 @@ impl CreateOrgHook {
 #[server(prefix = "/api/sfn")]
 pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
   use auth_domain::AuthDomainService;
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   let auth_user = crate::resources::authenticate()?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
   let auth_domain_service: AuthDomainService = expect_context();
 
   let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
@@ -166,7 +166,7 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let org = prime_domain_service
+  let org = domain_service
     .create_org(sanitized_name)
     .await
     .map_err(|e| {
@@ -174,7 +174,7 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
       ServerFnError::new("internal error")
     })?;
 
-  prime_domain_service
+  domain_service
     .add_org_to_user(auth_user.id, org)
     .await
     .map_err(|e| {

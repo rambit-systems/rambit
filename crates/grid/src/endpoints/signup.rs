@@ -1,6 +1,6 @@
 use auth_domain::{AuthDomainService, AuthSession};
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use prime_domain::models::{
+use domain::models::{
   UserSubmittedAuthCredentials,
   dvf::{EmailAddress, HumanName},
 };

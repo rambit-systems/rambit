@@ -57,7 +57,7 @@ pub fn context_provider(
   auth_session: AuthSession,
 ) -> impl Fn() + Clone {
   move || {
-    provide_context(app_state.prime_domain.clone());
+    provide_context(app_state.domain.clone());
     provide_context(app_state.auth_domain.clone());
     provide_context(auth_session.clone());
     if let Some(auth_user) = auth_session.user.clone() {

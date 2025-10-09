@@ -5,7 +5,7 @@ use axum::{
   http::StatusCode,
   response::IntoResponse,
 };
-use prime_domain::{models::Digest, narinfo::NarinfoRequest};
+use domain::{models::Digest, narinfo::NarinfoRequest};
 
 use super::extractors::{CacheNameExtractor, UserAuthExtractor};
 use crate::app_state::AppState;
@@ -48,7 +48,7 @@ pub async fn narinfo(
     digest,
   };
 
-  let narinfo_resp = app_state.prime_domain.narinfo(narinfo_req).await;
+  let narinfo_resp = app_state.domain.narinfo(narinfo_req).await;
 
   match narinfo_resp {
     Ok(resp) => resp.narinfo().to_string().into_response(),

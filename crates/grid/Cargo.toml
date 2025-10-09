@@ -8,7 +8,7 @@ publish = false
 
 [dependencies]
 auth-domain = { path = "../auth-domain" }
-prime-domain = { path = "../prime-domain" }
+domain = { path = "../domain" }
 site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
 tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 

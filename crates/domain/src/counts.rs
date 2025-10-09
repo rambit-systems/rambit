@@ -1,9 +1,9 @@
 use db::{FetchModelByIndexError, kv::LaxSlug};
 use models::{Cache, EntryIndexSelector, Store, dvf::RecordId};
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-impl PrimeDomainService {
+impl DomainService {
   /// Counts the number of [`Entry`](models::Entry)s in a [`Store`].
   pub async fn count_entries_in_store(
     &self,
