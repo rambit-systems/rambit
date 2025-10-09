@@ -2,6 +2,7 @@ mod entry_counts;
 mod fetch_by_id;
 mod fetch_by_name;
 mod fetch_by_org;
+mod fetch_entry_by;
 mod search_stores_by_user;
 
 use db::Database;

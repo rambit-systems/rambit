@@ -5,9 +5,9 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Cache, CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector,
-  NarAuthenticityData, NarDeriverData, NarStorageData, Org, StorePath, User,
-  dvf::{CompressionStatus, EitherSlug, EntityName, RecordId},
+  Cache, Digest, Entry, NarAuthenticityData, NarDeriverData, NarStorageData,
+  Org, StorePath, User,
+  dvf::{CompressionStatus, EntityName, RecordId},
   model::Model,
 };
 use serde::{Deserialize, Serialize};
@@ -94,8 +94,8 @@ impl DomainService {
 
     // find the user
     let user = self
-      .user_repo
-      .fetch_model_by_id(req.auth)
+      .meta
+      .fetch_user_by_id(req.auth)
       .await
       .into_diagnostic()
       .context("failed to find user")
@@ -149,11 +149,8 @@ impl DomainService {
     for cache_name in req.caches {
       caches.push(
         self
-          .cache_repo
-          .fetch_model_by_unique_index(
-            CacheUniqueIndexSelector::Name,
-            EitherSlug::Strict(cache_name.clone().into_inner()),
-          )
+          .meta
+          .fetch_cache_by_name(cache_name.clone())
           .await
           .into_diagnostic()
           .context("failed to search for cache")
@@ -169,14 +166,8 @@ impl DomainService {
 
     // make sure no entry exists for this path and store
     let duplicate_entry_by_store = self
-      .entry_repo
-      .fetch_model_by_unique_index(
-        EntryUniqueIndexSelector::StoreIdAndEntryPath,
-        Entry::unique_index_store_id_and_entry_path(
-          target_store.id,
-          &req.store_path,
-        ),
-      )
+      .meta
+      .fetch_entry_by_store_id_and_entry_path(target_store.id, &req.store_path)
       .await
       .into_diagnostic()
       .context("failed to search for conflicting entries by store and path")
@@ -189,13 +180,10 @@ impl DomainService {
     // make sure no entry exists for this path and any targeted cache
     for cache in caches.iter() {
       let duplicate_entry_by_cache = self
-        .entry_repo
-        .fetch_model_by_unique_index(
-          EntryUniqueIndexSelector::CacheIdAndEntryDigest,
-          Entry::unique_index_cache_id_and_entry_digest(
-            cache.id,
-            Digest::from_bytes(*req.store_path.digest()),
-          ),
+        .meta
+        .fetch_entry_by_cache_id_and_entry_digest(
+          cache.id,
+          Digest::from_bytes(*req.store_path.digest()),
         )
         .await
         .into_diagnostic()
