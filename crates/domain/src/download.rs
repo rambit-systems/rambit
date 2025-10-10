@@ -12,7 +12,8 @@ use models::{
 
 pub use self::{execute::*, plan::*};
 
-/// The request struct for the [`download`](DomainService::download) fn.
+/// The request struct for the
+/// [`plan_download`](crate::DomainService::plan_download) fn.
 #[derive(Debug)]
 pub struct DownloadRequest {
   /// The downloading user's authentication.

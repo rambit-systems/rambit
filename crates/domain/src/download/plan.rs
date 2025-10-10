@@ -6,14 +6,17 @@ use models::{
 
 use crate::{DomainService, download::DownloadRequest};
 
-/// A download plan.
+/// A download plan produced by [`plan_download`](DomainService::plan_download)
+/// fn.
 #[derive(Debug)]
 pub struct DownloadPlan {
+  /// The entry being requested.
   pub(crate) entry: Entry,
+  /// The store the entry resides in.
   pub(crate) store: Store,
 }
 
-/// The error enum for the [`download`](DomainService::download) fn.
+/// The error enum for the [`plan_download`](DomainService::plan_download) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadPlanningError {
   /// The user is unauthorized to download from this cache.
@@ -47,6 +50,7 @@ impl DomainService {
     &self,
     req: DownloadRequest,
   ) -> Result<DownloadPlan, DownloadPlanningError> {
+    // fetch the cache and make sure it exists
     let cache = self
       .meta
       .fetch_cache_by_name(req.cache_name.clone())
@@ -56,6 +60,7 @@ impl DomainService {
       .map_err(DownloadPlanningError::InternalError)?
       .ok_or(DownloadPlanningError::CacheNotFound(req.cache_name.clone()))?;
 
+    // fetch the user if an ID was given
     let user = match req.auth {
       Some(auth) => Some(
         self
@@ -71,6 +76,7 @@ impl DomainService {
       None => None,
     };
 
+    // authorize the user if the cache requires it
     match (cache.visibility, user) {
       (Visibility::Private, None) => {
         return Err(DownloadPlanningError::Unauthorized);
@@ -83,6 +89,7 @@ impl DomainService {
       (Visibility::Public, _) => (),
     }
 
+    // fetch the entry
     let entry = self
       .meta
       .fetch_entry_by_cache_id_and_entry_digest(
@@ -98,6 +105,7 @@ impl DomainService {
         store_path: req.store_path.clone(),
       })?;
 
+    // fetch the store the entry resides in
     let store = self
       .meta
       .fetch_store_by_id(entry.storage_data.store)

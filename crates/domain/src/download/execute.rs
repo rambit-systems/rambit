@@ -7,7 +7,8 @@ use models::{
 use super::plan::DownloadPlan;
 use crate::DomainService;
 
-/// The response struct for the [`download`](DomainService::download) fn.
+/// The response struct for the
+/// [`execute_download`](DomainService::execute_download) fn.
 #[derive(Debug)]
 pub struct DownloadResponse {
   /// The data being downloaded.
@@ -16,7 +17,8 @@ pub struct DownloadResponse {
   pub file_size: FileSize,
 }
 
-/// The error enum for the [`download`](DomainService::download) fn.
+/// The error enum for the [`execute_download`](DomainService::execute_download)
+/// fn.
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadExecutionError {
   /// The user is unauthorized to download from this cache.
@@ -50,18 +52,22 @@ impl DomainService {
     &self,
     plan: DownloadPlan,
   ) -> Result<DownloadResponse, DownloadExecutionError> {
+    // build a client to fetch from the store
     let store_client = storage::StorageClient::new_from_storage_creds(
       plan.store.credentials.into(),
     )
     .await
     .map_err(DownloadExecutionError::InternalError)?;
 
+    // fetch the data from the store
     let path = plan.entry.storage_data.storage_path;
-    let comp_status = plan.entry.storage_data.compression_status;
     let data = store_client
       .read(&path)
       .await
       .map_err(DownloadExecutionError::StorageFailure)?;
+
+    // decompress if needed
+    let comp_status = plan.entry.storage_data.compression_status;
     let (file_size, data) = match comp_status {
       CompressionStatus::Compressed {
         uncompressed_size,
