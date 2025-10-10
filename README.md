@@ -28,7 +28,7 @@ devshell will also come with custom commands, which you can explore with the
 
 - `app` - server binary entrypoint.
 - `models` - primary db model types.
-- `prime-domain` - centralized, dependency-injected business logic.
+- `domain` - centralized, dependency-injected business logic.
 
 ## License
 

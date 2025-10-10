@@ -1,28 +1,25 @@
 //! Entrypoint for domain logic.
 
-mod counts;
 mod create;
 mod delete_entry;
 pub mod download;
-mod fetch_by_id;
-mod fetch_by_name;
-mod fetch_by_org;
 mod migrate;
 pub mod mutate_user;
 pub mod narinfo;
-mod search_by_user;
 pub mod upload;
 
 pub use belt;
 pub use bytes;
 pub use db;
 use db::Database;
+use meta_domain::MetaService;
 pub use models;
 use models::{Cache, Entry, Org, Store, User};
 
-/// The prime domain service type.
+/// The domain service type.
 #[derive(Debug, Clone)]
-pub struct PrimeDomainService {
+pub struct DomainService {
+  meta:       MetaService,
   org_repo:   Database<Org>,
   user_repo:  Database<User>,
   store_repo: Database<Store>,
@@ -30,8 +27,8 @@ pub struct PrimeDomainService {
   cache_repo: Database<Cache>,
 }
 
-impl PrimeDomainService {
-  /// Create a new [`PrimeDomainService`].
+impl DomainService {
+  /// Create a new [`DomainService`].
   pub fn new(
     org_repo: Database<Org>,
     user_repo: Database<User>,
@@ -39,7 +36,16 @@ impl PrimeDomainService {
     entry_repo: Database<Entry>,
     cache_repo: Database<Cache>,
   ) -> Self {
+    let meta = MetaService::new(
+      org_repo.clone(),
+      user_repo.clone(),
+      store_repo.clone(),
+      entry_repo.clone(),
+      cache_repo.clone(),
+    );
+
     Self {
+      meta,
       org_repo,
       user_repo,
       store_repo,
@@ -47,23 +53,26 @@ impl PrimeDomainService {
       cache_repo,
     }
   }
+
+  /// Access the internal [`MetaService`].
+  pub fn meta(&self) -> &MetaService { &self.meta }
 }
 
 #[cfg(test)]
 mod tests {
   use db::Database;
 
-  use crate::PrimeDomainService;
+  use crate::DomainService;
 
-  impl PrimeDomainService {
-    pub(crate) async fn mock_prime_domain() -> PrimeDomainService {
-      let pds = PrimeDomainService {
-        org_repo:   Database::new_mock(),
-        user_repo:  Database::new_mock(),
-        store_repo: Database::new_mock(),
-        entry_repo: Database::new_mock(),
-        cache_repo: Database::new_mock(),
-      };
+  impl DomainService {
+    pub(crate) async fn mock_domain() -> DomainService {
+      let pds = DomainService::new(
+        Database::new_mock(),
+        Database::new_mock(),
+        Database::new_mock(),
+        Database::new_mock(),
+        Database::new_mock(),
+      );
 
       pds
         .migrate_test_data(true)

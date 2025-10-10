@@ -3,10 +3,10 @@
 use db::{FetchModelError, PatchModelError};
 use models::{Org, User, dvf::RecordId};
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
 /// The error enum for the
-/// [`add_org_to_user`](PrimeDomainService::add_org_to_user).
+/// [`add_org_to_user`](DomainService::add_org_to_user).
 #[derive(thiserror::Error, Debug)]
 pub enum AddOrgToUserError {
   /// The user does not exist.
@@ -31,7 +31,7 @@ pub enum AddOrgToUserError {
   InternalPatchError(PatchModelError),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Adds an [`Org`] to a [`User`]'s org list.
   pub async fn add_org_to_user(
     &self,
@@ -39,6 +39,7 @@ impl PrimeDomainService {
     org: RecordId<Org>,
   ) -> Result<(), AddOrgToUserError> {
     let user = self
+      .meta
       .fetch_user_by_id(user)
       .await
       .map_err(AddOrgToUserError::InternalFetchError)?
@@ -49,6 +50,7 @@ impl PrimeDomainService {
     }
 
     let org = self
+      .meta
       .fetch_org_by_id(org)
       .await
       .map_err(AddOrgToUserError::InternalFetchError)?

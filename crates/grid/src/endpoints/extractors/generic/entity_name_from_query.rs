@@ -4,7 +4,7 @@ use axum::{
   extract::{FromRequestParts, Query},
   http::{StatusCode, request::Parts},
 };
-use prime_domain::models::dvf::{self, EntityName, StrictSlug};
+use domain::models::dvf::{self, EntityName, StrictSlug};
 
 use super::QueryParameter;
 

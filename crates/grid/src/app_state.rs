@@ -3,15 +3,15 @@ use std::sync::Arc;
 
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
+use domain::{DomainService, db::Database};
 use leptos::config::LeptosOptions;
 use miette::{Context, IntoDiagnostic, Result};
-use prime_domain::{PrimeDomainService, db::Database};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
   pub auth_domain:    AuthDomainService,
-  pub prime_domain:   PrimeDomainService,
+  pub domain:         DomainService,
   pub session_store:  DatabaseSessionStore,
   pub leptos_options: LeptosOptions,
 }
@@ -65,8 +65,8 @@ impl AppState {
     };
 
     let auth_domain = AuthDomainService::new(org_db.clone(), user_db.clone());
-    let prime_domain =
-      PrimeDomainService::new(org_db, user_db, store_db, entry_db, cache_db);
+    let domain =
+      DomainService::new(org_db, user_db, store_db, entry_db, cache_db);
     let session_store = DatabaseSessionStore::new(session_db);
 
     let leptos_conf = leptos::prelude::get_configuration(None)
@@ -76,7 +76,7 @@ impl AppState {
 
     Ok(AppState {
       auth_domain,
-      prime_domain,
+      domain,
       session_store,
       leptos_options,
     })

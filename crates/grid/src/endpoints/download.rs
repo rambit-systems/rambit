@@ -6,7 +6,7 @@ use axum::{
   http::{StatusCode, header::CONTENT_LENGTH},
   response::IntoResponse,
 };
-use prime_domain::{
+use domain::{
   download::{DownloadRequest, DownloadResponse},
   models::StorePath,
 };
@@ -42,7 +42,7 @@ pub async fn download(
     store_path,
   };
 
-  let download_resp = app_state.prime_domain.download(download_req).await;
+  let download_resp = app_state.domain.download(download_req).await;
 
   match download_resp {
     Ok(DownloadResponse { data, file_size }) => (

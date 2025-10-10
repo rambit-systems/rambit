@@ -4,9 +4,9 @@ use models::{
   dvf::{EntityName, RecordId, Visibility},
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-impl PrimeDomainService {
+impl DomainService {
   /// Creates a [`Cache`].
   pub async fn create_cache(
     &self,

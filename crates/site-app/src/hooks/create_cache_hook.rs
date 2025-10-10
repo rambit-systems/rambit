@@ -175,18 +175,18 @@ pub async fn create_cache(
   name: String,
   visibility: Visibility,
 ) -> Result<RecordId<Cache>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   crate::resources::authorize_for_org(org)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
   let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  prime_domain_service
+  domain_service
     .create_cache(org, sanitized_name, visibility)
     .await
     .map_err(|e| {

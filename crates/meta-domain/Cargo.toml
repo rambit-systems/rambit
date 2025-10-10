@@ -1,0 +1,17 @@
+[package]
+name = "meta-domain"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+models = { path = "../models" }
+
+db.workspace = true
+
+thiserror.workspace = true
+
+[lints]
+workspace = true

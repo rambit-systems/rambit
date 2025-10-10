@@ -1,9 +1,9 @@
 use db::DeleteModelError;
 use models::{Entry, dvf::RecordId};
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-impl PrimeDomainService {
+impl DomainService {
   /// Deletes an [`Entry`].
   pub async fn delete_entry(
     &self,

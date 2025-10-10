@@ -3,7 +3,7 @@ use axum::{
   extract::{FromRequestParts, OptionalFromRequestParts},
   http::StatusCode,
 };
-use prime_domain::models::AuthUser;
+use domain::models::AuthUser;
 
 /// Uses [`AuthSession`] to extract [`AuthUser`]. This extra indirection is here
 /// so that we can extract user auth from multiple sources in the future.

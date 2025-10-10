@@ -23,11 +23,12 @@ pub fn store_query_scope(
 async fn fetch_store(
   id: RecordId<Store>,
 ) -> Result<Option<PvStore>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let store = prime_domain_service
+  let store = domain_service
+    .meta()
     .fetch_store_by_id(id)
     .await
     .map(|o| o.map(PvStore::from))
@@ -53,13 +54,14 @@ pub fn stores_in_org_query_scope(
 pub async fn fetch_stores_in_org(
   org: RecordId<Org>,
 ) -> Result<Vec<PvStore>, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
   authorize_for_org(org)?;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let ids = prime_domain_service
+  let ids = domain_service
+    .meta()
     .fetch_stores_by_org(org)
     .await
     .map_err(|e| {
@@ -71,7 +73,8 @@ pub async fn fetch_stores_in_org(
 
   for id in ids {
     models.push(
-      prime_domain_service
+      domain_service
+        .meta()
         .fetch_store_by_id(id)
         .await
         .map_err(|e| {
@@ -99,8 +102,8 @@ pub fn store_name_is_available_query_scope(
 pub async fn check_if_store_name_is_available(
   org_and_name: (RecordId<Org>, String),
 ) -> Result<bool, ServerFnError> {
+  use domain::DomainService;
   use models::dvf::{EntityName, StrictSlug};
-  use prime_domain::PrimeDomainService;
 
   let (org, name) = org_and_name;
 
@@ -111,9 +114,10 @@ pub async fn check_if_store_name_is_available(
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let prime_domain_service: PrimeDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  let occupied = prime_domain_service
+  let occupied = domain_service
+    .meta()
     .fetch_store_by_org_and_name(org, sanitized_name)
     .await
     .map_err(|e| {
@@ -140,10 +144,11 @@ pub fn entry_count_in_store_query_scope(
 pub async fn count_entries_in_store(
   store: RecordId<Store>,
 ) -> Result<u32, ServerFnError> {
-  use prime_domain::PrimeDomainService;
+  use domain::DomainService;
 
-  let prime_domain_service: PrimeDomainService = expect_context();
-  let store = prime_domain_service
+  let domain_service: DomainService = expect_context();
+  let store = domain_service
+    .meta()
     .fetch_store_by_id(store)
     .await
     .map_err(|e| {
@@ -154,7 +159,8 @@ pub async fn count_entries_in_store(
 
   authorize_for_org(store.org)?;
 
-  prime_domain_service
+  domain_service
+    .meta()
     .count_entries_in_store(store.id)
     .await
     .map_err(|e| {

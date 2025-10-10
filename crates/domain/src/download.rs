@@ -3,17 +3,16 @@
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector, StorePath,
-  User,
+  Digest, StorePath, User,
   dvf::{
-    CompressionAlgorithm, CompressionStatus, EitherSlug, EntityName, FileSize,
-    RecordId, Visibility,
+    CompressionAlgorithm, CompressionStatus, EntityName, FileSize, RecordId,
+    Visibility,
   },
 };
 
-use crate::PrimeDomainService;
+use crate::DomainService;
 
-/// The request struct for the [`download`](PrimeDomainService::download) fn.
+/// The request struct for the [`download`](DomainService::download) fn.
 #[derive(Debug)]
 pub struct DownloadRequest {
   /// The downloading user's authentication.
@@ -24,7 +23,7 @@ pub struct DownloadRequest {
   pub store_path: StorePath<String>,
 }
 
-/// The response struct for the [`download`](PrimeDomainService::download) fn.
+/// The response struct for the [`download`](DomainService::download) fn.
 #[derive(Debug)]
 pub struct DownloadResponse {
   /// The data being downloaded.
@@ -33,7 +32,7 @@ pub struct DownloadResponse {
   pub file_size: FileSize,
 }
 
-/// The error enum for the [`download`](PrimeDomainService::download) fn.
+/// The error enum for the [`download`](DomainService::download) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadError {
   /// The user is unauthorized to download from this cache.
@@ -61,18 +60,15 @@ pub enum DownloadError {
   InternalError(miette::Report),
 }
 
-impl PrimeDomainService {
+impl DomainService {
   /// Downloads an entry's payload from storage.
   pub async fn download(
     &self,
     req: DownloadRequest,
   ) -> Result<DownloadResponse, DownloadError> {
     let cache = self
-      .cache_repo
-      .fetch_model_by_unique_index(
-        CacheUniqueIndexSelector::Name,
-        EitherSlug::Strict(req.cache_name.clone().into_inner()),
-      )
+      .meta
+      .fetch_cache_by_name(req.cache_name.clone())
       .await
       .into_diagnostic()
       .context("failed to search for cache")
@@ -82,8 +78,8 @@ impl PrimeDomainService {
     let user = match req.auth {
       Some(auth) => Some(
         self
-          .user_repo
-          .fetch_model_by_id(auth)
+          .meta
+          .fetch_user_by_id(auth)
           .await
           .into_diagnostic()
           .context("failed to find user")
@@ -107,13 +103,10 @@ impl PrimeDomainService {
     }
 
     let entry = self
-      .entry_repo
-      .fetch_model_by_unique_index(
-        EntryUniqueIndexSelector::CacheIdAndEntryDigest,
-        Entry::unique_index_cache_id_and_entry_digest(
-          cache.id,
-          Digest::from_bytes(*req.store_path.digest()),
-        ),
+      .meta
+      .fetch_entry_by_cache_id_and_entry_digest(
+        cache.id,
+        Digest::from_bytes(*req.store_path.digest()),
       )
       .await
       .into_diagnostic()
@@ -125,8 +118,8 @@ impl PrimeDomainService {
       })?;
 
     let store = self
-      .store_repo
-      .fetch_model_by_id(entry.storage_data.store)
+      .meta
+      .fetch_store_by_id(entry.storage_data.store)
       .await
       .into_diagnostic()
       .context("failed to find store")
@@ -177,12 +170,12 @@ mod tests {
   };
 
   use crate::{
-    PrimeDomainService, download::DownloadRequest, upload::UploadRequest,
+    DomainService, download::DownloadRequest, upload::UploadRequest,
   };
 
   #[tokio::test]
   async fn test_download() {
-    let pds = PrimeDomainService::mock_prime_domain().await;
+    let pds = DomainService::mock_domain().await;
 
     let input_bytes = Bytes::from_static(include_bytes!(
       "../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"

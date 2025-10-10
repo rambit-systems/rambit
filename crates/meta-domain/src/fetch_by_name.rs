@@ -5,9 +5,9 @@ use models::{
   dvf::{EntityName, RecordId},
 };
 
-use crate::PrimeDomainService;
+use crate::MetaService;
 
-impl PrimeDomainService {
+impl MetaService {
   /// Fetches a [`Cache`] by its [name](CacheUniqueIndexSelector::Name).
   pub async fn fetch_cache_by_name(
     &self,
