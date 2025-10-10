@@ -1,3 +1,5 @@
+//! Provides [`MetaService`] for read-only only operations on models.
+
 mod entry_counts;
 mod fetch_by_id;
 mod fetch_by_name;
@@ -10,7 +12,7 @@ use models::{Cache, Entry, Org, Store, User};
 
 pub use self::search_stores_by_user::SearchByUserError;
 
-/// Service for basic read-only operations on models.
+/// Service for read-only operations on models.
 #[derive(Debug, Clone)]
 pub struct MetaService {
   org_repo:   Database<Org>,

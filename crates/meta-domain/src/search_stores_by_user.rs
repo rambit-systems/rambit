@@ -6,6 +6,8 @@ use models::{
 
 use super::MetaService;
 
+/// Failures that can occur when running
+/// [`search_stores_by_name_and_user`](MetaService::search_stores_by_name_and_user).
 #[derive(Debug, thiserror::Error)]
 pub enum SearchByUserError {
   /// Indicates that the user does not exist.

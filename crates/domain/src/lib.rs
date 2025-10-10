@@ -3,7 +3,6 @@
 mod create;
 mod delete_entry;
 pub mod download;
-mod meta;
 mod migrate;
 pub mod mutate_user;
 pub mod narinfo;
@@ -13,10 +12,9 @@ pub use belt;
 pub use bytes;
 pub use db;
 use db::Database;
+use meta_domain::MetaService;
 pub use models;
 use models::{Cache, Entry, Org, Store, User};
-
-pub use self::meta::MetaService;
 
 /// The domain service type.
 #[derive(Debug, Clone)]

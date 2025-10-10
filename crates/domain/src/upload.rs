@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 
 use belt::Belt;
+use meta_domain::SearchByUserError;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Cache, Digest, Entry, NarAuthenticityData, NarDeriverData, NarStorageData,
@@ -12,7 +13,7 @@ use models::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{DomainService, meta::SearchByUserError};
+use crate::DomainService;
 
 /// The request struct for the [`upload`](DomainService::upload) fn.
 #[derive(Debug)]
