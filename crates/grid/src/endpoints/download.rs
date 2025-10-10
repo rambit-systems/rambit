@@ -42,7 +42,14 @@ pub async fn download(
     store_path,
   };
 
-  let download_resp = app_state.domain.download(download_req).await;
+  let download_plan = match app_state.domain.plan_download(download_req).await {
+    Ok(plan) => plan,
+    Err(err) => {
+      return format!("{err:#?}").into_response();
+    }
+  };
+
+  let download_resp = app_state.domain.execute_download(download_plan).await;
 
   match download_resp {
     Ok(DownloadResponse { data, file_size }) => (

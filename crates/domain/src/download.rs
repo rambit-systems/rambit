@@ -3,7 +3,7 @@
 use belt::Belt;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Digest, StorePath, User,
+  Digest, Entry, Store, StorePath, User,
   dvf::{
     CompressionAlgorithm, CompressionStatus, EntityName, FileSize, RecordId,
     Visibility,
@@ -23,6 +23,41 @@ pub struct DownloadRequest {
   pub store_path: StorePath<String>,
 }
 
+/// A download plan.
+#[derive(Debug)]
+pub struct DownloadPlan {
+  entry: Entry,
+  store: Store,
+}
+
+/// The error enum for the [`download`](DomainService::download) fn.
+#[derive(thiserror::Error, Debug)]
+pub enum DownloadPlanningError {
+  /// The user is unauthorized to download from this cache.
+  #[error("The user is unauthorized to download from this cache")]
+  Unauthorized,
+  /// The requested cache was not found.
+  #[error("The requested cache was not found: \"{0}\"")]
+  CacheNotFound(EntityName),
+  /// The requested entry was not found.
+  #[error(
+    "The requested entry was not found: store path \"{store_path}\" in cache \
+     \"{cache}\""
+  )]
+  EntryNotFound {
+    /// The cache.
+    cache:      EntityName,
+    /// The entry store path.
+    store_path: StorePath<String>,
+  },
+  /// Failed to read from storage.
+  #[error("Failed to read from storage: {0}")]
+  StorageFailure(storage::ReadError),
+  /// Some other internal error.
+  #[error("Unexpected error: {0}")]
+  InternalError(miette::Report),
+}
+
 /// The response struct for the [`download`](DomainService::download) fn.
 #[derive(Debug)]
 pub struct DownloadResponse {
@@ -34,7 +69,7 @@ pub struct DownloadResponse {
 
 /// The error enum for the [`download`](DomainService::download) fn.
 #[derive(thiserror::Error, Debug)]
-pub enum DownloadError {
+pub enum DownloadExecutionError {
   /// The user is unauthorized to download from this cache.
   #[error("The user is unauthorized to download from this cache")]
   Unauthorized,
@@ -61,19 +96,19 @@ pub enum DownloadError {
 }
 
 impl DomainService {
-  /// Downloads an entry's payload from storage.
-  pub async fn download(
+  /// Plans a download.
+  pub async fn plan_download(
     &self,
     req: DownloadRequest,
-  ) -> Result<DownloadResponse, DownloadError> {
+  ) -> Result<DownloadPlan, DownloadPlanningError> {
     let cache = self
       .meta
       .fetch_cache_by_name(req.cache_name.clone())
       .await
       .into_diagnostic()
       .context("failed to search for cache")
-      .map_err(DownloadError::InternalError)?
-      .ok_or(DownloadError::CacheNotFound(req.cache_name.clone()))?;
+      .map_err(DownloadPlanningError::InternalError)?
+      .ok_or(DownloadPlanningError::CacheNotFound(req.cache_name.clone()))?;
 
     let user = match req.auth {
       Some(auth) => Some(
@@ -83,20 +118,20 @@ impl DomainService {
           .await
           .into_diagnostic()
           .context("failed to find user")
-          .map_err(DownloadError::InternalError)?
+          .map_err(DownloadPlanningError::InternalError)?
           .ok_or(miette!("authenticated user not found"))
-          .map_err(DownloadError::InternalError)?,
+          .map_err(DownloadPlanningError::InternalError)?,
       ),
       None => None,
     };
 
     match (cache.visibility, user) {
       (Visibility::Private, None) => {
-        return Err(DownloadError::Unauthorized);
+        return Err(DownloadPlanningError::Unauthorized);
       }
       (Visibility::Private, Some(user)) => {
         if !user.belongs_to_org(cache.org) {
-          return Err(DownloadError::Unauthorized);
+          return Err(DownloadPlanningError::Unauthorized);
         }
       }
       (Visibility::Public, _) => (),
@@ -111,9 +146,9 @@ impl DomainService {
       .await
       .into_diagnostic()
       .context("failed to search for entry")
-      .map_err(DownloadError::InternalError)?
-      .ok_or(DownloadError::EntryNotFound {
-        cache:      cache.name,
+      .map_err(DownloadPlanningError::InternalError)?
+      .ok_or(DownloadPlanningError::EntryNotFound {
+        cache:      cache.name.clone(),
         store_path: req.store_path.clone(),
       })?;
 
@@ -123,21 +158,30 @@ impl DomainService {
       .await
       .into_diagnostic()
       .context("failed to find store")
-      .map_err(DownloadError::InternalError)?
+      .map_err(DownloadPlanningError::InternalError)?
       .ok_or(miette!("store not found"))
-      .map_err(DownloadError::InternalError)?;
+      .map_err(DownloadPlanningError::InternalError)?;
 
-    let store_client =
-      storage::StorageClient::new_from_storage_creds(store.credentials.into())
-        .await
-        .map_err(DownloadError::InternalError)?;
+    Ok(DownloadPlan { entry, store })
+  }
 
-    let path = entry.storage_data.storage_path;
-    let comp_status = entry.storage_data.compression_status;
+  /// Downloads an entry's payload from storage.
+  pub async fn execute_download(
+    &self,
+    plan: DownloadPlan,
+  ) -> Result<DownloadResponse, DownloadExecutionError> {
+    let store_client = storage::StorageClient::new_from_storage_creds(
+      plan.store.credentials.into(),
+    )
+    .await
+    .map_err(DownloadExecutionError::InternalError)?;
+
+    let path = plan.entry.storage_data.storage_path;
+    let comp_status = plan.entry.storage_data.compression_status;
     let data = store_client
       .read(&path)
       .await
-      .map_err(DownloadError::StorageFailure)?;
+      .map_err(DownloadExecutionError::StorageFailure)?;
     let (file_size, data) = match comp_status {
       CompressionStatus::Compressed {
         uncompressed_size,
@@ -225,10 +269,14 @@ mod tests {
       store_path,
     };
 
-    let download_resp = pds
-      .download(download_req)
+    let download_plan = pds
+      .plan_download(download_req)
       .await
-      .expect("failed to download");
+      .expect("failed to plan download");
+    let download_resp = pds
+      .execute_download(download_plan)
+      .await
+      .expect("failed to execute download");
 
     let downloaded_data = download_resp
       .data
