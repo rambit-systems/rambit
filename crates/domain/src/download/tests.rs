@@ -45,7 +45,11 @@ async fn test_download() {
     deriver_data,
   };
 
-  let resp = pds.upload(req).await.expect("failed to upload");
+  let plan = pds.plan_upload(req).await.expect("failed to plan upload");
+  let resp = pds
+    .execute_upload(plan)
+    .await
+    .expect("failed to execute upload");
 
   let _entry = pds
     .entry_repo

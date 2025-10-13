@@ -62,9 +62,13 @@ pub async fn upload(
     deriver_data,
   };
 
-  let upload_resp = app_state.domain.upload(upload_req).await;
-
-  match upload_resp {
+  let upload_plan = match app_state.domain.plan_upload(upload_req).await {
+    Ok(plan) => plan,
+    Err(err) => {
+      return format!("{err:?}").into_response();
+    }
+  };
+  match app_state.domain.execute_upload(upload_plan).await {
     Ok(resp) => Json(resp).into_response(),
     Err(err) => format!("{err:?}").into_response(),
   }
