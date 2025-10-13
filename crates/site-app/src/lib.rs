@@ -28,6 +28,9 @@ const PRELOAD_FONT_PATHS: &[&str] = &[
   "/fonts/funnel_sans/OpNIno8Dg9bX6Bsp3Wq69Tpyfhg.woff2",
   "/fonts/funnel_display/B50WF7FGv37QNVWgE0ga--4Pbb6dDYs.woff2",
 ];
+const FAVICON_SVG: &str = include_str!("../public/favicon.svg");
+const FAVICON_SVG_BASE64: &str =
+  const_base::encode_as_str!(FAVICON_SVG, const_base::Config::B64);
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
   view! {
@@ -48,8 +51,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
         <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
 
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" sizes="64x64" href="/favicon-64x64.png" />
+        <link
+          rel="icon" type="image/svg+xml"
+          href={format!("data:image/svg+xml;base64,{FAVICON_SVG_BASE64}")}
+        />
 
         <MetaTags/>
       </head>

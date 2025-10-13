@@ -30,6 +30,7 @@ leptos-use = { version = "0.16", default-features = false, features = [
   "use_window_focus",
   "use_clipboard",
 ] }
+const_base = "0.2.0"
 
 [features]
 default = [  ]
