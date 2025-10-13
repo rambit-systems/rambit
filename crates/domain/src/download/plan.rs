@@ -36,9 +36,6 @@ pub enum DownloadPlanningError {
     /// The entry store path.
     store_path: StorePath<String>,
   },
-  /// Failed to read from storage.
-  #[error("Failed to read from storage: {0}")]
-  StorageFailure(storage::ReadError),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),

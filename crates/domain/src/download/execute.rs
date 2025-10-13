@@ -1,8 +1,5 @@
 use belt::Belt;
-use models::{
-  StorePath,
-  dvf::{CompressionAlgorithm, CompressionStatus, EntityName, FileSize},
-};
+use models::dvf::{CompressionAlgorithm, CompressionStatus, FileSize};
 
 use super::plan::DownloadPlan;
 use crate::DomainService;
@@ -21,23 +18,6 @@ pub struct DownloadResponse {
 /// fn.
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadExecutionError {
-  /// The user is unauthorized to download from this cache.
-  #[error("The user is unauthorized to download from this cache")]
-  Unauthorized,
-  /// The requested cache was not found.
-  #[error("The requested cache was not found: \"{0}\"")]
-  CacheNotFound(EntityName),
-  /// The requested entry was not found.
-  #[error(
-    "The requested entry was not found: store path \"{store_path}\" in cache \
-     \"{cache}\""
-  )]
-  EntryNotFound {
-    /// The cache.
-    cache:      EntityName,
-    /// The entry store path.
-    store_path: StorePath<String>,
-  },
   /// Failed to read from storage.
   #[error("Failed to read from storage: {0}")]
   StorageFailure(storage::ReadError),
