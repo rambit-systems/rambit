@@ -81,15 +81,6 @@ pub enum UploadPlanningError {
     /// The cache that contains the duplicate.
     cache: RecordId<Cache>,
   },
-  /// Failed to write to storage.
-  #[error("Failed to write to storage: {0}")]
-  StorageFailure(storage::WriteError),
-  /// Failed to read all the input data.
-  #[error("Failed to read input data: {0}")]
-  InputDataError(std::io::Error),
-  /// Failed to validate NAR.
-  #[error("Failed to validate NAR: {0}")]
-  NarValidationError(owl::InterrogatorError),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -106,35 +97,6 @@ pub struct UploadResponse {
 /// The error enum for the [`execute_upload`](DomainService::execute_upload) fn.
 #[derive(thiserror::Error, Debug)]
 pub enum UploadExecutionError {
-  /// The user is unauthorized to upload to this cache.
-  #[error("The user is unauthorized to upload to this cache")]
-  Unauthorized,
-  /// The requested cache was not found.
-  #[error("The requested cache was not found: \"{0}\"")]
-  CacheNotFound(EntityName),
-  /// The target store was not found.
-  #[error("The target store was not found: \"{0}\"")]
-  TargetStoreNotFound(EntityName),
-  /// Multiple stores were found with the given name in different organizations.
-  #[error(
-    "The target store name \"{1}\" is ambiguous: multiple results found in \
-     orgs {0:?}"
-  )]
-  TargetStoreAmbiguous(Vec<RecordId<Org>>, EntityName),
-  /// An entry with that path already exists in the target store.
-  #[error("An entry with that path already exists in the target store: {0}")]
-  DuplicateEntryInStore(RecordId<Entry>),
-  /// An entry with that path already exists in the cache.
-  #[error(
-    "An entry with that path already exists in the cache: entry {entry} in \
-     cache {cache}"
-  )]
-  DuplicateEntryInCache {
-    /// The entry that already exists in the cache.
-    entry: RecordId<Entry>,
-    /// The cache that contains the duplicate.
-    cache: RecordId<Cache>,
-  },
   /// Failed to write to storage.
   #[error("Failed to write to storage: {0}")]
   StorageFailure(storage::WriteError),
