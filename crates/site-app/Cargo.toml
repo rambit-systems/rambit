@@ -19,6 +19,7 @@ models = { path = "../models", default-features = false }
 serde.workspace = true
 tracing.workspace = true
 
+const_base = "0.2.0"
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 leptos-fetch = { version = "0.4", features = [ "devtools" ] }
 leptos-use = { version = "0.16", default-features = false, features = [
@@ -30,7 +31,6 @@ leptos-use = { version = "0.16", default-features = false, features = [
   "use_window_focus",
   "use_clipboard",
 ] }
-const_base = "0.2.0"
 
 [features]
 default = [  ]
