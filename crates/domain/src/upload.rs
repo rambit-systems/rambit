@@ -11,7 +11,8 @@ use models::{
   dvf::{EntityName, RecordId},
 };
 
-/// The request struct for the [`upload`](DomainService::upload) fn.
+/// The request struct for the
+/// [`plan_upload`](crate::DomainService::plan_upload) fn.
 #[derive(Debug)]
 pub struct UploadRequest {
   /// The data to be uploaded.
