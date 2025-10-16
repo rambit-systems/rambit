@@ -4,6 +4,7 @@ mod create;
 mod delete_entry;
 pub mod download;
 mod migrate;
+mod mutate;
 pub mod mutate_user;
 pub mod narinfo;
 pub mod upload;
@@ -16,15 +17,13 @@ use meta_domain::MetaService;
 pub use models;
 use models::{Cache, Entry, Org, Store, User};
 
+use self::mutate::MutationService;
+
 /// The domain service type.
 #[derive(Debug, Clone)]
 pub struct DomainService {
-  meta:       MetaService,
-  org_repo:   Database<Org>,
-  user_repo:  Database<User>,
-  store_repo: Database<Store>,
-  entry_repo: Database<Entry>,
-  cache_repo: Database<Cache>,
+  meta:   MetaService,
+  mutate: MutationService,
 }
 
 impl DomainService {
@@ -43,15 +42,15 @@ impl DomainService {
       entry_repo.clone(),
       cache_repo.clone(),
     );
+    let mutate = MutationService::new(
+      org_repo.clone(),
+      user_repo.clone(),
+      store_repo.clone(),
+      entry_repo.clone(),
+      cache_repo.clone(),
+    );
 
-    Self {
-      meta,
-      org_repo,
-      user_repo,
-      store_repo,
-      entry_repo,
-      cache_repo,
-    }
+    Self { meta, mutate }
   }
 
   /// Access the internal [`MetaService`].

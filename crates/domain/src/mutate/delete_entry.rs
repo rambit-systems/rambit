@@ -1,14 +1,18 @@
 use db::DeleteModelError;
 use models::{Entry, dvf::RecordId};
 
-use crate::DomainService;
+use super::MutationService;
 
-impl DomainService {
+impl MutationService {
   /// Deletes an [`Entry`].
   pub async fn delete_entry(
     &self,
     id: RecordId<Entry>,
   ) -> Result<Option<RecordId<Entry>>, DeleteModelError> {
-    self.mutate.delete_entry(id).await
+    self
+      .entry_repo
+      .delete_model(id)
+      .await
+      .map(|b| b.then_some(id))
   }
 }
