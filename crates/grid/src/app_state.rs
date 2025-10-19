@@ -3,7 +3,10 @@ use std::sync::Arc;
 
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
-use domain::{DomainService, db::Database};
+use domain::{
+  DomainService, db::Database, meta_domain::MetaService,
+  mutate_domain::MutationService,
+};
 use leptos::config::LeptosOptions;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
@@ -64,9 +67,24 @@ impl AppState {
       )
     };
 
-    let auth_domain = AuthDomainService::new(org_db.clone(), user_db.clone());
-    let domain =
-      DomainService::new(org_db, user_db, store_db, entry_db, cache_db);
+    let meta_domain = MetaService::new(
+      org_db.clone(),
+      user_db.clone(),
+      store_db.clone(),
+      entry_db.clone(),
+      cache_db.clone(),
+    );
+    let mutate_domain = MutationService::new(
+      org_db.clone(),
+      user_db.clone(),
+      store_db.clone(),
+      entry_db.clone(),
+      cache_db,
+    );
+
+    let auth_domain =
+      AuthDomainService::new(meta_domain.clone(), mutate_domain.clone());
+    let domain = DomainService::new(meta_domain, mutate_domain);
     let session_store = DatabaseSessionStore::new(session_db);
 
     let leptos_conf = leptos::prelude::get_configuration(None)

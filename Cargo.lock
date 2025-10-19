@@ -327,9 +327,10 @@ dependencies = [
  "argon2",
  "async-trait",
  "axum-login",
- "db",
+ "meta-domain",
  "miette",
  "models",
+ "mutate-domain",
  "thiserror 2.0.16",
  "tokio",
  "tracing",
@@ -1354,6 +1355,7 @@ dependencies = [
  "meta-domain",
  "miette",
  "models",
+ "mutate-domain",
  "owl",
  "serde",
  "storage",
@@ -3064,6 +3066,16 @@ dependencies = [
  "mime",
  "spin",
  "version_check",
+]
+
+[[package]]
+name = "mutate-domain"
+version = "0.1.0"
+dependencies = [
+ "db",
+ "miette",
+ "models",
+ "thiserror 2.0.16",
 ]
 
 [[package]]

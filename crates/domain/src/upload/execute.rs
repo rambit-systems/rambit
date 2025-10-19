@@ -94,9 +94,9 @@ impl DomainService {
     let nar_authenticity_data = NarAuthenticityData::default();
 
     // insert entry
-    let entry = self
-      .entry_repo
-      .create_model(Entry {
+    let entry_id = self
+      .mutate
+      .create_entry(Entry {
         id:                entry_id,
         org:               plan.org_id,
         caches:            plan.caches.iter().map(Model::id).collect(),
@@ -111,6 +111,6 @@ impl DomainService {
       .context("failed to create entry")
       .map_err(UploadExecutionError::InternalError)?;
 
-    Ok(UploadResponse { entry_id: entry.id })
+    Ok(UploadResponse { entry_id })
   }
 }

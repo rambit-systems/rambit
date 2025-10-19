@@ -14,16 +14,7 @@ impl DomainService {
     name: EntityName,
     visibility: Visibility,
   ) -> Result<RecordId<Cache>, CreateModelError> {
-    self
-      .cache_repo
-      .create_model(Cache {
-        id: RecordId::new(),
-        org,
-        name,
-        visibility,
-      })
-      .await
-      .map(|c| c.id)
+    self.mutate.create_cache(org, name, visibility).await
   }
 
   /// Creates a [`Store`].
@@ -35,16 +26,9 @@ impl DomainService {
     config: StoreConfiguration,
   ) -> Result<RecordId<Store>, CreateModelError> {
     self
-      .store_repo
-      .create_model(Store {
-        id: RecordId::new(),
-        org,
-        credentials,
-        config,
-        name,
-      })
+      .mutate
+      .create_store(org, name, credentials, config)
       .await
-      .map(|s| s.id)
   }
 
   /// Creates an [`Org`].
@@ -53,12 +37,11 @@ impl DomainService {
     name: EntityName,
   ) -> Result<RecordId<Org>, CreateModelError> {
     self
-      .org_repo
-      .create_model(Org {
+      .mutate
+      .create_org(Org {
         id:        RecordId::new(),
         org_ident: models::OrgIdent::Named(name),
       })
       .await
-      .map(|s| s.id)
   }
 }

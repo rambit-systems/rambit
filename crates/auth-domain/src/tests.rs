@@ -1,12 +1,15 @@
+use meta_domain::MetaService;
 use models::dvf::{EmailAddress, HumanName};
+use mutate_domain::MutationService;
 
 use super::*;
 
 #[tokio::test]
 async fn test_user_signup() {
-  let org_repo = Database::new_mock();
-  let user_repo = Database::new_mock();
-  let service = AuthDomainService::new(org_repo, user_repo);
+  let service = AuthDomainService::new(
+    MetaService::new_mock(),
+    MutationService::new_mock(),
+  );
 
   let name = HumanName::try_new("Test User 1").unwrap();
   let email = EmailAddress::try_new("test@example.com").unwrap();
@@ -30,9 +33,10 @@ async fn test_user_signup() {
 
 #[tokio::test]
 async fn test_user_authenticate() {
-  let org_repo = Database::new_mock();
-  let user_repo = Database::new_mock();
-  let service = AuthDomainService::new(org_repo, user_repo);
+  let service = AuthDomainService::new(
+    MetaService::new_mock(),
+    MutationService::new_mock(),
+  );
 
   let name = HumanName::try_new("Test User 1").unwrap();
   let email = EmailAddress::try_new("test@example.com").unwrap();

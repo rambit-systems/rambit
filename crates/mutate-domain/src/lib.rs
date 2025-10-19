@@ -1,21 +1,19 @@
-//! Provides [`MetaService`] for read-only only operations on models.
+//! Provides [`MutationService`] for mutation operations on models.
 
-mod entry_counts;
-mod fetch_by_id;
-mod fetch_by_name;
-mod fetch_by_org;
-mod fetch_entry_by;
-mod fetch_user_by;
-mod search_stores_by_user;
+mod create;
+mod delete_entry;
+mod migrate;
+mod patch_user;
+mod user_active_org;
 
 use db::Database;
 use models::{Cache, Entry, Org, Store, User};
 
-pub use self::search_stores_by_user::SearchByUserError;
+pub use self::user_active_org::UpdateActiveOrgError;
 
-/// Service for read-only operations on models.
+/// Service for mutation operations on models.
 #[derive(Debug, Clone)]
-pub struct MetaService {
+pub struct MutationService {
   org_repo:   Database<Org>,
   user_repo:  Database<User>,
   store_repo: Database<Store>,
@@ -23,8 +21,8 @@ pub struct MetaService {
   cache_repo: Database<Cache>,
 }
 
-impl MetaService {
-  /// Creates a new [`MetaService`].
+impl MutationService {
+  /// Creates a new [`MutationService`].
   pub fn new(
     org_repo: Database<Org>,
     user_repo: Database<User>,
@@ -41,7 +39,7 @@ impl MetaService {
     }
   }
 
-  /// Creates a mocked-up [`MetaService`].
+  /// Creates a mocked-up [`MutationService`].
   pub fn new_mock() -> Self {
     Self {
       org_repo:   Database::new_mock(),

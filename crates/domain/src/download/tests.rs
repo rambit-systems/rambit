@@ -52,8 +52,8 @@ async fn test_download() {
     .expect("failed to execute upload");
 
   let _entry = pds
-    .entry_repo
-    .fetch_model_by_id(resp.entry_id)
+    .meta()
+    .fetch_entry_by_id(resp.entry_id)
     .await
     .expect("failed to find entry")
     .expect("failed to find entry");

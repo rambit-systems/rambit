@@ -2,9 +2,8 @@
 
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  CacheUniqueIndexSelector, Digest, Entry, EntryUniqueIndexSelector, Signature,
-  StorePath, User,
-  dvf::{EitherSlug, EntityName, RecordId, Visibility},
+  Digest, Entry, Signature, StorePath, User,
+  dvf::{EntityName, RecordId, Visibility},
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
@@ -95,11 +94,8 @@ impl DomainService {
     req: NarinfoRequest,
   ) -> Result<NarinfoResponse, NarinfoError> {
     let cache = self
-      .cache_repo
-      .fetch_model_by_unique_index(
-        CacheUniqueIndexSelector::Name,
-        EitherSlug::Strict(req.cache_name.clone().into_inner()),
-      )
+      .meta
+      .fetch_cache_by_name(req.cache_name.clone())
       .await
       .into_diagnostic()
       .context("failed to search for cache")
@@ -109,8 +105,8 @@ impl DomainService {
     let user = match req.auth {
       Some(user_id) => Some(
         self
-          .user_repo
-          .fetch_model_by_id(user_id)
+          .meta
+          .fetch_user_by_id(user_id)
           .await
           .into_diagnostic()
           .context("failed to find user")
@@ -134,11 +130,8 @@ impl DomainService {
     }
 
     let entry = self
-      .entry_repo
-      .fetch_model_by_unique_index(
-        EntryUniqueIndexSelector::CacheIdAndEntryDigest,
-        Entry::unique_index_cache_id_and_entry_digest(cache.id, req.digest),
-      )
+      .meta
+      .fetch_entry_by_cache_id_and_entry_digest(cache.id, req.digest)
       .await
       .context("failed to search for entry")
       .map_err(NarinfoError::InternalError)?

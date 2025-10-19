@@ -66,8 +66,8 @@ impl DomainService {
     };
 
     self
-      .user_repo
-      .patch_model(user.id, new_user)
+      .mutate
+      .patch_user(new_user)
       .await
       .map_err(AddOrgToUserError::InternalPatchError)?;
 

@@ -7,14 +7,14 @@ mod tests;
 
 use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
-use db::{Database, FetchModelByIndexError, FetchModelError, kv::LaxSlug};
-use miette::{IntoDiagnostic, miette};
+use miette::{Context, IntoDiagnostic, miette};
 use models::{
   AuthUser, Org, OrgIdent, User, UserAuthCredentials,
-  UserSubmittedAuthCredentials, UserUniqueIndexSelector,
-  dvf::{EitherSlug, EmailAddress, HumanName},
+  UserSubmittedAuthCredentials,
+  dvf::{EmailAddress, HumanName},
   model::RecordId,
 };
+pub use mutate_domain::UpdateActiveOrgError;
 
 pub use self::errors::*;
 
@@ -24,70 +24,29 @@ pub type AuthSession = axum_login::AuthSession<AuthDomainService>;
 /// A dynamic [`AuthDomainService`] trait object.
 #[derive(Clone, Debug)]
 pub struct AuthDomainService {
-  org_repo:  Database<Org>,
-  user_repo: Database<User>,
+  meta:   meta_domain::MetaService,
+  mutate: mutate_domain::MutationService,
 }
 
 impl AuthDomainService {
   /// Creates a new [`AuthDomainService`].
   #[must_use]
-  pub fn new(org_repo: Database<Org>, user_repo: Database<User>) -> Self {
-    Self {
-      org_repo,
-      user_repo,
-    }
+  pub fn new(
+    meta: meta_domain::MetaService,
+    mutate: mutate_domain::MutationService,
+  ) -> Self {
+    Self { meta, mutate }
   }
 }
 
 impl AuthDomainService {
-  /// Fetch a [`User`] by ID.
-  async fn fetch_user_by_id(
-    &self,
-    id: RecordId<User>,
-  ) -> Result<Option<User>, FetchModelError> {
-    self.user_repo.fetch_model_by_id(id).await
-  }
-
-  /// Fetch a [`User`] by [`EmailAddress`](EmailAddress).
-  async fn fetch_user_by_email(
-    &self,
-    email: EmailAddress,
-  ) -> Result<Option<User>, FetchModelByIndexError> {
-    self
-      .user_repo
-      .fetch_model_by_unique_index(
-        UserUniqueIndexSelector::Email,
-        EitherSlug::Lax(LaxSlug::new(email.as_ref())),
-      )
-      .await
-  }
-
-  /// Switch a [`User`]'s active org.
+  /// Switches the active org of a [`User`].
   pub async fn switch_active_org(
     &self,
     user: RecordId<User>,
     new_active_org: RecordId<Org>,
-  ) -> Result<RecordId<Org>, errors::UpdateActiveOrgError> {
-    let user = self
-      .user_repo
-      .fetch_model_by_id(user)
-      .await?
-      .ok_or(errors::UpdateActiveOrgError::MissingUser(user))?;
-
-    let new_index = user
-      .iter_orgs()
-      .position(|o| o == new_active_org)
-      .ok_or(errors::UpdateActiveOrgError::InvalidOrg(new_active_org))?;
-
-    self
-      .user_repo
-      .patch_model(user.id, User {
-        active_org_index: new_index as _,
-        ..user
-      })
-      .await?;
-
-    Ok(new_active_org)
+  ) -> Result<RecordId<Org>, UpdateActiveOrgError> {
+    self.mutate.switch_active_org(user, new_active_org).await
   }
 
   /// Sign up a [`User`].
@@ -99,7 +58,15 @@ impl AuthDomainService {
   ) -> Result<User, errors::CreateUserError> {
     use argon2::PasswordHasher;
 
-    if self.fetch_user_by_email(email.clone()).await?.is_some() {
+    if self
+      .meta
+      .fetch_user_by_email(email.clone())
+      .await
+      .into_diagnostic()
+      .context("failed to check for conflicting user by email")
+      .map_err(CreateUserError::InternalError)?
+      .is_some()
+    {
       return Err(errors::CreateUserError::EmailAlreadyUsed(email));
     }
 
@@ -113,8 +80,8 @@ impl AuthDomainService {
           argon
             .hash_password(password.as_bytes(), &salt)
             .map_err(|e| {
-              errors::CreateUserError::PasswordHashing(miette!(
-                "failed to hash password: {e}"
+              CreateUserError::InternalError(miette!(
+                "failed to parse password hash: {e}"
               ))
             })?
             .to_string(),
@@ -143,18 +110,22 @@ impl AuthDomainService {
     };
 
     self
-      .org_repo
-      .create_model(org)
+      .mutate
+      .create_org(org)
       .await
       .into_diagnostic()
-      .map_err(errors::CreateUserError::CreateError)?;
+      .context("failed to create personal org for user")
+      .map_err(errors::CreateUserError::InternalError)?;
 
     self
-      .user_repo
-      .create_model(user)
+      .mutate
+      .create_user(user.clone())
       .await
       .into_diagnostic()
-      .map_err(errors::CreateUserError::CreateError)
+      .context("failed to create user")
+      .map_err(errors::CreateUserError::InternalError)?;
+
+    Ok(user)
   }
 
   /// Authenticate a [`User`].
@@ -162,10 +133,17 @@ impl AuthDomainService {
     &self,
     email: EmailAddress,
     creds: UserSubmittedAuthCredentials,
-  ) -> Result<Option<User>, errors::AuthenticationError> {
+  ) -> Result<Option<User>, AuthenticationError> {
     use argon2::PasswordVerifier;
 
-    let Some(user) = self.fetch_user_by_email(email).await? else {
+    let Some(user) = self
+      .meta
+      .fetch_user_by_email(email)
+      .await
+      .into_diagnostic()
+      .context("failed to fetch user by email")
+      .map_err(AuthenticationError)?
+    else {
       return Ok(None);
     };
 
@@ -176,9 +154,7 @@ impl AuthDomainService {
       ) => {
         let password_hash = argon2::PasswordHash::new(&password_hash.0)
           .map_err(|e| {
-            errors::AuthenticationError::PasswordHashing(miette!(
-              "failed to parse password hash: {e}"
-            ))
+            AuthenticationError(miette!("failed to parse password hash: {e}"))
           })?;
 
         let argon = argon2::Argon2::default();
@@ -189,7 +165,7 @@ impl AuthDomainService {
             Err(e) => Err(e),
           })
           .map_err(|e| {
-            errors::AuthenticationError::PasswordHashing(miette!(
+            AuthenticationError(miette!(
               "failed to verify password against hash: {e}"
             ))
           })?;
@@ -220,9 +196,11 @@ impl AuthnBackend for AuthDomainService {
     id: &<Self::User as AxumLoginAuthUser>::Id,
   ) -> Result<Option<Self::User>, Self::Error> {
     self
+      .meta
       .fetch_user_by_id(*id)
       .await
+      .into_diagnostic()
       .map(|u| u.map(Into::into))
-      .map_err(Into::into)
+      .map_err(AuthenticationError)
   }
 }
