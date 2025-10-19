@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 meta-domain = { path = "../meta-domain" }
 models = { path = "../models" }
+mutate-domain = { path = "../mutate-domain" }
 owl = { path = "../owl" }
 
 belt.workspace = true

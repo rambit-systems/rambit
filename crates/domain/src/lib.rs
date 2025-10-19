@@ -4,7 +4,7 @@ mod create;
 mod delete_entry;
 pub mod download;
 mod migrate;
-mod mutate;
+
 pub mod mutate_user;
 pub mod narinfo;
 pub mod upload;
@@ -16,8 +16,7 @@ use db::Database;
 use meta_domain::MetaService;
 pub use models;
 use models::{Cache, Entry, Org, Store, User};
-
-use self::mutate::MutationService;
+use mutate_domain::MutationService;
 
 /// The domain service type.
 #[derive(Debug, Clone)]

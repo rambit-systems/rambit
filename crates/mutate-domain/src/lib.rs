@@ -1,3 +1,5 @@
+//! Provides [`MutationService`] for mutation operations on models.
+
 mod create;
 mod delete_entry;
 mod migrate;
@@ -6,6 +8,7 @@ mod patch_user;
 use db::Database;
 use models::{Cache, Entry, Org, Store, User};
 
+/// Service for mutation operations on models.
 #[derive(Debug, Clone)]
 pub struct MutationService {
   org_repo:   Database<Org>,
@@ -16,6 +19,7 @@ pub struct MutationService {
 }
 
 impl MutationService {
+  /// Creates a new [`MutationService`].
   pub fn new(
     org_repo: Database<Org>,
     user_repo: Database<User>,
