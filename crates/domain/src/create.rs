@@ -36,6 +36,12 @@ impl DomainService {
     &self,
     name: EntityName,
   ) -> Result<RecordId<Org>, CreateModelError> {
-    self.mutate.create_org(name).await
+    self
+      .mutate
+      .create_org(Org {
+        id:        RecordId::new(),
+        org_ident: models::OrgIdent::Named(name),
+      })
+      .await
   }
 }

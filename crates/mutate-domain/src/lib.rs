@@ -4,9 +4,12 @@ mod create;
 mod delete_entry;
 mod migrate;
 mod patch_user;
+mod user_active_org;
 
 use db::Database;
 use models::{Cache, Entry, Org, Store, User};
+
+pub use self::user_active_org::UpdateActiveOrgError;
 
 /// Service for mutation operations on models.
 #[derive(Debug, Clone)]
@@ -33,6 +36,17 @@ impl MutationService {
       store_repo,
       entry_repo,
       cache_repo,
+    }
+  }
+
+  /// Creates a mocked-up [`MutationService`].
+  pub fn new_mock() -> Self {
+    Self {
+      org_repo:   Database::new_mock(),
+      user_repo:  Database::new_mock(),
+      store_repo: Database::new_mock(),
+      entry_repo: Database::new_mock(),
+      cache_repo: Database::new_mock(),
     }
   }
 }

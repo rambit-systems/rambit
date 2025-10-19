@@ -1,6 +1,6 @@
 use db::CreateModelError;
 use models::{
-  Cache, Entry, Org, StorageCredentials, Store, StoreConfiguration,
+  Cache, Entry, Org, StorageCredentials, Store, StoreConfiguration, User,
   dvf::{EntityName, RecordId, Visibility},
 };
 
@@ -50,16 +50,17 @@ impl MutationService {
   /// Creates an [`Org`].
   pub async fn create_org(
     &self,
-    name: EntityName,
+    org: Org,
   ) -> Result<RecordId<Org>, CreateModelError> {
-    self
-      .org_repo
-      .create_model(Org {
-        id:        RecordId::new(),
-        org_ident: models::OrgIdent::Named(name),
-      })
-      .await
-      .map(|s| s.id)
+    self.org_repo.create_model(org).await.map(|s| s.id)
+  }
+
+  /// Creates a [`User`].
+  pub async fn create_user(
+    &self,
+    user: User,
+  ) -> Result<RecordId<User>, CreateModelError> {
+    self.user_repo.create_model(user).await.map(|u| u.id)
   }
 
   /// Creates an [`Entry`].

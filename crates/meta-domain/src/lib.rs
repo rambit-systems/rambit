@@ -5,6 +5,7 @@ mod fetch_by_id;
 mod fetch_by_name;
 mod fetch_by_org;
 mod fetch_entry_by;
+mod fetch_user_by;
 mod search_stores_by_user;
 
 use db::Database;
@@ -37,6 +38,17 @@ impl MetaService {
       store_repo,
       entry_repo,
       cache_repo,
+    }
+  }
+
+  /// Creates a mocked-up [`MetaService`].
+  pub fn new_mock() -> Self {
+    Self {
+      org_repo:   Database::new_mock(),
+      user_repo:  Database::new_mock(),
+      store_repo: Database::new_mock(),
+      entry_repo: Database::new_mock(),
+      cache_repo: Database::new_mock(),
     }
   }
 }
