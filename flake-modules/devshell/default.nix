@@ -36,8 +36,8 @@
         {
           name = "container";
           command = ''
-            podman load -i $(nix build .#grid-container --print-out-paths --no-link) && \
-            podman run \
+            docker load -i $(nix build .#grid-container --print-out-paths --no-link) && \
+            docker run \
               --rm --network host \
               -e POSTGRES_URL='postgresql://postgres:password@localhost:6432/main' \
               grid:latest --migrate
@@ -48,7 +48,7 @@
         {
           name = "db";
           command = ''
-            podman run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 6432:5432 $@ postgres
+            docker run --rm -e POSTGRES_DB=main -e POSTGRES_PASSWORD=password -p 6432:5432 $@ postgres
           '';
           help = "Runs PostgreSQL in a container.";
         }
