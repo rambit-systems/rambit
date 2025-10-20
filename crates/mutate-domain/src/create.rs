@@ -8,6 +8,7 @@ use super::MutationService;
 
 impl MutationService {
   /// Creates a [`Cache`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_cache(
     &self,
     org: RecordId<Org>,
@@ -27,6 +28,7 @@ impl MutationService {
   }
 
   /// Creates a [`Store`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_store(
     &self,
     org: RecordId<Org>,
@@ -48,6 +50,7 @@ impl MutationService {
   }
 
   /// Creates an [`Org`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_org(
     &self,
     org: Org,
@@ -64,6 +67,7 @@ impl MutationService {
   }
 
   /// Creates an [`Entry`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_entry(
     &self,
     entry: Entry,

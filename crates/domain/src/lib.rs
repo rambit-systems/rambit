@@ -4,7 +4,6 @@ mod create;
 mod delete_entry;
 pub mod download;
 mod migrate;
-
 pub mod mutate_user;
 pub mod narinfo;
 pub mod upload;

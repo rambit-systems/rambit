@@ -12,6 +12,7 @@ macro_rules! impl_fetch_by_org {
     $vis:vis fn $method_name:ident($repo_field:ident) -> $model_ty:ident, $index_selector:ident
   ) => {
     $(#[$meta])*
+    #[tracing::instrument(skip(self))]
     $vis async fn $method_name(
       &self,
       id: RecordId<Org>,

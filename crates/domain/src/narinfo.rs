@@ -29,6 +29,7 @@ pub struct NarinfoResponse {
 
 impl NarinfoResponse {
   /// Returns the requested [`NarInfo`].
+  #[tracing::instrument(skip(self))]
   pub fn narinfo(&self) -> NarInfo<'_> {
     let mut references = self
       .entry

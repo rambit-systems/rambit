@@ -43,6 +43,7 @@ pub enum DownloadPlanningError {
 
 impl DomainService {
   /// Plans a download.
+  #[tracing::instrument(skip(self))]
   pub async fn plan_download(
     &self,
     req: DownloadRequest,

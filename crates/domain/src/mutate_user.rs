@@ -33,6 +33,7 @@ pub enum AddOrgToUserError {
 
 impl DomainService {
   /// Adds an [`Org`] to a [`User`]'s org list.
+  #[tracing::instrument(skip(self))]
   pub async fn add_org_to_user(
     &self,
     user: RecordId<User>,

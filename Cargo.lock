@@ -2954,6 +2954,7 @@ dependencies = [
  "db",
  "models",
  "thiserror 2.0.16",
+ "tracing",
 ]
 
 [[package]]
@@ -3076,6 +3077,7 @@ dependencies = [
  "miette",
  "models",
  "thiserror 2.0.16",
+ "tracing",
 ]
 
 [[package]]

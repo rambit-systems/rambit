@@ -67,6 +67,7 @@ pub enum UploadPlanningError {
 
 impl DomainService {
   /// Plans an upload.
+  #[tracing::instrument(skip(self))]
   pub async fn plan_upload(
     &self,
     req: UploadRequest,

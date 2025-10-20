@@ -22,6 +22,7 @@ pub enum UpdateActiveOrgError {
 
 impl MutationService {
   /// Switch a [`User`]'s active org.
+  #[tracing::instrument(skip(self))]
   pub async fn switch_active_org(
     &self,
     user: RecordId<User>,

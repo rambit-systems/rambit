@@ -8,6 +8,7 @@ use crate::DomainService;
 
 impl DomainService {
   /// Creates a [`Cache`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_cache(
     &self,
     org: RecordId<Org>,
@@ -18,6 +19,7 @@ impl DomainService {
   }
 
   /// Creates a [`Store`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_store(
     &self,
     org: RecordId<Org>,
@@ -32,6 +34,7 @@ impl DomainService {
   }
 
   /// Creates an [`Org`].
+  #[tracing::instrument(skip(self))]
   pub async fn create_org(
     &self,
     name: EntityName,

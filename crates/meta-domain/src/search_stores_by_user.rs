@@ -23,6 +23,7 @@ pub enum SearchByUserError {
 
 impl MetaService {
   /// Find all stores with the given name across all a user's orgs.
+  #[tracing::instrument(skip(self))]
   pub async fn search_stores_by_name_and_user(
     &self,
     user_id: RecordId<User>,

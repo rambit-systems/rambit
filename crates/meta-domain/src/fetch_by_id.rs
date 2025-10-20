@@ -7,6 +7,7 @@ macro_rules! impl_fetch_by_id {
   ($($method:ident, $model:ty, $repo_field:ident);* $(;)?) => {
     $(
       #[doc = concat!("Fetches a [`", stringify!($model), "`] by its ID.")]
+      #[tracing::instrument(skip(self))]
       pub async fn $method(
         &self,
         id: RecordId<$model>,

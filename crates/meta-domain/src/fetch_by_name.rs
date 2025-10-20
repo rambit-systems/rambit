@@ -9,6 +9,7 @@ use crate::MetaService;
 
 impl MetaService {
   /// Fetches a [`Cache`] by its [name](CacheUniqueIndexSelector::Name).
+  #[tracing::instrument(skip(self))]
   pub async fn fetch_cache_by_name(
     &self,
     name: EntityName,
@@ -23,6 +24,7 @@ impl MetaService {
   }
 
   /// Fetches a [`Store`] by its org and name.
+  #[tracing::instrument(skip(self))]
   pub async fn fetch_store_by_org_and_name(
     &self,
     org: RecordId<Org>,
@@ -38,6 +40,7 @@ impl MetaService {
   }
 
   /// Fetches an [`Org`] by its [`OrgIdent`].
+  #[tracing::instrument(skip(self))]
   pub async fn fetch_org_by_ident(
     &self,
     org_ident: OrgIdent,

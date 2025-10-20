@@ -8,6 +8,7 @@ use super::MetaService;
 
 impl MetaService {
   /// Counts the number of [`Entry`](models::Entry)s in a [`Store`].
+  #[tracing::instrument(skip(self))]
   pub async fn count_entries_in_store(
     &self,
     store: RecordId<Store>,
@@ -22,6 +23,7 @@ impl MetaService {
   }
 
   /// Counts the number of [`Entry`](models::Entry)s in a [`Cache`].
+  #[tracing::instrument(skip(self))]
   pub async fn count_entries_in_cache(
     &self,
     cache: RecordId<Cache>,

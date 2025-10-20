@@ -7,6 +7,7 @@ use super::MutationService;
 
 impl MutationService {
   /// Patches a [`User`].
+  #[tracing::instrument(skip(self))]
   pub async fn patch_user(&self, user: User) -> Result<User, PatchModelError> {
     self.user_repo.patch_model(user.id, user).await
   }

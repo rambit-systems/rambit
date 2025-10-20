@@ -28,6 +28,7 @@ pub enum DownloadExecutionError {
 
 impl DomainService {
   /// Downloads an entry's payload from storage.
+  #[tracing::instrument(skip(self))]
   pub async fn execute_download(
     &self,
     plan: DownloadPlan,

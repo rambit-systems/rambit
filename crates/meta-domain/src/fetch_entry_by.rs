@@ -9,6 +9,7 @@ use super::MetaService;
 impl MetaService {
   /// Fetches a [`Entry`] by its
   /// [cache-id-and-entry-digest](EntryUniqueIndexSelector::CacheIdAndEntryDigest).
+  #[tracing::instrument(skip(self))]
   pub async fn fetch_entry_by_cache_id_and_entry_digest(
     &self,
     cache_id: RecordId<Cache>,
@@ -25,6 +26,7 @@ impl MetaService {
 
   /// Fetches a [`Entry`] by its
   /// [store-id-and-entry-path](EntryUniqueIndexSelector::CacheIdAndEntryDigest).
+  #[tracing::instrument(skip(self))]
   pub async fn fetch_entry_by_store_id_and_entry_path(
     &self,
     store_id: RecordId<Store>,
