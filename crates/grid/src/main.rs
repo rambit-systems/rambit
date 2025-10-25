@@ -7,6 +7,7 @@ mod args;
 mod endpoints;
 mod handlers;
 mod middleware;
+mod tracing_subscribers;
 
 use axum::{Router, handler::Handler, routing::post};
 use axum_login::AuthManagerLayerBuilder;
@@ -17,8 +18,7 @@ use tower_http::{
   compression::{CompressionLayer, DefaultPredicate, Predicate},
   trace::{DefaultOnResponse, TraceLayer},
 };
-use tracing::{Level, info_span, level_filters::LevelFilter};
-use tracing_subscriber::{EnvFilter, prelude::*};
+use tracing::{Level, info_span};
 
 use self::{
   app_state::AppState,
@@ -35,23 +35,8 @@ use self::{
 #[tokio::main]
 async fn main() -> Result<()> {
   // set up tracing
-  let env_filter = EnvFilter::builder()
-    .with_default_directive(LevelFilter::INFO.into())
-    .from_env_lossy();
-  let formatter = {
-    #[cfg(not(feature = "json-tracing"))]
-    {
-      tracing_subscriber::fmt::layer()
-    }
-    #[cfg(feature = "json-tracing")]
-    {
-      tracing_subscriber::fmt::layer().json()
-    }
-  };
-  tracing_subscriber::registry()
-    .with(formatter)
-    .with(env_filter)
-    .init();
+  let _guard = self::tracing_subscribers::setup_tracing()
+    .context("failed to set up tracing subscribers")?;
 
   // parse command-line arguments
   let args = CliArgs::parse();
