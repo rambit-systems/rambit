@@ -13,8 +13,10 @@ use models::{NarIntrensicData, dvf::FileSize};
 use nix_compat::store_path::StorePath;
 use nix_nar::Content;
 use regex::bytes::Regex as RegexBytes;
+use tracing::{Instrument, info_span};
 
 /// Interrogates a NAR and returns its intrensically known data.
+#[derive(Debug)]
 pub struct NarInterrogator;
 
 /// Possible failures of a NAR interrogation.
@@ -35,12 +37,14 @@ static NIX_STORE_PATH_REGEX: LazyLock<RegexBytes> = LazyLock::new(|| {
 
 impl NarInterrogator {
   /// Interrogate a NAR and return its intrensically known data.
+  #[tracing::instrument]
   pub async fn interrogate(
     &self,
     data: Belt,
   ) -> Result<NarIntrensicData, InterrogatorError> {
     let buffered_data = data
       .collect()
+      .instrument(info_span!("collect_belt_data"))
       .await
       .map_err(InterrogatorError::InputError)?;
     let buffered_data_slice = buffered_data.as_slice();
@@ -52,12 +56,15 @@ impl NarInterrogator {
         .expect("failed to convert from usize to u64"),
     );
 
-    let nar_hash_string = sha256::digest(buffered_data_slice);
+    let nar_hash_string = info_span!("calculate_nar_hash")
+      .in_scope(|| sha256::digest(buffered_data_slice));
     let nar_hash: [u8; 32] = hex::decode(nar_hash_string)
       .expect("sha256 crate produced malformed hex string")
       .try_into()
       .expect("failed to squash sha256 digest bytes into 32 byte array");
 
+    let span = info_span!("collect_nar_references");
+    let _guard = span.enter();
     let decoder = nix_nar::Decoder::new(io::Cursor::new(buffered_data_slice))
       .map_err(InterrogatorError::DecodingError)?;
     let mut captures = Vec::new();
@@ -80,6 +87,7 @@ impl NarInterrogator {
         StorePath::<String>::from_absolute_path(p.as_bytes()).ok()
       })
       .collect();
+    drop(_guard);
 
     Ok(NarIntrensicData {
       nar_hash,
