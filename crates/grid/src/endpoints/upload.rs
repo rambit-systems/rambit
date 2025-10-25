@@ -50,7 +50,8 @@ pub async fn upload(
     body
       .into_data_stream()
       .map(|res| res.map_err(|e| io::Error::other(e.to_string()))),
-    Some(belt::DEFAULT_CHUNK_SIZE),
+    // Some(belt::DEFAULT_CHUNK_SIZE),
+    None,
   );
 
   let upload_req = UploadRequest {

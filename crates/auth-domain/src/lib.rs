@@ -50,6 +50,7 @@ impl AuthDomainService {
   }
 
   /// Sign up a [`User`].
+  #[tracing::instrument(skip(self))]
   pub async fn user_signup(
     &self,
     name: HumanName,
@@ -129,6 +130,7 @@ impl AuthDomainService {
   }
 
   /// Authenticate a [`User`].
+  #[tracing::instrument(skip(self))]
   pub async fn user_authenticate(
     &self,
     email: EmailAddress,
@@ -181,6 +183,7 @@ impl AuthnBackend for AuthDomainService {
   type Error = errors::AuthenticationError;
   type User = AuthUser;
 
+  #[tracing::instrument(skip(self))]
   async fn authenticate(
     &self,
     creds: Self::Credentials,
@@ -191,6 +194,7 @@ impl AuthnBackend for AuthDomainService {
       .map(|u| u.map(Into::into))
   }
 
+  #[tracing::instrument(skip(self))]
   async fn get_user(
     &self,
     id: &<Self::User as AxumLoginAuthUser>::Id,

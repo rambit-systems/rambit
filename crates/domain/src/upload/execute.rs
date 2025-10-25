@@ -8,6 +8,7 @@ use models::{
   model::Model,
 };
 use serde::{Deserialize, Serialize};
+use tracing::{Instrument, info_span};
 
 use super::plan::UploadPlan;
 use crate::DomainService;
@@ -52,6 +53,7 @@ impl DomainService {
     let big_terrible_buffer = plan
       .nar_contents
       .collect()
+      .instrument(info_span!("collect_big_terrible_buffer"))
       .await
       .map_err(UploadExecutionError::InputDataError)?;
 
