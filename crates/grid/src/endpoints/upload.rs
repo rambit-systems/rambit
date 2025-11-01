@@ -8,7 +8,7 @@ use axum::{
   response::IntoResponse,
 };
 use domain::{
-  belt::{self, Belt, StreamExt},
+  belt::{Belt, StreamExt},
   models::NarDeriverData,
   upload::UploadRequest,
 };
