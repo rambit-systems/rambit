@@ -10,15 +10,22 @@ license-file = "LICENSE.md"
 missing_docs = "deny"
 
 [workspace.dependencies]
-# # app-core
-belt = { git = "https://github.com/johnbchron/app-core" }
-db = { git = "https://github.com/johnbchron/app-core" }
-dvf = { git = "https://github.com/johnbchron/app-core" }
-kv = { git = "https://github.com/johnbchron/app-core" }
-kv-redb-impl = { git = "https://github.com/johnbchron/app-core" }
-kv-tikv-impl = { git = "https://github.com/johnbchron/app-core" }
-model = { git = "https://github.com/johnbchron/app-core" }
-storage = { git = "https://github.com/johnbchron/app-core" }
+# # # app-core
+# belt = { git = "https://github.com/johnbchron/app-core" }
+# db = { git = "https://github.com/johnbchron/app-core" }
+# dvf = { git = "https://github.com/johnbchron/app-core" }
+# kv = { git = "https://github.com/johnbchron/app-core" }
+# kv-redb-impl = { git = "https://github.com/johnbchron/app-core" }
+# kv-tikv-impl = { git = "https://github.com/johnbchron/app-core" }
+# model = { git = "https://github.com/johnbchron/app-core" }
+# storage = { git = "https://github.com/johnbchron/app-core" }
+
+# palin-core
+belt = { git = "https://github.com/rambit-systems/palin-core" }
+db = { git = "https://github.com/rambit-systems/palin-core" }
+model = { git = "https://github.com/rambit-systems/palin-core" }
+slug = { git = "https://github.com/rambit-systems/palin-core" }
+storage = { git = "https://github.com/rambit-systems/palin-core" }
 
 # essentials
 bytes = { version = "1" }
