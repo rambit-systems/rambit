@@ -1,6 +1,7 @@
 use std::{collections::HashSet, path::PathBuf};
 
-use dvf::{CompressionStatus, FileSize, RecordId};
+use model::RecordId;
+use model_types::{CompressionStatus, FileSize};
 use nix_compat::{narinfo::Signature, nixhash::CAHash, store_path::StorePath};
 use serde::{Deserialize, Serialize};
 

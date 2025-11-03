@@ -1,15 +1,18 @@
-use std::fmt;
-
-use dvf::{EitherSlug, RecordId, StrictSlug};
-use model::{Model, SlugFieldGetter};
+use model::{IndexValue, Model, RecordId};
+use model_types::EntityName;
 use serde::{Deserialize, Serialize};
 
 use crate::{AuthUser, User};
 
 /// An org.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Model)]
+#[model(
+  table = "org",
+  index(name = "ident", unique, extract = Org::unique_index_ident)
+)]
 pub struct Org {
   /// The org's ID.
+  #[model(id)]
   pub id:        RecordId<Org>,
   /// The org's identifier.
   pub org_ident: OrgIdent,
@@ -17,7 +20,7 @@ pub struct Org {
 
 impl Org {
   /// Generates the value of the unique [`Org`] index `ident`.
-  pub fn unique_index_ident(&self) -> Vec<EitherSlug> {
+  pub fn unique_index_ident(&self) -> Vec<IndexValue> {
     vec![self.org_ident.index_value().into()]
   }
 }
@@ -54,52 +57,21 @@ impl From<Org> for PvOrg {
   }
 }
 
-/// The unique index selector for [`Org`].
-#[derive(Debug, Clone, Copy)]
-pub enum OrgUniqueIndexSelector {
-  /// The `ident` index.
-  Ident,
-}
-
-impl fmt::Display for OrgUniqueIndexSelector {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      OrgUniqueIndexSelector::Ident => write!(f, "ident"),
-    }
-  }
-}
-
 /// The [`Org`]'s identifier.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum OrgIdent {
   /// An [`Org`] identifier using a name.
-  Named(dvf::EntityName),
+  Named(EntityName),
   /// An [`Org`] identifier using a user ID.
   UserOrg(RecordId<User>),
 }
 
 impl OrgIdent {
   /// Calculates the unique index value for this org ident.
-  pub fn index_value(&self) -> StrictSlug {
+  pub fn index_value(&self) -> IndexValue {
     match self {
-      OrgIdent::Named(entity_name) => {
-        StrictSlug::new(format!("named-{}", entity_name))
-      }
-      OrgIdent::UserOrg(u) => StrictSlug::new(format!("user-{}", u)),
+      OrgIdent::Named(entity_name) => IndexValue::new_single(entity_name),
+      OrgIdent::UserOrg(u) => IndexValue::new_single(format!("user-{}", u)),
     }
   }
-}
-
-impl Model for Org {
-  type IndexSelector = !;
-  type UniqueIndexSelector = OrgUniqueIndexSelector;
-
-  const INDICES: &'static [(Self::IndexSelector, SlugFieldGetter<Self>)] = &[];
-  const TABLE_NAME: &'static str = "org";
-  const UNIQUE_INDICES: &'static [(
-    Self::UniqueIndexSelector,
-    SlugFieldGetter<Self>,
-  )] = &[(OrgUniqueIndexSelector::Ident, Org::unique_index_ident)];
-
-  fn id(&self) -> RecordId<Org> { self.id }
 }

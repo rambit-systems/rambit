@@ -10,8 +10,8 @@ mod session;
 mod store;
 mod user;
 
-pub use dvf;
 pub use model;
+pub use model_types::*;
 pub use nix_compat;
 
 #[cfg(feature = "session")]

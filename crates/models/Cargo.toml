@@ -7,7 +7,8 @@ license-file.workspace = true
 publish = false
 
 [dependencies]
-dvf.workspace = true
+model-types = { path = "../model-types" }
+
 model.workspace = true
 
 nix-compat.workspace = true

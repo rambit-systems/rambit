@@ -1,18 +1,22 @@
 mod creds;
 
-use std::fmt;
-
-use dvf::{EitherSlug, EntityName, LaxSlug, RecordId};
-use model::{Model, SlugFieldGetter};
+use model::{IndexValue, Model, RecordId};
+use model_types::EntityName;
 use serde::{Deserialize, Serialize};
 
 pub use self::creds::*;
 use crate::Org;
 
 /// A store.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Model)]
+#[model(
+  table = "store",
+  index(name = "org", extract = |m| vec![IndexValue::new_single(m.org.to_string())]),
+  index(name = "name_by_org", extract = |m| vec![Store::unique_index_name_by_org(m)]),
+)]
 pub struct Store {
   /// The store's ID.
+  #[model(id)]
   pub id:          RecordId<Store>,
   /// The store's org.
   pub org:         RecordId<Org>,
@@ -27,13 +31,8 @@ pub struct Store {
 impl Store {
   /// Generates the value of the unique [`Store`] index
   /// `name_by_org`.
-  pub fn unique_index_name_by_org(&self) -> EitherSlug {
-    LaxSlug::new(format!(
-      "{org_id}-{name}",
-      org_id = self.org,
-      name = self.name
-    ))
-    .into()
+  pub fn unique_index_name_by_org(&self) -> IndexValue {
+    IndexValue::new([self.org.to_string(), self.name.to_string()])
   }
 }
 
@@ -64,57 +63,6 @@ impl From<Store> for PvStore {
   }
 }
 
-/// The unique index selector for [`Store`].
-#[derive(Debug, Clone, Copy)]
-pub enum StoreUniqueIndexSelector {
-  /// The `name-by-org` index.
-  NameByOrg,
-}
-
-impl fmt::Display for StoreUniqueIndexSelector {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      StoreUniqueIndexSelector::NameByOrg => write!(f, "name-by-org"),
-    }
-  }
-}
-
-/// The index selector for [`Store`].
-#[derive(Debug, Clone, Copy)]
-pub enum StoreIndexSelector {
-  /// The `org` index.
-  Org,
-}
-
-impl fmt::Display for StoreIndexSelector {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      StoreIndexSelector::Org => write!(f, "org"),
-    }
-  }
-}
-
 /// The configuration for a [`Store`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StoreConfiguration {}
-
-impl Model for Store {
-  type IndexSelector = StoreIndexSelector;
-  type UniqueIndexSelector = StoreUniqueIndexSelector;
-
-  const INDICES: &'static [(
-    Self::IndexSelector,
-    model::SlugFieldGetter<Self>,
-  )] = &[(StoreIndexSelector::Org, |s| {
-    vec![LaxSlug::new(s.org.to_string()).into()]
-  })];
-  const TABLE_NAME: &'static str = "store";
-  const UNIQUE_INDICES: &'static [(
-    Self::UniqueIndexSelector,
-    SlugFieldGetter<Self>,
-  )] = &[(StoreUniqueIndexSelector::NameByOrg, |s| {
-    vec![Store::unique_index_name_by_org(s)]
-  })];
-
-  fn id(&self) -> dvf::RecordId<Self> { self.id }
-}

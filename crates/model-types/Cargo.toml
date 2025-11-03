@@ -1,0 +1,23 @@
+[package]
+name = "model-types"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+slug.workspace = true
+
+serde.workspace = true
+thiserror.workspace = true
+
+email_address = { version = "0.2" }
+regex = { version = "1", default-features = false, features = [ "std" ], optional = true }
+
+[lints]
+workspace = true
+
+[features]
+default = [  ]
+reasonable-email = [ "dep:regex" ]

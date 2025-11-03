@@ -13,30 +13,6 @@ pub enum StorageCredentials {
   Memory(MemoryStorageCredentials),
 }
 
-impl From<StorageCredentials> for dvf::StorageCredentials {
-  fn from(value: StorageCredentials) -> Self {
-    match value {
-      StorageCredentials::Local(LocalStorageCredentials(path_buf)) => {
-        dvf::StorageCredentials::Local(dvf::LocalStorageCredentials(path_buf))
-      }
-      StorageCredentials::R2(R2StorageCredentials::Default {
-        access_key,
-        secret_access_key,
-        endpoint,
-        bucket,
-      }) => dvf::StorageCredentials::R2(dvf::R2StorageCredentials::Default {
-        access_key,
-        secret_access_key,
-        endpoint,
-        bucket,
-      }),
-      StorageCredentials::Memory(_) => {
-        dvf::StorageCredentials::Memory(dvf::MemoryStorageCredentials)
-      }
-    }
-  }
-}
-
 /// Public view of [`StorageCredentials`].
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum PvStorageCredentials {

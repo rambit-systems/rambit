@@ -1,19 +1,26 @@
 use std::{
-  fmt,
   hash::{self, Hash, Hasher},
   iter::once,
 };
 
-use dvf::{EitherSlug, EmailAddress, HumanName, LaxSlug, RecordId};
-use model::{Model, SlugFieldGetter};
+use model::{IndexValue, Model, RecordId};
+use model_types::{EmailAddress, HumanName};
 use serde::{Deserialize, Serialize};
 
 use crate::Org;
 
 /// A user.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Model)]
+#[model(
+  table = "users",
+  index(name = "org", extract =
+    |m| m.iter_orgs().map(|r| IndexValue::new_single(r.to_string())).collect()
+  ),
+  index(name = "email", unique, extract = |m| vec![IndexValue::new_single(&m.email)])
+)]
 pub struct User {
   /// The user's ID.
+  #[model(id)]
   pub id:               RecordId<User>,
   /// The user's personal org.
   pub personal_org:     RecordId<Org>,
@@ -37,11 +44,6 @@ impl User {
     let mut hasher = hash::DefaultHasher::new();
     self.auth.hash(&mut hasher);
     hasher.finish()
-  }
-
-  /// Generates the value of the unique [`User`] index `email`.
-  pub fn unique_index_email(&self) -> Vec<EitherSlug> {
-    vec![EitherSlug::Lax(LaxSlug::new(self.email.as_ref()))]
   }
 
   /// Returns an iterator of the user's orgs.
@@ -68,36 +70,6 @@ impl User {
   }
 }
 
-/// The unique index selector for [`User`]
-#[derive(Debug, Clone, Copy)]
-pub enum UserUniqueIndexSelector {
-  /// The `email` index.
-  Email,
-}
-
-impl fmt::Display for UserUniqueIndexSelector {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      UserUniqueIndexSelector::Email => write!(f, "email"),
-    }
-  }
-}
-
-/// The index selector for [`User`]
-#[derive(Debug, Clone, Copy)]
-pub enum UserIndexSelector {
-  /// The `org` index.
-  Org,
-}
-
-impl fmt::Display for UserIndexSelector {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      UserIndexSelector::Org => write!(f, "org"),
-    }
-  }
-}
-
 /// A password hash.
 #[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub struct PasswordHash(pub String);
@@ -120,27 +92,6 @@ pub enum UserAuthCredentials {
     /// The hash of the password used.
     password_hash: PasswordHash,
   },
-}
-
-impl Model for User {
-  type IndexSelector = UserIndexSelector;
-  type UniqueIndexSelector = UserUniqueIndexSelector;
-
-  const INDICES: &'static [(
-    Self::IndexSelector,
-    model::SlugFieldGetter<Self>,
-  )] = &[(UserIndexSelector::Org, |u| {
-    u.iter_orgs()
-      .map(|id| LaxSlug::new(id.to_string()).into())
-      .collect()
-  })];
-  const TABLE_NAME: &'static str = "users";
-  const UNIQUE_INDICES: &'static [(
-    Self::UniqueIndexSelector,
-    SlugFieldGetter<Self>,
-  )] = &[(UserUniqueIndexSelector::Email, User::unique_index_email)];
-
-  fn id(&self) -> dvf::RecordId<Self> { self.id }
 }
 
 /// An auth-centric view of a [`User`], able to be sent to the client.
