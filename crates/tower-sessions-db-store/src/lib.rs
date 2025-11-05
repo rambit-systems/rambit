@@ -1,11 +1,7 @@
 //! A [`SessionStore`] implementer for [`Database`].
 
 use db::Database;
-use models::{
-  Session,
-  dvf::{RecordId, Ulid},
-  model::Model,
-};
+use models::{RecordId, Session, model::Model};
 use tower_sessions::{
   SessionStore,
   session::{Id, Record},
@@ -13,7 +9,7 @@ use tower_sessions::{
 };
 
 fn session_id_to_record_id<M: Model>(id: Id) -> RecordId<M> {
-  RecordId::from_ulid(Ulid(u128::from_ne_bytes(id.0.to_ne_bytes())))
+  RecordId::from_ulid_u128(u128::from_ne_bytes(id.0.to_ne_bytes()))
 }
 
 /// A [`SessionStore`] implementer for [`Database`].
@@ -37,7 +33,7 @@ impl SessionStore for DatabaseStore {
 
     self
       .inner
-      .create_model(session)
+      .insert(&session)
       .await
       .map(|_| ())
       .map_err(|e| Error::Backend(e.to_string()))
@@ -49,33 +45,19 @@ impl SessionStore for DatabaseStore {
       record: session_record.clone(),
     };
 
-    let exists = self
+    self
       .inner
-      .fetch_model_by_id(session.id)
+      .update(&session)
       .await
-      .map(|r| r.is_some())
       .map_err(|e| Error::Backend(e.to_string()))?;
 
-    match exists {
-      true => self
-        .inner
-        .patch_model(session.id, session)
-        .await
-        .map(|_| ())
-        .map_err(|e| Error::Backend(e.to_string())),
-      false => self
-        .inner
-        .create_model(session)
-        .await
-        .map(|_| ())
-        .map_err(|e| Error::Backend(e.to_string())),
-    }
+    Ok(())
   }
 
   async fn load(&self, session_id: &Id) -> Result<Option<Record>, Error> {
     self
       .inner
-      .fetch_model_by_id(session_id_to_record_id(*session_id))
+      .get(session_id_to_record_id(*session_id))
       .await
       .map(|o| o.map(|s| s.record))
       .map_err(|e| Error::Backend(e.to_string()))
@@ -84,9 +66,8 @@ impl SessionStore for DatabaseStore {
   async fn delete(&self, session_id: &Id) -> Result<(), Error> {
     self
       .inner
-      .delete_model(session_id_to_record_id(*session_id))
+      .delete(session_id_to_record_id(*session_id))
       .await
-      .map(|_| ())
       .map_err(|e| Error::Backend(e.to_string()))
   }
 }
