@@ -8,8 +8,7 @@ pub use nix_compat::{
 };
 use serde::{Deserialize, Serialize};
 
-use self::digest::Digest;
-pub use self::{abbreviate::*, nar_data::*};
+pub use self::{abbreviate::*, digest::*, nar_data::*};
 use crate::{Org, Store, cache::Cache};
 
 /// An entry.
