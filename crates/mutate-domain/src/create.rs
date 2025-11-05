@@ -1,8 +1,5 @@
-use db::CreateModelError;
-use models::{
-  Cache, Entry, Org, StorageCredentials, Store, StoreConfiguration, User,
-  dvf::{EntityName, RecordId, Visibility},
-};
+use db::DatabaseError;
+use models::{Cache, Entry, Org, RecordId, Store, User};
 
 use super::MutationService;
 
@@ -11,67 +8,43 @@ impl MutationService {
   #[tracing::instrument(skip(self))]
   pub async fn create_cache(
     &self,
-    org: RecordId<Org>,
-    name: EntityName,
-    visibility: Visibility,
-  ) -> Result<RecordId<Cache>, CreateModelError> {
-    self
-      .cache_repo
-      .create_model(Cache {
-        id: RecordId::new(),
-        org,
-        name,
-        visibility,
-      })
-      .await
-      .map(|c| c.id)
+    cache: &Cache,
+  ) -> Result<RecordId<Cache>, DatabaseError> {
+    self.cache_repo.insert(cache).await.map(|()| cache.id)
   }
 
   /// Creates a [`Store`].
   #[tracing::instrument(skip(self))]
   pub async fn create_store(
     &self,
-    org: RecordId<Org>,
-    name: EntityName,
-    credentials: StorageCredentials,
-    config: StoreConfiguration,
-  ) -> Result<RecordId<Store>, CreateModelError> {
-    self
-      .store_repo
-      .create_model(Store {
-        id: RecordId::new(),
-        org,
-        credentials,
-        config,
-        name,
-      })
-      .await
-      .map(|s| s.id)
+    store: &Store,
+  ) -> Result<RecordId<Store>, DatabaseError> {
+    self.store_repo.insert(store).await.map(|()| store.id)
   }
 
   /// Creates an [`Org`].
   #[tracing::instrument(skip(self))]
   pub async fn create_org(
     &self,
-    org: Org,
-  ) -> Result<RecordId<Org>, CreateModelError> {
-    self.org_repo.create_model(org).await.map(|s| s.id)
+    org: &Org,
+  ) -> Result<RecordId<Org>, DatabaseError> {
+    self.org_repo.insert(org).await.map(|()| org.id)
   }
 
   /// Creates a [`User`].
   pub async fn create_user(
     &self,
-    user: User,
-  ) -> Result<RecordId<User>, CreateModelError> {
-    self.user_repo.create_model(user).await.map(|u| u.id)
+    user: &User,
+  ) -> Result<RecordId<User>, DatabaseError> {
+    self.user_repo.insert(user).await.map(|()| user.id)
   }
 
   /// Creates an [`Entry`].
   #[tracing::instrument(skip(self))]
   pub async fn create_entry(
     &self,
-    entry: Entry,
-  ) -> Result<RecordId<Entry>, CreateModelError> {
-    self.entry_repo.create_model(entry).await.map(|s| s.id)
+    entry: &Entry,
+  ) -> Result<RecordId<Entry>, DatabaseError> {
+    self.entry_repo.insert(entry).await.map(|()| entry.id)
   }
 }

@@ -1,6 +1,6 @@
 //! User mutation logic.
 
-use db::PatchModelError;
+use db::DatabaseError;
 use models::User;
 
 use super::MutationService;
@@ -8,7 +8,7 @@ use super::MutationService;
 impl MutationService {
   /// Patches a [`User`].
   #[tracing::instrument(skip(self))]
-  pub async fn patch_user(&self, user: User) -> Result<User, PatchModelError> {
-    self.user_repo.patch_model(user.id, user).await
+  pub async fn patch_user(&self, user: &User) -> Result<(), DatabaseError> {
+    self.user_repo.update(user).await
   }
 }

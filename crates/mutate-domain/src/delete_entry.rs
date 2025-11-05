@@ -1,5 +1,5 @@
-use db::DeleteModelError;
-use models::{Entry, dvf::RecordId};
+use db::DatabaseError;
+use models::{Entry, RecordId};
 
 use super::MutationService;
 
@@ -9,11 +9,7 @@ impl MutationService {
   pub async fn delete_entry(
     &self,
     id: RecordId<Entry>,
-  ) -> Result<Option<RecordId<Entry>>, DeleteModelError> {
-    self
-      .entry_repo
-      .delete_model(id)
-      .await
-      .map(|b| b.then_some(id))
+  ) -> Result<Entry, DatabaseError> {
+    self.entry_repo.delete_and_return(id).await
   }
 }
