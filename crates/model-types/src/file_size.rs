@@ -6,6 +6,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Copy, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct FileSize(u64);
 
+impl FileSize {
+  /// Create a new [`FileSize`].
+  pub fn new(input: u64) -> Self { Self(input) }
+
+  /// Return the inner [`u64`].
+  pub fn inner(&self) -> u64 { self.0 }
+}
+
 impl AsRef<u64> for FileSize {
   fn as_ref(&self) -> &u64 { &self.0 }
 }
