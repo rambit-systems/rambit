@@ -5,10 +5,7 @@ use std::{fmt, io::Read, str::FromStr};
 
 use clap::Args;
 use miette::{Context, IntoDiagnostic, bail, miette};
-use models::{
-  StorePath,
-  dvf::{FileSize, StrictSlug},
-};
+use models::{FileSize, Slug, StorePath};
 
 use self::{current_system::CurrentSystem, path_info::PathInfo};
 use crate::{Action, app_state::AppState, authenticate::AuthenticateCommand};
@@ -86,9 +83,9 @@ impl Action for UploadCommand {
     let cache_list = self
       .caches
       .into_iter()
-      .map(|c| (c.clone(), StrictSlug::new(c)))
+      .map(|c| (c.clone(), Slug::new(&c)))
       .inspect(|(o, n)| {
-        if *o != n.clone().into_inner() {
+        if *o != n.to_string() {
           tracing::warn!("coercing cache name `{o}` into `{n}`")
         }
       })
@@ -97,8 +94,8 @@ impl Action for UploadCommand {
       .join(",");
     tracing::debug!(%cache_list, "using cache list");
 
-    let target_store = StrictSlug::new(self.store.clone());
-    if self.store != target_store.clone().into_inner() {
+    let target_store = Slug::new(&self.store);
+    if self.store != target_store.to_string() {
       tracing::warn!(
         "coercing store name `{original}` into `{new}`",
         original = self.store,
@@ -124,7 +121,7 @@ impl Action for UploadCommand {
       .into_diagnostic()
       .context("failed to read bytes from nar encoder")?;
     tracing::debug!("buffered {} of NAR", FileSize::new(buffer.len() as _));
-    let nar_belt = belt::Belt::from_bytes(bytes::Bytes::from(buffer), None);
+    let nar_belt = belt::Belt::from(bytes::Bytes::from(buffer));
 
     let client = app_state.http_client();
 

@@ -1,5 +1,5 @@
 use miette::{Context, IntoDiagnostic, Result};
-use models::dvf::EmailAddress;
+use models::EmailAddress;
 use reqwest::Client;
 use tokio::sync::RwLock;
 

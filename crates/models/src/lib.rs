@@ -10,7 +10,7 @@ mod session;
 mod store;
 mod user;
 
-pub use model;
+pub use model::{self, RecordId};
 pub use model_types::*;
 pub use nix_compat;
 

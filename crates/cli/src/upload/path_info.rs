@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use miette::{Result, miette};
-use models::{CAHash, StorePath, dvf::FileSize};
+use models::{CAHash, FileSize, StorePath};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 

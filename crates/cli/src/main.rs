@@ -9,7 +9,7 @@ mod upload;
 
 use clap::{Parser, Subcommand};
 use miette::{Context, Result};
-use models::{User, dvf::RecordId};
+use models::{RecordId, User};
 use tracing_subscriber::{
   EnvFilter, layer::SubscriberExt, util::SubscriberInitExt,
 };

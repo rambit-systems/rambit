@@ -1,6 +1,6 @@
 use clap::Args;
 use miette::{Context, IntoDiagnostic, bail, miette};
-use models::{User, dvf::RecordId};
+use models::{RecordId, User};
 use serde::Serialize;
 
 use crate::{Action, AppState, SessionCreds};
@@ -54,7 +54,7 @@ impl Action for AuthenticateCommand {
     let client = app_state.http_client();
 
     let params = AuthenticateRequestParams {
-      email:    email.clone().into_inner(),
+      email:    email.as_ref().to_owned(),
       password: password.into(),
     };
     let url = format!("{}/authenticate", app_state.api_url_base());
