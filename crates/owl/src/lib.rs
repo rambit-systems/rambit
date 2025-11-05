@@ -9,7 +9,7 @@ use std::{
 };
 
 use belt::Belt;
-use models::{NarIntrensicData, dvf::FileSize};
+use models::{FileSize, NarIntrensicData};
 use nix_compat::store_path::StorePath;
 use nix_nar::Content;
 use regex::bytes::Regex as RegexBytes;
@@ -43,7 +43,7 @@ impl NarInterrogator {
     data: Belt,
   ) -> Result<NarIntrensicData, InterrogatorError> {
     let buffered_data = data
-      .collect()
+      .collect_bytes()
       .instrument(info_span!("collect_belt_data"))
       .await
       .map_err(InterrogatorError::InputError)?;
@@ -131,8 +131,6 @@ fn extract_store_paths_from_reader<R: Read>(
 
 #[cfg(test)]
 mod test {
-  use belt::Belt;
-
   use crate::NarInterrogator;
 
   #[tokio::test]
@@ -142,10 +140,7 @@ mod test {
 
     let interrogator = NarInterrogator;
     let data = interrogator
-      .interrogate(Belt::from_bytes(
-        bytes::Bytes::from(bat_nar.as_slice()),
-        None,
-      ))
+      .interrogate(bytes::Bytes::from(bat_nar.as_slice()).into())
       .await
       .unwrap();
 
