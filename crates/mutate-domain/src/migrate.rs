@@ -1,17 +1,17 @@
-use std::{path::PathBuf, str::FromStr};
+use std::str::FromStr;
 
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
-  Cache, EmailAddress, EntityName, HumanName, LocalStorageCredentials,
-  MemoryStorageCredentials, Org, OrgIdent, RecordId, Store, StoreConfiguration,
-  User, Visibility,
+  Cache, EmailAddress, EntityName, HumanName, MemoryStorageCredentials, Org,
+  OrgIdent, RecordId, StorageCredentials, Store, StoreConfiguration, User,
+  Visibility,
 };
 
 use super::MutationService;
 
 impl MutationService {
   /// Add test data to databases.
-  pub async fn migrate_test_data(&self, ephemeral_storage: bool) -> Result<()> {
+  pub async fn migrate_test_data(&self) -> Result<()> {
     let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
 
     let personal_org = Org {
@@ -69,12 +69,7 @@ impl MutationService {
     let albert_store = Store {
       id:          RecordId::from_str("01JXGXVF0MVQNGRM565YHM20BC").unwrap(),
       org:         federation.id,
-      credentials: match ephemeral_storage {
-        true => models::StorageCredentials::Memory(MemoryStorageCredentials),
-        false => models::StorageCredentials::Local(LocalStorageCredentials(
-          PathBuf::from("/tmp/rambit-albert-store"),
-        )),
-      },
+      credentials: StorageCredentials::Memory(MemoryStorageCredentials),
       config:      StoreConfiguration {},
       name:        EntityName::new("albert"),
     };
