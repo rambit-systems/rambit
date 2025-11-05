@@ -1,12 +1,8 @@
-use std::path::PathBuf;
-
 use serde::{Deserialize, Serialize};
 
 /// Credentials for a storage backend.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum StorageCredentials {
-  /// Storage credentials for local filesystem storage.
-  Local(LocalStorageCredentials),
   /// Storage credentials for R2 object storage.
   R2(R2StorageCredentials),
   /// Storage credentials for in-memory storage.
@@ -16,8 +12,6 @@ pub enum StorageCredentials {
 /// Public view of [`StorageCredentials`].
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum PvStorageCredentials {
-  /// Storage credentials for local filesystem storage.
-  Local(LocalStorageCredentials),
   /// Storage credentials for R2 object storage.
   R2(PvR2StorageCredentials),
   /// Storage credentials for in-memory storage.
@@ -27,7 +21,6 @@ pub enum PvStorageCredentials {
 impl From<StorageCredentials> for PvStorageCredentials {
   fn from(value: StorageCredentials) -> Self {
     match value {
-      StorageCredentials::Local(local) => PvStorageCredentials::Local(local),
       StorageCredentials::R2(r2) => PvStorageCredentials::R2(r2.into()),
       StorageCredentials::Memory(memory) => {
         PvStorageCredentials::Memory(memory)
@@ -35,10 +28,6 @@ impl From<StorageCredentials> for PvStorageCredentials {
     }
   }
 }
-
-/// Storage credentials for local filesystem storage.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct LocalStorageCredentials(pub PathBuf);
 
 /// Storage credentials for in-memory storage.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
