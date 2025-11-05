@@ -1,24 +1,23 @@
-use db::{FetchModelByIndexError, kv::LaxSlug};
+use db::DatabaseError;
 use models::{
-  Cache, CacheUniqueIndexSelector, Org, OrgIdent, OrgUniqueIndexSelector,
-  Store, StoreUniqueIndexSelector,
-  dvf::{EntityName, RecordId},
+  Cache, CacheIndexSelector, EntityName, Org, OrgIdent, OrgIndexSelector,
+  RecordId, Store, StoreIndexSelector, model::IndexValue,
 };
 
 use crate::MetaService;
 
 impl MetaService {
-  /// Fetches a [`Cache`] by its [name](CacheUniqueIndexSelector::Name).
+  /// Fetches a [`Cache`] by its [name](CacheIndexSelector::Name).
   #[tracing::instrument(skip(self))]
   pub async fn fetch_cache_by_name(
     &self,
     name: EntityName,
-  ) -> Result<Option<Cache>, FetchModelByIndexError> {
+  ) -> Result<Option<Cache>, DatabaseError> {
     self
       .cache_repo
-      .fetch_model_by_unique_index(
-        CacheUniqueIndexSelector::Name,
-        name.into_inner().into(),
+      .find_by_unique_index(
+        CacheIndexSelector::Name,
+        &IndexValue::new_single(name.into_inner()),
       )
       .await
   }
@@ -29,12 +28,12 @@ impl MetaService {
     &self,
     org: RecordId<Org>,
     store_name: EntityName,
-  ) -> Result<Option<Store>, FetchModelByIndexError> {
+  ) -> Result<Option<Store>, DatabaseError> {
     self
       .store_repo
-      .fetch_model_by_unique_index(
-        StoreUniqueIndexSelector::NameByOrg,
-        LaxSlug::new(format!("{org}-{store_name}")).into(),
+      .find_by_unique_index(
+        StoreIndexSelector::NameByOrg,
+        &Store::unique_index_name_by_org(org, &store_name),
       )
       .await
   }
@@ -44,13 +43,10 @@ impl MetaService {
   pub async fn fetch_org_by_ident(
     &self,
     org_ident: OrgIdent,
-  ) -> Result<Option<Org>, FetchModelByIndexError> {
+  ) -> Result<Option<Org>, DatabaseError> {
     self
       .org_repo
-      .fetch_model_by_unique_index(
-        OrgUniqueIndexSelector::Ident,
-        org_ident.index_value().into(),
-      )
+      .find_by_unique_index(OrgIndexSelector::Ident, &org_ident.index_value())
       .await
   }
 }

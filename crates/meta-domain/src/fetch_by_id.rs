@@ -1,5 +1,5 @@
-use db::FetchModelError;
-use models::{Cache, Entry, Org, Store, User, dvf::RecordId};
+use db::DatabaseError;
+use models::{Cache, Entry, Org, RecordId, Store, User};
 
 use super::MetaService;
 
@@ -11,9 +11,9 @@ macro_rules! impl_fetch_by_id {
       pub async fn $method(
         &self,
         id: RecordId<$model>,
-      ) -> Result<Option<$model>, FetchModelError> {
+      ) -> Result<Option<$model>, DatabaseError> {
         tracing::warn!("fetching {} by id {}", stringify!($model), id);
-        self.$repo_field.fetch_model_by_id(id).await
+        self.$repo_field.get(id).await
       }
     )*
   };

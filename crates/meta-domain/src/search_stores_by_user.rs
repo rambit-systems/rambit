@@ -1,8 +1,5 @@
-use db::{FetchModelByIndexError, FetchModelError, kv::LaxSlug};
-use models::{
-  Store, StoreUniqueIndexSelector, User,
-  dvf::{EntityName, RecordId},
-};
+use db::DatabaseError;
+use models::{EntityName, RecordId, Store, StoreIndexSelector, User};
 
 use super::MetaService;
 
@@ -15,10 +12,7 @@ pub enum SearchByUserError {
   MissingUser(RecordId<User>),
   /// Indicates that a database error occurred.
   #[error("Failed to fetch users by index")]
-  FetchError(#[from] FetchModelError),
-  /// Indicates that a database error occurred.
-  #[error("Failed to fetch users by index")]
-  FetchByIndexError(#[from] FetchModelByIndexError),
+  DatabaseError(#[from] DatabaseError),
 }
 
 impl MetaService {
@@ -42,14 +36,12 @@ impl MetaService {
     let mut stores = Vec::new();
     for org in user_orgs {
       // calculate the `NameByOrg` index
-      let index_value = LaxSlug::new(format!("{org}-{store_name}"));
+      let index_value = Store::unique_index_name_by_org(org, &store_name);
+
       // find the associated store
       let store = self
         .store_repo
-        .fetch_model_by_unique_index(
-          StoreUniqueIndexSelector::NameByOrg,
-          index_value.into(),
-        )
+        .find_by_unique_index(StoreIndexSelector::NameByOrg, &index_value)
         .await?;
 
       // if a store with that name exists, push it

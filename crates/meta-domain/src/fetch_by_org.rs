@@ -1,7 +1,7 @@
-use db::{FetchModelByIndexError, kv::LaxSlug};
+use db::DatabaseError;
 use models::{
-  Cache, CacheIndexSelector, Entry, EntryIndexSelector, Org, Store,
-  StoreIndexSelector, dvf::RecordId,
+  Cache, CacheIndexSelector, Entry, EntryIndexSelector, Org, RecordId, Store,
+  StoreIndexSelector, model::IndexValue,
 };
 
 use crate::MetaService;
@@ -16,13 +16,18 @@ macro_rules! impl_fetch_by_org {
     $vis async fn $method_name(
       &self,
       id: RecordId<Org>,
-    ) -> Result<Vec<RecordId<$model_ty>>, FetchModelByIndexError> {
-      self.$repo_field
-        .fetch_ids_by_index(
-          $index_selector::Org,
-          LaxSlug::new(id.to_string()).into(),
+    ) -> Result<Vec<RecordId<$model_ty>>, DatabaseError> {
+      Ok(
+        self.$repo_field
+          .find_by_index(
+            $index_selector::Org,
+            &IndexValue::new_single(id.to_string()),
+          )
+          .await?
+          .into_iter()
+          .map(|m| m.id)
+          .collect()
         )
-        .await
     }
   };
 }

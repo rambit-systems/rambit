@@ -1,8 +1,5 @@
-use db::FetchModelByIndexError;
-use models::{
-  Cache, EntryIndexSelector, Store,
-  dvf::{LaxSlug, RecordId},
-};
+use db::DatabaseError;
+use models::{Cache, EntryIndexSelector, RecordId, Store, model::IndexValue};
 
 use super::MetaService;
 
@@ -12,12 +9,12 @@ impl MetaService {
   pub async fn count_entries_in_store(
     &self,
     store: RecordId<Store>,
-  ) -> Result<u32, FetchModelByIndexError> {
+  ) -> Result<u64, DatabaseError> {
     self
       .entry_repo
-      .count_models_by_index(
+      .count_by_index(
         EntryIndexSelector::Store,
-        LaxSlug::new(store.to_string()).into(),
+        &IndexValue::new_single(store.to_string()),
       )
       .await
   }
@@ -27,12 +24,12 @@ impl MetaService {
   pub async fn count_entries_in_cache(
     &self,
     cache: RecordId<Cache>,
-  ) -> Result<u32, FetchModelByIndexError> {
+  ) -> Result<u64, DatabaseError> {
     self
       .entry_repo
-      .count_models_by_index(
-        EntryIndexSelector::Cache,
-        LaxSlug::new(cache.to_string()).into(),
+      .count_by_index(
+        EntryIndexSelector::Caches,
+        &IndexValue::new_single(cache.to_string()),
       )
       .await
   }

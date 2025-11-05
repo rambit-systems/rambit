@@ -1,5 +1,5 @@
-use db::{FetchModelByIndexError, kv::LaxSlug};
-use models::{User, UserUniqueIndexSelector, dvf::EmailAddress};
+use db::DatabaseError;
+use models::{EmailAddress, User, UserIndexSelector, model::IndexValue};
 
 use crate::MetaService;
 
@@ -9,12 +9,12 @@ impl MetaService {
   pub async fn fetch_user_by_email(
     &self,
     email: EmailAddress,
-  ) -> Result<Option<User>, FetchModelByIndexError> {
+  ) -> Result<Option<User>, DatabaseError> {
     self
       .user_repo
-      .fetch_model_by_unique_index(
-        UserUniqueIndexSelector::Email,
-        LaxSlug::new(email.as_ref()).into(),
+      .find_by_unique_index(
+        UserIndexSelector::Email,
+        &IndexValue::new_single(&email),
       )
       .await
   }
