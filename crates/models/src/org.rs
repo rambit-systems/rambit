@@ -21,7 +21,7 @@ pub struct Org {
 impl Org {
   /// Generates the value of the unique [`Org`] index `ident`.
   pub fn unique_index_ident(&self) -> Vec<IndexValue> {
-    vec![self.org_ident.index_value().into()]
+    vec![self.org_ident.index_value()]
   }
 }
 
