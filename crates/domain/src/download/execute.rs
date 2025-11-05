@@ -1,5 +1,8 @@
 use belt::Belt;
-use models::dvf::{CompressionAlgorithm, CompressionStatus, FileSize};
+use futures::TryStreamExt;
+use miette::Context;
+use models::{CompressionStatus, FileSize};
+use storage::{BlobKey, BlobStorageError};
 
 use super::plan::DownloadPlan;
 use crate::DomainService;
@@ -20,7 +23,7 @@ pub struct DownloadResponse {
 pub enum DownloadExecutionError {
   /// Failed to read from storage.
   #[error("Failed to read from storage: {0}")]
-  StorageFailure(storage::ReadError),
+  StorageFailure(storage::BlobStorageError),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -34,34 +37,32 @@ impl DomainService {
     plan: DownloadPlan,
   ) -> Result<DownloadResponse, DownloadExecutionError> {
     // build a client to fetch from the store
-    let store_client = storage::StorageClient::new_from_storage_creds(
-      plan.store.credentials.into(),
+    let store_client = crate::storage_glue::storage_creds_to_blob_storage(
+      plan.store.credentials,
     )
     .await
+    .context("failed to create storage client for store")
     .map_err(DownloadExecutionError::InternalError)?;
 
     // fetch the data from the store
-    let path = plan.entry.storage_data.storage_path;
+    let path =
+      BlobKey::new(plan.entry.storage_data.storage_path.to_string_lossy());
     let data = store_client
-      .read(&path)
+      .get_stream(&path)
       .await
       .map_err(DownloadExecutionError::StorageFailure)?;
+    let data = Belt::new(data.map_err(BlobStorageError::into_io_error));
 
     // decompress if needed
     let comp_status = plan.entry.storage_data.compression_status;
     let (file_size, data) = match comp_status {
-      CompressionStatus::Compressed {
-        uncompressed_size,
-        algorithm,
-        ..
-      } => {
-        let data = data
-          .set_declared_comp(Some(match algorithm {
-            CompressionAlgorithm::Zstd => belt::CompressionAlgorithm::Zstd,
-          }))
-          .adapt_to_no_comp();
-        (uncompressed_size, data)
-      }
+      // CompressionStatus::Compressed {
+      //   uncompressed_size,
+      //   algorithm,
+      //   ..
+      // } => {
+      //   todo!()
+      // }
       CompressionStatus::Uncompressed { size } => (size, data),
     };
 

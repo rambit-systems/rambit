@@ -1,5 +1,5 @@
 use meta_domain::MetaService;
-use models::dvf::{EmailAddress, HumanName};
+use models::{EmailAddress, HumanName};
 use mutate_domain::MutationService;
 
 use super::*;

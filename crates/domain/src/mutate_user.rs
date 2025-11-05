@@ -1,7 +1,7 @@
 //! User mutation logic.
 
-use db::{FetchModelError, PatchModelError};
-use models::{Org, User, dvf::RecordId};
+use db::DatabaseError;
+use models::{Org, RecordId, User};
 
 use crate::DomainService;
 
@@ -23,12 +23,9 @@ pub enum AddOrgToUserError {
   /// The action has already been completed.
   #[error("This action has already been completed")]
   Idempotency,
-  /// A fetch action failed.
+  /// An internal error occurred.
   #[error("Internal error: failed to fetch model: {0}")]
-  InternalFetchError(FetchModelError),
-  /// A patch action failed.
-  #[error("Internal error: failed to patch model: {0}")]
-  InternalPatchError(PatchModelError),
+  InternalError(#[from] DatabaseError),
 }
 
 impl DomainService {
@@ -42,8 +39,7 @@ impl DomainService {
     let user = self
       .meta
       .fetch_user_by_id(user)
-      .await
-      .map_err(AddOrgToUserError::InternalFetchError)?
+      .await?
       .ok_or(AddOrgToUserError::UserDoesNotExist(user))?;
 
     if user.belongs_to_org(org) {
@@ -53,8 +49,7 @@ impl DomainService {
     let org = self
       .meta
       .fetch_org_by_id(org)
-      .await
-      .map_err(AddOrgToUserError::InternalFetchError)?
+      .await?
       .ok_or(AddOrgToUserError::OrgDoesNotExist(org))?;
 
     if matches!(org.org_ident, models::OrgIdent::UserOrg(_)) {
@@ -66,11 +61,7 @@ impl DomainService {
       ..user
     };
 
-    self
-      .mutate
-      .patch_user(new_user)
-      .await
-      .map_err(AddOrgToUserError::InternalPatchError)?;
+    self.mutate.patch_user(&new_user).await?;
 
     Ok(())
   }

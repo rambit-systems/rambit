@@ -1,8 +1,5 @@
 use miette::{Context, IntoDiagnostic, miette};
-use models::{
-  Digest, Entry, Store, StorePath,
-  dvf::{EntityName, Visibility},
-};
+use models::{Digest, EntityName, Entry, Store, StorePath, Visibility};
 
 use crate::{DomainService, download::DownloadRequest};
 

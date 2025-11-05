@@ -50,7 +50,7 @@ fn parse_email(input: &str) -> Result<EmailAddress, String> {
   if input.is_empty() {
     return Err("empty email address found".to_owned());
   }
-  EmailAddress::try_new(input.to_owned())
+  EmailAddress::try_new(input)
     .map_err(|_| "email address is malformed".to_owned())
 }
 

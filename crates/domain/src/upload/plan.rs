@@ -2,8 +2,8 @@ use belt::Belt;
 use meta_domain::SearchByUserError;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Cache, Digest, Entry, NarDeriverData, Org, Store, StorePath,
-  dvf::{EntityName, RecordId},
+  Cache, Digest, EntityName, Entry, NarDeriverData, Org, RecordId, Store,
+  StorePath,
 };
 
 use super::UploadRequest;
@@ -92,13 +92,7 @@ impl DomainService {
         SearchByUserError::MissingUser(u) => {
           unreachable!("user {u} was already fetched")
         }
-        SearchByUserError::FetchError(e) => UploadPlanningError::InternalError(
-          Err::<(), _>(e)
-            .into_diagnostic()
-            .context("failed to search for stores by user")
-            .unwrap_err(),
-        ),
-        SearchByUserError::FetchByIndexError(e) => {
+        SearchByUserError::DatabaseError(e) => {
           UploadPlanningError::InternalError(
             Err::<(), _>(e)
               .into_diagnostic()

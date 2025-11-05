@@ -1,5 +1,5 @@
-use db::DeleteModelError;
-use models::{Entry, dvf::RecordId};
+use db::DatabaseError;
+use models::{Entry, RecordId};
 
 use crate::DomainService;
 
@@ -9,7 +9,7 @@ impl DomainService {
   pub async fn delete_entry(
     &self,
     id: RecordId<Entry>,
-  ) -> Result<Option<RecordId<Entry>>, DeleteModelError> {
+  ) -> Result<Entry, DatabaseError> {
     self.mutate.delete_entry(id).await
   }
 }

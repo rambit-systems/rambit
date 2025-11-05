@@ -2,8 +2,7 @@
 
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  Digest, Entry, Signature, StorePath, User,
-  dvf::{EntityName, RecordId, Visibility},
+  Digest, EntityName, Entry, RecordId, Signature, StorePath, User, Visibility,
   nix_compat::narinfo::{Flags, NarInfo},
 };
 
@@ -52,7 +51,7 @@ impl NarinfoResponse {
       flags: Flags::empty(),
       store_path: self.entry.store_path.as_ref(),
       nar_hash: self.entry.intrensic_data.nar_hash,
-      nar_size: self.entry.intrensic_data.nar_size.into_inner(),
+      nar_size: self.entry.intrensic_data.nar_size.inner(),
       references,
       signatures,
       ca: self.entry.intrensic_data.ca_hash.clone(),
@@ -66,7 +65,7 @@ impl NarinfoResponse {
       url: &self.nar_relative_url,
       compression: None,
       file_hash: Some(self.entry.intrensic_data.nar_hash),
-      file_size: Some(self.entry.intrensic_data.nar_size.into_inner()),
+      file_size: Some(self.entry.intrensic_data.nar_size.inner()),
     }
   }
 }

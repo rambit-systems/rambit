@@ -6,6 +6,7 @@ pub mod download;
 mod migrate;
 pub mod mutate_user;
 pub mod narinfo;
+mod storage_glue;
 pub mod upload;
 
 pub use belt;
@@ -51,7 +52,7 @@ mod tests {
       let pds = DomainService::new_mock();
 
       pds
-        .migrate_test_data(true)
+        .migrate_test_data()
         .await
         .expect("failed to migrate test data");
 

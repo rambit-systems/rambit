@@ -40,10 +40,8 @@ impl MutationService {
       id:               user_id,
       personal_org:     personal_org.id,
       orgs:             vec![federation.id],
-      email:            EmailAddress::try_new(
-        "jpicard@federation.gov".to_string(),
-      )
-      .unwrap(),
+      email:            EmailAddress::try_new("jpicard@federation.gov")
+        .unwrap(),
       name:             HumanName::try_new("Jean-Luc Picard")
         .expect("failed to create name"),
       name_abbr:        User::abbreviate_name(

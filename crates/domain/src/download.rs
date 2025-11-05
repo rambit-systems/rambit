@@ -5,10 +5,7 @@ mod plan;
 #[cfg(test)]
 mod tests;
 
-use models::{
-  StorePath, User,
-  dvf::{EntityName, RecordId},
-};
+use models::{EntityName, RecordId, StorePath, User};
 
 pub use self::{execute::*, plan::*};
 

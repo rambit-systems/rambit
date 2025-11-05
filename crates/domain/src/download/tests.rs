@@ -2,10 +2,7 @@ use std::str::FromStr;
 
 use belt::Belt;
 use bytes::Bytes;
-use models::{
-  NarDeriverData, StorePath,
-  dvf::{EntityName, RecordId, StrictSlug},
-};
+use models::{EntityName, NarDeriverData, RecordId, StorePath};
 
 use crate::{DomainService, download::DownloadRequest, upload::UploadRequest};
 
@@ -16,11 +13,11 @@ async fn test_download() {
   let input_bytes = Bytes::from_static(include_bytes!(
     "../../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"
   ));
-  let nar_contents = Belt::from_bytes(input_bytes.clone(), None);
+  let nar_contents = Belt::new_from_bytes(input_bytes.clone());
 
   let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
-  let cache_name = EntityName::new(StrictSlug::confident("aaron"));
-  let target_store = EntityName::new(StrictSlug::confident("albert"));
+  let cache_name = EntityName::new("aaron");
+  let target_store = EntityName::new("albert");
   let store_path = "/nix/store/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";
   let store_path =
     StorePath::from_absolute_path(store_path.as_bytes()).unwrap();
@@ -76,7 +73,7 @@ async fn test_download() {
 
   let downloaded_data = download_resp
     .data
-    .collect()
+    .collect_bytes()
     .await
     .expect("failed to collect bytes from belt");
   assert_eq!(input_bytes, downloaded_data);

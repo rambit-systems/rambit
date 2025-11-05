@@ -3,11 +3,11 @@ use std::path::PathBuf;
 use belt::Belt;
 use miette::{Context, IntoDiagnostic};
 use models::{
-  Entry, NarAuthenticityData, NarStorageData,
-  dvf::{CompressionStatus, RecordId},
-  model::Model,
+  CompressionStatus, Entry, FileSize, NarAuthenticityData, NarStorageData,
+  RecordId, model::Model,
 };
 use serde::{Deserialize, Serialize};
+use storage::BlobKey;
 use tracing::{Instrument, info_span};
 
 use super::plan::UploadPlan;
@@ -27,13 +27,13 @@ pub struct UploadResponse {
 pub enum UploadExecutionError {
   /// Failed to write to storage.
   #[error("Failed to write to storage: {0}")]
-  StorageFailure(storage::WriteError),
+  StorageFailure(#[from] storage::BlobStorageError),
   /// Failed to read all the input data.
   #[error("Failed to read input data: {0}")]
-  InputDataError(std::io::Error),
+  InputDataError(#[from] std::io::Error),
   /// Failed to validate NAR.
   #[error("Failed to validate NAR: {0}")]
-  NarValidationError(owl::InterrogatorError),
+  NarValidationError(#[from] owl::InterrogatorError),
   /// Some other internal error.
   #[error("Unexpected error: {0}")]
   InternalError(miette::Report),
@@ -52,7 +52,7 @@ impl DomainService {
     // the NAR and to upload to storage
     let big_terrible_buffer = plan
       .nar_contents
-      .collect()
+      .collect_bytes()
       .instrument(info_span!("collect_big_terrible_buffer"))
       .await
       .map_err(UploadExecutionError::InputDataError)?;
@@ -60,7 +60,7 @@ impl DomainService {
     // validate the NAR and gather intrensic data
     let nar_interrogator = owl::NarInterrogator;
     let mut nar_intrensic_data = nar_interrogator
-      .interrogate(Belt::from_bytes(big_terrible_buffer.clone(), None))
+      .interrogate(Belt::new_from_bytes(big_terrible_buffer.clone()))
       .await
       .map_err(UploadExecutionError::NarValidationError)?;
 
@@ -71,20 +71,29 @@ impl DomainService {
       tracing::warn!("no self-reference found in entry {entry_id}");
     }
 
-    let store_client = storage::StorageClient::new_from_storage_creds(
-      plan.target_store.credentials.into(),
+    let store_client = crate::storage_glue::storage_creds_to_blob_storage(
+      plan.target_store.credentials,
     )
     .await
+    .context("failed to create storage client for store")
     .map_err(UploadExecutionError::InternalError)?;
 
     let storage_path = PathBuf::from(plan.store_path.to_string());
-    let file_size = store_client
-      .write(
-        storage_path.as_ref(),
-        Belt::from_bytes(big_terrible_buffer, None),
+    let storage_key = BlobKey::new(storage_path.clone().to_string_lossy());
+    store_client
+      .put_stream(
+        &storage_key,
+        Box::pin(Belt::new_from_bytes(big_terrible_buffer)),
+        storage::UploadOptions::default(),
       )
-      .await
-      .map_err(UploadExecutionError::StorageFailure)?;
+      .await?;
+    let metadata = store_client.head(&storage_key).await?.ok_or(
+      UploadExecutionError::InternalError(miette::miette!(
+        "uploaded file does not exist"
+      )),
+    )?;
+    let file_size = FileSize::new(metadata.size);
+
     let compression_status =
       CompressionStatus::Uncompressed { size: file_size };
 
@@ -97,18 +106,19 @@ impl DomainService {
     let nar_authenticity_data = NarAuthenticityData::default();
 
     // insert entry
-    let entry_id = self
+    let entry = Entry {
+      id:                entry_id,
+      org:               plan.org_id,
+      caches:            plan.caches.iter().map(Model::id).collect(),
+      store_path:        plan.store_path,
+      intrensic_data:    nar_intrensic_data,
+      storage_data:      nar_storage_data,
+      authenticity_data: nar_authenticity_data,
+      deriver_data:      plan.deriver_data,
+    };
+    self
       .mutate
-      .create_entry(Entry {
-        id:                entry_id,
-        org:               plan.org_id,
-        caches:            plan.caches.iter().map(Model::id).collect(),
-        store_path:        plan.store_path,
-        intrensic_data:    nar_intrensic_data,
-        storage_data:      nar_storage_data,
-        authenticity_data: nar_authenticity_data,
-        deriver_data:      plan.deriver_data,
-      })
+      .create_entry(&entry)
       .await
       .into_diagnostic()
       .context("failed to create entry")

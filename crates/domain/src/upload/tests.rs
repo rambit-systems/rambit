@@ -2,11 +2,7 @@ use std::str::FromStr;
 
 use belt::Belt;
 use bytes::Bytes;
-use db::kv::StrictSlug;
-use models::{
-  NarDeriverData, StorePath,
-  dvf::{EntityName, RecordId},
-};
+use models::{EntityName, NarDeriverData, RecordId, StorePath};
 
 use super::UploadRequest;
 use crate::DomainService;
@@ -18,11 +14,11 @@ async fn test_upload() {
   let bytes = Bytes::from_static(include_bytes!(
     "../../../owl/test/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0"
   ));
-  let nar_contents = Belt::from_bytes(bytes, None);
+  let nar_contents = Belt::new_from_bytes(bytes);
 
   let user_id = RecordId::from_str("01JXGXV4R6VCZWQ2DAYDWR1VXD").unwrap();
-  let caches = vec![EntityName::new(StrictSlug::confident("aaron"))];
-  let target_store = EntityName::new(StrictSlug::confident("albert"));
+  let caches = vec![EntityName::new("aaron")];
+  let target_store = EntityName::new("albert");
   let store_path = "/nix/store/ky2wzr68im63ibgzksbsar19iyk861x6-bat-0.25.0";
   let store_path =
     StorePath::from_absolute_path(store_path.as_bytes()).unwrap();

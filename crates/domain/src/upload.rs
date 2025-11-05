@@ -6,10 +6,7 @@ mod plan;
 mod tests;
 
 use belt::Belt;
-use models::{
-  NarDeriverData, StorePath, User,
-  dvf::{EntityName, RecordId},
-};
+use models::{EntityName, NarDeriverData, RecordId, StorePath, User};
 
 /// The request struct for the
 /// [`plan_upload`](crate::DomainService::plan_upload) fn.

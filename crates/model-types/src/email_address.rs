@@ -41,7 +41,8 @@ pub enum EmailAddressError {
 
 impl EmailAddress {
   /// Create a new EmailAddress with validation.
-  pub fn try_new(email: String) -> Result<Self, EmailAddressError> {
+  pub fn try_new(email: impl AsRef<str>) -> Result<Self, EmailAddressError> {
+    let email = email.as_ref().to_owned();
     if email.chars().count() > 128 {
       return Err(EmailAddressError::TooLong);
     }
@@ -74,9 +75,7 @@ impl std::fmt::Display for EmailAddress {
 impl FromStr for EmailAddress {
   type Err = EmailAddressError;
 
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    Self::try_new(s.to_string())
-  }
+  fn from_str(s: &str) -> Result<Self, Self::Err> { Self::try_new(s) }
 }
 
 #[cfg(test)]
