@@ -1,4 +1,4 @@
-use models::dvf::EmailAddress;
+use models::EmailAddress;
 
 /// An error that occurs during user creation.
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]

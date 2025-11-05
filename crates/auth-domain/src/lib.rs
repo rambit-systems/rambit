@@ -9,10 +9,8 @@ use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
-  AuthUser, Org, OrgIdent, User, UserAuthCredentials,
-  UserSubmittedAuthCredentials,
-  dvf::{EmailAddress, HumanName},
-  model::RecordId,
+  AuthUser, EmailAddress, HumanName, Org, OrgIdent, User, UserAuthCredentials,
+  UserSubmittedAuthCredentials, model::RecordId,
 };
 pub use mutate_domain::UpdateActiveOrgError;
 
@@ -112,7 +110,7 @@ impl AuthDomainService {
 
     self
       .mutate
-      .create_org(org)
+      .create_org(&org)
       .await
       .into_diagnostic()
       .context("failed to create personal org for user")
@@ -120,7 +118,7 @@ impl AuthDomainService {
 
     self
       .mutate
-      .create_user(user.clone())
+      .create_user(&user)
       .await
       .into_diagnostic()
       .context("failed to create user")
