@@ -2,10 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use miette::Result;
-use models::{
-  StorePath,
-  dvf::{self, EmailAddress, EntityName, StrictSlug},
-};
+use models::{EmailAddress, EntityName, Slug, StorePath};
 
 #[derive(Parser, Debug)]
 pub struct CliArgs {
@@ -53,7 +50,7 @@ fn parse_email(input: &str) -> Result<EmailAddress, String> {
   if input.is_empty() {
     return Err("empty email address found".to_owned());
   }
-  EmailAddress::try_new(input)
+  EmailAddress::try_new(input.to_owned())
     .map_err(|_| "email address is malformed".to_owned())
 }
 
@@ -61,8 +58,9 @@ fn parse_cache_name(input: &str) -> Result<EntityName, String> {
   if input.is_empty() {
     return Err("empty cache name found".to_owned());
   }
-  match dvf::strict::strict_slugify(input) == input {
-    true => Ok(EntityName::new(StrictSlug::new(input))),
+  let slug = Slug::new(input);
+  match slug.as_ref() == input {
+    true => Ok(EntityName::new(slug)),
     false => Err(format!("cache name is malformed: `{input}`")),
   }
 }
@@ -86,7 +84,7 @@ fn parse_deriver_store_path(input: &str) -> Result<StorePath<String>, String> {
 }
 
 fn parse_store_name(input: &str) -> Result<EntityName, String> {
-  let sanitized = StrictSlug::new(input);
+  let sanitized = Slug::new(input);
   if input != sanitized.as_ref() {
     return Err(format!(
       "invalid target store name \"{input}\" - try \"{sanitized}\""

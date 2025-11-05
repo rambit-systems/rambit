@@ -1,8 +1,5 @@
 use miette::{Context, IntoDiagnostic};
-use models::{
-  User,
-  dvf::{EmailAddress, RecordId},
-};
+use models::{EmailAddress, RecordId, User};
 use reqwest::Client;
 use serde::Serialize;
 
@@ -22,7 +19,7 @@ pub async fn authenticate(
   tracing::debug!("authenticating as \"{email}\"");
 
   let params = AuthenticateParams {
-    email:    email.clone().into_inner(),
+    email:    email.clone().to_string(),
     password: password.into(),
   };
 

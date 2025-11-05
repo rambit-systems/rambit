@@ -1,10 +1,7 @@
 use std::path::Path;
 
 use miette::{Context, IntoDiagnostic, bail};
-use models::{
-  StorePath,
-  dvf::{EmailAddress, EntityName},
-};
+use models::{EmailAddress, EntityName, StorePath};
 use tokio::io::BufReader;
 
 #[allow(clippy::too_many_arguments)]
@@ -49,7 +46,7 @@ pub async fn upload(
     .context("failed to read NAR")?;
   tracing::debug!(?nar_path, "opened NAR");
 
-  let data = belt::Belt::from_async_buf_read(BufReader::new(file), None);
+  let data = belt::Belt::new_from_async_buf_read(BufReader::new(file));
 
   let cache_list = cache_list.iter().map(|c| c.to_string()).collect::<String>();
   let req = client

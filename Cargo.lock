@@ -526,7 +526,7 @@ dependencies = [
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "bytes",
  "futures",
@@ -1285,7 +1285,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "db-core",
  "db-impl-mock",
@@ -1297,7 +1297,7 @@ dependencies = [
 [[package]]
 name = "db-core"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "miette",
@@ -1310,7 +1310,7 @@ dependencies = [
 [[package]]
 name = "db-impl-mock"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "db-core",
@@ -1321,7 +1321,7 @@ dependencies = [
 [[package]]
 name = "db-impl-postgres"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "db-core",
@@ -2964,7 +2964,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "model-derive",
  "record-id",
@@ -2975,7 +2975,7 @@ dependencies = [
 [[package]]
 name = "model-derive"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3876,7 +3876,7 @@ dependencies = [
 [[package]]
 name = "record-id"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "serde",
  "ulid",
@@ -4511,7 +4511,7 @@ dependencies = [
 [[package]]
 name = "slug"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "deunicode",
  "serde",
@@ -4758,7 +4758,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "storage-core",
  "storage-impl-memory",
@@ -4768,7 +4768,7 @@ dependencies = [
 [[package]]
 name = "storage-core"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "bytes",
@@ -4783,7 +4783,7 @@ dependencies = [
 [[package]]
 name = "storage-impl-memory"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "bytes",
@@ -4799,7 +4799,7 @@ dependencies = [
 [[package]]
 name = "storage-impl-s3"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "async-trait",
  "bytes",
@@ -4816,7 +4816,7 @@ dependencies = [
 [[package]]
 name = "storage-types"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/palin-core#839207a8f002aaedb0f903cd0aac981395f7ec5e"
+source = "git+https://github.com/rambit-systems/palin-core#d92878448a498d8502c9f7453a5cd92fc19c17f3"
 dependencies = [
  "serde",
 ]
