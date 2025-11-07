@@ -37,6 +37,13 @@ impl AppState {
       )
     };
 
+    org_db.initialize_schema().await?;
+    user_db.initialize_schema().await?;
+    store_db.initialize_schema().await?;
+    entry_db.initialize_schema().await?;
+    cache_db.initialize_schema().await?;
+    session_db.initialize_schema().await?;
+
     let meta_domain = MetaService::new(
       org_db.clone(),
       user_db.clone(),
