@@ -1,6 +1,3 @@
-#[cfg(not(feature = "postgres"))]
-use std::sync::Arc;
-
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use domain::{
@@ -21,33 +18,6 @@ pub struct AppState {
 
 impl AppState {
   pub async fn build() -> Result<Self> {
-    #[cfg(not(feature = "postgres"))]
-    let (org_db, user_db, store_db, entry_db, cache_db, session_db) = {
-      #[cfg(not(feature = "tikv"))]
-      let kv_store = {
-        let kv_store_location = std::path::PathBuf::from(
-          std::env::var("REDB_STORE_PATH")
-            .unwrap_or("/tmp/rambit-db".to_owned()),
-        );
-        kv::KeyValueStore::new(Arc::new(kv_redb_impl::RedbClient::new(
-          &kv_store_location,
-        )?))
-      };
-      #[cfg(feature = "tikv")]
-      let kv_store = kv::KeyValueStore::new(Arc::new(
-        kv_tikv_impl::TikvClient::new_from_env().await?,
-      ));
-
-      (
-        Database::new_from_kv(kv_store.clone()),
-        Database::new_from_kv(kv_store.clone()),
-        Database::new_from_kv(kv_store.clone()),
-        Database::new_from_kv(kv_store.clone()),
-        Database::new_from_kv(kv_store.clone()),
-        Database::new_from_kv(kv_store),
-      )
-    };
-    #[cfg(feature = "postgres")]
     let (org_db, user_db, store_db, entry_db, cache_db, session_db) = {
       let url = std::env::var("POSTGRES_URL")
         .into_diagnostic()
@@ -58,12 +28,12 @@ impl AppState {
         .context("failed to connect to postgres")?;
 
       (
-        Database::new_from_postgres(pool.clone()).await?,
-        Database::new_from_postgres(pool.clone()).await?,
-        Database::new_from_postgres(pool.clone()).await?,
-        Database::new_from_postgres(pool.clone()).await?,
-        Database::new_from_postgres(pool.clone()).await?,
-        Database::new_from_postgres(pool).await?,
+        Database::new_postgres_from_pool(pool.clone()),
+        Database::new_postgres_from_pool(pool.clone()),
+        Database::new_postgres_from_pool(pool.clone()),
+        Database::new_postgres_from_pool(pool.clone()),
+        Database::new_postgres_from_pool(pool.clone()),
+        Database::new_postgres_from_pool(pool),
       )
     };
 

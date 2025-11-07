@@ -4,7 +4,7 @@ use axum::{
   extract::{FromRequestParts, Query},
   http::{StatusCode, request::Parts},
 };
-use domain::models::dvf::{self, EntityName, StrictSlug};
+use domain::models::{EntityName, Slug};
 
 const CACHE_LIST_QUERY_PARAM: &str = "caches";
 
@@ -45,8 +45,8 @@ impl<S: Sync> FromRequestParts<S> for CacheListExtractor {
             "Empty cache name found".to_owned(),
           ));
         }
-        match dvf::strict::strict_slugify(c) == c {
-          true => Ok(EntityName::new(StrictSlug::new(c))),
+        match Slug::new(c).as_ref() == c {
+          true => Ok(EntityName::new(c)),
           false => Err((
             StatusCode::BAD_REQUEST,
             format!("Cache name is malformed: `{c}`"),

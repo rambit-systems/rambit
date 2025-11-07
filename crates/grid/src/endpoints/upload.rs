@@ -7,11 +7,8 @@ use axum::{
   http::StatusCode,
   response::IntoResponse,
 };
-use domain::{
-  belt::{Belt, StreamExt},
-  models::NarDeriverData,
-  upload::UploadRequest,
-};
+use domain::{belt::Belt, models::NarDeriverData, upload::UploadRequest};
+use http_body_util::BodyExt;
 
 use super::extractors::{
   CacheListExtractor, DeriverStorePathExtractor, StorePathExtractor,
@@ -46,12 +43,10 @@ pub async fn upload(
     deriver: Some(deriver_store_path.value().clone()),
   };
 
-  let nar_contents = Belt::from_stream(
+  let nar_contents = Belt::new(
     body
-      .into_data_stream()
-      .map(|res| res.map_err(|e| io::Error::other(e.to_string()))),
-    // Some(belt::DEFAULT_CHUNK_SIZE),
-    None,
+      .map_err(|e| io::Error::other(e.to_string()))
+      .into_data_stream(),
   );
 
   let upload_req = UploadRequest {

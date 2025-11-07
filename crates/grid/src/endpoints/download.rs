@@ -53,7 +53,7 @@ pub async fn download(
 
   match download_resp {
     Ok(DownloadResponse { data, file_size }) => (
-      [(CONTENT_LENGTH, file_size.into_inner().to_string())],
+      [(CONTENT_LENGTH, file_size.inner().to_string())],
       Body::from_stream(data),
     )
       .into_response(),

@@ -1,9 +1,6 @@
 use auth_domain::{AuthDomainService, AuthSession};
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use domain::models::{
-  UserSubmittedAuthCredentials,
-  dvf::{EmailAddress, HumanName},
-};
+use domain::models::{EmailAddress, HumanName, UserSubmittedAuthCredentials};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

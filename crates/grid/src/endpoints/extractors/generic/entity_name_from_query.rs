@@ -4,7 +4,7 @@ use axum::{
   extract::{FromRequestParts, Query},
   http::{StatusCode, request::Parts},
 };
-use domain::models::dvf::{self, EntityName, StrictSlug};
+use domain::models::{EntityName, Slug};
 
 use super::QueryParameter;
 
@@ -42,13 +42,13 @@ impl<S: Sync, P: QueryParameter> FromRequestParts<S>
         format!("{desc} is empty", desc = P::DESCRIPTION),
       ));
     }
-    if dvf::strict::strict_slugify(value) != *value {
+    if Slug::new(value).as_ref() != value {
       return Err((
         StatusCode::BAD_REQUEST,
         format!("{desc} is malformed: `{value}`", desc = P::DESCRIPTION),
       ));
     }
-    let value = EntityName::new(StrictSlug::new(value));
+    let value = EntityName::new(value);
 
     Ok(Self(value, PhantomData))
   }

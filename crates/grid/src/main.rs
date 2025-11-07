@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
 
   // migrate if necessary
   if args.migrate {
-    match app_state.domain.migrate_test_data(false).await {
+    match app_state.domain.migrate_test_data().await {
       Ok(_) => {
         tracing::info!("migrated test data as requested");
       }
