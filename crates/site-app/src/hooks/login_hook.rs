@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use leptos::{ev::Event, prelude::*};
-use models::dvf::{EmailAddress, EmailAddressError};
+use models::{EmailAddress, EmailAddressError};
 
 use crate::{
   navigation::{navigate_to, next_url_string_hook},
@@ -77,10 +77,10 @@ impl LoginHook {
       }
       match EmailAddress::try_new(email) {
         Ok(_) => None,
-        Err(EmailAddressError::LenCharMaxViolated) => {
+        Err(EmailAddressError::TooLong) => {
           Some("That email address looks too long.".into())
         }
-        Err(EmailAddressError::PredicateViolated) => {
+        Err(EmailAddressError::InvalidEmail) => {
           Some("That email address doesn't look right.".into())
         }
       }

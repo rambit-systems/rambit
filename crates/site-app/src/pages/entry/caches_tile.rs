@@ -1,9 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{
-  dvf::{RecordId, Visibility},
-  Cache, Entry, PvCache, StorePath,
-};
+use models::{Cache, Entry, PvCache, RecordId, StorePath, Visibility};
 
 use crate::components::{CacheItemLink, LockClosedHeroIcon};
 

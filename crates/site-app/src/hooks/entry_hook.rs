@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::RecordId, Entry};
+use models::{Entry, RecordId};
 
 use crate::resources::entry::entry_query_scope;
 

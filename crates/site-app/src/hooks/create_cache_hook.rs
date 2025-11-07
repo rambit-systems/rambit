@@ -1,9 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 use leptos_fetch::QueryClient;
-use models::{
-  dvf::{EntityName, RecordId, StrictSlug, Visibility},
-  Cache, Org,
-};
+use models::{Cache, EntityName, Org, RecordId, Visibility};
 
 use super::OrgHook;
 use crate::{
@@ -27,8 +24,7 @@ impl CreateCacheHook {
 
     let name_signal = RwSignal::new(String::new());
     let sanitized_name_memo = Memo::new(move |_| {
-      Some(EntityName::new(StrictSlug::new(name_signal())))
-        .filter(|n| !n.to_string().is_empty())
+      Some(EntityName::new(name_signal())).filter(|n| !n.to_string().is_empty())
     });
     let visibility_signal = RwSignal::new(Visibility::Private);
 
@@ -181,16 +177,20 @@ pub async fn create_cache(
 
   let domain_service: DomainService = expect_context();
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(&name);
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  domain_service
-    .create_cache(org, sanitized_name, visibility)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to create cache: {e}");
-      ServerFnError::new("internal error")
-    })
+  let cache = Cache {
+    id: RecordId::new(),
+    org,
+    name: sanitized_name,
+    visibility,
+  };
+
+  domain_service.create_cache(&cache).await.map_err(|e| {
+    tracing::error!("failed to create cache: {e}");
+    ServerFnError::new("internal error")
+  })
 }

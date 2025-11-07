@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryScope;
-use models::{dvf::RecordId, model::Model, Org, PvOrg};
+use models::{model::Model, Org, PvOrg, RecordId};
 
 #[cfg(feature = "ssr")]
 use crate::resources::{authenticate, authorize_for_org};
@@ -42,11 +42,11 @@ pub async fn check_if_org_name_is_available(
   name: String,
 ) -> Result<bool, ServerFnError> {
   use domain::DomainService;
-  use models::dvf::{EntityName, StrictSlug};
+  use models::EntityName;
 
   authenticate()?;
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }

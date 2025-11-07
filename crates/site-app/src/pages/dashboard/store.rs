@@ -102,7 +102,6 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
   };
 
   let storage_type = match store.credentials {
-    PvStorageCredentials::Local(_) => "Local (DEBUG)".into_any(),
     PvStorageCredentials::R2(PvR2StorageCredentials::Default {
       bucket,
       ..

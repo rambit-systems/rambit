@@ -1,5 +1,5 @@
 use leptos::{prelude::*, server::ServerAction};
-use models::{dvf::RecordId, Entry};
+use models::{Entry, RecordId};
 
 use crate::{hooks::OrgHook, navigation::navigate_to};
 
@@ -58,7 +58,7 @@ impl DeleteEntryHook {
 async fn delete_entry(
   id: RecordId<Entry>,
 ) -> Result<Option<RecordId<Entry>>, ServerFnError> {
-  use domain::DomainService;
+  use domain::{db::DatabaseError, DomainService};
 
   let domain_service = expect_context::<DomainService>();
 
@@ -77,8 +77,12 @@ async fn delete_entry(
 
   crate::resources::authorize_for_org(entry.org)?;
 
-  domain_service.delete_entry(id).await.map_err(|e| {
-    tracing::error!("failed to delete entry: {e}");
-    ServerFnError::new("internal error")
-  })
+  match domain_service.delete_entry(id).await {
+    Ok(entry) => Ok(Some(entry.id)),
+    Err(DatabaseError::NotFound(_)) => Ok(None),
+    Err(e) => {
+      tracing::error!("failed to delete entry: {e}");
+      Err(ServerFnError::new("internal error"))
+    }
+  }
 }

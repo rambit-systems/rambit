@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use leptos::{ev::Event, prelude::*};
-use models::dvf::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
+use models::{EmailAddress, EmailAddressError, HumanName, HumanNameError};
 
 use crate::{
   navigation::{navigate_to, next_url_string_hook},
@@ -93,12 +93,10 @@ impl SignupHook {
       }
       match HumanName::try_new(name) {
         Ok(_) => None,
-        Err(HumanNameError::LenCharMaxViolated) => {
+        Err(HumanNameError::TooLong) => {
           Some("The name you entered is too long.".into())
         }
-        Err(HumanNameError::NotEmptyViolated) => {
-          Some("Your name is required.".into())
-        }
+        Err(HumanNameError::Empty) => Some("Your name is required.".into()),
       }
     })
   }
@@ -116,10 +114,10 @@ impl SignupHook {
       }
       match EmailAddress::try_new(email) {
         Ok(_) => None,
-        Err(EmailAddressError::LenCharMaxViolated) => {
+        Err(EmailAddressError::TooLong) => {
           Some("That email address looks too long.".into())
         }
-        Err(EmailAddressError::PredicateViolated) => {
+        Err(EmailAddressError::InvalidEmail) => {
           Some("That email address doesn't look right.".into())
         }
       }

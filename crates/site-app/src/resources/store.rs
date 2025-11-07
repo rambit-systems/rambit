@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, model::Model, Entry, Org, PvStore, Store};
+use models::{model::Model, Entry, Org, PvStore, RecordId, Store};
 
 #[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
@@ -103,13 +103,13 @@ pub async fn check_if_store_name_is_available(
   org_and_name: (RecordId<Org>, String),
 ) -> Result<bool, ServerFnError> {
   use domain::DomainService;
-  use models::dvf::{EntityName, StrictSlug};
+  use models::EntityName;
 
   let (org, name) = org_and_name;
 
   authorize_for_org(org)?;
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
@@ -130,7 +130,7 @@ pub async fn check_if_store_name_is_available(
 }
 
 pub fn entry_count_in_store_query_scope(
-) -> QueryScope<RecordId<Store>, Result<u32, ServerFnError>> {
+) -> QueryScope<RecordId<Store>, Result<u64, ServerFnError>> {
   QueryScope::new(count_entries_in_store).with_invalidation_link(move |s| {
     [
       Entry::TABLE_NAME.to_string(),
@@ -143,7 +143,7 @@ pub fn entry_count_in_store_query_scope(
 #[server(prefix = "/api/sfn")]
 pub async fn count_entries_in_store(
   store: RecordId<Store>,
-) -> Result<u32, ServerFnError> {
+) -> Result<u64, ServerFnError> {
   use domain::DomainService;
 
   let domain_service: DomainService = expect_context();

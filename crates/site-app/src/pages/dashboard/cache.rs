@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::Visibility, PvCache};
+use models::{PvCache, Visibility};
 
 use crate::{
   components::{

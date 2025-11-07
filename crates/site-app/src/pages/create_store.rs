@@ -3,8 +3,7 @@ mod credentials_input;
 use leptos::{prelude::*, server_fn::codec::Json};
 use leptos_fetch::QueryClient;
 use models::{
-  dvf::{EntityName, RecordId, StrictSlug},
-  Org, R2StorageCredentials, Store, StoreConfiguration,
+  EntityName, Org, R2StorageCredentials, RecordId, Store, StoreConfiguration,
 };
 
 use self::credentials_input::CredentialsInput;
@@ -31,8 +30,7 @@ pub fn CreateStorePage() -> impl IntoView {
 
   let name = RwSignal::new(String::new());
   let sanitized_name = Memo::new(move |_| {
-    Some(EntityName::new(StrictSlug::new(name())))
-      .filter(|n| !n.to_string().is_empty())
+    Some(EntityName::new(name())).filter(|n| !n.to_string().is_empty())
   });
   let (read_name, write_name) = touched_input_bindings(name);
   let credentials = RwSignal::<Option<R2StorageCredentials>>::new(None);
@@ -181,21 +179,21 @@ pub async fn create_store(
 
   let domain_service: DomainService = expect_context();
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  domain_service
-    .create_store(
-      org,
-      sanitized_name,
-      StorageCredentials::R2(credentials),
-      configuration,
-    )
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to create store: {e}");
-      ServerFnError::new("internal error")
-    })
+  let store = Store {
+    id: RecordId::new(),
+    org,
+    name: sanitized_name,
+    credentials: StorageCredentials::R2(credentials),
+    config: configuration,
+  };
+
+  domain_service.create_store(&store).await.map_err(|e| {
+    tracing::error!("failed to create store: {e}");
+    ServerFnError::new("internal error")
+  })
 }

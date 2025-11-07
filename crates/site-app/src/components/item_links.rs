@@ -1,7 +1,7 @@
 use std::iter::once;
 
 use leptos::prelude::*;
-use models::{dvf::RecordId, Cache, Store};
+use models::{Cache, RecordId, Store};
 
 #[component]
 pub fn CacheItemLink(

@@ -5,7 +5,7 @@ mod title_tile;
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_params_map;
-use models::{dvf::RecordId, Entry};
+use models::{Entry, RecordId};
 
 use self::{
   action_tile::ActionTile, caches_tile::CachesTile,

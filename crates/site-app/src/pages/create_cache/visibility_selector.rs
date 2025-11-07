@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::dvf::Visibility;
+use models::Visibility;
 
 use crate::hooks::OrgHook;
 

@@ -6,7 +6,7 @@ pub mod store;
 #[cfg(feature = "ssr")]
 use leptos::prelude::*;
 #[cfg(feature = "ssr")]
-use models::{dvf::RecordId, AuthUser, Org};
+use models::{AuthUser, Org, RecordId};
 
 #[cfg(feature = "ssr")]
 pub fn authorize_for_org(

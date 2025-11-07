@@ -2,7 +2,7 @@ use std::panic::Location;
 
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{dvf::RecordId, AuthUser, Org, PvOrg};
+use models::{AuthUser, Org, PvOrg, RecordId};
 
 use crate::{pages::RequestedOrg, resources::org::org_query_scope};
 

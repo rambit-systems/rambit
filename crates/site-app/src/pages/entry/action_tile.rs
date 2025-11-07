@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{dvf::RecordId, Entry};
+use models::{Entry, RecordId};
 
 use crate::{components::LoadingCircle, hooks::DeleteEntryHook};
 

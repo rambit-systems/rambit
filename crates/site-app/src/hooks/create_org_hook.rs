@@ -1,9 +1,6 @@
 use leptos::{ev::Event, prelude::*};
 use leptos_fetch::QueryClient;
-use models::{
-  dvf::{EntityName, RecordId, StrictSlug},
-  Org,
-};
+use models::{EntityName, Org, RecordId};
 
 use super::OrgHook;
 use crate::{
@@ -23,8 +20,7 @@ impl CreateOrgHook {
   pub fn new() -> Self {
     let name_signal = RwSignal::new(String::new());
     let sanitized_name_memo = Memo::new(move |_| {
-      Some(EntityName::new(StrictSlug::new(name_signal())))
-        .filter(|n| !n.to_string().is_empty())
+      Some(EntityName::new(name_signal())).filter(|n| !n.to_string().is_empty())
     });
 
     let query_client = expect_context::<QueryClient>();
@@ -161,21 +157,23 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
   let domain_service: DomainService = expect_context();
   let auth_domain_service: AuthDomainService = expect_context();
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let org = domain_service
-    .create_org(sanitized_name)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to create org: {e}");
-      ServerFnError::new("internal error")
-    })?;
+  let org = Org {
+    id:        RecordId::new(),
+    org_ident: models::OrgIdent::Named(sanitized_name),
+  };
+
+  domain_service.create_org(&org).await.map_err(|e| {
+    tracing::error!("failed to create org: {e}");
+    ServerFnError::new("internal error")
+  })?;
 
   domain_service
-    .add_org_to_user(auth_user.id, org)
+    .add_org_to_user(auth_user.id, org.id)
     .await
     .map_err(|e| {
       tracing::error!("failed to add org to user: {e}");
@@ -183,12 +181,12 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
     })?;
 
   auth_domain_service
-    .switch_active_org(auth_user.id, org)
+    .switch_active_org(auth_user.id, org.id)
     .await
     .map_err(|e| {
       tracing::error!("failed to fetch org: {e}");
       ServerFnError::new("internal error")
     })?;
 
-  Ok(org)
+  Ok(org.id)
 }

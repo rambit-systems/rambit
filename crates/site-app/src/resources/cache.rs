@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
-use models::{dvf::RecordId, model::Model, Cache, Entry, Org, PvCache};
+use models::{model::Model, Cache, Entry, Org, PvCache, RecordId};
 
 #[cfg(feature = "ssr")]
 use crate::resources::{authenticate, authorize_for_org};
@@ -103,11 +103,11 @@ pub async fn check_if_cache_name_is_available(
   name: String,
 ) -> Result<bool, ServerFnError> {
   use domain::DomainService;
-  use models::dvf::{EntityName, StrictSlug};
+  use models::EntityName;
 
   authenticate()?;
 
-  let sanitized_name = EntityName::new(StrictSlug::new(name.clone()));
+  let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
@@ -128,7 +128,7 @@ pub async fn check_if_cache_name_is_available(
 }
 
 pub fn entry_count_in_cache_query_scope(
-) -> QueryScope<RecordId<Cache>, Result<u32, ServerFnError>> {
+) -> QueryScope<RecordId<Cache>, Result<u64, ServerFnError>> {
   QueryScope::new(count_entries_in_cache).with_invalidation_link(move |c| {
     [
       Entry::TABLE_NAME.to_string(),
@@ -141,7 +141,7 @@ pub fn entry_count_in_cache_query_scope(
 #[server(prefix = "/api/sfn")]
 pub async fn count_entries_in_cache(
   cache: RecordId<Cache>,
-) -> Result<u32, ServerFnError> {
+) -> Result<u64, ServerFnError> {
   use domain::DomainService;
 
   let domain_service: DomainService = expect_context();
