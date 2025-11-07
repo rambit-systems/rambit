@@ -72,7 +72,7 @@ impl SessionStore for DatabaseStore {
   async fn delete(&self, session_id: &Id) -> Result<(), Error> {
     match self
       .inner
-      .delete(dbg!(session_id_to_record_id(*session_id)))
+      .delete(session_id_to_record_id(*session_id))
       .await
     {
       Ok(()) => Ok(()),

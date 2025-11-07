@@ -22,8 +22,6 @@ async fn test_user_signup() {
     .unwrap();
   assert_eq!(user.email, email);
 
-  dbg!(&service);
-
   let name = HumanName::try_new("Test User 2").unwrap();
   let user2 = service
     .user_signup(name, email.clone(), creds.clone())
