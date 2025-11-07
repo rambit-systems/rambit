@@ -1,7 +1,10 @@
 //! A [`SessionStore`] implementer for [`Database`].
 
-use db::Database;
-use models::{RecordId, Session, model::Model};
+use db::{Database, DatabaseError};
+use models::{
+  RecordId, Session,
+  model::{Model, Ulid},
+};
 use tower_sessions::{
   SessionStore,
   session::{Id, Record},
@@ -9,7 +12,7 @@ use tower_sessions::{
 };
 
 fn session_id_to_record_id<M: Model>(id: Id) -> RecordId<M> {
-  RecordId::from_ulid_u128(u128::from_ne_bytes(id.0.to_ne_bytes()))
+  RecordId::from_ulid(Ulid(u128::from_ne_bytes(id.0.to_ne_bytes())))
 }
 
 /// A [`SessionStore`] implementer for [`Database`].
@@ -28,7 +31,7 @@ impl SessionStore for DatabaseStore {
   async fn create(&self, session_record: &mut Record) -> Result<(), Error> {
     let session = Session {
       id:     session_id_to_record_id(session_record.id),
-      record: session_record.clone(),
+      record: session_record.clone().into(),
     };
 
     self
@@ -42,12 +45,12 @@ impl SessionStore for DatabaseStore {
   async fn save(&self, session_record: &Record) -> Result<(), Error> {
     let session = Session {
       id:     session_id_to_record_id(session_record.id),
-      record: session_record.clone(),
+      record: session_record.clone().into(),
     };
 
     self
       .inner
-      .update(&session)
+      .upsert(&session)
       .await
       .map_err(|e| Error::Backend(e.to_string()))?;
 
@@ -55,19 +58,26 @@ impl SessionStore for DatabaseStore {
   }
 
   async fn load(&self, session_id: &Id) -> Result<Option<Record>, Error> {
-    self
-      .inner
-      .get(session_id_to_record_id(*session_id))
-      .await
-      .map(|o| o.map(|s| s.record))
-      .map_err(|e| Error::Backend(e.to_string()))
+    Ok(
+      self
+        .inner
+        .get(session_id_to_record_id(*session_id))
+        .await
+        .map_err(|e| Error::Backend(e.to_string()))?
+        .map(|s| Record::try_from(s.record).map_err(Error::Backend))
+        .transpose()?,
+    )
   }
 
   async fn delete(&self, session_id: &Id) -> Result<(), Error> {
-    self
+    match self
       .inner
-      .delete(session_id_to_record_id(*session_id))
+      .delete(dbg!(session_id_to_record_id(*session_id)))
       .await
-      .map_err(|e| Error::Backend(e.to_string()))
+    {
+      Ok(()) => Ok(()),
+      Err(DatabaseError::NotFound(_)) => Ok(()),
+      Err(e) => Err(Error::Backend(e.to_string())),
+    }
   }
 }

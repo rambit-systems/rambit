@@ -17,13 +17,14 @@ serde.workspace = true
 ulid.workspace = true
 
 axum-login = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 tower-sessions = { workspace = true, optional = true }
 
 [features]
 default = [ "auth", "session" ]
 
 auth = [ "dep:axum-login" ]
-session = [ "dep:tower-sessions" ]
+session = [ "dep:tower-sessions", "dep:serde_json" ]
 
 [lints]
 workspace = true

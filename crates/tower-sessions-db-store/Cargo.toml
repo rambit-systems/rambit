@@ -13,6 +13,7 @@ db.workspace = true
 
 async-trait.workspace = true
 tower-sessions.workspace = true
+tracing.workspace = true
 
 [lints]
 workspace = true

@@ -21,16 +21,22 @@ missing_docs = "deny"
 # storage = { git = "https://github.com/johnbchron/app-core" }
 
 # palin-core
-belt = { git = "https://github.com/rambit-systems/palin-core" }
-db = { git = "https://github.com/rambit-systems/palin-core" }
-model = { git = "https://github.com/rambit-systems/palin-core" }
-slug = { git = "https://github.com/rambit-systems/palin-core" }
-storage = { git = "https://github.com/rambit-systems/palin-core" }
+# belt = { git = "https://github.com/rambit-systems/palin-core" }
+# db = { git = "https://github.com/rambit-systems/palin-core" }
+# model = { git = "https://github.com/rambit-systems/palin-core" }
+# slug = { git = "https://github.com/rambit-systems/palin-core" }
+# storage = { git = "https://github.com/rambit-systems/palin-core" }
+belt = { path = "../palin-core/crates/belt" }
+db = { path = "../palin-core/crates/db" }
+model = { path = "../palin-core/crates/model" }
+slug = { path = "../palin-core/crates/slug" }
+storage = { path = "../palin-core/crates/storage" }
 
 # essentials
 bytes = { version = "1" }
 serde = { version = "1", features = [ "derive" ] }
-serde_json = { version = "1" }
+# arbitrary_precision required for deserializing bare u128
+serde_json = { version = "1", features = [ "arbitrary_precision" ] }
 thiserror = { version = "2" }
 tracing = { version = "0.1", features = [ "async-await" ] }
 ulid = { version = "1.1", features = [ "serde" ] }
