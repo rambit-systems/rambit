@@ -12,7 +12,9 @@ use crate::Org;
 #[model(
   table = "store",
   index(name = "org", extract = |m| vec![IndexValue::new_single(m.org.to_string())]),
-  index(name = "name_by_org", extract = |m| vec![Store::unique_index_name_by_org(m.org, &m.name)]),
+  index(name = "name_by_org", unique, extract =
+    |m| vec![Store::unique_index_name_by_org(m.org, &m.name)]
+  ),
 )]
 pub struct Store {
   /// The store's ID.
