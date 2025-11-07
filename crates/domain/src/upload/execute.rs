@@ -84,7 +84,7 @@ impl DomainService {
       .put_stream(
         &storage_key,
         Box::pin(Belt::new_from_bytes(big_terrible_buffer)),
-        storage::UploadOptions::default(),
+        storage::UploadOptions { overwrite: true },
       )
       .await?;
     let metadata = store_client.head(&storage_key).await?.ok_or(
