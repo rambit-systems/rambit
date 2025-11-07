@@ -18,6 +18,9 @@ use tower_http::{
   compression::{CompressionLayer, DefaultPredicate, Predicate},
   trace::{DefaultOnResponse, TraceLayer},
 };
+use tower_sessions::{
+  CachingSessionStore, MemoryStore, cookie::time::Duration,
+};
 use tracing::{Level, info_span};
 
 use self::{
@@ -86,9 +89,11 @@ async fn main() -> Result<()> {
     })
     .on_response(DefaultOnResponse::new().level(Level::INFO));
 
-  let session_layer =
-    tower_sessions::SessionManagerLayer::new(app_state.session_store)
-      .with_secure(!args.no_secure_cookies);
+  let session_layer = tower_sessions::SessionManagerLayer::new(
+    CachingSessionStore::new(MemoryStore::default(), app_state.session_store),
+  )
+  .with_expiry(tower_sessions::Expiry::OnInactivity(Duration::hours(1)))
+  .with_secure(!args.no_secure_cookies);
   let auth_layer =
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
 
