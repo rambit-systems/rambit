@@ -1,8 +1,8 @@
-use std::str::FromStr;
+use std::{path::PathBuf, str::FromStr};
 
 use miette::{Context, IntoDiagnostic, Result};
 use models::{
-  Cache, EmailAddress, EntityName, HumanName, MemoryStorageCredentials, Org,
+  Cache, EmailAddress, EntityName, HumanName, LocalStorageCredentials, Org,
   OrgIdent, RecordId, StorageCredentials, Store, StoreConfiguration, User,
   Visibility,
 };
@@ -67,7 +67,9 @@ impl MutationService {
     let albert_store = Store {
       id:          RecordId::from_str("01JXGXVF0MVQNGRM565YHM20BC").unwrap(),
       org:         federation.id,
-      credentials: StorageCredentials::Memory(MemoryStorageCredentials),
+      credentials: StorageCredentials::Local(LocalStorageCredentials(
+        PathBuf::from("/tmp/rambit-files"),
+      )),
       config:      StoreConfiguration {},
       name:        EntityName::new("albert"),
     };

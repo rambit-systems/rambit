@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{PvR2StorageCredentials, PvStorageCredentials, PvStore};
+use models::{
+  LocalStorageCredentials, MemoryStorageCredentials, PvR2StorageCredentials,
+  PvStorageCredentials, PvStore,
+};
 
 use crate::{
   components::{
@@ -105,8 +108,14 @@ fn StoreDataRow(store: PvStore) -> impl IntoView {
     PvStorageCredentials::R2(PvR2StorageCredentials::Default {
       bucket,
       ..
-    }) => format!("R2 ({bucket})").into_any(),
-    PvStorageCredentials::Memory(_) => "Memory (DEBUG)".into_any(),
+    }) => view! { "R2 (" { bucket } ")" }.into_any(),
+    PvStorageCredentials::Memory(MemoryStorageCredentials) => {
+      "Memory (DEBUG)".into_any()
+    }
+    PvStorageCredentials::Local(LocalStorageCredentials(path)) => {
+      view! { "Local (DEBUG, \"" { path.display().to_string() } "\")" }
+        .into_any()
+    }
   };
 
   view! {

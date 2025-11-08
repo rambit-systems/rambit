@@ -1,5 +1,6 @@
 use models::{
-  MemoryStorageCredentials, R2StorageCredentials, StorageCredentials,
+  LocalStorageCredentials, MemoryStorageCredentials, R2StorageCredentials,
+  StorageCredentials,
 };
 use storage::{BlobStorage, BlobStorageResult};
 
@@ -7,6 +8,9 @@ pub async fn storage_creds_to_blob_storage(
   creds: StorageCredentials,
 ) -> BlobStorageResult<BlobStorage> {
   match creds {
+    StorageCredentials::Local(LocalStorageCredentials(path)) => {
+      BlobStorage::new_fs(path).await
+    }
     StorageCredentials::Memory(MemoryStorageCredentials) => {
       Ok(BlobStorage::new_memory())
     }
