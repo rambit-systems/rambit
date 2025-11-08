@@ -21,16 +21,16 @@ missing_docs = "deny"
 # storage = { git = "https://github.com/johnbchron/app-core" }
 
 # palin-core
-# belt = { git = "https://github.com/rambit-systems/palin-core" }
-# db = { git = "https://github.com/rambit-systems/palin-core" }
-# model = { git = "https://github.com/rambit-systems/palin-core" }
-# slug = { git = "https://github.com/rambit-systems/palin-core" }
-# storage = { git = "https://github.com/rambit-systems/palin-core" }
-belt = { path = "../palin-core/crates/belt" }
-db = { path = "../palin-core/crates/db" }
-model = { path = "../palin-core/crates/model" }
-slug = { path = "../palin-core/crates/slug" }
-storage = { path = "../palin-core/crates/storage" }
+belt = { git = "https://github.com/rambit-systems/palin-core" }
+db = { git = "https://github.com/rambit-systems/palin-core" }
+model = { git = "https://github.com/rambit-systems/palin-core" }
+slug = { git = "https://github.com/rambit-systems/palin-core" }
+storage = { git = "https://github.com/rambit-systems/palin-core" }
+# belt = { path = "../palin-core/crates/belt" }
+# db = { path = "../palin-core/crates/db" }
+# model = { path = "../palin-core/crates/model" }
+# slug = { path = "../palin-core/crates/slug" }
+# storage = { path = "../palin-core/crates/storage" }
 
 # essentials
 bytes = { version = "1" }
