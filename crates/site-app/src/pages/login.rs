@@ -8,9 +8,7 @@ use crate::{
 #[component]
 pub fn LoginPage() -> impl IntoView {
   view! {
-    <div class="flex-1" />
     <LoginIsland />
-    <div class="flex-1" />
   }
 }
 

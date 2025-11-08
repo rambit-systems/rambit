@@ -10,9 +10,7 @@ use crate::{
 #[component]
 pub fn SignupPage() -> impl IntoView {
   view! {
-    <div class="flex-1" />
     <SignupIsland />
-    <div class="flex-1" />
   }
 }
 

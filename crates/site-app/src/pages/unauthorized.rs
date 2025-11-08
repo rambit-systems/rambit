@@ -6,7 +6,6 @@ pub fn UnauthorizedPage() -> impl IntoView {
                                  elevation-flat flex flex-col gap-8";
 
   view! {
-    <div class="flex-1" />
     <div class=CONTAINER_CLASS>
       <p class="title">"Unauthorized"</p>
 
@@ -14,6 +13,5 @@ pub fn UnauthorizedPage() -> impl IntoView {
         "Sorry, but you're not cleared to see this page."
       </p>
     </div>
-    <div class="flex-1" />
   }
 }

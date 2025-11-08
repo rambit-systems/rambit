@@ -5,7 +5,6 @@ use crate::{components::LoadingCircle, navigation::navigate_to};
 #[component]
 pub fn LogoutPage() -> impl IntoView {
   view! {
-    <div class="flex-1" />
     <div
       class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8"
     >
@@ -19,7 +18,6 @@ pub fn LogoutPage() -> impl IntoView {
         <LogoutButton />
       </div>
     </div>
-    <div class="flex-1" />
   }
 }
 

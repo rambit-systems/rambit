@@ -20,7 +20,6 @@ pub fn CreateOrgPage() -> impl IntoView {
                             md:grid-cols-form gap-x-8 gap-y-12";
 
   view! {
-    <div class="flex-1" />
     <div class=FORM_CLASS>
       <GridRowFull>
         <div class="flex flex-col gap-2">
@@ -35,7 +34,6 @@ pub fn CreateOrgPage() -> impl IntoView {
 
       <CreateOrgIsland />
     </div>
-    <div class="flex-1" />
   }
 }
 
