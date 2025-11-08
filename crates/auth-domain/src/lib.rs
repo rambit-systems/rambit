@@ -1,9 +1,12 @@
 //! Provides the [`AuthDomainService`], the entry point for users,
 //! authentication, and authorization logic.
 
+mod cache;
 mod errors;
 #[cfg(test)]
 mod tests;
+
+use std::{sync::Arc, time::Duration};
 
 use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
@@ -13,7 +16,9 @@ use models::{
   UserSubmittedAuthCredentials, model::RecordId,
 };
 pub use mutate_domain::UpdateActiveOrgError;
+use tracing::debug;
 
+use self::cache::ExpiringCache;
 pub use self::errors::*;
 
 /// The authentication session type.
@@ -22,8 +27,9 @@ pub type AuthSession = axum_login::AuthSession<AuthDomainService>;
 /// A dynamic [`AuthDomainService`] trait object.
 #[derive(Clone, Debug)]
 pub struct AuthDomainService {
-  meta:   meta_domain::MetaService,
-  mutate: mutate_domain::MutationService,
+  meta:       meta_domain::MetaService,
+  mutate:     mutate_domain::MutationService,
+  user_cache: Arc<ExpiringCache<RecordId<User>, AuthUser>>,
 }
 
 impl AuthDomainService {
@@ -33,7 +39,11 @@ impl AuthDomainService {
     meta: meta_domain::MetaService,
     mutate: mutate_domain::MutationService,
   ) -> Self {
-    Self { meta, mutate }
+    Self {
+      meta,
+      mutate,
+      user_cache: Arc::new(ExpiringCache::new(Duration::from_secs(2))),
+    }
   }
 }
 
@@ -197,12 +207,28 @@ impl AuthnBackend for AuthDomainService {
     &self,
     id: &<Self::User as AxumLoginAuthUser>::Id,
   ) -> Result<Option<Self::User>, Self::Error> {
-    self
+    // use cache if it's there
+    if let Some(user) = self.user_cache.get(id).await {
+      debug!(%id, "user cache hit from AuthDomain");
+      return Ok(Some(user));
+    }
+
+    // fetch the user from the DB
+    debug!(%id, "user cache miss from AuthDomain: fetching user");
+    let user = self
       .meta
       .fetch_user_by_id(*id)
       .await
       .into_diagnostic()
-      .map(|u| u.map(Into::into))
-      .map_err(AuthenticationError)
+      .map_err(AuthenticationError)?
+      .map(AuthUser::from);
+
+    if let Some(user) = user {
+      // populate cache
+      self.user_cache.insert(*id, user.clone()).await;
+      Ok(Some(user))
+    } else {
+      Ok(None)
+    }
   }
 }
