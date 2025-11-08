@@ -12,7 +12,6 @@ macro_rules! impl_fetch_by_id {
         &self,
         id: RecordId<$model>,
       ) -> Result<Option<$model>, DatabaseError> {
-        tracing::warn!("fetching {} by id {}", stringify!($model), id);
         self.$repo_field.get(id).await
       }
     )*
