@@ -107,9 +107,11 @@ fn LeptosFetchDevtools() -> impl IntoView {
 fn PageContainer(children: Children) -> impl IntoView {
   view! {
     <main class="elevation-suppressed text-base-11 font-medium text-base/[1.2]">
-      <div class="page-container flex flex-col min-h-svh pb-8">
+      <div class="page-container flex flex-col min-h-svh">
         <self::components::Navbar />
         { children() }
+        <div class="flex-1" />
+        <self::components::Footer />
       </div>
     </main>
   }
