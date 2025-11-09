@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
   let session_layer = tower_sessions::SessionManagerLayer::new(
     CachingSessionStore::new(MemoryStore::default(), app_state.session_store),
   )
-  .with_expiry(tower_sessions::Expiry::OnInactivity(Duration::hours(1)))
+  .with_expiry(tower_sessions::Expiry::OnInactivity(Duration::weeks(1)))
   .with_secure(!args.no_secure_cookies);
   let auth_layer =
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
