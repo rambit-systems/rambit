@@ -1,6 +1,9 @@
 { ... }: {
   perSystem = { pkgs, inputs', config, rust-toolchain, ... }: {
-    devShells.default = pkgs.devshell.mkShell {
+    devShells.default = let
+      libraries = with pkgs; [
+        openssl
+      ];
       packages = with pkgs; [
         (rust-toolchain.dev-toolchain pkgs)
 
@@ -23,7 +26,33 @@
         dive flyctl
       ];
 
+      # this is just so we can extract $PKG_CONFIG_PATH
+      libshell = pkgs.stdenv.mkDerivation {
+        src = ./.;
+        name = "rust-libraries-shell";
+        nativeBuildInputs = [ pkgs.pkg-config ];
+        buildInputs = libraries;
+        buildPhase = ''
+          echo $PKG_CONFIG_PATH > $out
+        '';
+      };
+      PKG_CONFIG_PATH = builtins.readFile libshell;
+      LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath libraries;
+    in pkgs.devshell.mkShell {
+      inherit packages;
+
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
+
+      env = [
+        {
+          name = "PKG_CONFIG_PATH";
+          prefix = PKG_CONFIG_PATH;
+        }
+        {
+          name = "LD_LIBRARY_PATH";
+          prefix = LD_LIBRARY_PATH;
+        }
+      ];
 
       commands = [
         {
