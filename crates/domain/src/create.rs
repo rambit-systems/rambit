@@ -1,5 +1,6 @@
 use db::DatabaseError;
-use models::{Cache, Org, RecordId, Store};
+use miette::{Context, IntoDiagnostic, Report};
+use models::{Cache, EmailAddress, EntityName, Org, OrgIdent, RecordId, Store};
 
 use crate::DomainService;
 
@@ -24,10 +25,27 @@ impl DomainService {
 
   /// Creates an [`Org`].
   #[tracing::instrument(skip(self))]
-  pub async fn create_org(
+  pub async fn create_named_org(
     &self,
-    org: &Org,
-  ) -> Result<RecordId<Org>, DatabaseError> {
-    self.mutate.create_org(org).await
+    id: RecordId<Org>,
+    org_name: EntityName,
+    billing_email: EmailAddress,
+  ) -> Result<Org, Report> {
+    let customer_id = self
+      .billing
+      .create_customer(id, org_name.as_ref(), &billing_email)
+      .await
+      .context("failed to create customer for org")?;
+
+    let org = Org {
+      id,
+      org_ident: OrgIdent::Named(org_name),
+      billing_email,
+      customer_id,
+    };
+
+    self.mutate.create_org(&org).await.into_diagnostic()?;
+
+    Ok(org)
   }
 }

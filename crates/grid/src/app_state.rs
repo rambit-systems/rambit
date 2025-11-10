@@ -1,8 +1,8 @@
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use domain::{
-  DomainService, db::Database, meta_domain::MetaService,
-  mutate_domain::MutationService,
+  DomainService, billing_domain::BillingService, db::Database,
+  meta_domain::MetaService, mutate_domain::MutationService,
 };
 use leptos::config::LeptosOptions;
 use miette::{Context, IntoDiagnostic, Result};
@@ -58,10 +58,14 @@ impl AppState {
       entry_db.clone(),
       cache_db,
     );
+    let billing_domain = BillingService::new_from_env()?;
 
-    let auth_domain =
-      AuthDomainService::new(meta_domain.clone(), mutate_domain.clone());
-    let domain = DomainService::new(meta_domain, mutate_domain);
+    let auth_domain = AuthDomainService::new(
+      meta_domain.clone(),
+      mutate_domain.clone(),
+      billing_domain.clone(),
+    );
+    let domain = DomainService::new(meta_domain, mutate_domain, billing_domain);
     let session_store = DatabaseSessionStore::new(session_db);
 
     let leptos_conf = leptos::prelude::get_configuration(None)

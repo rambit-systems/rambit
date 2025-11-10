@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 models = { path = "../models" }
 
+billing-domain = { path = "../billing-domain" }
 meta-domain = { path = "../meta-domain" }
 mutate-domain = { path = "../mutate-domain" }
 

@@ -1,5 +1,5 @@
 use model::{IndexValue, Model, RecordId};
-use model_types::EntityName;
+use model_types::{EmailAddress, EntityName, PaddleCustomerId};
 use serde::{Deserialize, Serialize};
 
 use crate::{AuthUser, User};
@@ -13,9 +13,13 @@ use crate::{AuthUser, User};
 pub struct Org {
   /// The org's ID.
   #[model(id)]
-  pub id:        RecordId<Org>,
+  pub id:            RecordId<Org>,
   /// The org's identifier.
-  pub org_ident: OrgIdent,
+  pub org_ident:     OrgIdent,
+  /// The email address using for billing within this organization.
+  pub billing_email: EmailAddress,
+  /// The customer ID for this org in Paddle.
+  pub customer_id:   PaddleCustomerId,
 }
 
 impl Org {

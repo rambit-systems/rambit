@@ -9,6 +9,8 @@ mod storage_glue;
 pub mod upload;
 
 pub use belt;
+pub use billing_domain;
+use billing_domain::BillingService;
 pub use bytes;
 pub use db;
 pub use meta_domain;
@@ -20,23 +22,32 @@ use mutate_domain::MutationService;
 /// The domain service type.
 #[derive(Debug, Clone)]
 pub struct DomainService {
-  meta:   MetaService,
-  mutate: MutationService,
+  meta:    MetaService,
+  mutate:  MutationService,
+  billing: BillingService,
 }
 
 impl DomainService {
   /// Create a new [`DomainService`].
-  pub fn new(meta: MetaService, mutate: MutationService) -> Self {
-    Self { meta, mutate }
-  }
-
-  /// Create a mocked-up [`DomainService`].
-  pub fn new_mock() -> Self {
+  pub fn new(
+    meta: MetaService,
+    mutate: MutationService,
+    billing: BillingService,
+  ) -> Self {
     Self {
-      meta:   MetaService::new_mock(),
-      mutate: MutationService::new_mock(),
+      meta,
+      mutate,
+      billing,
     }
   }
+
+  // /// Create a mocked-up [`DomainService`].
+  // pub fn new_mock() -> Self {
+  //   Self {
+  //     meta:   MetaService::new_mock(),
+  //     mutate: MutationService::new_mock(),
+  //   }
+  // }
 
   /// Access the internal [`MetaService`].
   pub fn meta(&self) -> &MetaService { &self.meta }

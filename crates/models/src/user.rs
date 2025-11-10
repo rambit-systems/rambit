@@ -107,6 +107,8 @@ pub struct AuthUser {
   pub name:             HumanName,
   /// An abbreviated form of the user's name.
   pub name_abbr:        HumanName,
+  /// The user's email address.
+  pub email:            EmailAddress,
   /// The hash of the user's authentication secrets.
   pub auth_hash_bytes:  Box<[u8]>,
   /// The index of the [`Org`] that the user is currently operating as.
@@ -123,6 +125,7 @@ impl From<User> for AuthUser {
       orgs: user.orgs,
       name: user.name,
       name_abbr: user.name_abbr,
+      email: user.email,
       auth_hash_bytes,
       active_org_index: user.active_org_index,
     }

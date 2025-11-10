@@ -162,15 +162,16 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let org = Org {
-    id:        RecordId::new(),
-    org_ident: models::OrgIdent::Named(sanitized_name),
-  };
+  let org_id = RecordId::new();
+  let billing_email = auth_user.email;
 
-  domain_service.create_org(&org).await.map_err(|e| {
-    tracing::error!("failed to create org: {e}");
-    ServerFnError::new("internal error")
-  })?;
+  let org = domain_service
+    .create_named_org(org_id, sanitized_name, billing_email)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to create org: {e}");
+      ServerFnError::new("internal error")
+    })?;
 
   domain_service
     .add_org_to_user(auth_user.id, org.id)

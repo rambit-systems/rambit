@@ -9,6 +9,8 @@ publish = false
 [dependencies]
 models = { path = "../models" }
 
+miette.workspace = true
+
 paddle-rust-sdk = { version = "0.14" }
 
 [lints]

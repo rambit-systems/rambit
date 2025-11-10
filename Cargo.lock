@@ -310,6 +310,7 @@ dependencies = [
  "argon2",
  "async-trait",
  "axum-login",
+ "billing-domain",
  "meta-domain",
  "miette",
  "models",
@@ -538,6 +539,7 @@ dependencies = [
 name = "billing-domain"
 version = "0.1.0"
 dependencies = [
+ "miette",
  "models",
  "paddle-rust-sdk",
 ]
@@ -1482,6 +1484,7 @@ name = "domain"
 version = "0.1.0"
 dependencies = [
  "belt",
+ "billing-domain",
  "bytes",
  "db",
  "futures",

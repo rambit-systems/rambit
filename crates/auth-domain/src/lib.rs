@@ -29,6 +29,7 @@ pub type AuthSession = axum_login::AuthSession<AuthDomainService>;
 pub struct AuthDomainService {
   meta:       meta_domain::MetaService,
   mutate:     mutate_domain::MutationService,
+  billing:    billing_domain::BillingService,
   user_cache: Arc<ExpiringCache<RecordId<User>, AuthUser>>,
 }
 
@@ -38,10 +39,12 @@ impl AuthDomainService {
   pub fn new(
     meta: meta_domain::MetaService,
     mutate: mutate_domain::MutationService,
+    billing: billing_domain::BillingService,
   ) -> Self {
     Self {
       meta,
       mutate,
+      billing,
       user_cache: Arc::new(ExpiringCache::new(Duration::from_secs(2))),
     }
   }
@@ -101,10 +104,20 @@ impl AuthDomainService {
     };
 
     let user_id = RecordId::new();
+    let org_id = RecordId::new();
+
+    let customer_id = self
+      .billing
+      .create_customer(org_id, name.as_ref(), &email)
+      .await
+      .context("failed to create customer for organization")
+      .map_err(CreateUserError::InternalError)?;
 
     let org = Org {
-      id:        RecordId::new(),
+      id: org_id,
       org_ident: OrgIdent::UserOrg(user_id),
+      billing_email: email.clone(),
+      customer_id,
     };
 
     let user = User {

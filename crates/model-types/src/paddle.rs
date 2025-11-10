@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct PaddleCustomerId(String);
 
 impl PaddleCustomerId {
+  /// Create a new [`PaddleCustomerId`].
+  pub fn new(input: impl AsRef<str>) -> Self { Self(input.as_ref().to_owned()) }
+
   /// Return the inner [`String`].
   pub fn into_inner(self) -> String { self.0 }
 }
