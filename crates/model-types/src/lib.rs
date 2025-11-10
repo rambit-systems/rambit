@@ -5,11 +5,12 @@ mod email_address;
 mod entity_name;
 mod file_size;
 mod human_name;
+mod paddle;
 mod visibility;
 
 pub use slug::*;
 
 pub use self::{
   compression_status::*, email_address::*, entity_name::*, file_size::*,
-  human_name::*, visibility::*,
+  human_name::*, paddle::*, visibility::*,
 };
