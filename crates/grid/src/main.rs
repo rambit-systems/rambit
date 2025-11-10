@@ -51,16 +51,6 @@ async fn main() -> Result<()> {
     .await
     .context("failed to build app state")?;
 
-  // migrate if necessary
-  if args.migrate {
-    match app_state.domain.migrate_test_data().await {
-      Ok(_) => {
-        tracing::info!("migrated test data as requested");
-      }
-      Err(e) => tracing::warn!("failed to migrate test data: {e}"),
-    }
-  }
-
   // prepare leptos
   let routes = leptos_axum::generate_route_list(site_app::App);
 

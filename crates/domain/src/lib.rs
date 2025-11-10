@@ -3,7 +3,6 @@
 mod create;
 mod delete_entry;
 pub mod download;
-mod migrate;
 pub mod mutate_user;
 pub mod narinfo;
 mod storage_glue;
@@ -41,22 +40,4 @@ impl DomainService {
 
   /// Access the internal [`MetaService`].
   pub fn meta(&self) -> &MetaService { &self.meta }
-}
-
-#[cfg(test)]
-mod tests {
-  use crate::DomainService;
-
-  impl DomainService {
-    pub(crate) async fn mock_domain() -> DomainService {
-      let pds = DomainService::new_mock();
-
-      pds
-        .migrate_test_data()
-        .await
-        .expect("failed to migrate test data");
-
-      pds
-    }
-  }
 }

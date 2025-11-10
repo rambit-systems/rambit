@@ -2,7 +2,6 @@
 
 mod create;
 mod delete_entry;
-mod migrate;
 mod patch_user;
 mod user_active_org;
 

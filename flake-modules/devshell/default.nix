@@ -40,7 +40,7 @@
             docker run \
               --rm --network host \
               -e POSTGRES_URL='postgresql://postgres:password@localhost:6432/main' \
-              grid:latest --migrate
+              grid:latest
           '';
           help = "Runs the site binary in a container.";
         }
