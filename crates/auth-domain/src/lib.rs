@@ -45,7 +45,7 @@ impl AuthDomainService {
       meta,
       mutate,
       billing,
-      user_cache: Arc::new(ExpiringCache::new(Duration::from_secs(2))),
+      user_cache: Arc::new(ExpiringCache::new(Duration::from_secs(0))),
     }
   }
 }
