@@ -8,7 +8,9 @@
     /* text */
     @apply font-sans font-medium underline hover:no-underline;
   }
+}
 
+@layer utilities {
   .text-link-primary {
     /* color */
     @apply text-product-11;

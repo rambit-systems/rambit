@@ -15,6 +15,13 @@
     /* text */
     @apply font-sans font-medium leading-none;
   }
+}
+
+@layer utilities {
+  .btn-link-tight {
+    /* spacing */
+    @apply p-2;
+  }
 
   .btn-link-primary {
     /* color */
