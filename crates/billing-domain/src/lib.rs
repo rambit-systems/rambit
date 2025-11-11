@@ -42,29 +42,6 @@ impl BillingService {
 }
 
 impl BillingService {
-  /// Create a new customer.
-  pub async fn create_customer(
-    &self,
-    id: RecordId<Org>,
-    name: &str,
-    email: &EmailAddress,
-  ) -> Result<PaddleCustomerId, Report> {
-    let mut req = self.paddle_client.customer_create(email.as_ref());
-
-    req
-      .name(name)
-      .custom_data(HashMap::from_iter([("id".to_owned(), id.to_string())]));
-
-    let customer = req
-      .send()
-      .await
-      .into_diagnostic()
-      .context("failed to create paddle customer")?
-      .data;
-
-    Ok(PaddleCustomerId::new(customer.id.0))
-  }
-
   /// Creates a new customer if a customer with the given email does not already
   /// exist. Otherwise, update the ID and name of the customer whose email
   /// matches.

@@ -108,7 +108,7 @@ impl AuthDomainService {
 
     let customer_id = self
       .billing
-      .create_customer(org_id, name.as_ref(), &email)
+      .upsert_customer(org_id, name.as_ref(), &email)
       .await
       .context("failed to create customer for organization")
       .map_err(CreateUserError::InternalError)?;

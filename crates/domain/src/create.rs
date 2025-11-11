@@ -37,7 +37,7 @@ impl DomainService {
 
     let customer_id = self
       .billing
-      .create_customer(org_id, org_name.as_ref(), &billing_email)
+      .upsert_customer(org_id, org_name.as_ref(), &billing_email)
       .await
       .context("failed to create customer for org")?;
 
