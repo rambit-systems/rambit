@@ -17,7 +17,7 @@ use leptos_meta::{
   provide_meta_context, HashedStylesheet, MetaTags, Style, Title,
 };
 use leptos_router::{
-  components::{Route, Router, Routes},
+  components::{ParentRoute, Route, Router, Routes},
   path,
 };
 use models::AuthUser;
@@ -81,6 +81,10 @@ pub fn App() -> impl IntoView {
             <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
             <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
             <Route path=path!("/org/create_org") view=protect(CreateOrgPage) />
+            <ParentRoute path=path!("/org/:org/settings") view=protect_by_org(OrgSettingsPage)>
+              <Route path=path!("/") view=OrgSettingsSubPageOverview />
+              <Route path=path!("/billing") view=OrgSettingsSubPageBilling />
+            </ParentRoute>
             <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
             <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
             <Route path=path!("/auth/signup") view=SignupPage/>
