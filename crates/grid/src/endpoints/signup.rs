@@ -58,7 +58,7 @@ pub async fn signup(
     .user_signup(name, email.clone(), creds.clone())
     .await
   {
-    tracing::error!("failed to sign up: {e}");
+    tracing::error!("failed to sign up: {e:#?}");
     return (StatusCode::INTERNAL_SERVER_ERROR, "internal error")
       .into_response();
   };
@@ -69,7 +69,7 @@ pub async fn signup(
       return (StatusCode::UNAUTHORIZED, Json(())).into_response();
     }
     Err(e) => {
-      tracing::error!("failed to authenticate: {e}");
+      tracing::error!("failed to authenticate: {e:#?}");
       return (StatusCode::INTERNAL_SERVER_ERROR, "internal error")
         .into_response();
     }
@@ -78,7 +78,7 @@ pub async fn signup(
   match auth_session.login(&user).await {
     Ok(_) => (StatusCode::OK, Json(user.id)).into_response(),
     Err(e) => {
-      tracing::error!("failed to authenticate: {e}");
+      tracing::error!("failed to authenticate: {e:#?}");
       (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
     }
   }

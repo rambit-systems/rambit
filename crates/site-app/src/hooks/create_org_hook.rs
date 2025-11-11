@@ -149,43 +149,22 @@ impl CreateOrgHook {
 
 #[server(prefix = "/api/sfn")]
 pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
-  use auth_domain::AuthDomainService;
   use domain::DomainService;
 
   let auth_user = crate::resources::authenticate()?;
 
   let domain_service: DomainService = expect_context();
-  let auth_domain_service: AuthDomainService = expect_context();
 
   let sanitized_name = EntityName::new(name.clone());
   if name != sanitized_name.clone().to_string() {
     return Err(ServerFnError::new("name is unsanitized"));
   }
 
-  let org_id = RecordId::new();
-  let billing_email = auth_user.email;
-
   let org = domain_service
-    .create_named_org(org_id, sanitized_name, billing_email)
+    .create_named_org_with_user(auth_user.id, sanitized_name, auth_user.email)
     .await
     .map_err(|e| {
-      tracing::error!("failed to create org: {e}");
-      ServerFnError::new("internal error")
-    })?;
-
-  domain_service
-    .add_org_to_user(auth_user.id, org.id)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to add org to user: {e}");
-      ServerFnError::new("internal error")
-    })?;
-
-  auth_domain_service
-    .switch_active_org(auth_user.id, org.id)
-    .await
-    .map_err(|e| {
-      tracing::error!("failed to fetch org: {e}");
+      tracing::error!("failed to create named org with user: {e:#?}");
       ServerFnError::new("internal error")
     })?;
 
