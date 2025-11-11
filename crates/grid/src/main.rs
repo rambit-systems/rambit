@@ -8,6 +8,7 @@ mod endpoints;
 mod handlers;
 mod middleware;
 mod tracing_subscribers;
+mod util_traits;
 
 use axum::{Router, handler::Handler, routing::post};
 use axum_login::AuthManagerLayerBuilder;

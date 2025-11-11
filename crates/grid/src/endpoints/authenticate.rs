@@ -3,6 +3,8 @@ use axum::{Json, http::StatusCode, response::IntoResponse};
 use domain::models::{EmailAddress, UserSubmittedAuthCredentials};
 use serde::Deserialize;
 
+use crate::util_traits::InternalError;
+
 #[derive(Deserialize)]
 pub struct AuthenticateParams {
   email:    Option<String>,
@@ -45,18 +47,13 @@ pub async fn authenticate(
       return (StatusCode::UNAUTHORIZED, Json(())).into_response();
     }
     Err(e) => {
-      tracing::error!("failed to authenticate: {e}");
-      return (StatusCode::INTERNAL_SERVER_ERROR, "internal error")
-        .into_response();
+      return e.internal("failed to authenticate");
     }
   };
 
   match auth_session.login(&user).await {
     Ok(_) => (StatusCode::OK, Json(user.id)).into_response(),
-    Err(e) => {
-      tracing::error!("failed to authenticate: {e}");
-      (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
-    }
+    Err(e) => e.internal("failed to login"),
   }
 }
 
@@ -66,9 +63,6 @@ pub async fn deauthenticate(
 ) -> impl IntoResponse {
   match auth_session.logout().await {
     Ok(_) => StatusCode::OK.into_response(),
-    Err(e) => {
-      tracing::error!("failed to deauthenticate: {e}");
-      (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
-    }
+    Err(e) => e.internal("failed to deauthenticate"),
   }
 }

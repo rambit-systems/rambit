@@ -3,6 +3,8 @@ use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use domain::models::{EmailAddress, HumanName, UserSubmittedAuthCredentials};
 use serde::Deserialize;
 
+use crate::util_traits::InternalError;
+
 #[derive(Deserialize)]
 pub struct SignupParams {
   name:     Option<String>,
@@ -58,9 +60,7 @@ pub async fn signup(
     .user_signup(name, email.clone(), creds.clone())
     .await
   {
-    tracing::error!("failed to sign up: {e:#?}");
-    return (StatusCode::INTERNAL_SERVER_ERROR, "internal error")
-      .into_response();
+    return e.internal("failed to sign up");
   };
 
   let user = match auth_session.authenticate((email, creds)).await {
@@ -69,17 +69,12 @@ pub async fn signup(
       return (StatusCode::UNAUTHORIZED, Json(())).into_response();
     }
     Err(e) => {
-      tracing::error!("failed to authenticate: {e:#?}");
-      return (StatusCode::INTERNAL_SERVER_ERROR, "internal error")
-        .into_response();
+      return e.internal("failed to authenticate");
     }
   };
 
   match auth_session.login(&user).await {
     Ok(_) => (StatusCode::OK, Json(user.id)).into_response(),
-    Err(e) => {
-      tracing::error!("failed to authenticate: {e:#?}");
-      (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
-    }
+    Err(e) => e.internal("failed to login"),
   }
 }
