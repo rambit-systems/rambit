@@ -3,8 +3,8 @@ use models::{AuthUser, Org, RecordId};
 
 use crate::{
   components::{
-    CheckHeroIcon, ChevronDownHeroIcon, LoadingCircle, PlusHeroIcon, Popover,
-    PopoverContents, PopoverTrigger,
+    CheckHeroIcon, ChevronDownHeroIcon, Cog6Tooth, LoadingCircle, PlusHeroIcon,
+    Popover, PopoverContents, PopoverTrigger,
   },
   hooks::OrgHook,
   navigation::navigate_to,
@@ -128,20 +128,27 @@ fn OrgSelectorMenu() -> impl IntoView {
       <div class="p-1">
         <div class="h-0 border-t-2 border-base-6/75" />
       </div>
-      <CreateOrgRow />
+      <ExtraRows />
     </div>
   }
 }
 
 #[component]
-fn CreateOrgRow() -> impl IntoView {
-  const CLASS: &str = "btn-link btn-link-secondary btn-link-tight";
+fn ExtraRows() -> impl IntoView {
+  let active_org_hook = OrgHook::new_active();
+  let active_org_settings_url = active_org_hook.settings_url();
 
   view! {
-    <a href="/org/create_org" class=CLASS>
-      <PlusHeroIcon {..} class="size-5 stroke-product-11 stroke-[2.0]" />
+    <a href=active_org_settings_url class="btn-link btn-link-secondary btn-link-tight">
+      <Cog6Tooth {..} class="size-5 stroke-base-11 stroke-[2.0]" />
       <span class="flex-1 text-ellipsis">
-        "Create Organization..."
+        "Org Settings"
+      </span>
+    </a>
+    <a href="/org/create_org" class="btn-link btn-link-secondary btn-link-tight">
+      <PlusHeroIcon {..} class="size-5 stroke-base-11 stroke-[2.0]" />
+      <span class="flex-1 text-ellipsis">
+        "Create Org"
       </span>
     </a>
   }

@@ -100,6 +100,11 @@ impl OrgHook {
     Memo::new(move |_| format!("{}/dash", base_url()))
   }
 
+  pub fn settings_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/settings", base_url()))
+  }
+
   pub fn descriptor(&self) -> AsyncDerived<String> {
     AsyncDerived::new({
       let resource = self.resource;

@@ -45,7 +45,7 @@ fn AccountMenuMenu() -> impl IntoView {
     <div class=POPOVER_CLASS>
       <a class="btn-link btn-link-secondary btn-link-tight">
         <Cog6Tooth {..} class="size-5 stroke-base-11 stroke-[2.0]" />
-        "Account Settings"
+        "User Settings"
       </a>
       <a href="/auth/logout" class="btn btn-critical-subtle btn-tight">
         <ArrowRightStartOnRectangle {..} class="size-5 stroke-critical-11 stroke-[2.0]" />
