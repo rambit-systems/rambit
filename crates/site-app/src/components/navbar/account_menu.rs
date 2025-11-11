@@ -36,7 +36,7 @@ pub(crate) fn AccountMenu() -> impl IntoView {
 fn AccountMenuMenu() -> impl IntoView {
   const POPOVER_CLASS: &str =
     "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
-     elevation-lv1 p-2 flex flex-col gap-1 leading-none";
+     elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
 
   view! {
     <div class=POPOVER_CLASS>

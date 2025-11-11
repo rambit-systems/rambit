@@ -15,7 +15,7 @@ fn OrgSelectorTrigger() -> impl IntoView {
   let active_org_hook = OrgHook::new_active();
   let active_org_descriptor = active_org_hook.descriptor();
 
-  const CLASS: &str = "transition hover:bg-base-3 active:bg-base-4 \
+  const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
                        cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
                        text-sm leading-none items-end gap-0";
 
@@ -55,7 +55,7 @@ fn OrgSelectorMenu() -> impl IntoView {
 
   const POPOVER_CLASS: &str =
     "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
-     elevation-lv1 p-2 flex flex-col gap-1 leading-none";
+     elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
 
   let org_hooks = Signal::stored(
     auth_user
