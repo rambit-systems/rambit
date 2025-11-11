@@ -11,7 +11,10 @@ models = { path = "../models" }
 
 miette.workspace = true
 
-paddle-rust-sdk = { version = "0.14" }
+# paddle-rust-sdk = { version = "0.14" }
+paddle-rust-sdk = { git = "https://github.com/johnbchron/paddle-rust-sdk", default-features = false, features = [
+  "rustls-webpki-roots",
+] }
 
 [lints]
 workspace = true
