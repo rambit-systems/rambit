@@ -34,6 +34,9 @@ impl BillingService {
     let api_key = std::env::var("PADDLE_API_KEY")
       .into_diagnostic()
       .context("failed to read var `PADDLE_API_KEY`")?;
+    if api_key.is_empty() {
+      miette::bail!("env var `PADDLE_API_KEY` is empty")
+    }
     let is_sandbox = std::env::var("PADDLE_SANDBOX")
       .map(|v| !v.is_empty() && v != "0" && v != "false")
       .unwrap_or(false);
