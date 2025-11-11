@@ -135,9 +135,7 @@ fn OrgSelectorMenu() -> impl IntoView {
 
 #[component]
 fn CreateOrgRow() -> impl IntoView {
-  const CLASS: &str = "rounded p-2 flex flex-row gap-2 items-center \
-                       cursor-pointer btn-link-secondary transition-colors \
-                       text-base-12";
+  const CLASS: &str = "btn-link btn-link-secondary btn-link-tight";
 
   view! {
     <a href="/org/create_org" class=CLASS>
