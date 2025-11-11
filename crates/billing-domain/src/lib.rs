@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use miette::{Context, IntoDiagnostic, Report};
 use models::{EmailAddress, Org, PaddleCustomerId, RecordId};
-use paddle_rust_sdk::Paddle;
+use paddle_rust_sdk::{Paddle, error::PaddleApiError, response::ErrorResponse};
 
 /// Entrypoint for logic in the billing domain.
 #[derive(Clone, Debug)]
@@ -60,6 +60,65 @@ impl BillingService {
       .await
       .into_diagnostic()
       .context("failed to create paddle customer")?
+      .data;
+
+    Ok(PaddleCustomerId::new(customer.id.0))
+  }
+
+  /// Creates a new customer if a customer with the given email does not already
+  /// exist. Otherwise, update the ID and name of the customer whose email
+  /// matches.
+  pub async fn upsert_customer(
+    &self,
+    org_id: RecordId<Org>,
+    name: &str,
+    email: &EmailAddress,
+  ) -> Result<PaddleCustomerId, Report> {
+    // attempt to just create a user
+    let mut req = self.paddle_client.customer_create(email.as_ref());
+    req
+      .name(name)
+      .custom_data(HashMap::from_iter([("id".to_owned(), org_id.to_string())]));
+    let create_result = req.send().await;
+
+    // short circuit if it worked
+    let err = match create_result {
+      Ok(customer) => return Ok(PaddleCustomerId::new(customer.data.id.0)),
+      Err(e) => e,
+    };
+
+    // extract the ID if it's a duplicate customer error
+    let id = match err {
+      paddle_rust_sdk::Error::PaddleApi(ErrorResponse {
+        error: PaddleApiError { code, detail, .. },
+        ..
+      }) if code == "customer_already_exists" => detail
+        .split(" ")
+        .last()
+        .ok_or(miette::miette!(
+          "could not find customer ID in duplicate customer error: {detail:?}"
+        ))?
+        .to_owned(),
+      e => {
+        return Err(
+          Report::from_err(e)
+            .context("unknown paddle error in attempted customer creation"),
+        );
+      }
+    };
+
+    // update the customer name and Rambit ID, and activate if archived
+    let mut update_req = self.paddle_client.customer_update(&*id);
+    update_req
+      .name(name)
+      .custom_data(HashMap::from_iter([("id".to_owned(), org_id.to_string())]))
+      .status(paddle_rust_sdk::enums::Status::Active);
+
+    let customer = update_req
+      .send()
+      .await
+      .into_diagnostic()
+      .context("failed to update paddle customer")?
       .data;
 
     Ok(PaddleCustomerId::new(customer.id.0))
