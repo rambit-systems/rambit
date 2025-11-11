@@ -13,7 +13,7 @@ pub struct BillingService {
 }
 
 impl BillingService {
-  /// Create a new [`BillingDomain`].
+  /// Create a new [`BillingService`].
   pub fn new(api_key: &str, is_sandbox: bool) -> Result<Self, Report> {
     let url = if is_sandbox {
       Paddle::SANDBOX
@@ -29,7 +29,7 @@ impl BillingService {
     })
   }
 
-  /// Create a new [`BillingDomain`] from environment variables.
+  /// Create a new [`BillingService`] from environment variables.
   pub fn new_from_env() -> Result<Self, Report> {
     let api_key = std::env::var("PADDLE_API_KEY")
       .into_diagnostic()

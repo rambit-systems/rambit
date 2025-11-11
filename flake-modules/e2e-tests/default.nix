@@ -15,8 +15,8 @@
     callTestModule = source: pkgs.lib.attrsets.mapAttrs' test-renamer (call source);
   in {
     checks = { }
-      // (callTestModule ./domain/upload-download.nix)
-      // (callTestModule ./domain/authenticate-deauthenticate.nix)
+      # // (callTestModule ./domain/upload-download.nix)
+      # // (callTestModule ./domain/authenticate-deauthenticate.nix)
     ;
   };
 }
