@@ -161,7 +161,7 @@ pub async fn create_org(name: String) -> Result<RecordId<Org>, ServerFnError> {
   }
 
   let org = domain_service
-    .create_named_org_with_user(auth_user.id, sanitized_name, auth_user.email)
+    .create_named_org_with_user(auth_user.id, sanitized_name)
     .await
     .map_err(|e| {
       tracing::error!("failed to create named org with user: {e:#?}");

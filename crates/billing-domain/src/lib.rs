@@ -3,7 +3,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use miette::{Context, IntoDiagnostic, Report};
-use models::{EmailAddress, Org, PaddleCustomerId, RecordId};
+use models::{EmailAddress, PaddleCustomerId, RecordId, User};
 use paddle_rust_sdk::{Paddle, error::PaddleApiError, response::ErrorResponse};
 
 /// Entrypoint for logic in the billing domain.
@@ -50,7 +50,7 @@ impl BillingService {
   /// matches.
   pub async fn upsert_customer(
     &self,
-    org_id: RecordId<Org>,
+    org_id: RecordId<User>,
     name: &str,
     email: &EmailAddress,
   ) -> Result<PaddleCustomerId, Report> {

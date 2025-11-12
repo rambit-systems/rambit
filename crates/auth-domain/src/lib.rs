@@ -104,20 +104,17 @@ impl AuthDomainService {
     };
 
     let user_id = RecordId::new();
-    let org_id = RecordId::new();
 
     let customer_id = self
       .billing
-      .upsert_customer(org_id, name.as_ref(), &email)
+      .upsert_customer(user_id, name.as_ref(), &email)
       .await
-      .context("failed to create customer for organization")
+      .context("failed to create customer for user")
       .map_err(CreateUserError::InternalError)?;
 
     let org = Org {
-      id: org_id,
+      id:        RecordId::new(),
       org_ident: OrgIdent::UserOrg(user_id),
-      billing_email: email.clone(),
-      customer_id,
     };
 
     let user = User {
@@ -129,6 +126,7 @@ impl AuthDomainService {
       email,
       auth,
       active_org_index: 0,
+      customer_id,
     };
 
     self

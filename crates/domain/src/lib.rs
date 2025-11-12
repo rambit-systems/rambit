@@ -41,14 +41,6 @@ impl DomainService {
     }
   }
 
-  // /// Create a mocked-up [`DomainService`].
-  // pub fn new_mock() -> Self {
-  //   Self {
-  //     meta:   MetaService::new_mock(),
-  //     mutate: MutationService::new_mock(),
-  //   }
-  // }
-
   /// Access the internal [`MetaService`].
   pub fn meta(&self) -> &MetaService { &self.meta }
 }

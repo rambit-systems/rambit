@@ -4,7 +4,7 @@ use std::{
 };
 
 use model::{IndexValue, Model, RecordId};
-use model_types::{EmailAddress, HumanName};
+use model_types::{EmailAddress, HumanName, PaddleCustomerId};
 use serde::{Deserialize, Serialize};
 
 use crate::Org;
@@ -36,6 +36,8 @@ pub struct User {
   pub auth:             UserAuthCredentials,
   /// The index of the [`Org`] that the user is currently operating as.
   pub active_org_index: u8,
+  /// The customer ID for this org in Paddle.
+  pub customer_id:      PaddleCustomerId,
 }
 
 impl User {
