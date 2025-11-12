@@ -126,6 +126,7 @@ fn IslandContextProvider(
   auth_user: Option<AuthUser>,
   children: Children,
 ) -> impl IntoView {
+  provide_meta_context();
   if let Some(auth_user) = auth_user {
     provide_context(auth_user);
   }
