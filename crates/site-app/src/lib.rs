@@ -20,7 +20,7 @@ use leptos_router::{
   components::{ParentRoute, Route, Router, Routes},
   path,
 };
-use models::{AuthUser, PaddleClientSecret};
+use models::{AuthUser, PaddleClientSecret, PaddleEnvironment};
 
 use self::pages::*;
 
@@ -76,6 +76,7 @@ pub fn App() -> impl IntoView {
     <IslandContextProvider
       auth_user={ use_context() }
       paddle_client_secret={ use_context() }
+      paddle_environment={ use_context() }
     >
       <Router>
         <PageContainer>
@@ -90,9 +91,9 @@ pub fn App() -> impl IntoView {
             </ParentRoute>
             <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
             <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
-            <Route path=path!("/auth/signup") view=SignupPage/>
-            <Route path=path!("/auth/login") view=LoginPage/>
-            <Route path=path!("/auth/logout") view=LogoutPage/>
+            <Route path=path!("/auth/signup") view=SignupPage />
+            <Route path=path!("/auth/login") view=LoginPage />
+            <Route path=path!("/auth/logout") view=LogoutPage />
           </Routes>
         </PageContainer>
       </Router>
@@ -128,6 +129,7 @@ fn PageContainer(children: Children) -> impl IntoView {
 fn IslandContextProvider(
   auth_user: Option<AuthUser>,
   paddle_client_secret: Option<PaddleClientSecret>,
+  paddle_environment: Option<PaddleEnvironment>,
   children: Children,
 ) -> impl IntoView {
   provide_meta_context();
@@ -136,6 +138,9 @@ fn IslandContextProvider(
   }
   if let Some(paddle_client_secret) = paddle_client_secret {
     provide_context(paddle_client_secret);
+  }
+  if let Some(paddle_environment) = paddle_environment {
+    provide_context(paddle_environment);
   }
   QueryClient::new().provide();
 

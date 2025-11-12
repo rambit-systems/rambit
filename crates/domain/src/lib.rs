@@ -16,7 +16,7 @@ pub use db;
 pub use meta_domain;
 use meta_domain::MetaService;
 pub use models;
-use models::PaddleClientSecret;
+use models::{PaddleClientSecret, PaddleEnvironment};
 pub use mutate_domain;
 use mutate_domain::MutationService;
 
@@ -48,5 +48,10 @@ impl DomainService {
   /// Return the Paddle client secret.
   pub fn paddle_client_secret(&self) -> PaddleClientSecret {
     self.billing.get_client_secret()
+  }
+
+  /// Returns the Paddle environment being used.
+  pub fn paddle_environment(&self) -> PaddleEnvironment {
+    self.billing.environment()
   }
 }

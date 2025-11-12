@@ -4,7 +4,8 @@ use std::{collections::HashMap, sync::Arc};
 
 use miette::{Context, IntoDiagnostic, Report};
 use models::{
-  EmailAddress, PaddleClientSecret, PaddleCustomerId, RecordId, User,
+  EmailAddress, PaddleClientSecret, PaddleCustomerId, PaddleEnvironment,
+  RecordId, User,
 };
 use paddle_rust_sdk::{Paddle, error::PaddleApiError, response::ErrorResponse};
 
@@ -13,6 +14,7 @@ use paddle_rust_sdk::{Paddle, error::PaddleApiError, response::ErrorResponse};
 pub struct BillingService {
   paddle_client: Arc<Paddle>,
   client_secret: PaddleClientSecret,
+  environment:   PaddleEnvironment,
 }
 
 impl BillingService {
@@ -20,12 +22,11 @@ impl BillingService {
   pub fn new(
     api_key: &str,
     client_secret: &str,
-    is_sandbox: bool,
+    environment: PaddleEnvironment,
   ) -> Result<Self, Report> {
-    let url = if is_sandbox {
-      Paddle::SANDBOX
-    } else {
-      Paddle::PRODUCTION
+    let url = match environment {
+      PaddleEnvironment::Sandbox => Paddle::SANDBOX,
+      PaddleEnvironment::Production => Paddle::PRODUCTION,
     };
 
     miette::ensure!(!api_key.is_empty(), "paddle api key is empty");
@@ -38,6 +39,7 @@ impl BillingService {
           .context("failed to initialize paddle client")?,
       ),
       client_secret: PaddleClientSecret(client_secret.to_owned()),
+      environment,
     })
   }
 
@@ -55,7 +57,12 @@ impl BillingService {
       .map(|v| !v.is_empty() && v != "0" && v != "false")
       .unwrap_or(false);
 
-    Self::new(&api_key, &client_secret, is_sandbox)
+    let environment = match is_sandbox {
+      true => PaddleEnvironment::Sandbox,
+      false => PaddleEnvironment::Production,
+    };
+
+    Self::new(&api_key, &client_secret, environment)
   }
 }
 
@@ -64,6 +71,9 @@ impl BillingService {
   pub fn get_client_secret(&self) -> PaddleClientSecret {
     self.client_secret.clone()
   }
+
+  /// Returns the Paddle environment being used.
+  pub fn environment(&self) -> PaddleEnvironment { self.environment }
 
   /// Creates a new customer if a customer with the given email does not already
   /// exist. Otherwise, update the ID and name of the customer whose email

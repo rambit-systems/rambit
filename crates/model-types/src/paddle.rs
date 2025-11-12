@@ -19,3 +19,12 @@ impl AsRef<str> for PaddleCustomerId {
 /// A client secret issued by Paddle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PaddleClientSecret(pub String);
+
+/// The Paddle environment being used.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum PaddleEnvironment {
+  /// A sandbox environment
+  Sandbox,
+  /// A production environment
+  Production,
+}
