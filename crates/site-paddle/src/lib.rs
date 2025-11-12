@@ -8,15 +8,21 @@ use leptos::{
   web_sys::{self, js_sys},
 };
 use leptos_meta::Script;
-use models::{AuthUser, PaddleClientSecret, PaddleCustomerId};
+use models::{
+  AuthUser, PaddleClientSecret, PaddleCustomerId, PaddleEnvironment,
+};
 
 #[island]
 pub fn PaddleProvider(children: Children) -> impl IntoView {
   Effect::new(|_| {
-    let auth_user = use_context::<AuthUser>();
     let client_secret = expect_context::<PaddleClientSecret>();
-    let result =
-      initialize_paddle(&client_secret, &auth_user.map(|au| au.customer_id));
+    let environment = expect_context::<PaddleEnvironment>();
+    let auth_user = use_context::<AuthUser>();
+    let result = initialize_paddle(
+      &client_secret,
+      &environment,
+      &auth_user.map(|au| au.customer_id),
+    );
     if let Err(e) = result {
       error!("failed to initialize Paddle: {e:?}");
     }
@@ -30,6 +36,7 @@ pub fn PaddleProvider(children: Children) -> impl IntoView {
 
 pub fn initialize_paddle(
   client_secret: &PaddleClientSecret,
+  environment: &PaddleEnvironment,
   customer_id: &Option<PaddleCustomerId>,
 ) -> Result<(), JsValue> {
   log!("initializing Paddle");
@@ -37,6 +44,14 @@ pub fn initialize_paddle(
   // get the global Paddle object
   let window = web_sys::window().expect("no global window");
   let paddle = Reflect::get(&window, &"Paddle".into())?;
+
+  // set the environment
+  if matches!(environment, PaddleEnvironment::Sandbox) {
+    let env_object = Reflect::get(&paddle, &"Environment".into())?;
+    let set_fn = Reflect::get(&env_object, &"set".into())?;
+    let set_fn = set_fn.dyn_into::<js_sys::Function>()?;
+    set_fn.call1(&env_object, &"sandbox".into())?;
+  }
 
   // create the config object
   let config = Object::new();
