@@ -115,6 +115,8 @@ pub struct AuthUser {
   pub auth_hash_bytes:  Box<[u8]>,
   /// The index of the [`Org`] that the user is currently operating as.
   pub active_org_index: u8,
+  /// The customer ID for this org in Paddle.
+  pub customer_id:      PaddleCustomerId,
 }
 
 impl From<User> for AuthUser {
@@ -130,6 +132,7 @@ impl From<User> for AuthUser {
       email: user.email,
       auth_hash_bytes,
       active_org_index: user.active_org_index,
+      customer_id: user.customer_id,
     }
   }
 }
