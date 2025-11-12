@@ -3,8 +3,8 @@ use models::{AuthUser, Org, RecordId};
 
 use crate::{
   components::{
-    CheckHeroIcon, ChevronDownHeroIcon, Cog6Tooth, LoadingCircle, PlusHeroIcon,
-    Popover, PopoverContents, PopoverTrigger,
+    CheckHeroIcon, ChevronDownHeroIcon, Cog6ToothHeroIcon, LoadingCircle,
+    PlusHeroIcon, Popover, PopoverContents, PopoverTrigger,
   },
   hooks::OrgHook,
   navigation::navigate_to,
@@ -140,7 +140,7 @@ fn ExtraRows() -> impl IntoView {
 
   view! {
     <a href=active_org_settings_url class="btn-link btn-link-secondary btn-link-tight">
-      <Cog6Tooth {..} class="size-5 stroke-base-11 stroke-[2.0]" />
+      <Cog6ToothHeroIcon {..} class="size-5 stroke-base-11 stroke-[2.0]" />
       <span class="flex-1 text-ellipsis">
         "Org Settings"
       </span>

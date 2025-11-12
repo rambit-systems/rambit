@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::components::Outlet;
 
 use crate::{
-  components::{Cog6Tooth, CreditCardHeroIcon},
+  components::{Cog6ToothHeroIcon, CreditCardHeroIcon},
   hooks::OrgHook,
 };
 
@@ -33,7 +33,7 @@ pub fn NavButtons() -> impl IntoView {
   view! {
     <div class="elevation-flat p-4 flex flex-col gap-2 w-64">
       <a href=settings_url class="btn btn-secondary btn-tight">
-        <Cog6Tooth {..} class="size-5 stroke-base-11 stroke-[2.0]" />
+        <Cog6ToothHeroIcon {..} class="size-5 stroke-base-11 stroke-[2.0]" />
         "Overview"
       </a>
       <a href=settings_billing_url class="btn btn-secondary btn-tight">

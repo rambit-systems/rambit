@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use models::AuthUser;
 
 use crate::components::{
-  ArrowRightStartOnRectangle, Cog6Tooth, Popover, PopoverContents,
-  PopoverTrigger,
+  ArrowRightStartOnRectangleHeroIcon, Cog6ToothHeroIcon, Popover,
+  PopoverContents, PopoverTrigger,
 };
 
 #[component]
@@ -44,11 +44,11 @@ fn AccountMenuMenu() -> impl IntoView {
   view! {
     <div class=POPOVER_CLASS>
       <a class="btn-link btn-link-secondary btn-link-tight">
-        <Cog6Tooth {..} class="size-5 stroke-base-11 stroke-[2.0]" />
+        <Cog6ToothHeroIcon {..} class="size-5 stroke-base-11 stroke-[2.0]" />
         "User Settings"
       </a>
       <a href="/auth/logout" class="btn btn-critical-subtle btn-tight">
-        <ArrowRightStartOnRectangle {..} class="size-5 stroke-critical-11 stroke-[2.0]" />
+        <ArrowRightStartOnRectangleHeroIcon {..} class="size-5 stroke-critical-11 stroke-[2.0]" />
         "Log Out"
       </a>
     </div>
