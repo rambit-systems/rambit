@@ -20,7 +20,7 @@ pub fn Footer() -> impl IntoView {
       <div class="flex-1" />
 
       <p>
-        "Made with zeal by "
+        "Made with love and zeal by "
         <a
           href=PORRIDGE_CO_HREF class=LINK_CLASS
           target="_blank" rel="noopener noreferrer"
