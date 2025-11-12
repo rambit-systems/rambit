@@ -15,6 +15,7 @@ auth-domain = { path = "../auth-domain", optional = true }
 css-minify-macro = { path = "../css-minify-macro" }
 domain = { path = "../domain", optional = true }
 models = { path = "../models", default-features = false }
+site-paddle = { path = "../site-paddle" }
 
 serde.workspace = true
 tracing.workspace = true
@@ -34,7 +35,7 @@ leptos-use = { version = "0.16", default-features = false, features = [
 
 [features]
 default = [  ]
-hydrate = [ "leptos/hydrate" ]
+hydrate = [ "leptos/hydrate", "site-paddle/hydrate" ]
 ssr = [
   "leptos/ssr",
   "leptos/tracing",
@@ -42,6 +43,7 @@ ssr = [
   "leptos_router/ssr",
   "leptos-fetch/ssr",
   "leptos-use/ssr",
+  "site-paddle/ssr",
   "dep:leptos_axum",
   "dep:domain",
   "dep:auth-domain",

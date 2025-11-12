@@ -1,0 +1,18 @@
+[package]
+name = "site-paddle"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+leptos.workspace = true
+leptos_meta.workspace = true
+
+models = { path = "../models", default-features = false }
+
+[features]
+default = [  ]
+hydrate = [ "leptos/hydrate" ]
+ssr = [ "leptos/ssr", "leptos/tracing", "leptos_meta/ssr" ]

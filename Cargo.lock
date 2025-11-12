@@ -4659,6 +4659,7 @@ dependencies = [
  "leptos_router",
  "models",
  "serde",
+ "site-paddle",
  "tracing",
 ]
 
@@ -4671,6 +4672,15 @@ dependencies = [
  "leptos",
  "site-app",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "site-paddle"
+version = "0.1.0"
+dependencies = [
+ "leptos",
+ "leptos_meta",
+ "models",
 ]
 
 [[package]]
