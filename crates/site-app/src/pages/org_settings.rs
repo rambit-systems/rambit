@@ -1,6 +1,10 @@
+mod billing;
+mod overview;
+
 use leptos::prelude::*;
 use leptos_router::components::Outlet;
 
+pub use self::{billing::*, overview::*};
 use crate::{
   components::{Cog6ToothHeroIcon, CreditCardHeroIcon},
   hooks::OrgHook,
@@ -61,19 +65,5 @@ pub fn NavButtons() -> impl IntoView {
         "Billing"
       </a>
     </div>
-  }
-}
-
-#[component]
-pub fn OrgSettingsSubPageOverview() -> impl IntoView {
-  view! {
-    <p class="subtitle">"Overview"</p>
-  }
-}
-
-#[component]
-pub fn OrgSettingsSubPageBilling() -> impl IntoView {
-  view! {
-    <p class="subtitle">"Billing"</p>
   }
 }
