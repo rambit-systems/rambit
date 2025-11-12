@@ -15,3 +15,7 @@ impl PaddleCustomerId {
 impl AsRef<str> for PaddleCustomerId {
   fn as_ref(&self) -> &str { &self.0 }
 }
+
+/// A client secret issued by Paddle.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PaddleClientSecret(pub String);

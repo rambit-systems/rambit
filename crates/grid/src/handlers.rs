@@ -60,6 +60,7 @@ pub fn context_provider(
     provide_context(app_state.domain.clone());
     provide_context(app_state.auth_domain.clone());
     provide_context(auth_session.clone());
+    provide_context(app_state.domain.paddle_client_secret());
     if let Some(auth_user) = auth_session.user.clone() {
       provide_context(auth_user);
     }

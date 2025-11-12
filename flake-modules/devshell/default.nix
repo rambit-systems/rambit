@@ -41,6 +41,7 @@
               --rm --network host \
               -e POSTGRES_URL='postgresql://postgres:password@localhost:6432/main' \
               -e PADDLE_API_KEY=$PADDLE_API_KEY \
+              -e PADDLE_CLIENT_KEY=$PADDLE_CLIENT_KEY \
               -e PADDLE_SANDBOX=1 \
               grid:latest
           '';

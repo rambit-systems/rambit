@@ -3,29 +3,41 @@
 use std::{collections::HashMap, sync::Arc};
 
 use miette::{Context, IntoDiagnostic, Report};
-use models::{EmailAddress, PaddleCustomerId, RecordId, User};
+use models::{
+  EmailAddress, PaddleClientSecret, PaddleCustomerId, RecordId, User,
+};
 use paddle_rust_sdk::{Paddle, error::PaddleApiError, response::ErrorResponse};
 
 /// Entrypoint for logic in the billing domain.
 #[derive(Clone, Debug)]
 pub struct BillingService {
   paddle_client: Arc<Paddle>,
+  client_secret: PaddleClientSecret,
 }
 
 impl BillingService {
   /// Create a new [`BillingService`].
-  pub fn new(api_key: &str, is_sandbox: bool) -> Result<Self, Report> {
+  pub fn new(
+    api_key: &str,
+    client_secret: &str,
+    is_sandbox: bool,
+  ) -> Result<Self, Report> {
     let url = if is_sandbox {
       Paddle::SANDBOX
     } else {
       Paddle::PRODUCTION
     };
+
+    miette::ensure!(!api_key.is_empty(), "paddle api key is empty");
+    miette::ensure!(!client_secret.is_empty(), "paddle client secret is empty");
+
     Ok(Self {
       paddle_client: Arc::new(
         Paddle::new(api_key, url)
           .into_diagnostic()
           .context("failed to initialize paddle client")?,
       ),
+      client_secret: PaddleClientSecret(client_secret.to_owned()),
     })
   }
 
@@ -34,17 +46,25 @@ impl BillingService {
     let api_key = std::env::var("PADDLE_API_KEY")
       .into_diagnostic()
       .context("failed to read var `PADDLE_API_KEY`")?;
-    if api_key.is_empty() {
-      miette::bail!("env var `PADDLE_API_KEY` is empty")
-    }
+
+    let client_secret = std::env::var("PADDLE_CLIENT_KEY")
+      .into_diagnostic()
+      .context("failed to read var `PADDLE_CLIENT_KEY`")?;
+
     let is_sandbox = std::env::var("PADDLE_SANDBOX")
       .map(|v| !v.is_empty() && v != "0" && v != "false")
       .unwrap_or(false);
-    Self::new(&api_key, is_sandbox)
+
+    Self::new(&api_key, &client_secret, is_sandbox)
   }
 }
 
 impl BillingService {
+  /// Returns the Paddle client secret.
+  pub fn get_client_secret(&self) -> PaddleClientSecret {
+    self.client_secret.clone()
+  }
+
   /// Creates a new customer if a customer with the given email does not already
   /// exist. Otherwise, update the ID and name of the customer whose email
   /// matches.
