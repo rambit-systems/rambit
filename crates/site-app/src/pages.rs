@@ -7,12 +7,13 @@ mod homepage;
 mod login;
 mod logout;
 mod org_settings;
+mod payment_link;
 mod protected;
 mod signup;
 mod unauthorized;
 
 pub use self::{
   create_cache::*, create_org::*, create_store::*, dashboard::*, entry::*,
-  homepage::*, login::*, logout::*, org_settings::*, protected::*, signup::*,
-  unauthorized::*,
+  homepage::*, login::*, logout::*, org_settings::*, payment_link::*,
+  protected::*, signup::*, unauthorized::*,
 };
