@@ -65,3 +65,34 @@ pub async fn check_if_org_name_is_available(
 
   Ok(!occupied)
 }
+
+pub fn self_is_org_owner_query_scope(
+) -> QueryScope<RecordId<Org>, Result<bool, ServerFnError>> {
+  QueryScope::new(check_if_self_is_org_owner).with_invalidation_link(move |o| {
+    [Org::TABLE_NAME.to_string(), o.to_string()]
+  })
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn check_if_self_is_org_owner(
+  org: RecordId<Org>,
+) -> Result<bool, ServerFnError> {
+  use domain::DomainService;
+
+  let auth_user = authenticate()?;
+  let user_id = auth_user.id;
+
+  let domain_service: DomainService = expect_context();
+
+  let org = domain_service
+    .meta()
+    .fetch_org_by_id(org)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch org: {e}");
+      ServerFnError::new("internal error")
+    })?
+    .ok_or(ServerFnError::new("org does not exist"))?;
+
+  Ok(org.owner == user_id)
+}
