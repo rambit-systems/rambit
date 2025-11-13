@@ -16,6 +16,8 @@ pub struct Org {
   pub id:        RecordId<Org>,
   /// The org's identifier.
   pub org_ident: OrgIdent,
+  /// The org's owner.
+  pub owner:     RecordId<User>,
 }
 
 impl Org {

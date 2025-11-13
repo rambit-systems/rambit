@@ -33,6 +33,7 @@ impl DomainService {
     let org = Org {
       id:        RecordId::new(),
       org_ident: OrgIdent::Named(org_name),
+      owner:     user_id,
     };
 
     self

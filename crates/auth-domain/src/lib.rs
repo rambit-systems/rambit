@@ -115,6 +115,7 @@ impl AuthDomainService {
     let org = Org {
       id:        RecordId::new(),
       org_ident: OrgIdent::UserOrg(user_id),
+      owner:     user_id,
     };
 
     let user = User {
