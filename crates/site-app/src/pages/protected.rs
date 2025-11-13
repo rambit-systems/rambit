@@ -35,24 +35,31 @@ pub struct RequestedOrg(pub RecordId<Org>);
 
 #[component]
 pub fn ProtectedByOrgPage(children: Children) -> impl IntoView {
-  let auth_user = use_context::<AuthUser>();
-  let params = use_params_map();
-  let requested_org = params()
-    .get("org")
-    .expect("missing org path param")
-    .parse::<RecordId<_>>()
-    .ok();
+  // fail if use is not logged in
+  let Some(auth_user) = use_context::<AuthUser>() else {
+    return view! { <UnauthorizedPage /> }.into_any();
+  };
 
-  match requested_org {
-    Some(org) if auth_user.is_some_and(|u| u.belongs_to_org(org)) => {
-      provide_context(RequestedOrg(org));
-      view! {
-        <RequestedOrgIslandContextProvider org=org children=children />
-      }
-      .into_any()
-    }
-    Some(_) | None => view! { <UnauthorizedPage /> }.into_any(),
+  // panic if org param is not found for route
+  let params = use_params_map();
+  let requested_org_param =
+    params().get("org").expect("missing org path param");
+
+  // fail if ID can't be parsed
+  let Ok(requested_org) = requested_org_param.parse::<RecordId<_>>() else {
+    return view! { <UnauthorizedPage /> }.into_any();
+  };
+
+  // fail if user doesn't belong to org
+  if !auth_user.belongs_to_org(requested_org) {
+    return view! { <UnauthorizedPage /> }.into_any();
   }
+
+  provide_context(RequestedOrg(requested_org));
+  view! {
+    <RequestedOrgIslandContextProvider org=requested_org children=children />
+  }
+  .into_any()
 }
 
 #[island]
