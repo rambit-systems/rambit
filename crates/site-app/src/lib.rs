@@ -85,7 +85,7 @@ pub fn App() -> impl IntoView {
             <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
             <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
             <Route path=path!("/org/create_org") view=protect(CreateOrgPage) />
-            <ParentRoute path=path!("/org/:org/settings") view=protect_by_org(OrgSettingsPage)>
+            <ParentRoute path=path!("/org/:org/settings") view=protect_by_org_owner(OrgSettingsPage)>
               <Route path=path!("/") view=OrgSettingsSubPageOverview />
               <Route path=path!("/billing") view=OrgSettingsSubPageBilling />
             </ParentRoute>
