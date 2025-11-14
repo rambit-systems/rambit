@@ -3381,7 +3381,7 @@ checksum = "48dd4f4a2c8405440fd0462561f0e5806bd0f77e86f51c761481bdd4018b545e"
 [[package]]
 name = "paddle-rust-sdk"
 version = "0.15.0"
-source = "git+https://github.com/johnbchron/paddle-rust-sdk#691f3cf499b9def0258ea2ba8b2666d4f3f630ab"
+source = "git+https://github.com/johnbchron/paddle-rust-sdk?branch=location-price-type#339aa7a7710f90f2dadf52a752999a6c1fd205c5"
 dependencies = [
  "chrono",
  "hmac",
@@ -3398,7 +3398,7 @@ dependencies = [
 [[package]]
 name = "paddle-rust-sdk-types"
 version = "0.1.0"
-source = "git+https://github.com/johnbchron/paddle-rust-sdk#691f3cf499b9def0258ea2ba8b2666d4f3f630ab"
+source = "git+https://github.com/johnbchron/paddle-rust-sdk?branch=location-price-type#339aa7a7710f90f2dadf52a752999a6c1fd205c5"
 dependencies = [
  "chrono",
  "serde",
@@ -4402,18 +4402,28 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.219"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+dependencies = [
+ "serde_core",
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_core"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.219"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4434,12 +4444,13 @@ dependencies = [
 
 [[package]]
 name = "serde_path_to_error"
-version = "0.1.17"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59fab13f937fa393d08645bf3a84bdfe86e296747b506ada67bb15f10f218b2a"
+checksum = "10a9ff822e371bb5403e391ecd83e182e0e77ba7f6fe0160b795797109d1b457"
 dependencies = [
  "itoa",
  "serde",
+ "serde_core",
 ]
 
 [[package]]

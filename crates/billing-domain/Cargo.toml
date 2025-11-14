@@ -14,9 +14,12 @@ thiserror.workspace = true
 tracing.workspace = true
 
 # paddle-rust-sdk = { version = "0.14" }
-paddle-rust-sdk = { git = "https://github.com/johnbchron/paddle-rust-sdk", default-features = false, features = [
+paddle-rust-sdk = { git = "https://github.com/johnbchron/paddle-rust-sdk", branch = "location-price-type", default-features = false, features = [
   "rustls-webpki-roots",
 ] }
+# paddle-rust-sdk = { path = "../../../paddle-rust-sdk", default-features = false, features = [
+#   "rustls-webpki-roots",
+# ] }
 
 [lints]
 workspace = true

@@ -15,7 +15,8 @@ thiserror.workspace = true
 email_address = { version = "0.2" }
 regex = { version = "1", default-features = false, features = [ "std" ], optional = true }
 
-paddle-rust-sdk-types = { git = "https://github.com/johnbchron/paddle-rust-sdk" }
+paddle-rust-sdk-types = { git = "https://github.com/johnbchron/paddle-rust-sdk", branch = "location-price-type" }
+# paddle-rust-sdk-types = { path = "../../../paddle-rust-sdk/paddle-rust-sdk-types" }
 
 [lints]
 workspace = true
