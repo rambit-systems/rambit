@@ -1,5 +1,6 @@
 //! Entrypoint for domain logic.
 
+mod billing;
 mod create;
 mod delete_entry;
 pub mod download;
@@ -16,7 +17,6 @@ pub use db;
 pub use meta_domain;
 use meta_domain::MetaService;
 pub use models;
-use models::{PaddleClientSecret, PaddleEnvironment};
 pub use mutate_domain;
 use mutate_domain::MutationService;
 
@@ -44,14 +44,4 @@ impl DomainService {
 
   /// Access the internal [`MetaService`].
   pub fn meta(&self) -> &MetaService { &self.meta }
-
-  /// Return the Paddle client secret.
-  pub fn paddle_client_secret(&self) -> PaddleClientSecret {
-    self.billing.get_client_secret()
-  }
-
-  /// Returns the Paddle environment being used.
-  pub fn paddle_environment(&self) -> PaddleEnvironment {
-    self.billing.environment()
-  }
 }
