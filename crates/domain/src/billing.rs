@@ -1,7 +1,11 @@
-use models::{
-  Org, PaddleClientSecret, PaddleEnvironment, PaddleSubscription, RecordId,
-};
+//! Billing logic.
 
+mod helpers;
+mod subscriptions;
+
+use models::{PaddleClientSecret, PaddleEnvironment};
+
+pub use self::subscriptions::OrgSubscriptionReport;
 use crate::DomainService;
 
 impl DomainService {
@@ -13,13 +17,5 @@ impl DomainService {
   /// Returns the Paddle environment being used.
   pub fn paddle_environment(&self) -> PaddleEnvironment {
     self.billing.environment()
-  }
-
-  /// Gets the Paddle subscriptions for a given [`Org`].
-  pub fn get_subscriptions_for_org(
-    &self,
-    org_id: RecordId<Org>,
-  ) -> miette::Result<Vec<PaddleSubscription>> {
-    todo!()
   }
 }

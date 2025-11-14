@@ -1,5 +1,6 @@
 pub use paddle_rust_sdk_types::{
   entities::Subscription as PaddleSubscription,
+  enums::SubscriptionStatus as PaddleSubscriptionStatus,
   ids::CustomerID as PaddleCustomerId,
 };
 use serde::{Deserialize, Serialize};
