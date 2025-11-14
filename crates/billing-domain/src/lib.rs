@@ -93,7 +93,7 @@ impl BillingService {
 
     // short circuit if it worked
     let err = match create_result {
-      Ok(customer) => return Ok(PaddleCustomerId::new(customer.data.id.0)),
+      Ok(customer) => return Ok(customer.data.id),
       Err(e) => e,
     };
 
@@ -131,6 +131,6 @@ impl BillingService {
       .context("failed to update paddle customer")?
       .data;
 
-    Ok(PaddleCustomerId::new(customer.id.0))
+    Ok(customer.id)
   }
 }
