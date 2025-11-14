@@ -542,6 +542,7 @@ dependencies = [
  "miette",
  "models",
  "paddle-rust-sdk",
+ "thiserror 2.0.16",
 ]
 
 [[package]]

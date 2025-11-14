@@ -1,6 +1,7 @@
 //! Entrypoint for logic in the billing domain.
 
 mod customer;
+mod subscription;
 
 use std::sync::Arc;
 

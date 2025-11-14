@@ -10,6 +10,7 @@ publish = false
 models = { path = "../models" }
 
 miette.workspace = true
+thiserror.workspace = true
 
 # paddle-rust-sdk = { version = "0.14" }
 paddle-rust-sdk = { git = "https://github.com/johnbchron/paddle-rust-sdk", default-features = false, features = [
