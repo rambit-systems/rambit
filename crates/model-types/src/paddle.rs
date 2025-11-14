@@ -17,3 +17,12 @@ pub enum PaddleEnvironment {
   /// A production environment
   Production,
 }
+
+/// A report of an [`Org`]'s [`PaddleSubscription`]s.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OrgSubscriptionReport {
+  /// The org's current subscription, if it exists.
+  pub current: Option<PaddleSubscription>,
+  /// The list of the org's past subscriptions.
+  pub past:    Vec<PaddleSubscription>,
+}

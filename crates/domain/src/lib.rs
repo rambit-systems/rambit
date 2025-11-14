@@ -1,6 +1,6 @@
 //! Entrypoint for domain logic.
 
-pub mod billing;
+mod billing;
 mod create;
 mod delete_entry;
 pub mod download;

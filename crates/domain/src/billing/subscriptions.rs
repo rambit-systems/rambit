@@ -1,17 +1,12 @@
 use miette::Context;
-use models::{Org, PaddleSubscription, PaddleSubscriptionStatus, RecordId};
+use models::{
+  Org, OrgSubscriptionReport, PaddleSubscription, PaddleSubscriptionStatus,
+  RecordId,
+};
 use tracing::instrument;
 
 use super::helpers::associated_org_id_from_subscription;
 use crate::DomainService;
-
-/// A report of an [`Org`]'s [`PaddleSubscription`]s.
-pub struct OrgSubscriptionReport {
-  /// The org's current subscription, if it exists.
-  pub current: Option<PaddleSubscription>,
-  /// The list of the org's past subscriptions.
-  pub past:    Vec<PaddleSubscription>,
-}
 
 impl DomainService {
   /// Generates an [`OrgSubscriptionReport`] for the given org.

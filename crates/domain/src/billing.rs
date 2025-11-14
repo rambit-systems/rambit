@@ -5,7 +5,6 @@ mod subscriptions;
 
 use models::{PaddleClientSecret, PaddleEnvironment};
 
-pub use self::subscriptions::OrgSubscriptionReport;
 use crate::DomainService;
 
 impl DomainService {
