@@ -6,12 +6,32 @@ rustflags = [
   'erase_components',
   '-Z',
   'threads=10',
+  '-Z',
+  'incremental-verify-ich',
 ]
 
 [target.x86_64-unknown-linux-gnu]
 linker = "clang"
-rustflags = [ '-C', 'link-arg=-fuse-ld=mold', '--cfg', 'erase_components', '-Z', 'threads=10' ]
+rustflags = [
+  '-C',
+  'link-arg=-fuse-ld=mold',
+  '--cfg',
+  'erase_components',
+  '-Z',
+  'threads=10',
+  '-Z',
+  'incremental-verify-ich',
+]
 
 [target.aarch64-unknown-linux-gnu]
 linker = "clang"
-rustflags = [ '-C', 'link-arg=-fuse-ld=mold', '--cfg', 'erase_components', '-Z', 'threads=10' ]
+rustflags = [
+  '-C',
+  'link-arg=-fuse-ld=mold',
+  '--cfg',
+  'erase_components',
+  '-Z',
+  'threads=10',
+  '-Z',
+  'incremental-verify-ich',
+]
