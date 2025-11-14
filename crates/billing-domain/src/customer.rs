@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use miette::{Context, IntoDiagnostic, Report};
 use models::{EmailAddress, PaddleCustomerId, RecordId, User};
 use paddle_rust_sdk::{error::PaddleApiError, response::ErrorResponse};
+use tracing::instrument;
 
 use super::BillingService;
 
@@ -10,6 +11,7 @@ impl BillingService {
   /// Creates a new customer if a customer with the given email does not
   /// already exist. Otherwise, update the ID and name of the customer
   /// whose email matches.
+  #[instrument(skip(self))]
   pub async fn upsert_customer(
     &self,
     org_id: RecordId<User>,

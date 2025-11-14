@@ -543,6 +543,7 @@ dependencies = [
  "models",
  "paddle-rust-sdk",
  "thiserror 2.0.16",
+ "tracing",
 ]
 
 [[package]]

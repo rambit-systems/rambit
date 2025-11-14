@@ -1,5 +1,6 @@
 use miette::Diagnostic;
 use models::{PaddleCustomerId, PaddleSubscription};
+use tracing::instrument;
 
 use crate::BillingService;
 
@@ -12,6 +13,7 @@ pub enum SubscriptionsForCustomerError {
 
 impl BillingService {
   /// Gets the subscriptions attached to a customer.
+  #[instrument(skip(self))]
   pub async fn get_all_subscriptions_for_customer(
     &self,
     customer_id: &PaddleCustomerId,
