@@ -1,6 +1,5 @@
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use site_paddle::PaddleProvider;
 
 use crate::hooks::OrgHook;
 
@@ -20,14 +19,12 @@ pub fn OrgSettingsSubPageBilling() -> impl IntoView {
   };
 
   view! {
-    <PaddleProvider>
-      <p class="subtitle">"Billing"</p>
+    <p class="subtitle">"Billing"</p>
 
-      <code class="overflow-auto whitespace-pre">
-        <Transition fallback=|| "loading">
-          { suspend_fn }
-        </Transition>
-      </code>
-    </PaddleProvider>
+    <code class="overflow-auto whitespace-pre">
+      <Transition fallback=|| "loading">
+        { suspend_fn }
+      </Transition>
+    </code>
   }
 }
