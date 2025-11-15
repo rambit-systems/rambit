@@ -6,6 +6,17 @@ use models::{AuthUser, Org, PvOrg, RecordId};
 
 use crate::{pages::RequestedOrg, resources::org::org_query_scope};
 
+/// A hook that provides data on an [`Org`]. Works in SSR.
+///
+/// `OrgHook` requires [`AuthUser`] and [`QueryClient`] as context. It is used
+/// frequently enough that while it will panic if the required context cannot be
+/// found, it will include its defining [`Location`] in the panic message.
+///
+/// It can target:
+///  - the currently requested [`Org`] on org-scoped pages (pages with a `/:org`
+///    segment)
+///  - the user's [`active_org`](AuthUser::active_org)
+///  - an arbitrary org
 #[derive(Clone)]
 pub struct OrgHook {
   #[cfg(debug_assertions)]
@@ -86,7 +97,8 @@ impl OrgHook {
     move || key.run(())
   }
 
-  pub fn base_url(&self) -> Memo<String> {
+  /// The base URL for the org. No page exists here.
+  fn base_url(&self) -> Memo<String> {
     Memo::new({
       let key = self.key;
       {
@@ -105,6 +117,7 @@ impl OrgHook {
     Memo::new(move |_| format!("{}/settings", base_url()))
   }
 
+  /// The canonical user-facing org name/descriptor.
   pub fn descriptor(&self) -> AsyncDerived<String> {
     AsyncDerived::new({
       let resource = self.resource;
