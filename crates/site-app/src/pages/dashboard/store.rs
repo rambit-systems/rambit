@@ -73,8 +73,7 @@ pub(super) fn StoreTable() -> impl IntoView {
 #[component]
 fn StoreTableEmptyBody() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let create_url =
-    Signal::derive(move || format!("{}/create_store", org_hook.base_url()()));
+  let create_url = org_hook.create_store_url();
 
   view! {
     <TableEmptyBody>

@@ -2,7 +2,7 @@ use std::panic::Location;
 
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use models::{AuthUser, Org, PvOrg, RecordId};
+use models::{AuthUser, Entry, Org, PvOrg, RecordId};
 
 use crate::{pages::RequestedOrg, resources::org::org_query_scope};
 
@@ -107,11 +107,32 @@ impl OrgHook {
     })
   }
 
+  /// The URL for the org's dashboard page, relative to the site root.
   pub fn dashboard_url(&self) -> Memo<String> {
     let base_url = self.base_url();
     Memo::new(move |_| format!("{}/dash", base_url()))
   }
 
+  /// The URL for the org's "create cache" page, relative to the site root.
+  pub fn create_cache_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/create_cache", base_url()))
+  }
+
+  /// The URL for the org's "create store" page, relative to the site root.
+  pub fn create_store_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/create_store", base_url()))
+  }
+
+  /// The URL for the page of a given entry in the org, relative to the site
+  /// root.
+  pub fn entry_url(&self, entry_id: RecordId<Entry>) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{base}/entry/{entry_id}", base = base_url()))
+  }
+
+  /// The URL for the org's setting page, relative to the site root.
   pub fn settings_url(&self) -> Memo<String> {
     let base_url = self.base_url();
     Memo::new(move |_| format!("{}/settings", base_url()))

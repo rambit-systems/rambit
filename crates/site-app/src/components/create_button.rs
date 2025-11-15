@@ -5,9 +5,7 @@ use crate::hooks::OrgHook;
 #[component]
 pub fn CreateCacheButton(text: &'static str) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let base_url = org_hook.base_url();
-  let href =
-    Signal::derive(move || format!("{base}/create_cache", base = base_url()));
+  let href = org_hook.create_cache_url();
 
   view! {
     <a href=href class="btn btn-primary-subtle">
@@ -19,9 +17,7 @@ pub fn CreateCacheButton(text: &'static str) -> impl IntoView {
 #[component]
 pub fn CreateStoreButton(text: &'static str) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let base_url = org_hook.base_url();
-  let href =
-    Signal::derive(move || format!("{base}/create_store", base = base_url()));
+  let href = org_hook.create_store_url();
 
   view! {
     <a href=href class="btn btn-primary-subtle">

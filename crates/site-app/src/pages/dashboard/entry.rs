@@ -83,10 +83,7 @@ fn EntryTableEmptyBody() -> impl IntoView {
 #[component]
 fn EntryDataRow(entry: Entry) -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let base_url = org_hook.base_url();
-  let entry_href = move || {
-    format!("{base}/entry/{entry}", base = base_url(), entry = entry.id)
-  };
+  let entry_href = org_hook.entry_url(entry.id);
 
   const ABBREVIATE_AFTER_COUNT: usize = 5;
   let mut caches = entry.caches.clone();

@@ -72,8 +72,7 @@ pub(super) fn CacheTable() -> impl IntoView {
 #[component]
 fn CacheTableEmptyBody() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let create_url =
-    Signal::derive(move || format!("{}/create_cache", org_hook.base_url()()));
+  let create_url = org_hook.create_cache_url();
 
   view! {
     <TableEmptyBody>
