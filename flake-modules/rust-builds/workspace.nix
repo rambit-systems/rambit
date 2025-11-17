@@ -20,7 +20,6 @@
 
       pname = "rambit";
       version = "0.1";
-      doCheck = false;
 
       # inputs assumed to be relevant for all crates
       nativeBuildInputs = with pkgs; [
