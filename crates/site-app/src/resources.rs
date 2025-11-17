@@ -2,7 +2,6 @@ pub mod cache;
 pub mod entry;
 pub mod org;
 pub mod store;
-pub mod subscription;
 
 #[cfg(feature = "ssr")]
 use leptos::prelude::*;

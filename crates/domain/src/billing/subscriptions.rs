@@ -1,57 +1,11 @@
 use miette::Context;
-use models::{
-  Org, OrgSubscriptionReport, PaddleSubscription, PaddleSubscriptionStatus,
-  RecordId,
-};
+use models::{Org, PaddleSubscription, RecordId};
 use tracing::instrument;
 
 use super::helpers::associated_org_id_from_subscription;
 use crate::DomainService;
 
 impl DomainService {
-  /// Generates an [`OrgSubscriptionReport`] for the given org.
-  #[instrument(skip(self))]
-  pub async fn org_subscription_report(
-    &self,
-    org_id: RecordId<Org>,
-  ) -> miette::Result<OrgSubscriptionReport> {
-    let subs = self
-      .get_subscriptions_for_org(org_id)
-      .await
-      .context("failed to get subscriptions for org")?;
-
-    let mut current = Vec::new();
-    let mut past = Vec::new();
-
-    for sub in subs {
-      match sub.status {
-        PaddleSubscriptionStatus::Active
-        | PaddleSubscriptionStatus::PastDue
-        | PaddleSubscriptionStatus::Paused
-        | PaddleSubscriptionStatus::Trialing => {
-          current.push(sub);
-        }
-        PaddleSubscriptionStatus::Canceled => {
-          past.push(sub);
-        }
-        _ => todo!(),
-      }
-    }
-
-    if current.len() > 1 {
-      let err = miette::miette!(
-        "multiple current subscriptions found for org {org_id}: {current:?}"
-      );
-      tracing::error!("{err:?}");
-      return Err(err);
-    }
-
-    Ok(OrgSubscriptionReport {
-      current: current.first().cloned(),
-      past,
-    })
-  }
-
   /// Gets all Paddle subscriptions for a given [`Org`].
   #[instrument(skip(self))]
   pub async fn get_subscriptions_for_org(
