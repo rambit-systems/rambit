@@ -1,5 +1,5 @@
 { ... }: {
-  perSystem = { pkgs, inputs', config, rust-toolchain, ... }: {
+  perSystem = { pkgs, inputs', config, rust-toolchain, quickwit-config, ... }: {
     devShells.default = pkgs.devshell.mkShell {
       packages = with pkgs; [
         (rust-toolchain.dev-toolchain pkgs)
@@ -21,11 +21,18 @@
 
         # deployment
         dive flyctl
+
+        quickwit
       ];
 
       motd = "\n  Welcome to the {2}rambit{reset} dev shell. Run {1}menu{reset} for commands.\n";
 
       commands = [
+        {
+          name = "qw";
+          command = "mkdir -p /tmp/rambit-qwdata; ${pkgs.quickwit}/bin/quickwit run --config ${quickwit-config}";
+        }
+
         {
           name = "check";
           command = "nix flake check -L";

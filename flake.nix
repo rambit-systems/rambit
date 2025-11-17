@@ -11,6 +11,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     crane.url = "https://flakehub.com/f/ipetkov/crane/0.21.tar.gz";
+
+    quickwit.url = "github:johnbchron/quickwit-flake";
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } ({ ... }: {
@@ -22,6 +24,7 @@
       ./flake-modules/rust-builds
       ./flake-modules/repo-tests
       ./flake-modules/e2e-tests
+      ./flake-modules/repo-fixtures
       ./flake-modules/devshell
     ];
   });

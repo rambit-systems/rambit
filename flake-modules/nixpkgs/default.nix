@@ -5,6 +5,7 @@
       overlays = [
         (import inputs.rust-overlay)
         inputs.devshell.overlays.default
+        inputs.quickwit.overlays.default
       ];
     };
   };
