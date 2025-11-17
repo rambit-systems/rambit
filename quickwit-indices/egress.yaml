@@ -1,0 +1,39 @@
+version: 0.7
+
+index_id: "egress-event"
+
+doc_mapping:
+  mode: lenient
+  field_mappings:
+    - name: timestamp
+      type: datetime
+      input_formats:
+        - unix_timestamp
+      output_format: unix_timestamp_millis
+      fast_precision: seconds
+      fast: true
+    - name: entry_id
+      type: text
+      tokenizer: raw
+    - name: entry_path
+      type: text
+      tokenizer: raw
+    - name: cache_id
+      type: text
+      tokenizer: raw
+    - name: store_id
+      type: text
+      tokenizer: raw
+    - name: org_id
+      type: text
+      tokenizer: raw
+      fast: true
+    - name: byte_count
+      type: u64
+      fast: true
+  tag_fields: ["org_id"]
+  timestamp_field: timestamp
+
+retention:
+  period: 90 days
+  schedule: daily
