@@ -1935,6 +1935,7 @@ dependencies = [
  "clap",
  "db",
  "domain",
+ "drop-stream",
  "http",
  "http-body",
  "http-body-util",
