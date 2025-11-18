@@ -1491,6 +1491,7 @@ dependencies = [
  "db",
  "futures",
  "meta-domain",
+ "metrics-domain",
  "miette",
  "models",
  "mutate-domain",

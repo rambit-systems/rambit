@@ -16,6 +16,8 @@ pub use bytes;
 pub use db;
 pub use meta_domain;
 use meta_domain::MetaService;
+pub use metrics_domain;
+use metrics_domain::MetricsService;
 pub use models;
 pub use mutate_domain;
 use mutate_domain::MutationService;
@@ -26,6 +28,7 @@ pub struct DomainService {
   meta:    MetaService,
   mutate:  MutationService,
   billing: BillingService,
+  metrics: MetricsService,
 }
 
 impl DomainService {
@@ -34,11 +37,13 @@ impl DomainService {
     meta: MetaService,
     mutate: MutationService,
     billing: BillingService,
+    metrics: MetricsService,
   ) -> Self {
     Self {
       meta,
       mutate,
       billing,
+      metrics,
     }
   }
 

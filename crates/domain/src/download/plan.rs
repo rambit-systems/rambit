@@ -1,3 +1,4 @@
+use metrics_domain::TimelessEgressEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{Digest, EntityName, Entry, Store, StorePath, Visibility};
 
@@ -8,9 +9,11 @@ use crate::{DomainService, download::DownloadRequest};
 #[derive(Debug)]
 pub struct DownloadPlan {
   /// The entry being requested.
-  pub(crate) entry: Entry,
+  pub(crate) entry:        Entry,
   /// The store the entry resides in.
-  pub(crate) store: Store,
+  pub(crate) store:        Store,
+  /// The egress event to be sent.
+  pub(crate) egress_event: TimelessEgressEvent,
 }
 
 /// The error enum for the [`plan_download`](DomainService::plan_download) fn.
@@ -111,6 +114,19 @@ impl DomainService {
       .ok_or(miette!("store not found"))
       .map_err(DownloadPlanningError::InternalError)?;
 
-    Ok(DownloadPlan { entry, store })
+    let egress_event = TimelessEgressEvent {
+      entry_id:   entry.id,
+      entry_path: entry.store_path.to_absolute_path(),
+      cache_id:   cache.id,
+      store_id:   store.id,
+      org_id:     entry.org,
+      byte_count: 0,
+    };
+
+    Ok(DownloadPlan {
+      entry,
+      store,
+      egress_event,
+    })
   }
 }

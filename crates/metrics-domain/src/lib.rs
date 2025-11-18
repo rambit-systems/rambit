@@ -1,6 +1,6 @@
 //! Metrics and usage reporting logic.
 
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use miette::{Context, IntoDiagnostic};
 use models::{Cache, Entry, Org, RecordId, Store};
@@ -15,6 +15,12 @@ const EGRESS_EVENT_INDEX_ID: &str = "egress-event";
 pub struct MetricsService {
   client: Client,
   config: Arc<MetricsConfig>,
+}
+
+impl fmt::Debug for MetricsService {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct(stringify!(MetricsService)).finish()
+  }
 }
 
 struct MetricsConfig {
@@ -109,6 +115,39 @@ pub struct EgressEvent {
   pub org_id:     RecordId<Org>,
   /// The number of bytes served during the egress event.
   pub byte_count: u64,
+}
+
+/// An egress usage event without a timestamp.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimelessEgressEvent {
+  /// The ID of the entry being downloaded.
+  pub entry_id:   RecordId<Entry>,
+  /// The nix store path of the entry being downloaded.
+  pub entry_path: String,
+  /// The ID of the cache of the entry being downloaded.
+  pub cache_id:   RecordId<Cache>,
+  /// The ID of the store of the entry being downloaded.
+  pub store_id:   RecordId<Store>,
+  /// The ID of the org of the entry being downloaded.
+  pub org_id:     RecordId<Org>,
+  /// The number of bytes served during the egress event.
+  pub byte_count: u64,
+}
+
+impl TimelessEgressEvent {
+  /// Makes an [`EgressEvent`] out of a [`TimelessEgressEvent`] with the current
+  /// time.
+  pub fn stamp_with_now(self) -> EgressEvent {
+    EgressEvent {
+      timestamp:  UtcDateTime::now(),
+      entry_id:   self.entry_id,
+      entry_path: self.entry_path,
+      cache_id:   self.cache_id,
+      store_id:   self.store_id,
+      org_id:     self.org_id,
+      byte_count: self.byte_count,
+    }
+  }
 }
 
 impl MetricsService {

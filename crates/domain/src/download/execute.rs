@@ -1,5 +1,6 @@
 use belt::Belt;
 use futures::TryStreamExt;
+use metrics_domain::TimelessEgressEvent;
 use miette::Context;
 use models::{CompressionStatus, FileSize};
 use storage::{BlobKey, BlobStorageError};
@@ -12,9 +13,11 @@ use crate::DomainService;
 #[derive(Debug)]
 pub struct DownloadResponse {
   /// The data being downloaded.
-  pub data:      Belt,
+  pub data:         Belt,
   /// The file size of the data being downloaded.
-  pub file_size: FileSize,
+  pub file_size:    FileSize,
+  /// The egress event to be sent.
+  pub egress_event: TimelessEgressEvent,
 }
 
 /// The error enum for the [`execute_download`](DomainService::execute_download)
@@ -66,6 +69,15 @@ impl DomainService {
       CompressionStatus::Uncompressed { size } => (size, data),
     };
 
-    Ok(DownloadResponse { data, file_size })
+    let egress_event = TimelessEgressEvent {
+      byte_count: file_size.inner(),
+      ..plan.egress_event
+    };
+
+    Ok(DownloadResponse {
+      data,
+      file_size,
+      egress_event,
+    })
   }
 }
