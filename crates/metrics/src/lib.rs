@@ -1,5 +1,6 @@
 //! Metric and usage event types.
 
+pub mod compute;
 pub mod egress;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
