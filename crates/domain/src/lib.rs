@@ -4,6 +4,7 @@ mod billing;
 mod create;
 mod delete_entry;
 pub mod download;
+mod metrics;
 pub mod mutate_user;
 pub mod narinfo;
 mod storage_glue;

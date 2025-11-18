@@ -1,20 +1,23 @@
+#![feature(iter_intersperse)]
+
 //! Metrics and usage reporting logic.
 
-use std::{fmt, sync::Arc};
+mod batcher;
 
+use std::fmt;
+
+pub use metrics;
+use metrics::Metric;
 use miette::{Context, IntoDiagnostic};
-use models::{Cache, Entry, Org, RecordId, Store};
-use reqwest::{Client, Url};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use time::UtcDateTime;
+use reqwest::{Client, Url, header::CONTENT_TYPE};
+use serde_json::Value;
 
-const EGRESS_EVENT_INDEX_ID: &str = "egress-event";
+use self::batcher::{BatchConfig, Batcher};
 
 /// Contains metrics and usage reporting logic.
 #[derive(Clone)]
 pub struct MetricsService {
-  client: Client,
-  config: Arc<MetricsConfig>,
+  batcher: Batcher,
 }
 
 impl fmt::Debug for MetricsService {
@@ -23,6 +26,7 @@ impl fmt::Debug for MetricsService {
   }
 }
 
+#[derive(Debug)]
 struct MetricsConfig {
   quickwit_url: Url,
 }
@@ -33,11 +37,13 @@ impl MetricsService {
     let quickwit_url = reqwest::Url::parse(quickwit_url)
       .into_diagnostic()
       .context("failed to parse quickwit url")?;
+    let config = MetricsConfig { quickwit_url };
+    let client = reqwest::Client::new();
+    let (batcher, rx) = Batcher::new(BatchConfig::default());
 
-    Ok(Self {
-      client: Client::new(),
-      config: Arc::new(MetricsConfig { quickwit_url }),
-    })
+    tokio::spawn(Self::handle_batches(client, config, rx));
+
+    Ok(Self { batcher })
   }
 
   /// Creates a new [`MetricsService`] from environment variables.
@@ -49,23 +55,67 @@ impl MetricsService {
     Self::new(&quickwit_url)
   }
 
-  #[tracing::instrument(skip(self, payload))]
-  async fn send_event<T: Serialize>(
-    &self,
-    payload: &T,
+  /// Sends an event to the metrics service.
+  pub async fn send_event<M: Metric>(&self, event: M) {
+    let event = match serde_json::to_value(&event) {
+      Ok(event) => event,
+      Err(e) => {
+        tracing::error!(err = ?e, "failed to serialize metric event");
+        return;
+      }
+    };
+
+    self.batcher.add(M::INDEX_ID, event).await;
+    tracing::info!(index_id = M::INDEX_ID, "receieved metric event");
+  }
+
+  async fn handle_batches(
+    client: Client,
+    config: MetricsConfig,
+    mut rx: tokio::sync::mpsc::Receiver<(&'static str, Vec<Value>)>,
+  ) {
+    while let Some((index_id, event_batch)) = rx.recv().await {
+      Self::send_batch(&client, &config, &event_batch, index_id).await;
+    }
+  }
+
+  #[tracing::instrument(skip(client, events))]
+  async fn send_batch(
+    client: &Client,
+    config: &MetricsConfig,
+    events: &[Value],
     index_id: &str,
-  ) -> miette::Result<()> {
-    let url = self
-      .config
+  ) {
+    let url = config
       .quickwit_url
       .join(&format!("/api/v1/{index_id}/ingest"))
       .into_diagnostic()
-      .context("failed to parse quickwit url")?;
+      .context("failed to parse quickwit url")
+      .unwrap();
 
-    match self.client.post(url).json(payload).send().await {
+    let body = events
+      .iter()
+      .map(serde_json::to_string)
+      .filter_map(Result::ok)
+      .intersperse("\n".to_owned())
+      .collect::<String>();
+
+    match client
+      .post(url)
+      .header(CONTENT_TYPE, "application/json")
+      .body(body)
+      .send()
+      .await
+    {
       Ok(resp) => {
         if let Err(e) = resp.error_for_status_ref() {
           tracing::warn!(err = ?e, "failed to send metric event ingress request");
+        } else {
+          tracing::info!(
+            event_count = events.len(),
+            index_id,
+            "sent metric event batch"
+          );
         }
       }
       Err(e) => {
@@ -75,87 +125,5 @@ impl MetricsService {
         );
       }
     };
-
-    Ok(())
-  }
-}
-
-fn to_unix_timestamp_nanos<S: Serializer>(
-  datetime: &UtcDateTime,
-  s: S,
-) -> Result<S::Ok, S::Error> {
-  s.serialize_i128(datetime.unix_timestamp_nanos())
-}
-
-fn from_unix_timestamp_nanos<'de, D: Deserializer<'de>>(
-  d: D,
-) -> Result<UtcDateTime, D::Error> {
-  UtcDateTime::from_unix_timestamp_nanos(i128::deserialize(d)?)
-    .map_err(serde::de::Error::custom)
-}
-
-/// An egress usage event.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EgressEvent {
-  /// The timestamp of the event. This represents the completion of the event.
-  #[serde(
-    serialize_with = "to_unix_timestamp_nanos",
-    deserialize_with = "from_unix_timestamp_nanos"
-  )]
-  pub timestamp:  UtcDateTime,
-  /// The ID of the entry being downloaded.
-  pub entry_id:   RecordId<Entry>,
-  /// The nix store path of the entry being downloaded.
-  pub entry_path: String,
-  /// The ID of the cache of the entry being downloaded.
-  pub cache_id:   RecordId<Cache>,
-  /// The ID of the store of the entry being downloaded.
-  pub store_id:   RecordId<Store>,
-  /// The ID of the org of the entry being downloaded.
-  pub org_id:     RecordId<Org>,
-  /// The number of bytes served during the egress event.
-  pub byte_count: u64,
-}
-
-/// An egress usage event without a timestamp.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TimelessEgressEvent {
-  /// The ID of the entry being downloaded.
-  pub entry_id:   RecordId<Entry>,
-  /// The nix store path of the entry being downloaded.
-  pub entry_path: String,
-  /// The ID of the cache of the entry being downloaded.
-  pub cache_id:   RecordId<Cache>,
-  /// The ID of the store of the entry being downloaded.
-  pub store_id:   RecordId<Store>,
-  /// The ID of the org of the entry being downloaded.
-  pub org_id:     RecordId<Org>,
-  /// The number of bytes served during the egress event.
-  pub byte_count: u64,
-}
-
-impl TimelessEgressEvent {
-  /// Makes an [`EgressEvent`] out of a [`TimelessEgressEvent`] with the current
-  /// time.
-  pub fn stamp_with_now(self) -> EgressEvent {
-    EgressEvent {
-      timestamp:  UtcDateTime::now(),
-      entry_id:   self.entry_id,
-      entry_path: self.entry_path,
-      cache_id:   self.cache_id,
-      store_id:   self.store_id,
-      org_id:     self.org_id,
-      byte_count: self.byte_count,
-    }
-  }
-}
-
-impl MetricsService {
-  /// Sends an egress usage event to the aggregator.
-  pub async fn send_egress_event(
-    &self,
-    event: &EgressEvent,
-  ) -> miette::Result<()> {
-    self.send_event(event, EGRESS_EVENT_INDEX_ID).await
   }
 }

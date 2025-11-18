@@ -2964,14 +2964,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "metrics"
+version = "0.1.0"
+dependencies = [
+ "models",
+ "serde",
+ "time",
+]
+
+[[package]]
 name = "metrics-domain"
 version = "0.1.0"
 dependencies = [
+ "metrics",
  "miette",
  "models",
  "reqwest",
  "serde",
+ "serde_json",
  "time",
+ "tokio",
  "tracing",
 ]
 

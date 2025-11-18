@@ -52,11 +52,21 @@ pub async fn download(
   let download_resp = app_state.domain.execute_download(download_plan).await;
 
   match download_resp {
-    Ok(DownloadResponse { data, file_size }) => (
-      [(CONTENT_LENGTH, file_size.inner().to_string())],
-      Body::from_stream(data),
-    )
-      .into_response(),
+    Ok(DownloadResponse {
+      data,
+      file_size,
+      egress_event,
+    }) => {
+      app_state
+        .domain
+        .send_metric_event(egress_event.stamp_with_now(file_size.inner()))
+        .await;
+      (
+        [(CONTENT_LENGTH, file_size.inner().to_string())],
+        Body::from_stream(data),
+      )
+        .into_response()
+    }
     Err(err) => format!("{err:#?}").into_response(),
   }
 }
