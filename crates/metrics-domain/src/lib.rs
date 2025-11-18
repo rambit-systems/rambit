@@ -4,7 +4,7 @@
 
 mod batcher;
 
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 pub use metrics;
 use metrics::Metric;
@@ -17,7 +17,7 @@ use self::batcher::{BatchConfig, Batcher};
 /// Contains metrics and usage reporting logic.
 #[derive(Clone)]
 pub struct MetricsService {
-  batcher: Batcher,
+  batcher: Arc<Batcher>,
 }
 
 impl fmt::Debug for MetricsService {
@@ -43,7 +43,9 @@ impl MetricsService {
 
     tokio::spawn(Self::handle_batches(client, config, rx));
 
-    Ok(Self { batcher })
+    Ok(Self {
+      batcher: Arc::new(batcher),
+    })
   }
 
   /// Creates a new [`MetricsService`] from environment variables.
