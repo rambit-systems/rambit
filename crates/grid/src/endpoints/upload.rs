@@ -65,7 +65,16 @@ pub async fn upload(
     }
   };
   match app_state.domain.execute_upload(upload_plan).await {
-    Ok(resp) => Json(resp).into_response(),
+    Ok(resp) => {
+      app_state
+        .metrics_domain
+        .send_event(resp.compute_event)
+        .await;
+      Json(serde_json::json!({
+        "entry_id": resp.entry_id,
+      }))
+      .into_response()
+    }
     Err(err) => format!("{err:?}").into_response(),
   }
 }

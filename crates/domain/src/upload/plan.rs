@@ -1,5 +1,6 @@
 use belt::Belt;
 use meta_domain::SearchByUserError;
+use metrics::compute::UnstampedComputeEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Cache, Digest, EntityName, Entry, NarDeriverData, Org, RecordId, Store,
@@ -14,17 +15,19 @@ use crate::DomainService;
 #[derive(Debug)]
 pub struct UploadPlan {
   /// The data to be uploaded.
-  pub(crate) nar_contents: Belt,
+  pub(crate) nar_contents:  Belt,
   /// The store path of the entry.
-  pub(crate) store_path:   StorePath<String>,
+  pub(crate) store_path:    StorePath<String>,
   /// The store to store the data in.
-  pub(crate) target_store: Store,
+  pub(crate) target_store:  Store,
   /// The org that everything is scoped to.
-  pub(crate) org_id:       RecordId<Org>,
+  pub(crate) org_id:        RecordId<Org>,
   /// The caches for the entry to be registered in.
-  pub(crate) caches:       Vec<Cache>,
+  pub(crate) caches:        Vec<Cache>,
   /// Data about the NAR's deriver
-  pub(crate) deriver_data: NarDeriverData,
+  pub(crate) deriver_data:  NarDeriverData,
+  /// The compute event to be sent.
+  pub(crate) compute_event: UnstampedComputeEvent,
 }
 
 /// The error enum produced by [`plan_upload`](DomainService::plan_upload) fn.
@@ -174,6 +177,12 @@ impl DomainService {
       }
     }
 
+    let compute_event = UnstampedComputeEvent {
+      entry_path: req.store_path.clone().to_absolute_path(),
+      org_id,
+      op_type: metrics::compute::OperationType::Upload,
+    };
+
     Ok(UploadPlan {
       nar_contents: req.nar_contents,
       store_path: req.store_path,
@@ -181,6 +190,7 @@ impl DomainService {
       org_id,
       caches,
       deriver_data: req.deriver_data,
+      compute_event,
     })
   }
 }

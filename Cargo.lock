@@ -1945,6 +1945,7 @@ dependencies = [
  "metrics-domain",
  "miette",
  "serde",
+ "serde_json",
  "site-app",
  "tokio",
  "tower",

@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use belt::Belt;
+use metrics::compute::ComputeEvent;
 use miette::{Context, IntoDiagnostic};
 use models::{
   CompressionStatus, Entry, FileSize, NarAuthenticityData, NarStorageData,
@@ -18,7 +19,9 @@ use crate::DomainService;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadResponse {
   /// The ID of the created entry.
-  pub entry_id: RecordId<Entry>,
+  pub entry_id:      RecordId<Entry>,
+  /// The compute event to be sent.
+  pub compute_event: ComputeEvent,
 }
 
 /// The error enum for the [`execute_upload`](DomainService::execute_upload)
@@ -56,6 +59,7 @@ impl DomainService {
       .instrument(info_span!("collect_big_terrible_buffer"))
       .await
       .map_err(UploadExecutionError::InputDataError)?;
+    let byte_count = big_terrible_buffer.len();
 
     // validate the NAR and gather intrensic data
     let nar_interrogator = owl::NarInterrogator;
@@ -124,6 +128,13 @@ impl DomainService {
       .context("failed to create entry")
       .map_err(UploadExecutionError::InternalError)?;
 
-    Ok(UploadResponse { entry_id })
+    let compute_event = plan
+      .compute_event
+      .stamp_with_now(entry_id, byte_count.try_into().unwrap());
+
+    Ok(UploadResponse {
+      entry_id,
+      compute_event,
+    })
   }
 }
