@@ -34,7 +34,7 @@ impl Metric for EgressEvent {
   const INDEX_ID: &str = "egress-event";
 }
 
-/// An egress usage event without a timestamp.
+/// An egress usage event prepared beforehand.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnstampedEgressEvent {
   /// The ID of the entry being downloaded.
@@ -50,8 +50,8 @@ pub struct UnstampedEgressEvent {
 }
 
 impl UnstampedEgressEvent {
-  /// Makes an [`EgressEvent`] out of a [`TimelessEgressEvent`] with the
-  /// current time.
+  /// Makes an [`EgressEvent`] out of a [`UnstampedEgressEvent`] with the
+  /// remaining information and timestamp.
   pub fn stamp_with_now(self, byte_count: u64) -> EgressEvent {
     let timestamp = UtcDateTime::now();
     EgressEvent {
