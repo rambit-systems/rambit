@@ -2,10 +2,10 @@ use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use domain::{
   DomainService, billing_domain::BillingService, db::Database,
-  meta_domain::MetaService, metrics_domain::MetricsService,
-  mutate_domain::MutationService,
+  meta_domain::MetaService, mutate_domain::MutationService,
 };
 use leptos::config::LeptosOptions;
+use metrics_domain::MetricsService;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
@@ -13,6 +13,7 @@ use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 pub struct AppState {
   pub auth_domain:    AuthDomainService,
   pub domain:         DomainService,
+  pub metrics_domain: MetricsService,
   pub session_store:  DatabaseSessionStore,
   pub leptos_options: LeptosOptions,
 }
@@ -69,12 +70,7 @@ impl AppState {
       mutate_domain.clone(),
       billing_domain.clone(),
     );
-    let domain = DomainService::new(
-      meta_domain,
-      mutate_domain,
-      billing_domain,
-      metrics_domain,
-    );
+    let domain = DomainService::new(meta_domain, mutate_domain, billing_domain);
     let session_store = DatabaseSessionStore::new(session_db);
 
     let leptos_conf = leptos::prelude::get_configuration(None)
@@ -85,6 +81,7 @@ impl AppState {
     Ok(AppState {
       auth_domain,
       domain,
+      metrics_domain,
       session_store,
       leptos_options,
     })

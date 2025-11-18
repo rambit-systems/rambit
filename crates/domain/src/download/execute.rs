@@ -1,6 +1,6 @@
 use belt::Belt;
 use futures::TryStreamExt;
-use metrics_domain::metrics::egress::UnstampedEgressEvent;
+use metrics::egress::UnstampedEgressEvent;
 use miette::Context;
 use models::{CompressionStatus, FileSize};
 use storage::{BlobKey, BlobStorageError};

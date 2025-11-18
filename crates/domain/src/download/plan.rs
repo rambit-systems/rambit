@@ -1,4 +1,4 @@
-use metrics_domain::metrics::egress::UnstampedEgressEvent;
+use metrics::egress::UnstampedEgressEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{Digest, EntityName, Entry, Store, StorePath, Visibility};
 

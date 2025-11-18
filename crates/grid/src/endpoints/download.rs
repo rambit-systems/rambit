@@ -58,8 +58,8 @@ pub async fn download(
       egress_event,
     }) => {
       app_state
-        .domain
-        .send_metric_event(egress_event.stamp_with_now(file_size.inner()))
+        .metrics_domain
+        .send_event(egress_event.stamp_with_now(file_size.inner()))
         .await;
       (
         [(CONTENT_LENGTH, file_size.inner().to_string())],
