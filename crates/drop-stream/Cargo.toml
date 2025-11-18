@@ -1,0 +1,17 @@
+[package]
+name = "drop-stream"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+futures.workspace = true
+tokio = { workspace = true, features = [ "rt" ] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros" ] }
+
+[lints]
+workspace = true
