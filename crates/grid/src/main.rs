@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
           uri = %request.uri(),
       )
     })
-    .on_response(DefaultOnResponse::new().level(Level::INFO));
+    .on_response(DefaultOnResponse::new().level(Level::DEBUG));
 
   let session_layer = tower_sessions::SessionManagerLayer::new(
     CachingSessionStore::new(MemoryStore::default(), app_state.session_store),

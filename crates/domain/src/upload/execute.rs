@@ -41,7 +41,7 @@ pub enum UploadExecutionError {
 
 impl DomainService {
   /// Uploads a payload to storage, creates an entry, and adds it to a cache.
-  #[tracing::instrument(skip(self))]
+  #[tracing::instrument(skip(self, plan), fields(plan.store_path))]
   pub async fn execute_upload(
     &self,
     plan: UploadPlan,

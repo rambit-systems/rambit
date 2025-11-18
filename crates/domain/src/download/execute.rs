@@ -34,7 +34,7 @@ pub enum DownloadExecutionError {
 
 impl DomainService {
   /// Downloads an entry's payload from storage.
-  #[tracing::instrument(skip(self))]
+  #[tracing::instrument(skip(self, plan), fields(plan.entry.id, plan.entry.store_path))]
   pub async fn execute_download(
     &self,
     plan: DownloadPlan,
