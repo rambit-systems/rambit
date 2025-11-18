@@ -2963,6 +2963,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "metrics-domain"
+version = "0.1.0"
+dependencies = [
+ "miette",
+ "models",
+ "reqwest",
+ "serde",
+ "time",
+ "tracing",
+]
+
+[[package]]
 name = "miette"
 version = "7.6.0"
 source = "git+https://github.com/zkat/miette#df7bcfa17d9c0813286050ee245d5c3d94653f1c"

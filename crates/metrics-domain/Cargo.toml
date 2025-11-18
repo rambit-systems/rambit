@@ -1,0 +1,20 @@
+[package]
+name = "metrics-domain"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+models = { path = "../models" }
+
+miette.workspace = true
+serde.workspace = true
+time.workspace = true
+tracing.workspace = true
+
+reqwest = { version = "0.12", default-features = false, features = [ "rustls-tls", "json" ] }
+
+[lints]
+workspace = true

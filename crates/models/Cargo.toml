@@ -12,7 +12,7 @@ model-types = { path = "../model-types" }
 model.workspace = true
 
 nix-compat.workspace = true
-time = { version = "0.3", features = [ "serde" ] }
+time.workspace = true
 
 serde.workspace = true
 ulid.workspace = true

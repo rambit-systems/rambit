@@ -49,6 +49,7 @@ miette = { git = "https://github.com/zkat/miette", default-features = false, fea
 nix-compat = { git = "https://github.com/johnbchron/tvix", default-features = false }
 nix-nar = { version = "0.3" }
 sha256 = { version = "1.6", default-features = false }
+time = { version = "0.3", features = [ "serde" ] }
 
 # async
 async-trait = { version = "0.1" }
