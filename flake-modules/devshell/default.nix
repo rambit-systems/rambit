@@ -50,6 +50,7 @@
               -e PADDLE_API_KEY=$PADDLE_API_KEY \
               -e PADDLE_CLIENT_KEY=$PADDLE_CLIENT_KEY \
               -e PADDLE_SANDBOX=1 \
+              -e QUICKWIT_URL=$QUICKWIT_URL \
               grid:latest
           '';
           help = "Runs the site binary in a container.";
