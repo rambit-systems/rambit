@@ -9,7 +9,7 @@ use std::{fmt, sync::Arc};
 pub use metrics;
 use metrics::Metric;
 use miette::{Context, IntoDiagnostic};
-use reqwest::{Client, Url, header::CONTENT_TYPE};
+use reqwest::{Client, Response, Url, header::CONTENT_TYPE};
 use serde_json::Value;
 
 use self::batcher::{BatchConfig, Batcher};
@@ -71,6 +71,7 @@ impl MetricsService {
     tracing::info!(index_id = M::INDEX_ID, "receieved metric event");
   }
 
+  /// Long-running task that sends batches of events recieved from the `Batcher`
   async fn handle_batches(
     client: Client,
     config: MetricsConfig,
@@ -81,6 +82,7 @@ impl MetricsService {
     }
   }
 
+  /// Sends a batch of events to Quickwit
   #[tracing::instrument(skip(client, events))]
   async fn send_batch(
     client: &Client,
@@ -95,6 +97,7 @@ impl MetricsService {
       .context("failed to parse quickwit url")
       .unwrap();
 
+    // newline-delimited JSON records
     let body = events
       .iter()
       .map(serde_json::to_string)
@@ -102,23 +105,25 @@ impl MetricsService {
       .intersperse("\n".to_owned())
       .collect::<String>();
 
-    match client
+    // send the events
+    let result = client
       .post(url)
       .header(CONTENT_TYPE, "application/json")
       .body(body)
       .send()
-      .await
-    {
-      Ok(resp) => {
-        if let Err(e) = resp.error_for_status_ref() {
-          tracing::warn!(err = ?e, "failed to send metric event ingress request");
-        } else {
-          tracing::info!(
-            event_count = events.len(),
-            index_id,
-            "sent metric event batch"
-          );
-        }
+      .await;
+
+    // don't panic or propagate error, only log it
+    match result.map(Response::error_for_status) {
+      Ok(Err(e)) => {
+        tracing::warn!(err = ?e, "failed to send metric event ingress request");
+      }
+      Ok(Ok(_)) => {
+        tracing::info!(
+          event_count = events.len(),
+          index_id,
+          "sent metric event batch"
+        );
       }
       Err(e) => {
         tracing::warn!(
