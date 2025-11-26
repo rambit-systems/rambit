@@ -11,6 +11,7 @@ use metrics::Metric;
 use miette::{Context, IntoDiagnostic};
 use reqwest::{Client, Response, Url, header::CONTENT_TYPE};
 use serde_json::Value;
+use tokio::sync::mpsc;
 
 use self::batcher::{BatchConfig, Batcher};
 
@@ -27,7 +28,7 @@ impl fmt::Debug for MetricsService {
 }
 
 #[derive(Debug)]
-struct MetricsConfig {
+struct MetricsTxConfig {
   quickwit_url: Url,
 }
 
@@ -37,7 +38,7 @@ impl MetricsService {
     let quickwit_url = reqwest::Url::parse(quickwit_url)
       .into_diagnostic()
       .context("failed to parse quickwit url")?;
-    let config = MetricsConfig { quickwit_url };
+    let config = Arc::new(MetricsTxConfig { quickwit_url });
     let client = reqwest::Client::new();
     let (batcher, rx) = Batcher::new(BatchConfig::default());
 
@@ -74,21 +75,26 @@ impl MetricsService {
   /// Long-running task that sends batches of events recieved from the `Batcher`
   async fn handle_batches(
     client: Client,
-    config: MetricsConfig,
-    mut rx: tokio::sync::mpsc::Receiver<(&'static str, Vec<Value>)>,
+    config: Arc<MetricsTxConfig>,
+    mut rx: mpsc::Receiver<(&'static str, Vec<Value>)>,
   ) {
     while let Some((index_id, event_batch)) = rx.recv().await {
-      Self::send_batch(&client, &config, &event_batch, index_id).await;
+      tokio::spawn(Self::send_batch(
+        client.clone(),
+        config.clone(),
+        event_batch.into_boxed_slice(),
+        index_id,
+      ));
     }
   }
 
   /// Sends a batch of events to Quickwit
   #[tracing::instrument(skip(client, events))]
   async fn send_batch(
-    client: &Client,
-    config: &MetricsConfig,
-    events: &[Value],
-    index_id: &str,
+    client: Client,
+    config: Arc<MetricsTxConfig>,
+    events: Box<[Value]>,
+    index_id: &'static str,
   ) {
     let url = config
       .quickwit_url
