@@ -11,13 +11,14 @@ pub use metrics;
 use metrics::Metric;
 use miette::{Context, IntoDiagnostic};
 use reqwest::{Client, Url};
+use serde_json::Value;
 
-use self::batcher::{BatchConfig, Batcher};
+use self::batcher::{BatchConfig, CategoricalBatcher};
 
 /// Contains metrics and usage reporting logic.
 #[derive(Clone)]
 pub struct MetricsService {
-  batcher: Arc<Batcher>,
+  batcher: Arc<CategoricalBatcher<&'static str, Value>>,
   client:  Client,
 }
 
@@ -40,7 +41,7 @@ impl MetricsService {
       .context("failed to parse quickwit url")?;
     let config = Arc::new(MetricsTxConfig { quickwit_url });
     let client = reqwest::Client::new();
-    let (batcher, rx) = Batcher::new(BatchConfig::default());
+    let (batcher, rx) = CategoricalBatcher::new(BatchConfig::default());
 
     tokio::spawn(Self::handle_batches(client.clone(), config, rx));
 
