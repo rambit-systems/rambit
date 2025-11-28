@@ -694,6 +694,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "category-batcher"
+version = "0.1.0"
+dependencies = [
+ "tokio",
+]
+
+[[package]]
 name = "cc"
 version = "1.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3003,6 +3010,7 @@ dependencies = [
 name = "metrics-domain"
 version = "0.1.0"
 dependencies = [
+ "category-batcher",
  "metrics",
  "miette",
  "models",

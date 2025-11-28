@@ -2,24 +2,22 @@
 
 //! Metrics and usage reporting logic.
 
-mod batcher;
 mod handle_batches;
 
 use std::{fmt, sync::Arc};
 
+use category_batcher::{BatchConfig, CategoricalBatcher};
 pub use metrics;
 use metrics::Metric;
 use miette::{Context, IntoDiagnostic};
 use reqwest::{Client, Url};
 use serde_json::Value;
 
-use self::batcher::{BatchConfig, CategoricalBatcher};
-
 /// Contains metrics and usage reporting logic.
 #[derive(Clone)]
 pub struct MetricsService {
   batcher: Arc<CategoricalBatcher<&'static str, Value>>,
-  client:  Client,
+  _client: Client,
 }
 
 impl fmt::Debug for MetricsService {
@@ -47,7 +45,7 @@ impl MetricsService {
 
     Ok(Self {
       batcher: Arc::new(batcher),
-      client,
+      _client: client,
     })
   }
 
@@ -65,12 +63,22 @@ impl MetricsService {
     let event = match serde_json::to_value(&event) {
       Ok(event) => event,
       Err(e) => {
-        tracing::error!(err = ?e, "failed to serialize metric event");
+        tracing::error!(
+          index_id = M::INDEX_ID,
+          err = ?e,
+          "failed to serialize metric event"
+        );
         return;
       }
     };
 
-    self.batcher.add(M::INDEX_ID, event).await;
+    let _ = self.batcher.add(M::INDEX_ID, event).await.inspect_err(|e| {
+      tracing::error!(
+        index_id = M::INDEX_ID,
+        err = ?e,
+        "failed to send metric event to batcher"
+      );
+    });
     tracing::info!(index_id = M::INDEX_ID, "receieved metric event");
   }
 }

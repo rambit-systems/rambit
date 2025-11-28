@@ -1,0 +1,16 @@
+[package]
+name = "category-batcher"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+publish = false
+
+[dependencies]
+tokio = { workspace = true, features = [ "sync" ] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = [ "sync", "macros", "rt-multi-thread" ] }
+
+[lints]
+workspace = true
