@@ -12,22 +12,32 @@ doc_mapping:
       output_format: unix_timestamp_millis
       fast_precision: seconds
       fast: true
+
     - name: entry_id
       type: text
       tokenizer: raw
+      fast: true
+
     - name: entry_path
       type: text
       tokenizer: raw
+      fast: true
+
     - name: cache_id
       type: text
       tokenizer: raw
+      fast: true
+
     - name: store_id
       type: text
       tokenizer: raw
+      fast: true
+
     - name: org_id
       type: text
       tokenizer: raw
       fast: true
+
     - name: byte_count
       type: u64
       fast: true

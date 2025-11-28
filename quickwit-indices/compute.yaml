@@ -12,23 +12,31 @@ doc_mapping:
       output_format: unix_timestamp_millis
       fast_precision: seconds
       fast: true
+
     - name: entry_id
       type: text
       tokenizer: raw
+      fast: true
+
     - name: entry_path
       type: text
       tokenizer: raw
+      fast: true
+
     - name: org_id
       type: text
       tokenizer: raw
       fast: true
+
     - name: byte_count
       type: u64
       fast: true
+
     - name: op_type
       type: text
       tokenizer: raw
       fast: true
+
   tag_fields: ["org_id", "op_type"]
   timestamp_field: timestamp
 
