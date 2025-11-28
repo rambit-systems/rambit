@@ -1500,7 +1500,7 @@ dependencies = [
  "db",
  "futures",
  "meta-domain",
- "metrics",
+ "metrics-types",
  "miette",
  "models",
  "mutate-domain",
@@ -2998,20 +2998,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "metrics"
-version = "0.1.0"
-dependencies = [
- "models",
- "serde",
- "time",
-]
-
-[[package]]
 name = "metrics-domain"
 version = "0.1.0"
 dependencies = [
  "category-batcher",
- "metrics",
+ "metrics-types",
  "miette",
  "models",
  "reqwest",
@@ -3020,6 +3011,15 @@ dependencies = [
  "time",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "metrics-types"
+version = "0.1.0"
+dependencies = [
+ "models",
+ "serde",
+ "time",
 ]
 
 [[package]]

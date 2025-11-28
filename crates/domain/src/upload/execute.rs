@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use belt::Belt;
-use metrics::compute::ComputeUsageEvent;
+use metrics_types::compute::ComputeUsageEvent;
 use miette::{Context, IntoDiagnostic};
 use models::{
   CompressionStatus, Entry, FileSize, NarAuthenticityData, NarStorageData,

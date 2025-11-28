@@ -1,6 +1,6 @@
 use belt::Belt;
 use meta_domain::SearchByUserError;
-use metrics::compute::UnstampedComputeUsageEvent;
+use metrics_types::compute::UnstampedComputeUsageEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Cache, Digest, EntityName, Entry, NarDeriverData, Org, RecordId, Store,
@@ -180,7 +180,7 @@ impl DomainService {
     let compute_event = UnstampedComputeUsageEvent {
       entry_path: req.store_path.clone().to_absolute_path(),
       org_id,
-      op_type: metrics::compute::OperationType::Upload,
+      op_type: metrics_types::compute::OperationType::Upload,
     };
 
     Ok(UploadPlan {

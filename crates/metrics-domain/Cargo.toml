@@ -8,7 +8,7 @@ publish = false
 
 [dependencies]
 category-batcher = { path = "../category-batcher" }
-metrics = { path = "../metrics" }
+metrics-types = { path = "../metrics-types" }
 models = { path = "../models" }
 
 miette.workspace = true

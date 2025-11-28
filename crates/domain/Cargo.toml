@@ -9,7 +9,7 @@ publish = false
 [dependencies]
 billing-domain = { path = "../billing-domain" }
 meta-domain = { path = "../meta-domain" }
-metrics = { path = "../metrics" }
+metrics-types = { path = "../metrics-types" }
 models = { path = "../models" }
 mutate-domain = { path = "../mutate-domain" }
 owl = { path = "../owl" }

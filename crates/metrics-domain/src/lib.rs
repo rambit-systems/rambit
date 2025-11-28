@@ -7,8 +7,8 @@ mod handle_batches;
 use std::{fmt, sync::Arc};
 
 use category_batcher::{BatchConfig, CategoricalBatcher};
-pub use metrics;
-use metrics::Metric;
+pub use metrics_types;
+use metrics_types::Metric;
 use miette::{Context, IntoDiagnostic};
 use reqwest::{Client, Url};
 use serde_json::Value;
