@@ -17,13 +17,12 @@ use leptos_axum::LeptosRoutes;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::{
   compression::{CompressionLayer, DefaultPredicate, Predicate},
-  trace::{DefaultOnResponse, TraceLayer},
   request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
+  trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
 };
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
 };
-use tracing::{Level, info_span};
 
 use self::{
   app_state::AppState,
@@ -35,6 +34,7 @@ use self::{
     cache_on_success::CacheOnSuccessLayer,
     compression_predicate::NotForFailureStatus,
     make_ulid_request_id::MakeUlidRequestId,
+    on_response_metric_reporter::MetricReporterOnResponse,
   },
 };
 
@@ -73,14 +73,12 @@ async fn main() -> Result<()> {
 
   // build tower service
   let trace_layer = TraceLayer::new_for_http()
-    .make_span_with(|request: &http::Request<_>| {
-      info_span!(
-          "http_request",
-          method = %request.method(),
-          uri = %request.uri(),
-      )
-    })
-    .on_response(DefaultOnResponse::new().level(Level::DEBUG));
+    .make_span_with(DefaultMakeSpan::new().include_headers(true))
+    .on_response(MetricReporterOnResponse::new(
+      DefaultOnResponse::new(),
+      app_state.metrics_domain.clone(),
+      app_state.node_meta.clone(),
+    ));
 
   // request ID layers
   let set_request_id_layer = SetRequestIdLayer::x_request_id(MakeUlidRequestId);

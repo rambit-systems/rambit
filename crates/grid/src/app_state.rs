@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use domain::{
@@ -9,6 +11,29 @@ use metrics_domain::MetricsService;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
+#[derive(Debug)]
+pub struct NodeMeta {
+  pub environment: String,
+  pub host_name:   String,
+}
+
+impl NodeMeta {
+  pub fn from_env() -> miette::Result<Self> {
+    let env = std::env::var("GRID_ENV")
+      .into_diagnostic()
+      .context("`GRID_ENV` env var not populated")?;
+
+    let host_name = gethostname::gethostname()
+      .into_string()
+      .map_err(|_| miette::miette!("hostname was not unicode"))?;
+
+    Ok(NodeMeta {
+      environment: env,
+      host_name,
+    })
+  }
+}
+
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
   pub auth_domain:    AuthDomainService,
@@ -16,6 +41,7 @@ pub struct AppState {
   pub metrics_domain: MetricsService,
   pub session_store:  DatabaseSessionStore,
   pub leptos_options: LeptosOptions,
+  pub node_meta:      Arc<NodeMeta>,
 }
 
 impl AppState {
@@ -78,12 +104,17 @@ impl AppState {
       .context("failed to prepare leptos config")?;
     let leptos_options = leptos_conf.leptos_options;
 
+    let node_meta =
+      NodeMeta::from_env().context("failed to collect node metadata")?;
+    let node_meta = Arc::new(node_meta);
+
     Ok(AppState {
       auth_domain,
       domain,
       metrics_domain,
       session_store,
       leptos_options,
+      node_meta,
     })
   }
 }

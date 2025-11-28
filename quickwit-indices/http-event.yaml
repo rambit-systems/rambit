@@ -1,0 +1,128 @@
+
+version: 0.8
+
+index_id: http-event
+
+doc_mapping:
+  field_mappings:
+    # Common fields across all event types
+    - name: event_type
+      type: text
+      tokenizer: raw
+      fast: true
+      # Values: "request", "response", "error"
+    
+    - name: timestamp
+      type: datetime
+      input_formats:
+        - unix_timestamp
+      output_format: unix_timestamp_millis
+      fast: true
+      indexed: true
+    
+    - name: request_id
+      type: text
+      tokenizer: raw
+      fast: true
+      indexed: true
+    
+    # Request fields
+    - name: method
+      type: text
+      tokenizer: raw
+      fast: true
+    
+    - name: path
+      type: text
+      tokenizer: default
+      record: position
+    
+    - name: uri
+      type: text
+      tokenizer: raw
+      stored: true
+    
+    - name: client_ip
+      type: ip
+      fast: true
+      indexed: true
+    
+    - name: user_agent
+      type: text
+      tokenizer: default
+      stored: true
+    
+    # Response fields
+    - name: status_code
+      type: u64
+      fast: true
+      indexed: true
+    
+    - name: latency_micros
+      type: u64
+      fast: true
+      indexed: true
+    
+    - name: response_size_bytes
+      type: u64
+      fast: true
+    
+    # Error fields
+    - name: error_type
+      type: text
+      tokenizer: raw
+      fast: true
+    
+    - name: error_message
+      type: text
+      tokenizer: default
+      record: position
+      stored: true
+    
+    # Optional: custom labels/metadata
+    - name: service_name
+      type: text
+      tokenizer: raw
+      fast: true
+    
+    - name: environment
+      type: text
+      tokenizer: raw
+      fast: true
+    
+    - name: host
+      type: text
+      tokenizer: raw
+      fast: true
+    
+  # Timestamp field for time-based partitioning
+  timestamp_field: timestamp
+  
+  # Optional: tag fields for efficient filtering
+  tag_fields:
+    - event_type
+    - method
+    - service_name
+    - environment
+
+# Indexing settings
+indexing_settings:
+  commit_timeout_secs: 10
+  merge_policy:
+    type: stable_log
+    merge_factor: 10
+    max_merge_factor: 12
+  resources:
+    heap_size: 2GB
+
+# Search settings
+search_settings:
+  default_search_fields:
+    - path
+    - error_message
+    - user_agent
+
+# Retention policy (optional)
+retention:
+  period: 30 days
+  schedule: daily

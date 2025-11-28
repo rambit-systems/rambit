@@ -2,9 +2,10 @@
 
 pub mod compute;
 pub mod egress;
+pub mod http;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use time::UtcDateTime;
+pub use time::UtcDateTime;
 
 /// A trait for describing metrics.
 pub trait Metric: Serialize {
