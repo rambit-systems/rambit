@@ -18,6 +18,7 @@ use miette::{Context, IntoDiagnostic, Result};
 use tower_http::{
   compression::{CompressionLayer, DefaultPredicate, Predicate},
   trace::{DefaultOnResponse, TraceLayer},
+  request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
 };
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
@@ -33,6 +34,7 @@ use self::{
   middleware::{
     cache_on_success::CacheOnSuccessLayer,
     compression_predicate::NotForFailureStatus,
+    make_ulid_request_id::MakeUlidRequestId,
   },
 };
 
@@ -80,6 +82,10 @@ async fn main() -> Result<()> {
     })
     .on_response(DefaultOnResponse::new().level(Level::DEBUG));
 
+  // request ID layers
+  let set_request_id_layer = SetRequestIdLayer::x_request_id(MakeUlidRequestId);
+  let propagate_request_id_layer = PropagateRequestIdLayer::x_request_id();
+
   let session_layer = tower_sessions::SessionManagerLayer::new(
     CachingSessionStore::new(MemoryStore::default(), app_state.session_store),
   )
@@ -88,7 +94,11 @@ async fn main() -> Result<()> {
   let auth_layer =
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
 
-  let service = router.layer(trace_layer).layer(auth_layer);
+  let service = router
+    .layer(propagate_request_id_layer)
+    .layer(trace_layer)
+    .layer(set_request_id_layer)
+    .layer(auth_layer);
 
   let addr = format!("{host}:{port}", host = args.host, port = args.port);
   let listener = tokio::net::TcpListener::bind(&addr)
