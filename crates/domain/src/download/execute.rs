@@ -1,6 +1,6 @@
 use belt::Belt;
 use futures::TryStreamExt;
-use metrics::egress::UnstampedEgressEvent;
+use metrics::egress::UnstampedEgressUsageEvent;
 use miette::Context;
 use models::{CompressionStatus, FileSize};
 use storage::{BlobKey, BlobStorageError};
@@ -17,7 +17,7 @@ pub struct DownloadResponse {
   /// The file size of the data being downloaded.
   pub file_size:    FileSize,
   /// The egress event to be sent.
-  pub egress_event: UnstampedEgressEvent,
+  pub egress_event: UnstampedEgressUsageEvent,
 }
 
 /// The error enum for the [`execute_download`](DomainService::execute_download)

@@ -1,6 +1,6 @@
 use belt::Belt;
 use meta_domain::SearchByUserError;
-use metrics::compute::UnstampedComputeEvent;
+use metrics::compute::UnstampedComputeUsageEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{
   Cache, Digest, EntityName, Entry, NarDeriverData, Org, RecordId, Store,
@@ -27,7 +27,7 @@ pub struct UploadPlan {
   /// Data about the NAR's deriver
   pub(crate) deriver_data:  NarDeriverData,
   /// The compute event to be sent.
-  pub(crate) compute_event: UnstampedComputeEvent,
+  pub(crate) compute_event: UnstampedComputeUsageEvent,
 }
 
 /// The error enum produced by [`plan_upload`](DomainService::plan_upload) fn.
@@ -177,7 +177,7 @@ impl DomainService {
       }
     }
 
-    let compute_event = UnstampedComputeEvent {
+    let compute_event = UnstampedComputeUsageEvent {
       entry_path: req.store_path.clone().to_absolute_path(),
       org_id,
       op_type: metrics::compute::OperationType::Upload,

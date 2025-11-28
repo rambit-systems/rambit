@@ -1,4 +1,4 @@
-use metrics::egress::UnstampedEgressEvent;
+use metrics::egress::UnstampedEgressUsageEvent;
 use miette::{Context, IntoDiagnostic, miette};
 use models::{Digest, EntityName, Entry, Store, StorePath, Visibility};
 
@@ -13,7 +13,7 @@ pub struct DownloadPlan {
   /// The store the entry resides in.
   pub(crate) store:        Store,
   /// The egress event to be sent.
-  pub(crate) egress_event: UnstampedEgressEvent,
+  pub(crate) egress_event: UnstampedEgressUsageEvent,
 }
 
 /// The error enum for the [`plan_download`](DomainService::plan_download) fn.
@@ -114,7 +114,7 @@ impl DomainService {
       .ok_or(miette!("store not found"))
       .map_err(DownloadPlanningError::InternalError)?;
 
-    let egress_event = UnstampedEgressEvent {
+    let egress_event = UnstampedEgressUsageEvent {
       entry_id:   entry.id,
       entry_path: entry.store_path.to_absolute_path(),
       cache_id:   cache.id,

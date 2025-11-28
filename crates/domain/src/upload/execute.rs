@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use belt::Belt;
-use metrics::compute::ComputeEvent;
+use metrics::compute::ComputeUsageEvent;
 use miette::{Context, IntoDiagnostic};
 use models::{
   CompressionStatus, Entry, FileSize, NarAuthenticityData, NarStorageData,
@@ -21,7 +21,7 @@ pub struct UploadResponse {
   /// The ID of the created entry.
   pub entry_id:      RecordId<Entry>,
   /// The compute event to be sent.
-  pub compute_event: ComputeEvent,
+  pub compute_event: ComputeUsageEvent,
 }
 
 /// The error enum for the [`execute_upload`](DomainService::execute_upload)

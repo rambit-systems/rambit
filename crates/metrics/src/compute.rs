@@ -8,7 +8,7 @@ use crate::{Metric, from_unix_timestamp_nanos, to_unix_timestamp_nanos};
 
 /// An compute usage event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ComputeEvent {
+pub struct ComputeUsageEvent {
   /// The timestamp of the event. This represents the completion of the
   /// event.
   #[serde(
@@ -36,13 +36,13 @@ pub enum OperationType {
   Upload,
 }
 
-impl Metric for ComputeEvent {
+impl Metric for ComputeUsageEvent {
   const INDEX_ID: &str = "compute-event";
 }
 
 /// A compute usage event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UnstampedComputeEvent {
+pub struct UnstampedComputeUsageEvent {
   /// The nix store path of the entry being downloaded.
   pub entry_path: String,
   /// The ID of the org of the entry being downloaded.
@@ -51,16 +51,16 @@ pub struct UnstampedComputeEvent {
   pub op_type:    OperationType,
 }
 
-impl UnstampedComputeEvent {
+impl UnstampedComputeUsageEvent {
   /// Makes a [`ComputeEvent`] out of a [`UnstampedComputeEvent`] with the
   /// remaining information and timestamp.
   pub fn stamp_with_now(
     self,
     entry_id: RecordId<Entry>,
     byte_count: u64,
-  ) -> ComputeEvent {
+  ) -> ComputeUsageEvent {
     let timestamp = UtcDateTime::now();
-    ComputeEvent {
+    ComputeUsageEvent {
       timestamp,
       entry_id,
       entry_path: self.entry_path,

@@ -8,7 +8,7 @@ use crate::{Metric, from_unix_timestamp_nanos, to_unix_timestamp_nanos};
 
 /// An egress usage event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EgressEvent {
+pub struct EgressUsageEvent {
   /// The timestamp of the event. This represents the completion of the
   /// event.
   #[serde(
@@ -30,13 +30,13 @@ pub struct EgressEvent {
   pub byte_count: u64,
 }
 
-impl Metric for EgressEvent {
+impl Metric for EgressUsageEvent {
   const INDEX_ID: &str = "egress-event";
 }
 
 /// An egress usage event prepared beforehand.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UnstampedEgressEvent {
+pub struct UnstampedEgressUsageEvent {
   /// The ID of the entry being downloaded.
   pub entry_id:   RecordId<Entry>,
   /// The nix store path of the entry being downloaded.
@@ -49,12 +49,12 @@ pub struct UnstampedEgressEvent {
   pub org_id:     RecordId<Org>,
 }
 
-impl UnstampedEgressEvent {
+impl UnstampedEgressUsageEvent {
   /// Makes an [`EgressEvent`] out of a [`UnstampedEgressEvent`] with the
   /// remaining information and timestamp.
-  pub fn stamp_with_now(self, byte_count: u64) -> EgressEvent {
+  pub fn stamp_with_now(self, byte_count: u64) -> EgressUsageEvent {
     let timestamp = UtcDateTime::now();
-    EgressEvent {
+    EgressUsageEvent {
       timestamp,
       entry_id: self.entry_id,
       entry_path: self.entry_path,
