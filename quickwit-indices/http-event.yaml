@@ -42,8 +42,9 @@ doc_mapping:
       tokenizer: raw
       stored: true
     
-    - name: client_ip
-      type: ip
+    - name: origin
+      type: text
+      tokenizer: raw
       fast: true
       indexed: true
     

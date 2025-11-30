@@ -18,7 +18,7 @@ use miette::{Context, IntoDiagnostic, Result};
 use tower_http::{
   compression::{CompressionLayer, DefaultPredicate, Predicate},
   request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
-  trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+  trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
 };
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
@@ -34,6 +34,7 @@ use self::{
     cache_on_success::CacheOnSuccessLayer,
     compression_predicate::NotForFailureStatus,
     make_ulid_request_id::MakeUlidRequestId,
+    on_request_metric_reporter::MetricReporterOnRequest,
     on_response_metric_reporter::MetricReporterOnResponse,
   },
 };
@@ -74,6 +75,11 @@ async fn main() -> Result<()> {
   // build tower service
   let trace_layer = TraceLayer::new_for_http()
     .make_span_with(DefaultMakeSpan::new().include_headers(true))
+    .on_request(MetricReporterOnRequest::new(
+      DefaultOnRequest::new(),
+      app_state.metrics_domain.clone(),
+      app_state.node_meta.clone(),
+    ))
     .on_response(MetricReporterOnResponse::new(
       DefaultOnResponse::new(),
       app_state.metrics_domain.clone(),

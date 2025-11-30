@@ -8,10 +8,7 @@ use metrics_domain::{
     http::{EventDetails, HttpEvent, ResponseDetails},
   },
 };
-use tower_http::{
-  request_id::RequestId,
-  trace::{DefaultOnResponse, OnResponse},
-};
+use tower_http::trace::{DefaultOnResponse, OnResponse};
 
 use crate::app_state::NodeMeta;
 
@@ -45,17 +42,9 @@ impl<B> OnResponse<B> for MetricReporterOnResponse {
   ) {
     self.inner.on_response(response, latency, span);
 
-    // extract request ID from response extension
-    let Some(request_id) = response.extensions().get::<RequestId>() else {
-      tracing::warn!("could not extract request ID from response extensions");
-      return;
-    };
-    let Ok(request_id) = request_id.header_value().to_str() else {
-      tracing::warn!("invalid characters in request ID");
-      return;
-    };
-    let Ok(request_id) = request_id.parse() else {
-      tracing::warn!("failed to parse request ID as ULID");
+    let Some(request_id) =
+      super::utils::extract_request_id_from_extensions(response.extensions())
+    else {
       return;
     };
 

@@ -1,6 +1,6 @@
 //! Types for HTTP events.
 
-use std::{net::IpAddr, time::Duration};
+use std::time::Duration;
 
 use models::model::Ulid;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -69,10 +69,12 @@ pub struct RequestDetails {
   pub path:       String,
   /// The URI requested.
   pub uri:        String,
-  /// The IP of the client sending the request.
-  pub client_ip:  IpAddr,
+  /// The origin of the client sending the request.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub origin:     Option<String>,
   /// The user agent used by the client sending the request.
-  pub user_agent: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub user_agent: Option<String>,
 }
 
 /// Details of a response event.
