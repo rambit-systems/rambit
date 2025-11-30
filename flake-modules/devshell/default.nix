@@ -46,6 +46,7 @@
             docker load -i $(nix build .#grid-container --print-out-paths --no-link) && \
             docker run \
               --rm --network host \
+              -e GRID_ENV='dev' \
               -e POSTGRES_URL='postgresql://postgres:password@localhost:6432/main' \
               -e PADDLE_API_KEY=$PADDLE_API_KEY \
               -e PADDLE_CLIENT_KEY=$PADDLE_CLIENT_KEY \
