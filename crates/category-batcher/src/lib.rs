@@ -51,36 +51,6 @@ impl std::error::Error for BatchError {}
 
 /// A batching mechanism that groups values by category and flushes them
 /// based on size or time thresholds.
-///
-/// # Guarantees
-/// - Values within the same group are flushed in the order they were added.
-/// - No ordering guarantees exist between different groups.
-/// - On shutdown, all pending batches are flushed before the receiver closes.
-///
-/// # Example
-/// ```no_run
-/// use std::time::Duration;
-///
-/// # async fn example() {
-/// let config = BatchConfig {
-///   max_size: 10,
-///   max_time: Duration::from_secs(1),
-///   ..Default::default()
-/// };
-///
-/// let (batcher, mut receiver) = CategoricalBatcher::new(config);
-///
-/// // Add values
-/// let _ = batcher.add("group1", "value1").await.unwrap();
-/// let _ = batcher.add("group1", "value2").await.unwrap();
-/// let _ = batcher.add("group2", "value3").await.unwrap();
-///
-/// // Receive batches
-/// while let Some((group, values)) = receiver.recv().await {
-///   println!("Received {} values for group {}", values.len(), group);
-/// }
-/// # }
-/// ```
 #[derive(Clone)]
 pub struct CategoricalBatcher<G, V> {
   tx: mpsc::Sender<(G, V)>,

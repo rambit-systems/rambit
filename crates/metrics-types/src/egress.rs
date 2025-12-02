@@ -50,8 +50,8 @@ pub struct UnstampedEgressUsageEvent {
 }
 
 impl UnstampedEgressUsageEvent {
-  /// Makes an [`EgressEvent`] out of a [`UnstampedEgressEvent`] with the
-  /// remaining information and timestamp.
+  /// Makes an [`EgressUsageEvent`] out of a [`UnstampedEgressUsageEvent`] with
+  /// the remaining information and timestamp.
   pub fn stamp_with_now(self, byte_count: u64) -> EgressUsageEvent {
     let timestamp = UtcDateTime::now();
     EgressUsageEvent {

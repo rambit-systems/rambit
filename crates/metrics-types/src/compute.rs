@@ -52,8 +52,8 @@ pub struct UnstampedComputeUsageEvent {
 }
 
 impl UnstampedComputeUsageEvent {
-  /// Makes a [`ComputeEvent`] out of a [`UnstampedComputeEvent`] with the
-  /// remaining information and timestamp.
+  /// Makes a [`ComputeUsageEvent`] out of a [`UnstampedComputeUsageEvent`] with
+  /// the remaining information and timestamp.
   pub fn stamp_with_now(
     self,
     entry_id: RecordId<Entry>,
