@@ -13,5 +13,9 @@ min_machines_running = 0
 # axum is http2-enabled
 http_options.h2_backend = true
 
+[env]
+GRID_ENV = "staging"
+RUST_LOG = "info,grid=debug,domain=debug,tower_http=debug"
+
 [[vm]]
 size = 'shared-cpu-1x'
