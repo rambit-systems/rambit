@@ -16,11 +16,13 @@ cmd = [ "run" ]
 # Required secrets:
 # - AWS_ACCESS_KEY_ID (R2 access key)
 # - AWS_SECRET_ACCESS_KEY (R2 secret key)
-# - AWS_ENDPOINT_URL (R2 endpoint)
+# - QW_S3_ENDPOINT (R2 endpoint)
 AWS_REGION = 'auto'
+# QW_S3_FORCE_PATH_STYLE_ACCESS = true
+
 QW_CLUSTER_ID = 'quickwit-cluster'
 QW_DATA_DIR = '/quickwit/qwdata'
-QW_DEFAULT_INDEX_ROOT_URI = 's3://rambit-quickwit/indexes'
+QW_DEFAULT_INDEX_ROOT_URI = 's3://rambit-quickwit'
 QW_LISTEN_ADDRESS = '::'
 QW_NODE_ID = 'node-1'
 
