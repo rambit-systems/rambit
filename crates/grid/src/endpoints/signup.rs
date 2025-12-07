@@ -1,6 +1,9 @@
-use auth_domain::{AuthDomainService, AuthSession};
+use auth_domain::AuthSession;
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use domain::models::{EmailAddress, HumanName, UserSubmittedAuthCredentials};
+use domain::{
+  DomainService,
+  models::{EmailAddress, HumanName, UserSubmittedAuthCredentials},
+};
 use serde::Deserialize;
 
 use crate::util_traits::InternalError;
@@ -15,7 +18,7 @@ pub struct SignupParams {
 #[axum::debug_handler]
 pub async fn signup(
   mut auth_session: AuthSession,
-  State(auth_domain_service): State<AuthDomainService>,
+  State(domain_service): State<DomainService>,
   Json(params): Json<SignupParams>,
 ) -> impl IntoResponse {
   let Some(name) = params.name else {
@@ -56,7 +59,7 @@ pub async fn signup(
 
   let creds = UserSubmittedAuthCredentials::Password { password };
 
-  if let Err(e) = auth_domain_service
+  if let Err(e) = domain_service
     .user_signup(name, email.clone(), creds.clone())
     .await
   {

@@ -9,9 +9,7 @@ publish = false
 [dependencies]
 models = { path = "../models" }
 
-billing-domain = { path = "../billing-domain" }
-meta-domain = { path = "../meta-domain" }
-mutate-domain = { path = "../mutate-domain" }
+domain = { path = "../domain" }
 
 miette.workspace = true
 thiserror.workspace = true
@@ -19,7 +17,6 @@ thiserror.workspace = true
 tokio = { workspace = true, features = [ "sync" ] }
 tracing.workspace = true
 
-argon2 = "0.5.3"
 async-trait.workspace = true
 axum-login.workspace = true
 

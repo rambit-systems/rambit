@@ -158,13 +158,13 @@ fn ExtraRows() -> impl IntoView {
 pub async fn switch_active_org(
   new_active_org: RecordId<Org>,
 ) -> Result<RecordId<Org>, ServerFnError> {
-  use auth_domain::{AuthDomainService, UpdateActiveOrgError};
+  use domain::{DomainService, UpdateActiveOrgError};
 
   let auth_user = crate::resources::authenticate()?;
 
-  let auth_domain_service: AuthDomainService = expect_context();
+  let domain_service: DomainService = expect_context();
 
-  auth_domain_service
+  domain_service
     .switch_active_org(auth_user.id, new_active_org)
     .await
     .map_err(|e| match e {

@@ -2,6 +2,7 @@
 
 use db::DatabaseError;
 use models::{Org, RecordId, User};
+use mutate_domain::UpdateActiveOrgError;
 
 use crate::DomainService;
 
@@ -64,5 +65,16 @@ impl DomainService {
     self.mutate.patch_user(&new_user).await?;
 
     Ok(())
+  }
+}
+
+impl DomainService {
+  /// Switches the active org of a [`User`].
+  pub async fn switch_active_org(
+    &self,
+    user: RecordId<User>,
+    new_active_org: RecordId<Org>,
+  ) -> Result<RecordId<Org>, UpdateActiveOrgError> {
+    self.mutate.switch_active_org(user, new_active_org).await
   }
 }

@@ -18,6 +18,7 @@ belt.workspace = true
 db.workspace = true
 storage.workspace = true
 
+argon2 = "0.5"
 bytes.workspace = true
 futures.workspace = true
 miette.workspace = true

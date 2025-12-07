@@ -308,14 +308,11 @@ dependencies = [
 name = "auth-domain"
 version = "0.1.0"
 dependencies = [
- "argon2",
  "async-trait",
  "axum-login",
- "billing-domain",
- "meta-domain",
+ "domain",
  "miette",
  "models",
- "mutate-domain",
  "thiserror 2.0.16",
  "tokio",
  "tracing",
@@ -1494,6 +1491,7 @@ dependencies = [
 name = "domain"
 version = "0.1.0"
 dependencies = [
+ "argon2",
  "belt",
  "billing-domain",
  "bytes",

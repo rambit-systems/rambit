@@ -91,12 +91,8 @@ impl AppState {
     let metrics_domain = MetricsService::new_from_env()
       .context("failed to create MetricService")?;
 
-    let auth_domain = AuthDomainService::new(
-      meta_domain.clone(),
-      mutate_domain.clone(),
-      billing_domain.clone(),
-    );
     let domain = DomainService::new(meta_domain, mutate_domain, billing_domain);
+    let auth_domain = AuthDomainService::new(domain.clone());
     let session_store = DatabaseSessionStore::new(session_db);
 
     let leptos_conf = leptos::prelude::get_configuration(None)

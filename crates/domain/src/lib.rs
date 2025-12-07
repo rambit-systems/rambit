@@ -1,5 +1,6 @@
 //! Entrypoint for domain logic.
 
+pub mod authenticate;
 mod billing;
 mod create;
 mod delete_entry;
@@ -17,8 +18,8 @@ pub use db;
 pub use meta_domain;
 use meta_domain::MetaService;
 pub use models;
-pub use mutate_domain;
 use mutate_domain::MutationService;
+pub use mutate_domain::{self, UpdateActiveOrgError};
 
 /// The domain service type.
 #[derive(Debug, Clone)]
