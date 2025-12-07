@@ -25,6 +25,7 @@ fn LoginIsland() -> impl IntoView {
     signup_trigger.run(());
   };
   let show_spinner = login_hook.show_spinner();
+  let error_feedback = login_hook.feedback_error_text();
 
   let _ = login_hook.create_redirect_effect();
 
@@ -57,17 +58,24 @@ fn LoginIsland() -> impl IntoView {
         />
       </div>
 
-      <label class="flex flex-row gap-2">
-        <input type="submit" class="hidden" />
-        <button class="btn btn-primary w-full max-w-80 justify-between">
-          <div class="size-4" />
-          { login_hook.button_text() }
-          <LoadingCircle {..}
-            class="size-4 transition-opacity"
-            class=("opacity-0", move || { !show_spinner() })
-          />
-        </button>
-      </label>
+      <div class="flex flex-col gap-4">
+        <label class="flex flex-row gap-2">
+          <input type="submit" class="hidden" />
+          <button class="btn btn-primary w-full max-w-80 justify-between">
+            <div class="size-4" />
+            { login_hook.button_text() }
+            <LoadingCircle {..}
+              class="size-4 transition-opacity"
+              class=("opacity-0", move || { !show_spinner() })
+            />
+          </button>
+        </label>
+        { move || error_feedback().map(move |text| view! {
+          <p class="animate-fade-down text-critical-11 text-sm">
+            { text }
+          </p>
+        })}
+      </div>
     </form>
   }
 }

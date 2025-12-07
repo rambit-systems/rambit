@@ -120,6 +120,16 @@ impl LoginHook {
     })
   }
 
+  pub fn feedback_error_text(&self) -> Signal<Option<&'static str>> {
+    let value = self.action.value();
+    Signal::derive(move || match value.get() {
+      Some(Ok(true)) => None,
+      Some(Ok(false)) => Some("The credentials you entered don't match."),
+      Some(Err(_)) => Some("Login failed. Please try again later."),
+      None => None,
+    })
+  }
+
   pub fn action_trigger(&self) -> Callback<()> {
     let submit_touched_signal = self.submit_touched_signal;
     let email_error_hint = self.email_error_hint();
