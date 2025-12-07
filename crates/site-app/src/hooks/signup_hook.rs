@@ -176,6 +176,16 @@ impl SignupHook {
     })
   }
 
+  pub fn feedback_error_text(&self) -> Signal<Option<&'static str>> {
+    let value = self.action.value();
+    Signal::derive(move || match value.get() {
+      Some(Ok(true)) => None,
+      Some(Ok(false)) => Some("That email address is taken."),
+      Some(Err(_)) => Some("Signup failed. Please try again later."),
+      None => None,
+    })
+  }
+
   pub fn action_trigger(&self) -> Callback<()> {
     let submit_touched_signal = self.submit_touched_signal;
     let name_error_hint = self.name_error_hint();
