@@ -7,7 +7,7 @@ license-file.workspace = true
 publish = false
 
 [dependencies]
-category-batcher = { path = "../category-batcher" }
+catbat = { path = "../catbat" }
 metrics-types = { path = "../metrics-types" }
 models = { path = "../models" }
 

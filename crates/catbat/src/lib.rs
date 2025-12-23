@@ -1,4 +1,4 @@
-//! A category-based async batcher.
+//! A *Cat*egory-based async *Bat*cher.
 
 use std::{
   collections::HashMap,

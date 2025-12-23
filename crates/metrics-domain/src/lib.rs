@@ -6,7 +6,7 @@ mod handle_batches;
 
 use std::{fmt, sync::Arc};
 
-use category_batcher::{BatchConfig, CategoricalBatcher};
+use catbat::{BatchConfig, CategoricalBatcher};
 pub use metrics_types;
 use metrics_types::Metric;
 use miette::{Context, IntoDiagnostic};

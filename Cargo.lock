@@ -691,7 +691,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "category-batcher"
+name = "catbat"
 version = "0.1.0"
 dependencies = [
  "tokio",
@@ -3010,7 +3010,7 @@ dependencies = [
 name = "metrics-domain"
 version = "0.1.0"
 dependencies = [
- "category-batcher",
+ "catbat",
  "metrics-types",
  "miette",
  "models",
