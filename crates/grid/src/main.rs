@@ -2,17 +2,15 @@
 
 //! The server-side entrypoint for Rambit.
 
-mod app_state;
 mod args;
-mod endpoints;
 mod handlers;
 mod middleware;
 mod tracing_subscribers;
-mod util_traits;
 
 use axum::{Router, handler::Handler, routing::post};
 use axum_login::AuthManagerLayerBuilder;
 use clap::Parser;
+use grid_state::AppState;
 use leptos_axum::LeptosRoutes;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_http::{
@@ -25,7 +23,6 @@ use tower_sessions::{
 };
 
 use self::{
-  app_state::AppState,
   args::CliArgs,
   handlers::{
     leptos_fallback_handler, leptos_routes_handler, server_fn_handler,
@@ -60,7 +57,7 @@ async fn main() -> Result<()> {
 
   // build router
   let router = Router::new()
-    .nest("/api/v1", self::endpoints::router())
+    .nest("/api/v1", gridpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
     .route("/api/sfn/{*fn_name}", post(server_fn_handler))
     .fallback(

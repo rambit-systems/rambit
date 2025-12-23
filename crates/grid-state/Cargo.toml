@@ -1,0 +1,23 @@
+[package]
+name = "grid-state"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+
+[dependencies]
+auth-domain = { path = "../auth-domain" }
+domain = { path = "../domain" }
+metrics-domain = { path = "../metrics-domain" }
+tower-sessions-db-store = { path = "../tower-sessions-db-store" }
+
+db = { workspace = true }
+
+axum.workspace = true
+leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+
+gethostname = { version = "1.1" }
+miette.workspace = true
+
+[lints]
+workspace = true

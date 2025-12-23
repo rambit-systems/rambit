@@ -1,3 +1,5 @@
+//! App state for the grid service.
+
 use std::sync::Arc;
 
 use auth_domain::AuthDomainService;
@@ -11,13 +13,17 @@ use metrics_domain::MetricsService;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
 
+/// Metadata for a node serving the grid service.
 #[derive(Debug)]
 pub struct NodeMeta {
+  /// A string descriptor of the node's environment (dev, staging, prod, etc.).
   pub environment: String,
+  /// The name of the node host.
   pub host_name:   String,
 }
 
 impl NodeMeta {
+  /// Collect [`NodeMeta`] from the runtime environment.
   pub fn from_env() -> miette::Result<Self> {
     let env = std::env::var("GRID_ENV")
       .into_diagnostic()
@@ -34,17 +40,25 @@ impl NodeMeta {
   }
 }
 
+/// The state of a running grid service.
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
+  /// The auth domain service.
   pub auth_domain:    AuthDomainService,
+  /// The prime domain service.
   pub domain:         DomainService,
+  /// The metrics domain service.
   pub metrics_domain: MetricsService,
+  /// The user session store.
   pub session_store:  DatabaseSessionStore,
+  /// Options for leptos.
   pub leptos_options: LeptosOptions,
+  /// The node metadata.
   pub node_meta:      Arc<NodeMeta>,
 }
 
 impl AppState {
+  /// Builds the [`AppState`].
   pub async fn build() -> Result<Self> {
     let (org_db, user_db, store_db, entry_db, cache_db, session_db) = {
       let url = std::env::var("POSTGRES_URL")

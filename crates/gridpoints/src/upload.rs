@@ -8,13 +8,13 @@ use axum::{
   response::IntoResponse,
 };
 use domain::{belt::Belt, models::NarDeriverData, upload::UploadRequest};
+use grid_state::AppState;
 use http_body_util::BodyExt;
 
 use super::extractors::{
   CacheListExtractor, DeriverStorePathExtractor, StorePathExtractor,
   TargetStoreExtractor, UserAuthExtractor,
 };
-use crate::app_state::AppState;
 
 #[allow(clippy::too_many_arguments)]
 #[axum::debug_handler]

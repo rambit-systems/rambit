@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use grid_state::NodeMeta;
 use http::header::CONTENT_LENGTH;
 use metrics_domain::{
   MetricsService,
@@ -9,8 +10,6 @@ use metrics_domain::{
   },
 };
 use tower_http::trace::{DefaultOnResponse, OnResponse};
-
-use crate::app_state::NodeMeta;
 
 #[derive(Clone, Debug)]
 pub struct MetricReporterOnResponse {

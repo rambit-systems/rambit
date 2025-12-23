@@ -6,9 +6,9 @@ use axum::{
   response::IntoResponse,
 };
 use domain::{models::Digest, narinfo::NarinfoRequest};
+use grid_state::AppState;
 
 use super::extractors::{CacheNameExtractor, UserAuthExtractor};
-use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn narinfo(

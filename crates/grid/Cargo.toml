@@ -10,6 +10,8 @@ publish = false
 auth-domain = { path = "../auth-domain" }
 domain = { path = "../domain" }
 drop-stream = { path = "../drop-stream" }
+grid-state = { path = "../grid-state" }
+gridpoints = { path = "../gridpoints" }
 metrics-domain = { path = "../metrics-domain" }
 site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
 tower-sessions-db-store = { path = "../tower-sessions-db-store" }

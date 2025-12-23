@@ -5,9 +5,8 @@ use axum::{
   http::Uri,
   response::IntoResponse,
 };
+use grid_state::AppState;
 use leptos::prelude::provide_context;
-
-use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn leptos_routes_handler(

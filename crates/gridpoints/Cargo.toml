@@ -1,0 +1,23 @@
+[package]
+name = "gridpoints"
+version = "0.1.0"
+
+edition = "2024"
+license-file.workspace = true
+
+[dependencies]
+auth-domain = { path = "../auth-domain" }
+domain = { path = "../domain" }
+drop-stream = { path = "../drop-stream" }
+grid-state = { path = "../grid-state" }
+
+axum.workspace = true
+http = { version = "1" }
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+
+http-body-util = { version = "0.1.3" }
+
+[lints]
+workspace = true

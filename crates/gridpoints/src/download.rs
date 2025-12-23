@@ -11,9 +11,9 @@ use domain::{
   models::StorePath,
 };
 use drop_stream::StreamDropCallbackExt;
+use grid_state::AppState;
 
 use super::extractors::{CacheNameExtractor, UserAuthExtractor};
-use crate::app_state::AppState;
 
 #[axum::debug_handler]
 pub async fn download(

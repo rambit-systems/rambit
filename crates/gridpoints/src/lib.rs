@@ -1,3 +1,7 @@
+//! Endpoints for the grid service.
+
+#![feature(iterator_try_collect)]
+
 mod authenticate;
 mod download;
 mod extractors;
@@ -5,6 +9,7 @@ mod narinfo;
 mod nix_cache_info;
 mod signup;
 mod upload;
+mod util_traits;
 
 use axum::{
   Json, Router,
@@ -12,7 +17,9 @@ use axum::{
   response::IntoResponse,
   routing::{get, post},
 };
+use grid_state::AppState;
 
+pub use self::util_traits::*;
 use self::{
   authenticate::{authenticate, deauthenticate},
   download::download,
@@ -21,22 +28,22 @@ use self::{
   signup::signup,
   upload::upload,
 };
-use crate::app_state::AppState;
 
 #[axum::debug_handler]
-pub async fn root() -> impl IntoResponse {
+async fn root() -> impl IntoResponse {
   "You've reached the root endpoint of the Rambit API.\nYou probably meant to \
    go somewhere else."
 }
 
 #[axum::debug_handler]
-pub async fn health() -> impl IntoResponse { Json(true) }
+async fn health() -> impl IntoResponse { Json(true) }
 
 #[axum::debug_handler]
-pub async fn fallback() -> impl IntoResponse {
+async fn fallback() -> impl IntoResponse {
   (StatusCode::NOT_FOUND, "endpoint not found")
 }
 
+/// Builds the grid router.
 pub fn router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
