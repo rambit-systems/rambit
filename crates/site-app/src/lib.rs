@@ -33,21 +33,21 @@ const FAVICON_SVG: &str = include_str!("../public/favicon.svg");
 const FAVICON_SVG_BASE64: &str =
   const_base::encode_as_str!(FAVICON_SVG, const_base::Config::B64);
 
-pub fn shell(options: LeptosOptions) -> impl IntoView {
+pub fn shell() -> impl IntoView {
   view! {
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <AutoReload options=options.clone() />
-        <HydrationScripts options={options.clone()} islands=true />
+        // <AutoReload options=options.clone() />
+        // <HydrationScripts options={options.clone()} islands=true />
 
         { PRELOAD_FONT_PATHS.iter().map(|p| view! {
           <link rel="preload" href={*p} as="font" type="font/woff2" crossorigin="anonymous" />
         }).collect_view() }
 
-        <HashedStylesheet options id="leptos" />
+        // <HashedStylesheet options id="leptos" />
         <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
         <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
         <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>

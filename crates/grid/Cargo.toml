@@ -1,10 +1,32 @@
 [package]
 name = "grid"
 version = "0.1.0"
+
 edition = "2024"
 license-file.workspace = true
 
 [dependencies]
+auth-domain = { path = "../auth-domain" }
+grid-endpoints = { path = "../grid-endpoints" }
+grid-state = { path = "../grid-state" }
+site-app = { path = "../site-app", default-features = false, features = [ "ssr" ] }
+
+leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos_axum.workspace = true
+leptos_router.workspace = true
+
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = [ "env-filter", "json" ] }
+
+axum.workspace = true
+axum-login.workspace = true
+http = { version = "1" }
+tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
+tower.workspace = true
+tower-http = { workspace = true, features = [ "trace", "compression-full", "request-id" ] }
+tower-sessions.workspace = true
+
+miette = { workspace = true, features = [ "fancy" ] }
 
 [lints]
 workspace = true

@@ -1950,31 +1950,19 @@ dependencies = [
  "auth-domain",
  "axum",
  "axum-login",
- "clap",
- "db",
- "domain",
- "drop-stream",
- "gethostname",
  "grid-endpoints",
  "grid-state",
  "http",
- "http-body",
- "http-body-util",
  "leptos",
  "leptos_axum",
  "leptos_router",
- "metrics-domain",
  "miette",
- "serde",
- "serde_json",
  "site-app",
  "tokio",
  "tower",
  "tower-http",
  "tower-sessions",
- "tower-sessions-db-store",
  "tracing",
- "tracing-chrome",
  "tracing-subscriber",
 ]
 
@@ -3424,6 +3412,41 @@ checksum = "ed0423ff9973dea4d6bd075934fdda86ebb8c05bdf9d6b0507067d4a1226371d"
 dependencies = [
  "serde",
  "thiserror 2.0.16",
+]
+
+[[package]]
+name = "old-grid"
+version = "0.1.0"
+dependencies = [
+ "auth-domain",
+ "axum",
+ "axum-login",
+ "clap",
+ "db",
+ "domain",
+ "drop-stream",
+ "gethostname",
+ "grid-endpoints",
+ "grid-state",
+ "http",
+ "http-body",
+ "http-body-util",
+ "leptos",
+ "leptos_axum",
+ "leptos_router",
+ "metrics-domain",
+ "miette",
+ "serde",
+ "serde_json",
+ "site-app",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower-sessions",
+ "tower-sessions-db-store",
+ "tracing",
+ "tracing-chrome",
+ "tracing-subscriber",
 ]
 
 [[package]]

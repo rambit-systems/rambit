@@ -8,7 +8,6 @@ use domain::{
   DomainService, billing_domain::BillingService, db::Database,
   meta_domain::MetaService, mutate_domain::MutationService,
 };
-use leptos::config::LeptosOptions;
 use metrics_domain::MetricsService;
 use miette::{Context, IntoDiagnostic, Result};
 use tower_sessions_db_store::DatabaseStore as DatabaseSessionStore;
@@ -43,16 +42,14 @@ impl NodeMeta {
 /// The state of a running grid service.
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
-  /// The auth domain service.
-  pub auth_domain:    AuthDomainService,
   /// The prime domain service.
   pub domain:         DomainService,
+  /// The auth domain service.
+  pub auth_domain:    AuthDomainService,
   /// The metrics domain service.
   pub metrics_domain: MetricsService,
   /// The user session store.
   pub session_store:  DatabaseSessionStore,
-  /// Options for leptos.
-  pub leptos_options: LeptosOptions,
   /// The node metadata.
   pub node_meta:      Arc<NodeMeta>,
 }
@@ -109,21 +106,15 @@ impl AppState {
     let auth_domain = AuthDomainService::new(domain.clone());
     let session_store = DatabaseSessionStore::new(session_db);
 
-    let leptos_conf = leptos::prelude::get_configuration(None)
-      .into_diagnostic()
-      .context("failed to prepare leptos config")?;
-    let leptos_options = leptos_conf.leptos_options;
-
     let node_meta =
       NodeMeta::from_env().context("failed to collect node metadata")?;
     let node_meta = Arc::new(node_meta);
 
     Ok(AppState {
-      auth_domain,
       domain,
+      auth_domain,
       metrics_domain,
       session_store,
-      leptos_options,
       node_meta,
     })
   }
