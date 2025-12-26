@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
 
   // build router
   let router = Router::new()
-    .nest("/api/v1", gridpoints::router())
+    .nest("/api/v1", grid_endpoints::router())
     .leptos_routes_with_handler(routes, leptos_routes_handler)
     .route("/api/sfn/{*fn_name}", post(server_fn_handler))
     .fallback(

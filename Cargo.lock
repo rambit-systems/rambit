@@ -1955,8 +1955,8 @@ dependencies = [
  "domain",
  "drop-stream",
  "gethostname",
+ "grid-endpoints",
  "grid-state",
- "gridpoints",
  "http",
  "http-body",
  "http-body-util",
@@ -1979,22 +1979,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "grid-state"
-version = "0.1.0"
-dependencies = [
- "auth-domain",
- "axum",
- "db",
- "domain",
- "gethostname",
- "leptos",
- "metrics-domain",
- "miette",
- "tower-sessions-db-store",
-]
-
-[[package]]
-name = "gridpoints"
+name = "grid-endpoints"
 version = "0.1.0"
 dependencies = [
  "auth-domain",
@@ -2007,6 +1992,21 @@ dependencies = [
  "serde",
  "serde_json",
  "tracing",
+]
+
+[[package]]
+name = "grid-state"
+version = "0.1.0"
+dependencies = [
+ "auth-domain",
+ "axum",
+ "db",
+ "domain",
+ "gethostname",
+ "leptos",
+ "metrics-domain",
+ "miette",
+ "tower-sessions-db-store",
 ]
 
 [[package]]
