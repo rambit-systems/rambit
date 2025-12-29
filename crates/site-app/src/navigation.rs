@@ -47,22 +47,19 @@ pub fn navigate_to(path: &str) {
 
 /// Gets the next URL if it's already set or sets it to the current page.
 pub fn next_url_string_hook() -> Signal<String> {
-  #[cfg(not(feature = "ssr"))]
-  use leptos_router::location::LocationProvider;
+  // use leptos_router::location::LocationProvider;
 
-  #[cfg(feature = "ssr")]
-  let current_url = leptos_router::hooks::use_url()();
-  #[cfg(not(feature = "ssr"))]
-  let current_url = leptos_router::location::BrowserUrl::current()
-    .expect("failed to get current browser url");
+  // let current_url = leptos_router::location::BrowserUrl::current()
+  //   .expect("failed to get current browser url");
 
-  Signal::stored(
-    current_url
-      .search_params()
-      .clone()
-      .get("next")
-      .unwrap_or(url_to_full_path(&current_url)),
-  )
+  // Signal::stored(
+  //   current_url
+  //     .search_params()
+  //     .clone()
+  //     .get("next")
+  //     .unwrap_or(url_to_full_path(&current_url)),
+  // )
+  Signal::stored(String::new())
 }
 
 /// Url-enccodes the next URL if it's already set or sets it to the current

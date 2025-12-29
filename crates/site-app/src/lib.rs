@@ -11,11 +11,10 @@ mod reactive_utils;
 mod resources;
 
 use css_minify_macro::include_css;
+use grid_state::AppState;
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use leptos_meta::{
-  provide_meta_context, HashedStylesheet, MetaTags, Style, Title,
-};
+use leptos_meta::{provide_meta_context, MetaTags, Style, Title};
 use leptos_router::{
   components::{ParentRoute, Route, Router, Routes},
   path,
@@ -34,20 +33,22 @@ const FAVICON_SVG_BASE64: &str =
   const_base::encode_as_str!(FAVICON_SVG, const_base::Config::B64);
 
 pub fn shell() -> impl IntoView {
+  let app_state = expect_context::<AppState>();
+  let stylesheet = app_state.serve_config.inlined_stylesheet.clone();
+
   view! {
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        // <AutoReload options=options.clone() />
-        // <HydrationScripts options={options.clone()} islands=true />
 
         { PRELOAD_FONT_PATHS.iter().map(|p| view! {
           <link rel="preload" href={*p} as="font" type="font/woff2" crossorigin="anonymous" />
         }).collect_view() }
 
-        // <HashedStylesheet options id="leptos" />
+        <style>{ stylesheet.as_ref() }</style>
+
         <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
         <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
         <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
@@ -103,15 +104,6 @@ pub fn App() -> impl IntoView {
         // <LeptosFetchDevtools />
       </PaddleProvider>
     </IslandContextProvider>
-  }
-}
-
-#[allow(dead_code)]
-#[island]
-fn LeptosFetchDevtools() -> impl IntoView {
-  let query_client = expect_context::<QueryClient>();
-  view! {
-    <leptos_fetch::QueryDevtools client=query_client/>
   }
 }
 

@@ -3,12 +3,9 @@ pub mod entry;
 pub mod org;
 pub mod store;
 
-#[cfg(feature = "ssr")]
 use leptos::prelude::*;
-#[cfg(feature = "ssr")]
 use models::{AuthUser, Org, RecordId};
 
-#[cfg(feature = "ssr")]
 pub fn authorize_for_org(
   org: RecordId<Org>,
 ) -> Result<AuthUser, ServerFnError> {
@@ -19,7 +16,6 @@ pub fn authorize_for_org(
   }
 }
 
-#[cfg(feature = "ssr")]
 pub fn authenticate() -> Result<AuthUser, ServerFnError> {
   use_context::<AuthUser>().ok_or(ServerFnError::new("Unauthorized"))
 }

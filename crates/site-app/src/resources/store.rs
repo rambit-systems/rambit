@@ -2,7 +2,6 @@ use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
 use models::{model::Model, Entry, Org, PvStore, RecordId, Store};
 
-#[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
 pub fn store(

@@ -2,7 +2,6 @@ use leptos::prelude::*;
 use leptos_fetch::QueryScope;
 use models::{model::Model, Entry, Org, RecordId};
 
-#[cfg(feature = "ssr")]
 use crate::resources::authorize_for_org;
 
 pub fn entry_query_scope(

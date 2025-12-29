@@ -1,23 +1,21 @@
 //! The server-side entrypoint for Rambit.
 
-use auth_domain::AuthSession;
-use axum::{
-  Router,
-  body::Body,
-  extract::{Request, State},
-  http::Method,
-  response::IntoResponse,
-  routing::get,
-};
+#![feature(unwrap_infallible)]
+
+mod handler;
+
+use axum::{self, Router, handler::Handler, routing::get};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
-use leptos::prelude::provide_context;
 use miette::{Context, IntoDiagnostic};
+use tower_http::services::ServeDir;
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
 };
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+
+use self::handler::{leptos_fallback_handler, leptos_routes_handler};
 
 fn setup_tracing() -> miette::Result<()> {
   let env_filter = EnvFilter::builder()
@@ -36,41 +34,6 @@ fn setup_tracing() -> miette::Result<()> {
   Ok(())
 }
 
-#[axum::debug_handler]
-async fn leptos_routes_handler(
-  auth_session: AuthSession,
-  method: Method,
-  State(app_state): State<AppState>,
-  request: Request<Body>,
-) -> axum::response::Response {
-  let handler = leptos_axum::render_app_to_stream_with_context(
-    move || {
-      let method = match method.clone() {
-        axum::http::Method::GET => leptos_router::Method::Get,
-        axum::http::Method::POST => leptos_router::Method::Post,
-        axum::http::Method::PUT => leptos_router::Method::Put,
-        axum::http::Method::PATCH => leptos_router::Method::Patch,
-        axum::http::Method::DELETE => leptos_router::Method::Delete,
-        verb => panic!("non-standard HTTP verb used in request: {verb}"),
-      };
-      provide_context(method);
-
-      provide_context(app_state.clone());
-
-      provide_context(app_state.domain.paddle_client_secret());
-      provide_context(app_state.domain.paddle_environment());
-
-      provide_context(auth_session.clone());
-      if let Some(auth_user) = auth_session.user.clone() {
-        provide_context(auth_user);
-      }
-    },
-    site_app::shell,
-  );
-
-  handler(request).await.into_response()
-}
-
 #[tokio::main]
 async fn main() -> miette::Result<()> {
   setup_tracing()?;
@@ -81,16 +44,25 @@ async fn main() -> miette::Result<()> {
     .await
     .context("failed to build app state")?;
 
+  // route API
   let mut router = Router::new().nest("/api/v1", grid_endpoints::router());
 
+  // route leptos routes
   for route_listing in routes {
     router = router.route(
       route_listing.path(),
-      get(leptos_routes_handler).post(leptos_routes_handler),
+      get(leptos_routes_handler)
+        .post(leptos_routes_handler)
+        .put(leptos_routes_handler)
+        .patch(leptos_routes_handler)
+        .delete(leptos_routes_handler),
     );
   }
 
-  let router = router.with_state(app_state.clone());
+  // add fallback and state
+  let router = router
+    .fallback(leptos_fallback_handler)
+    .with_state(app_state.clone());
 
   let session_layer = tower_sessions::SessionManagerLayer::new(
     CachingSessionStore::new(MemoryStore::default(), app_state.session_store),

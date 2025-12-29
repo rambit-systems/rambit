@@ -2,7 +2,6 @@ use leptos::prelude::*;
 use leptos_fetch::{QueryClient, QueryScope};
 use models::{model::Model, Cache, Entry, Org, PvCache, RecordId};
 
-#[cfg(feature = "ssr")]
 use crate::resources::{authenticate, authorize_for_org};
 
 pub fn cache(

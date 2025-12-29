@@ -1,6 +1,6 @@
 //! App state for the grid service.
 
-use std::sync::Arc;
+use std::{io::Read, path::PathBuf, sync::Arc};
 
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
@@ -39,6 +39,46 @@ impl NodeMeta {
   }
 }
 
+/// Configuration for serving HTTP responses.
+#[derive(Debug)]
+pub struct ServeConfig {
+  /// The directory to serve static assets out of.
+  pub static_asset_dir:   PathBuf,
+  /// The stylesheet to be inlined into the doc `<head>`.
+  pub inlined_stylesheet: Arc<str>,
+}
+
+impl ServeConfig {
+  /// Build [`ServeConfig`] from the runtime environment.
+  pub fn build() -> miette::Result<Self> {
+    let static_asset_dir = std::env::var("GRID_STATIC_ASSET_DIR")
+      .into_diagnostic()
+      .context("`GRID_STATIC_ASSET_DIR` env var not populated")?;
+    let static_asset_dir = PathBuf::from(static_asset_dir);
+
+    let stylesheet_path = std::env::var("GRID_STYLESHEET_PATH")
+      .into_diagnostic()
+      .context("`GRID_STYLESHEET_PATH` env var not populated")?;
+    let mut stylesheet_content = String::new();
+    match std::fs::File::open(&stylesheet_path) {
+      Ok(mut f) => {
+        f.read_to_string(&mut stylesheet_content)
+          .into_diagnostic()
+          .context("failed to read from stylesheet file")?;
+      }
+      Err(e) => {
+        tracing::warn!("failed to open stylesheet file: {e}");
+      }
+    };
+    let stylesheet_content = Arc::<str>::from(stylesheet_content);
+
+    Ok(ServeConfig {
+      static_asset_dir,
+      inlined_stylesheet: stylesheet_content,
+    })
+  }
+}
+
 /// The state of a running grid service.
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
@@ -52,6 +92,8 @@ pub struct AppState {
   pub session_store:  DatabaseSessionStore,
   /// The node metadata.
   pub node_meta:      Arc<NodeMeta>,
+  /// The HTTP serving configuration.
+  pub serve_config:   Arc<ServeConfig>,
 }
 
 impl AppState {
@@ -110,12 +152,17 @@ impl AppState {
       NodeMeta::from_env().context("failed to collect node metadata")?;
     let node_meta = Arc::new(node_meta);
 
+    let serve_config =
+      ServeConfig::build().context("failed to build serve config")?;
+    let serve_config = Arc::new(serve_config);
+
     Ok(AppState {
       domain,
       auth_domain,
       metrics_domain,
       session_store,
       node_meta,
+      serve_config,
     })
   }
 }
