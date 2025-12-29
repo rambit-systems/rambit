@@ -6,45 +6,20 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-leptos.workspace = true
-leptos_axum = { workspace = true, optional = true }
-leptos_meta.workspace = true
-leptos_router.workspace = true
+leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos_axum.workspace = true
+leptos_meta = { workspace = true, features = [ "ssr" ] }
+leptos_router = { workspace = true, features = [ "ssr" ] }
 
-auth-domain = { path = "../auth-domain", optional = true }
+auth-domain = { path = "../auth-domain" }
 css-minify-macro = { path = "../css-minify-macro" }
-domain = { path = "../domain", optional = true }
-models = { path = "../models", default-features = false }
-site-paddle = { path = "../site-paddle" }
+domain = { path = "../domain" }
+grid-state = { path = "../grid-state" }
+models = { path = "../models" }
+site-paddle = { path = "../site-paddle", features = [ "ssr" ] }
 
 serde.workspace = true
 tracing.workspace = true
 
 const_base = "0.2.0"
 gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
-leptos-fetch = { version = "0.4", features = [ "devtools" ] }
-leptos-use = { version = "0.16", default-features = false, features = [
-  "on_click_outside",
-  "signal_throttled",
-  "use_event_listener",
-  "use_window",
-  "use_interval_fn",
-  "use_window_focus",
-  "use_clipboard",
-] }
-
-[features]
-default = [  ]
-hydrate = [ "leptos/hydrate", "site-paddle/hydrate" ]
-ssr = [
-  "leptos/ssr",
-  "leptos/tracing",
-  "leptos_meta/ssr",
-  "leptos_router/ssr",
-  "leptos-fetch/ssr",
-  "leptos-use/ssr",
-  "site-paddle/ssr",
-  "dep:leptos_axum",
-  "dep:domain",
-  "dep:auth-domain",
-]
