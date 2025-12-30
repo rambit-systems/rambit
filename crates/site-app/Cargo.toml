@@ -16,7 +16,7 @@ css-minify-macro = { path = "../css-minify-macro" }
 domain = { path = "../domain" }
 grid-state = { path = "../grid-state" }
 models = { path = "../models" }
-site-paddle = { path = "../site-paddle", features = [ "ssr" ] }
+site-paddle = { path = "../site-paddle" }
 
 serde.workspace = true
 tracing.workspace = true

@@ -19,8 +19,7 @@ use leptos_router::{
   components::{ParentRoute, Route, Router, Routes},
   path,
 };
-use models::{AuthUser, PaddleClientSecret, PaddleEnvironment};
-use site_paddle::PaddleProvider;
+use site_paddle::PaddleSetup;
 
 use self::pages::*;
 
@@ -53,9 +52,16 @@ pub fn shell() -> impl IntoView {
         <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
         <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
 
+        <Title text="Rambit Labs — Never waste another build"/>
+
         <link
           rel="icon" type="image/svg+xml"
           href={format!("data:image/svg+xml;base64,{FAVICON_SVG_BASE64}")}
+        />
+
+        <PaddleSetup
+          env={ app_state.domain.paddle_environment() }
+          client_secret={ app_state.domain.paddle_client_secret() }
         />
 
         <MetaTags/>
@@ -73,37 +79,26 @@ pub fn App() -> impl IntoView {
   QueryClient::new().provide();
 
   view! {
-    <Title text="Rambit Labs — Never waste another build"/>
-
-    <IslandContextProvider
-      auth_user={ use_context() }
-      paddle_client_secret={ use_context() }
-      paddle_environment={ use_context() }
-    >
-      <PaddleProvider>
-        <Router>
-          <PageContainer>
-            <Routes fallback=|| "Page not found.".into_view()>
-              <Route path=path!("") view=HomePage/>
-              <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
-              <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
-              <Route path=path!("/org/create_org") view=protect(CreateOrgPage) />
-              <ParentRoute path=path!("/org/:org/settings") view=protect_by_org_owner(OrgSettingsPage)>
-                <Route path=path!("/") view=OrgSettingsSubPageOverview />
-                <Route path=path!("/billing") view=OrgSettingsSubPageBilling />
-              </ParentRoute>
-              <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
-              <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
-              <Route path=path!("/auth/signup") view=SignupPage />
-              <Route path=path!("/auth/login") view=LoginPage />
-              <Route path=path!("/auth/logout") view=LogoutPage />
-              <Route path=path!("/payment_link") view=PaymentLinkPage />
-            </Routes>
-          </PageContainer>
-        </Router>
-        // <LeptosFetchDevtools />
-      </PaddleProvider>
-    </IslandContextProvider>
+    <Router>
+      <PageContainer>
+        <Routes fallback=|| "Page not found.".into_view()>
+          <Route path=path!("") view=HomePage/>
+          <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
+          <Route path=path!("/org/:org/entry/:entry") view=protect_by_org(EntryPage) />
+          <Route path=path!("/org/create_org") view=protect(CreateOrgPage) />
+          <ParentRoute path=path!("/org/:org/settings") view=protect_by_org_owner(OrgSettingsPage)>
+            <Route path=path!("/") view=OrgSettingsSubPageOverview />
+            <Route path=path!("/billing") view=OrgSettingsSubPageBilling />
+          </ParentRoute>
+          <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
+          <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
+          <Route path=path!("/auth/signup") view=SignupPage />
+          <Route path=path!("/auth/login") view=LoginPage />
+          <Route path=path!("/auth/logout") view=LogoutPage />
+          <Route path=path!("/payment_link") view=PaymentLinkPage />
+        </Routes>
+      </PageContainer>
+    </Router>
   }
 }
 
@@ -119,26 +114,4 @@ fn PageContainer(children: Children) -> impl IntoView {
       </div>
     </main>
   }
-}
-
-#[island]
-fn IslandContextProvider(
-  auth_user: Option<AuthUser>,
-  paddle_client_secret: Option<PaddleClientSecret>,
-  paddle_environment: Option<PaddleEnvironment>,
-  children: Children,
-) -> impl IntoView {
-  provide_meta_context();
-  if let Some(auth_user) = auth_user {
-    provide_context(auth_user);
-  }
-  if let Some(paddle_client_secret) = paddle_client_secret {
-    provide_context(paddle_client_secret);
-  }
-  if let Some(paddle_environment) = paddle_environment {
-    provide_context(paddle_environment);
-  }
-  QueryClient::new().provide();
-
-  children()
 }

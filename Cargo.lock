@@ -4821,8 +4821,8 @@ name = "site-paddle"
 version = "0.1.0"
 dependencies = [
  "leptos",
- "leptos_meta",
  "models",
+ "serde_json",
 ]
 
 [[package]]
