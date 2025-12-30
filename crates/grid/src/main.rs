@@ -4,11 +4,10 @@
 
 mod handler;
 
-use axum::{self, Router, handler::Handler, routing::get};
+use axum::{self, Router, routing::get};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
 use miette::{Context, IntoDiagnostic};
-use tower_http::services::ServeDir;
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
 };

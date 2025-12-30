@@ -4,12 +4,11 @@ use axum::{
   body::Body,
   extract::{Request, State},
   handler::Handler,
-  http::Method,
   response::IntoResponse,
 };
+use axum_htmx::HxRequest;
 use grid_state::AppState;
-use http::Uri;
-use leptos::prelude::provide_context;
+use leptos::{either::Either, prelude::provide_context};
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 use tracing::debug;
@@ -66,14 +65,17 @@ async fn context_provider_from_request(
 #[axum::debug_handler]
 pub(crate) async fn leptos_routes_handler(
   State(app_state): State<AppState>,
+  HxRequest(hx_request): HxRequest,
   request: Request<Body>,
 ) -> impl IntoResponse {
   let (request, context_provider) =
     context_provider_from_request(State(app_state), request).await;
-  let handler = leptos_axum::render_app_to_stream_with_context(
-    context_provider,
-    site_app::shell,
-  );
+  let app_fn = move || match hx_request {
+    true => Either::Left(site_app::App()),
+    false => Either::Right(site_app::shell()),
+  };
+  let handler =
+    leptos_axum::render_app_to_stream_with_context(context_provider, app_fn);
 
   handler(request).await.into_response()
 }

@@ -19,6 +19,7 @@ tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = [ "env-filter", "json" ] }
 
 axum.workspace = true
+axum-htmx = "0.8.1"
 axum-login.workspace = true
 http = { version = "1" }
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
