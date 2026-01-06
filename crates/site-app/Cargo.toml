@@ -8,7 +8,6 @@ version = "0.1.0"
 [dependencies]
 leptos = { workspace = true, features = [ "ssr", "tracing" ] }
 leptos_axum.workspace = true
-leptos_meta = { workspace = true, features = [ "ssr" ] }
 leptos_router = { workspace = true, features = [ "ssr" ] }
 
 auth-domain = { path = "../auth-domain" }

@@ -4819,7 +4819,6 @@ dependencies = [
  "leptos-fetch",
  "leptos-use",
  "leptos_axum",
- "leptos_meta",
  "leptos_router",
  "models",
  "serde",

@@ -69,7 +69,6 @@ tower-sessions = { version = "0.14" }
 
 leptos = { version = "0.8", features = [ "nightly", "islands" ] }
 leptos_axum = { version = "0.8", features = [  ] }
-leptos_meta = { version = "0.8", features = [  ] }
 leptos_router = { version = "0.8", features = [ "nightly" ] }
 
 console_error_panic_hook = "0.1"

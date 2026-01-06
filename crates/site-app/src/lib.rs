@@ -14,7 +14,6 @@ use css_minify_macro::include_css;
 use grid_state::AppState;
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
-use leptos_meta::{provide_meta_context, MetaTags, Style, Title};
 use leptos_router::{
   components::{ParentRoute, Route, Router, Routes},
   path,
@@ -48,11 +47,11 @@ pub fn shell() -> impl IntoView {
 
         <style>{ stylesheet.as_ref() }</style>
 
-        <Style>{include_css!("style/fonts/funnel_sans.css")}</Style>
-        <Style>{include_css!("style/fonts/funnel_display.css")}</Style>
-        <Style>{include_css!("style/fonts/jetbrains_mono.css")}</Style>
+        <style>{include_css!("style/fonts/funnel_sans.css")}</style>
+        <style>{include_css!("style/fonts/funnel_display.css")}</style>
+        <style>{include_css!("style/fonts/jetbrains_mono.css")}</style>
 
-        <Title text="Rambit Labs — Never waste another build"/>
+        <title>"Rambit Labs — Never waste another build"</title>
 
         <link
           rel="icon" type="image/svg+xml"
@@ -63,8 +62,6 @@ pub fn shell() -> impl IntoView {
           env={ app_state.domain.paddle_environment() }
           client_secret={ app_state.domain.paddle_client_secret() }
         />
-
-        <MetaTags/>
       </head>
       <body>
         <App/>
@@ -75,7 +72,6 @@ pub fn shell() -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-  provide_meta_context();
   QueryClient::new().provide();
 
   view! {
