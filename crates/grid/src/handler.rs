@@ -1,6 +1,8 @@
+mod extract_form;
+
 use auth_domain::AuthSession;
 use axum::{
-  self, RequestExt,
+  self, Form, RequestExt,
   body::Body,
   extract::{Request, State},
   handler::Handler,
@@ -41,6 +43,10 @@ async fn context_provider_from_request(
     .extract_parts::<AuthSession>()
     .await
     .expect("failed to extract AuthSession from request");
+
+  let (request, form_data) =
+    self::extract_form::extract_form_data_from_body(request).await;
+
   let State(app_state) = app_state;
 
   (request, move || {
@@ -58,6 +64,11 @@ async fn context_provider_from_request(
     provide_context(auth_session.clone());
     if let Some(auth_user) = auth_session.user.clone() {
       provide_context(auth_user);
+    }
+
+    // form data
+    if let Some(form_data) = form_data.clone() {
+      provide_context(Form(form_data));
     }
   })
 }

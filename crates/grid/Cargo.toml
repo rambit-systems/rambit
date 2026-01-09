@@ -22,12 +22,14 @@ axum.workspace = true
 axum-htmx = "0.8.1"
 axum-login.workspace = true
 http = { version = "1" }
+http-body-util = { version = "0.1" }
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
 tower.workspace = true
 tower-http = { workspace = true, features = [ "trace", "compression-full", "request-id" ] }
 tower-sessions.workspace = true
 
 miette = { workspace = true, features = [ "fancy" ] }
+serde_urlencoded = "0.7.1"
 
 [lints]
 workspace = true

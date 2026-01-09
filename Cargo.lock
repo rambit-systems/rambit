@@ -1954,10 +1954,12 @@ dependencies = [
  "grid-endpoints",
  "grid-state",
  "http",
+ "http-body-util",
  "leptos",
  "leptos_axum",
  "leptos_router",
  "miette",
+ "serde_urlencoded",
  "site-app",
  "tokio",
  "tower",
@@ -4775,6 +4777,7 @@ name = "site-app"
 version = "0.1.0"
 dependencies = [
  "auth-domain",
+ "axum",
  "const_base",
  "css-minify-macro",
  "domain",
