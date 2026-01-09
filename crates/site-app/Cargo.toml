@@ -17,6 +17,8 @@ grid-state = { path = "../grid-state" }
 models = { path = "../models" }
 site-paddle = { path = "../site-paddle" }
 
+axum.workspace = true
+
 serde.workspace = true
 tracing.workspace = true
 
@@ -32,3 +34,5 @@ leptos-use = { version = "0.16", default-features = false, features = [
   "use_window_focus",
   "use_clipboard",
 ] }
+futures.workspace = true
+const_format = "0.2.35"
