@@ -94,8 +94,7 @@ pub fn App() -> impl IntoView {
         <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
 
         <Route path=path!("/auth/signup") view=SignupPage />
-        <Route path=path!("/auth/login") view=LoginPage />
-        <Route path=path!("/auth/login/validate/email") view=LoginFormEmailFieldHints />
+        <LoginPageRoutes />
         <Route path=path!("/auth/logout") view=LogoutPage />
 
         <Route path=path!("/payment_link") view=PaymentLinkPage />
