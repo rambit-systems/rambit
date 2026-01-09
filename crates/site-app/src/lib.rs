@@ -33,6 +33,7 @@ const FAVICON_SVG_BASE64: &str =
 pub fn shell() -> impl IntoView {
   let app_state = expect_context::<AppState>();
   let stylesheet = app_state.serve_config.inlined_stylesheet.clone();
+  let htmx_path = format!("/dist/{}", app_state.serve_config.htmx_asset_name());
 
   view! {
     <!DOCTYPE html>
@@ -41,7 +42,7 @@ pub fn shell() -> impl IntoView {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <script src="/dist/htmx.min.js"></script>
+        <script src={htmx_path}></script>
 
         { PRELOAD_FONT_PATHS.iter().map(|p| view! {
           <link rel="preload" href={*p} as="font" type="font/woff2" crossorigin="anonymous" />
