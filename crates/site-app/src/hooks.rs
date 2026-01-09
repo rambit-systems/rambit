@@ -5,12 +5,11 @@ mod create_cache_hook;
 mod create_org_hook;
 mod delete_entry_hook;
 mod entry_hook;
-mod login_hook;
 mod org_hook;
 mod signup_hook;
 
 // pub use self::cache_hook::*;
 pub use self::{
   create_cache_hook::*, create_org_hook::*, delete_entry_hook::*,
-  entry_hook::*, login_hook::*, org_hook::*, signup_hook::*,
+  entry_hook::*, org_hook::*, signup_hook::*,
 };
