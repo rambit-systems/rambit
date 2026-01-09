@@ -59,16 +59,16 @@ pub fn shell() -> impl IntoView {
           rel="icon" type="image/svg+xml"
           href={format!("data:image/svg+xml;base64,{FAVICON_SVG_BASE64}")}
         />
-
-        <PaddleSetup
-          env={ app_state.domain.paddle_environment() }
-          client_secret={ app_state.domain.paddle_client_secret() }
-        />
       </head>
       <body>
         <PageContainer>
           <App/>
         </PageContainer>
+
+        <PaddleSetup
+          env={ app_state.domain.paddle_environment() }
+          client_secret={ app_state.domain.paddle_client_secret() }
+        />
       </body>
     </html>
   }

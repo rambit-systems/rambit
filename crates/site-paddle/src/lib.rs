@@ -21,8 +21,6 @@ pub fn PaddleSetup(
 
   view! {
     <script src="https://cdn.paddle.com/paddle/v2/paddle.js" />
-    <script>
-      { js }
-    </script>
+    <script>{ js }</script>
   }
 }
