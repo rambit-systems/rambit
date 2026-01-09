@@ -3417,41 +3417,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "old-grid"
-version = "0.1.0"
-dependencies = [
- "auth-domain",
- "axum",
- "axum-login",
- "clap",
- "db",
- "domain",
- "drop-stream",
- "gethostname",
- "grid-endpoints",
- "grid-state",
- "http",
- "http-body",
- "http-body-util",
- "leptos",
- "leptos_axum",
- "leptos_router",
- "metrics-domain",
- "miette",
- "serde",
- "serde_json",
- "site-app",
- "tokio",
- "tower",
- "tower-http",
- "tower-sessions",
- "tower-sessions-db-store",
- "tracing",
- "tracing-chrome",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5799,17 +5764,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tracing-chrome"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf0a738ed5d6450a9fb96e86a23ad808de2b727fd1394585da5cdd6788ffe724"
-dependencies = [
- "serde_json",
- "tracing-core",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "tracing-core"
 version = "0.1.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5838,8 +5792,6 @@ checksum = "704b1aeb7be0d0a84fc9828cae51dab5970fee5088f83d1dd7ee6f6246fc6ff1"
 dependencies = [
  "serde",
  "tracing-core",
- "valuable",
- "valuable-serde",
 ]
 
 [[package]]
@@ -5861,8 +5813,6 @@ dependencies = [
  "tracing-core",
  "tracing-log",
  "tracing-serde",
- "valuable",
- "valuable-serde",
 ]
 
 [[package]]
@@ -6052,16 +6002,6 @@ name = "valuable"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
-
-[[package]]
-name = "valuable-serde"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ee0548edecd1b907be7e67789923b7d02275b9ba4a33ebc33300e2c947a8cb1"
-dependencies = [
- "serde",
- "valuable",
-]
 
 [[package]]
 name = "vcpkg"
