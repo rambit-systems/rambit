@@ -16,8 +16,7 @@
         cargo-depgraph # dependency graphing
 
         # leptos items
-        cargo-leptos binaryen # leptos build tools
-        tailwindcss_4 yarn # css build tools
+        tailwindcss_4 yarn bacon
 
         # deployment
         dive flyctl
