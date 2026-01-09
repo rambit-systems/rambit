@@ -41,6 +41,8 @@ pub fn shell() -> impl IntoView {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+        <script src="/dist/htmx.min.js"></script>
+
         { PRELOAD_FONT_PATHS.iter().map(|p| view! {
           <link rel="preload" href={*p} as="font" type="font/woff2" crossorigin="anonymous" />
         }).collect_view() }
