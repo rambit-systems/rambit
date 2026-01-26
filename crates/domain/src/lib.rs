@@ -2,7 +2,7 @@
 
 pub mod authenticate;
 mod billing;
-mod create;
+pub mod create;
 mod delete_entry;
 pub mod download;
 pub mod mutate_user;

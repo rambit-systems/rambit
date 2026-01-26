@@ -9,7 +9,7 @@ use leptos_router::{
 };
 use models::{EmailAddress, UserSubmittedAuthCredentials};
 
-use crate::components::*;
+use crate::{components::*, form_feedback_text::*};
 
 #[component(transparent)]
 pub fn LoginPageRoutes() -> impl MatchNestedRoutes + Clone {
@@ -84,25 +84,6 @@ fn LoginPage() -> impl IntoView {
   }
 }
 
-const INTERNAL_ERROR_MESSAGE: &str = "Oops! This is embarrasing... looks like \
-                                      we're having trouble logging you in :/";
-const SUCCESS_MESSAGE: &str = "Success! Redirecting :)";
-const UNAUTHORIZED_MESSAGE: &str =
-  "Oops! Looks like those aren't the right credentials :/";
-const NOT_FORM_MESSAGE: &str = "The login request did not contain form data :/";
-const MISSING_EMAIL_MESSAGE: &str = const_format::formatcp!(
-  "The login request did not contain the \"{EMAIL_FIELD_NAME}\" field :/"
-);
-const EMPTY_EMAIL_MESSAGE: &str =
-  "Looks like you forgot to put in your email :/";
-const MALFORMED_EMAIL_MESSAGE: &str =
-  "Sorry but that doesn't really look like an email address :/";
-const EMAIL_TOO_LONG_MESSAGE: &str = "Sorry but that email is too long :/";
-const MISSING_PASSWORD_MESSAGE: &str =
-  "The login request did not contain the \"{PASSWORD_FIELD_NAME}\" field :/";
-const EMPTY_PASSWORD_MESSAGE: &str =
-  "Looks like you forgot to put in your password :/";
-
 #[component]
 fn LoginFormAction() -> impl IntoView {
   let form_data = use_context::<Form<HashMap<String, String>>>();
@@ -111,7 +92,10 @@ fn LoginFormAction() -> impl IntoView {
   };
 
   let Some(email) = form_data.get(EMAIL_FIELD_NAME) else {
-    return form_rejection(MISSING_EMAIL_MESSAGE).into_any();
+    return form_rejection(const_format::formatcp!(
+      "The login request did not contain the \"{EMAIL_FIELD_NAME}\" field :/"
+    ))
+    .into_any();
   };
   if email.is_empty() {
     return form_rejection(EMPTY_EMAIL_MESSAGE).into_any();
@@ -127,7 +111,11 @@ fn LoginFormAction() -> impl IntoView {
   };
 
   let Some(password) = form_data.get(PASSWORD_FIELD_NAME) else {
-    return form_rejection(MISSING_PASSWORD_MESSAGE).into_any();
+    return form_rejection(const_format::formatcp!(
+      "The login request did not contain the \"{PASSWORD_FIELD_NAME}\" field \
+       :/"
+    ))
+    .into_any();
   };
   if password.is_empty() {
     return form_rejection(EMPTY_PASSWORD_MESSAGE).into_any();
@@ -179,21 +167,5 @@ async fn form_action(
       );
       Err(INTERNAL_ERROR_MESSAGE)
     }
-  }
-}
-
-fn form_rejection(text: impl AsRef<str>) -> impl IntoView {
-  view! {
-    <p id="form-rejection" class="text-critical-11">
-      { text.as_ref() }
-    </p>
-  }
-}
-
-fn form_acceptance(text: impl AsRef<str>) -> impl IntoView {
-  view! {
-    <p id="form-acceptance" class="text-base-12">
-      { text.as_ref() }
-    </p>
   }
 }

@@ -2,6 +2,7 @@
 #![feature(iter_intersperse)]
 
 mod components;
+mod form_feedback_text;
 mod formatting_utils;
 mod hooks;
 mod join_classes;
@@ -93,7 +94,7 @@ pub fn App() -> impl IntoView {
         <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
         <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
 
-        <Route path=path!("/auth/signup") view=SignupPage />
+        <SignupPageRoutes />
         <LoginPageRoutes />
         <Route path=path!("/auth/logout") view=LogoutPage />
 

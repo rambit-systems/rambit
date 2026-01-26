@@ -1,50 +1,54 @@
-use leptos::{ev::SubmitEvent, prelude::*};
+use std::collections::HashMap;
+
+use auth_domain::AuthSession;
+use axum::Form;
+use domain::{create::CreateUserError, DomainService};
+use futures::FutureExt;
+use grid_state::AppState;
+use leptos::prelude::*;
+use leptos_router::{
+  any_nested_route::IntoAnyNestedRoute, components::Route, path,
+};
+use models::{
+  EmailAddress, HumanName, HumanNameError, UserSubmittedAuthCredentials,
+};
 
 use crate::{
   components::{
-    form_layout::*, HideableInputField, InputField, InputIcon, LoadingCircle,
+    form_acceptance, form_layout::*, form_rejection, EnvelopeHeroIcon,
+    LoadingCircle, LockClosedHeroIcon, UserHeroIcon,
   },
-  hooks::SignupHook,
+  form_feedback_text::*,
 };
 
-#[component]
-pub fn SignupPage() -> impl IntoView {
+#[component(transparent)]
+pub fn SignupPageRoutes() -> impl MatchNestedRoutes + Clone {
   view! {
-    <SignupIsland />
+    <Route path=path!("/auth/signup") view=SignupPage />
+    <Route path=path!("/auth/signup/action") view=SignupFormAction />
   }
+  .into_inner()
+  .into_any_nested_route()
 }
 
-#[island]
-fn SignupIsland() -> impl IntoView {
-  let signup_hook = SignupHook::new();
+const NAME_FIELD_NAME: &str = "name";
+const EMAIL_FIELD_NAME: &str = "email";
+const PASSWORD_FIELD_NAME: &str = "password";
+const CONFIRM_FIELD_NAME: &str = "confirm";
 
-  let name_bindings = signup_hook.name_bindings();
-  let email_bindings = signup_hook.email_bindings();
-  let password_bindings = signup_hook.password_bindings();
-  let confirm_password_bindings = signup_hook.confirm_password_bindings();
-  let name_error_hint = MaybeProp::derive(signup_hook.name_error_hint());
-  let email_error_hint = MaybeProp::derive(signup_hook.email_error_hint());
-  let password_error_hint =
-    MaybeProp::derive(signup_hook.password_error_hint());
-  let confirm_password_error_hint =
-    MaybeProp::derive(signup_hook.confirm_password_error_hint());
-
-  let signup_trigger = signup_hook.action_trigger();
-  let submit_action = move |ev: SubmitEvent| {
-    ev.prevent_default();
-    signup_trigger.run(());
-  };
-  let show_spinner = signup_hook.show_spinner();
-  let error_feedback = signup_hook.feedback_error_text();
-
-  let _ = signup_hook.create_redirect_effect();
-
+#[component]
+fn SignupPage() -> impl IntoView {
   const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-2xl \
                             elevation-flat flex flex-col md:grid \
                             md:grid-cols-form gap-x-8 gap-y-12";
 
   view! {
-    <form on:submit=submit_action class=FORM_CLASS>
+    <form
+      class=FORM_CLASS
+      hx-post="/auth/signup/action"
+      hx-target="#form-result"
+      hx-swap="innerHTML transition:true"
+    >
       <GridRowFull>
         <div class="flex flex-col gap-2">
           <p class="title">"Sign Up"</p>
@@ -61,13 +65,14 @@ fn SignupIsland() -> impl IntoView {
           desc="What do you like to be called?"
         />
 
-        <InputField
-          id="name" input_type="text" placeholder="Full Name"
-          autofocus=true
-          input_signal=name_bindings.0 output_signal=name_bindings.1
-          before={InputIcon::User}
-          error_hint=name_error_hint
-        />
+        <label class="input-field">
+          <UserHeroIcon {..} class="size-6 shrink-0" />
+          <input
+            class="w-full py-2 focus-visible:outline-none"
+            type="text" autofocus=true required
+            placeholder="Full Name" name=NAME_FIELD_NAME
+          />
+        </label>
       </GridRow>
 
       <GridRow>
@@ -76,12 +81,13 @@ fn SignupIsland() -> impl IntoView {
           desc="[Helpful description goes here]"
         />
 
-        <InputField
-          id="email" input_type="text" placeholder="Email Address"
-          input_signal=email_bindings.0 output_signal=email_bindings.1
-          before={InputIcon::Envelope}
-          error_hint=email_error_hint
-        />
+        <label class="input-field">
+          <EnvelopeHeroIcon {..} class="size-6 shrink-0" />
+          <input
+            class="w-full py-2 focus-visible:outline-none" required
+            type="email" placeholder="Email Address" name=EMAIL_FIELD_NAME
+          />
+        </label>
       </GridRow>
 
       <GridRow>
@@ -91,18 +97,20 @@ fn SignupIsland() -> impl IntoView {
         />
 
         <div class="flex flex-col gap-1">
-          <HideableInputField
-            id="password" placeholder="Password"
-            input_signal=password_bindings.0 output_signal=password_bindings.1
-            before={InputIcon::LockClosed}
-            error_hint=password_error_hint
-          />
-          <HideableInputField
-            id="confirm_password" placeholder="Confirm Password"
-            input_signal=confirm_password_bindings.0 output_signal=confirm_password_bindings.1
-            before={InputIcon::LockClosed}
-            error_hint=confirm_password_error_hint
-          />
+          <label class="input-field">
+            <LockClosedHeroIcon {..} class="size-6 shrink-0" />
+            <input
+              class="w-full py-2 focus-visible:outline-none" required
+              type="password" placeholder="Password" name=PASSWORD_FIELD_NAME
+            />
+          </label>
+          <label class="input-field">
+            <LockClosedHeroIcon {..} class="size-6 shrink-0" />
+            <input
+              class="w-full py-2 focus-visible:outline-none" required
+              type="password" placeholder="Confirm Password" name=CONFIRM_FIELD_NAME
+            />
+          </label>
         </div>
       </GridRow>
 
@@ -113,20 +121,145 @@ fn SignupIsland() -> impl IntoView {
             <input type="submit" class="hidden" />
             <button class="btn btn-primary w-full max-w-80 justify-between">
               <div class="size-4" />
-              { signup_hook.button_text() }
+              "Sign Up"
               <LoadingCircle {..}
-                class="size-4 transition-opacity"
-                class=("opacity-0", move || { !show_spinner() })
+                class="size-4 transition-opacity htmx-indicator"
               />
             </button>
           </label>
-          { move || error_feedback().map(move |text| view! {
-            <p class="animate-fade-down text-critical-11 text-sm">
-              { text }
-            </p>
-          })}
+          <div id="form-result" class="contents" />
         </div>
       </GridRow>
     </form>
+  }
+}
+
+#[component]
+fn SignupFormAction() -> impl IntoView {
+  let form_data = use_context::<Form<HashMap<String, String>>>();
+  let Some(form_data) = form_data else {
+    return form_rejection(NOT_FORM_MESSAGE).into_any();
+  };
+
+  let Some(name) = form_data.get(NAME_FIELD_NAME) else {
+    return form_rejection(const_format::formatcp!(
+      "The signup request did not contain the \"{NAME_FIELD_NAME}\" field :/"
+    ))
+    .into_any();
+  };
+  if name.is_empty() {
+    return form_rejection(EMPTY_NAME_MESSAGE).into_any();
+  }
+  let name = match HumanName::try_new(name) {
+    Ok(name) => name,
+    Err(HumanNameError::Empty) => unreachable!(),
+    Err(HumanNameError::TooLong) => {
+      return form_rejection(NAME_TOO_LONG_MESSAGE).into_any();
+    }
+  };
+
+  let Some(email) = form_data.get(EMAIL_FIELD_NAME) else {
+    return form_rejection(const_format::formatcp!(
+      "The signup request did not contain the \"{EMAIL_FIELD_NAME}\" field :/"
+    ))
+    .into_any();
+  };
+  if email.is_empty() {
+    return form_rejection(EMPTY_EMAIL_MESSAGE).into_any();
+  }
+  let email = match EmailAddress::try_new(email) {
+    Ok(email) => email,
+    Err(models::EmailAddressError::InvalidEmail) => {
+      return form_rejection(MALFORMED_EMAIL_MESSAGE).into_any();
+    }
+    Err(models::EmailAddressError::TooLong) => {
+      return form_rejection(EMAIL_TOO_LONG_MESSAGE).into_any();
+    }
+  };
+
+  let Some(password) = form_data.get(PASSWORD_FIELD_NAME) else {
+    return form_rejection(const_format::formatcp!(
+      "The signup request did not contain the \"{PASSWORD_FIELD_NAME}\" field \
+       :/"
+    ))
+    .into_any();
+  };
+  if password.is_empty() {
+    return form_rejection(EMPTY_PASSWORD_MESSAGE).into_any();
+  }
+
+  let Some(confirm_password) = form_data.get(CONFIRM_FIELD_NAME) else {
+    return form_rejection(const_format::formatcp!(
+      "The signup request did not contain the \"{CONFIRM_FIELD_NAME}\" field \
+       :/"
+    ))
+    .into_any();
+  };
+  if confirm_password != password {
+    return form_rejection(PASSWORD_CONFIRM_MISMATCH_MESSAGE).into_any();
+  }
+
+  let creds = UserSubmittedAuthCredentials::Password {
+    password: password.to_owned(),
+  };
+
+  let auth_session = expect_context::<AuthSession>();
+  let state = expect_context::<AppState>();
+  let domain = state.domain.clone();
+
+  let suspend = move || {
+    Suspend::new(
+      form_action(
+        domain.clone(),
+        auth_session.clone(),
+        name.clone(),
+        email.clone(),
+        creds.clone(),
+      )
+      .map(|r| match r {
+        Ok(t) => form_acceptance(t).into_any(),
+        Err(t) => form_rejection(t).into_any(),
+      }),
+    )
+  };
+
+  view! {
+    <Suspense fallback=|| "Loading...">
+      { suspend }
+    </Suspense>
+  }
+  .into_any()
+}
+
+async fn form_action(
+  domain: DomainService,
+  mut auth_session: AuthSession,
+  name: HumanName,
+  email: EmailAddress,
+  creds: UserSubmittedAuthCredentials,
+) -> Result<&'static str, &'static str> {
+  let user = domain
+    .user_signup(name, email.clone(), creds.clone())
+    .await
+    .map_err(|e| match e {
+      CreateUserError::EmailAlreadyUsed(_) => EMAIL_ALREADY_USED_MESSAGE,
+      CreateUserError::InternalError(err) => {
+        tracing::error!(
+          "encountered error while signing up user ({email}): {err:?}"
+        );
+        INTERNAL_ERROR_MESSAGE
+      }
+    })?;
+
+  let auth_user = user.into();
+
+  match auth_session.login(&auth_user).await {
+    Ok(()) => Ok(SUCCESS_MESSAGE),
+    Err(err) => {
+      tracing::error!(
+        "encountered error while authenticating user ({email}): {err:?}"
+      );
+      Err(INTERNAL_ERROR_MESSAGE)
+    }
   }
 }

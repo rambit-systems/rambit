@@ -1,3 +1,5 @@
+//! Creation methods and types.
+
 use db::DatabaseError;
 use miette::{Context, IntoDiagnostic, Report, miette};
 use models::{
