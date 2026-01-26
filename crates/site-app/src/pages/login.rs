@@ -23,8 +23,6 @@ pub fn LoginPageRoutes() -> impl MatchNestedRoutes + Clone {
 
 const EMAIL_FIELD_NAME: &str = "email";
 const PASSWORD_FIELD_NAME: &str = "password";
-const EMAIL_INPUT_ID: &str = "email-input";
-const PASSWORD_INPUT_ID: &str = "password-input";
 
 #[component]
 fn LoginPage() -> impl IntoView {
@@ -43,29 +41,25 @@ fn LoginPage() -> impl IntoView {
 
         <div class="flex flex-col gap-4">
           // email
-          <label for=EMAIL_INPUT_ID class="flex flex-col gap-1">
+          <label class="flex flex-col gap-1">
             <p class="text-base-11">"Email Address"</p>
             <div class="input-field">
               <EnvelopeHeroIcon {..} class="size-6 shrink-0" />
               <input
-                class="w-full py-2 focus-visible:outline-none"
-
-                type="text" autofocus=true
-                placeholder="" id=EMAIL_INPUT_ID name=EMAIL_FIELD_NAME
+                class="w-full py-2 focus-visible:outline-none" required
+                type="email" autofocus=true placeholder="" name=EMAIL_FIELD_NAME
               />
             </div>
           </label>
 
           // password
-          <label for=PASSWORD_INPUT_ID class="flex flex-col gap-1">
+          <label class="flex flex-col gap-1">
             <p class="text-base-11">"Password"</p>
             <div class="input-field">
               <LockClosedHeroIcon {..} class="size-6 shrink-0" />
               <input
-                class="w-full py-2 focus-visible:outline-none"
-
-                type="password" autofocus=false
-                placeholder="" id=PASSWORD_INPUT_ID name=PASSWORD_FIELD_NAME
+                class="w-full py-2 focus-visible:outline-none" required
+                type="password" placeholder="" name=PASSWORD_FIELD_NAME
               />
             </div>
           </label>
