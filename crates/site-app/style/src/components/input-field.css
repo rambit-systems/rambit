@@ -8,8 +8,8 @@
     /* appearance */
     @apply text-base-12 rounded;
 
-    /* spacing */
-    @apply px-2 flex flex-row gap-2 items-center;
+    /* sizing and spacing */
+    @apply h-10 max-w-80 px-2 flex flex-row gap-2 items-center;
 
     /* border */
     @apply border-[1.5px] border-base-7 hover:border-base-8 has-focus-visible:border-base-8/0;
