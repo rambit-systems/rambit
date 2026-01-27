@@ -34,7 +34,7 @@ fn OrgSelectorTrigger() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 pub(super) fn OldOrgSelector() -> impl IntoView {
   view! {
     <Popover>

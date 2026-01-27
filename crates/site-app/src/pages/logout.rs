@@ -21,7 +21,7 @@ pub fn LogoutPage() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 pub fn LogoutButton() -> impl IntoView {
   let action = ServerAction::<Logout>::new();
 

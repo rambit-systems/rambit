@@ -67,7 +67,7 @@ tower-sessions = { version = "0.14" }
 ### leptos config ###
 # # # # # # # # # # #
 
-leptos = { version = "0.8", features = [ "nightly", "islands" ] }
+leptos = { version = "0.8", features = [ "nightly" ] }
 leptos_axum = { version = "0.8", features = [  ] }
 leptos_router = { version = "0.8", features = [ "nightly" ] }
 

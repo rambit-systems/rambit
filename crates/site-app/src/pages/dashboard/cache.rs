@@ -71,18 +71,18 @@ pub(super) fn CacheTable() -> impl IntoView {
 
 #[component]
 fn CacheTableEmptyBody() -> impl IntoView {
-  let org_hook = OrgHook::new_requested();
-  let create_url = org_hook.create_cache_url();
+  // let org_hook = OrgHook::new_requested();
+  // let create_url = org_hook.create_cache_url();
 
-  view! {
-    <TableEmptyBody>
-      <p class="text-base-12 text-lg">"Looks like you don't have any caches."</p>
-      <p class="text-sm">
-        <a href=create_url class="text-link text-link-primary">"Create one"</a>
-        " to get started."
-      </p>
-    </TableEmptyBody>
-  }
+  // view! {
+  //   <TableEmptyBody>
+  //     <p class="text-base-12 text-lg">"Looks like you don't have any
+  // caches."</p>     <p class="text-sm">
+  //       <a href=create_url class="text-link text-link-primary">"Create
+  // one"</a>       " to get started."
+  //     </p>
+  //   </TableEmptyBody>
+  // }
 }
 
 #[component]

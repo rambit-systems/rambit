@@ -4,14 +4,28 @@ mod requested_org;
 mod store;
 
 use leptos::prelude::*;
+use leptos_router::{
+  any_nested_route::IntoAnyNestedRoute, components::Route, path,
+};
 
 use self::{
   cache::CacheTable, entry::EntryTable, requested_org::RequestedOrgTile,
   store::StoreTable,
 };
+use crate::pages::protect_by_org;
+
+#[component(transparent)]
+pub fn DashboardPageRoutes() -> impl MatchNestedRoutes + Clone {
+  view! {
+    <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
+    <Route path=path!("/org/:org/dash/entry_table") view=protect_by_org(self::entry::EntryTableInfill) />
+  }
+  .into_inner()
+  .into_any_nested_route()
+}
 
 #[component]
-pub fn DashboardPage() -> impl IntoView {
+fn DashboardPage() -> impl IntoView {
   view! {
     <div class="flex flex-col md:grid xl:grid-cols-[320px_minmax(0,_1fr)] gap-4 md:place-items-start">
       <p class="title xl:col-start-2">"Dashboard"</p>

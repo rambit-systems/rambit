@@ -37,7 +37,7 @@ pub fn CreateOrgPage() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 pub fn CreateOrgIsland() -> impl IntoView {
   let hook = CreateOrgHook::new();
 

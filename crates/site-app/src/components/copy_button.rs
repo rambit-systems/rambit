@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 use crate::components::DocumentDuplicateHeroIcon;
 
-#[island]
+#[component]
 pub fn CopyButton(copy_content: String) -> impl IntoView {
   let _copy_content = Signal::stored(copy_content);
 

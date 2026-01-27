@@ -4,8 +4,7 @@ use models::Entry;
 
 use crate::{
   components::{
-    CacheItemLink, DataTableRefreshButton, StorePathAbbreviated,
-    StorePathCopyButton, TableEmptyBody,
+    CacheItemLink, LoadingCircle, StorePathAbbreviated, StorePathCopyButton,
   },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
@@ -14,40 +13,23 @@ use crate::{
 #[component]
 pub(super) fn EntryTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let key_fn = org_hook.key();
-  let query_scope = entries_in_org_query_scope();
-
-  let resource =
-    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
-
-  let body_view = move |e: Vec<Entry>| {
-    match e.len() {
-      0 => view! {
-        <EntryTableEmptyBody />
-      }.into_any(),
-      _ => view! {
-        <tbody class="animate-fade-in min-h-10">
-          <For each=move || e.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
-        </tbody>
-      }.into_any()
-    }
-  };
-  let suspend = move || {
-    Suspend::new(async move {
-      match resource.await {
-        Ok(entries) => body_view(entries).into_any(),
-        Err(e) => format!("Error: {e}").into_any(),
-      }
-    })
-  };
+  let table_infill_url = org_hook.dashboard_entry_table_infill_url();
 
   view! {
     <div class="flex flex-row items-center gap-2">
       <p class="title">"Entries"</p>
       <div class="flex-1" />
-      <DataTableRefreshButton
-        key_fn=key_fn query_scope=query_scope.clone()
-      />
+
+      <button
+        class="btn btn-secondary relative overflow-hidden"
+        hx-get={ table_infill_url }
+        hx-target="#entry-table"
+      >
+        "Refresh"
+        <div class="absolute inset-0 flex flex-row justify-center items-center btn-secondary htmx-indicator">
+          <LoadingCircle {..} class="size-5" />
+        </div>
+      </button>
     </div>
 
     <div class="w-full overflow-x-auto">
@@ -58,22 +40,64 @@ pub(super) fn EntryTable() -> impl IntoView {
           <th>"File Size"</th>
           <th>"Ref Count"</th>
         </thead>
-        <Transition fallback=|| ()>
-          { suspend }
-        </Transition>
+        <div id="entry-table" class="contents">
+          <EntryTableInfill />
+        </div>
       </table>
     </div>
   }
 }
 
 #[component]
-fn EntryTableEmptyBody() -> impl IntoView {
+pub(super) fn EntryTableInfill() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
+  let query_scope = entries_in_org_query_scope();
+
+  let resource =
+    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
+
+  let suspend = move || {
+    Suspend::new(async move {
+      match resource.await {
+        Ok(entries) => view! {
+          <EntryTableBodyData entries=entries />
+        }
+        .into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }
+    })
+  };
+
   view! {
-    <TableEmptyBody>
-      <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
-      <p class="text-sm">"Upload some entries from the CLI to see them here."</p>
-    </TableEmptyBody>
+    <Suspense fallback=|| "[loading]">
+      { suspend }
+    </Suspense>
   }
+}
+
+#[component]
+fn EntryTableBodyData(entries: Vec<Entry>) -> impl IntoView {
+  if entries.is_empty() {
+    return view! { <EntryTableEmptyBody /> }.into_any();
+  }
+
+  view! {
+    <tbody class="animate-fade-in min-h-10">
+      <For each=move || entries.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
+    </tbody>
+  }.into_any()
+}
+
+#[component]
+fn EntryTableEmptyBody() -> impl IntoView {
+  "empty"
+  // view! {
+  //   <TableEmptyBody>
+  //     <p class="text-base-12 text-lg">"Looks like you don't have any
+  // entries."</p>     <p class="text-sm">"Upload some entries from the CLI to
+  // see them here."</p>   </TableEmptyBody>
+  // }
 }
 
 #[component]

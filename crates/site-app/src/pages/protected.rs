@@ -70,10 +70,7 @@ pub fn ProtectedByOrgPage(children: Children) -> impl IntoView {
   }
 
   provide_context(RequestedOrg(requested_org));
-  view! {
-    <RequestedOrgIslandContextProvider org=requested_org children=children />
-  }
-  .into_any()
+  children().into_any()
 }
 
 #[component]
@@ -102,9 +99,7 @@ pub fn ProtectedByOrgOwnerPage(children: Children) -> impl IntoView {
   let children = move |data: &Result<bool, ServerFnError>| match data {
     Ok(true) => {
       provide_context(RequestedOrg(requested_org));
-      view! {
-        <RequestedOrgIslandContextProvider org=requested_org children=children />
-      }.into_any()
+      children().into_any()
     }
     Ok(false) => view! { <UnauthorizedPage /> }.into_any(),
     Err(e) => e.to_string().into_any(),
@@ -114,13 +109,4 @@ pub fn ProtectedByOrgOwnerPage(children: Children) -> impl IntoView {
     <Await blocking=true future={resource.into_future()} children=children />
   }
   .into_any()
-}
-
-#[island]
-fn RequestedOrgIslandContextProvider(
-  org: RecordId<Org>,
-  children: Children,
-) -> impl IntoView {
-  provide_context(RequestedOrg(org));
-  children()
 }

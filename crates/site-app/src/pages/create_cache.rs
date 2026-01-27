@@ -43,7 +43,7 @@ pub fn CreateCachePage() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 pub fn CreateCacheIsland() -> impl IntoView {
   let hook = CreateCacheHook::new();
 

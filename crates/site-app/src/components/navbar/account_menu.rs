@@ -21,7 +21,7 @@ fn AccountMenuTrigger() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 pub(crate) fn AccountMenu() -> impl IntoView {
   view! {
     <Popover>

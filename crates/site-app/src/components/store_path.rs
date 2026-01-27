@@ -9,7 +9,7 @@ pub fn StorePathAbbreviated(sp: StorePath<String>) -> impl IntoView {
   Abbreviate::abbreviate(&sp)
 }
 
-#[island]
+#[component]
 pub fn StorePathCopyButton(sp: StorePath<String>) -> impl IntoView {
   let absolute = sp.to_absolute_path();
 

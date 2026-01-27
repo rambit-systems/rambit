@@ -23,7 +23,7 @@ const STORE_DESCRIPTION: &str =
    credentials or encoding configuration, you will need to create a new store \
    and migrate the old store's entries to it. This incurs compute costs.";
 
-#[island]
+#[component]
 pub fn CreateStorePage() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let org_key = org_hook.key();

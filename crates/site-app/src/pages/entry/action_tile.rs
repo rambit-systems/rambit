@@ -3,7 +3,7 @@ use models::{Entry, RecordId};
 
 use crate::{components::LoadingCircle, hooks::DeleteEntryHook};
 
-#[island]
+#[component]
 pub(crate) fn ActionTile(entry_id: RecordId<Entry>) -> impl IntoView {
   let delete_hook = DeleteEntryHook::new(move || entry_id);
   let show_delete_spinner = delete_hook.show_spinner();
