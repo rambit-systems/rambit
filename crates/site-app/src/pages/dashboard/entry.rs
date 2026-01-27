@@ -1,13 +1,11 @@
-use std::time::Duration;
-
 use leptos::prelude::*;
 use leptos_fetch::QueryClient;
 use models::Entry;
 
 use crate::{
   components::{
-    refetch_while_focused, CacheItemLink, DataTableRefreshButton,
-    StorePathAbbreviated, StorePathCopyButton, TableEmptyBody,
+    CacheItemLink, DataTableRefreshButton, StorePathAbbreviated,
+    StorePathCopyButton, TableEmptyBody,
   },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
@@ -18,8 +16,6 @@ pub(super) fn EntryTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let key_fn = org_hook.key();
   let query_scope = entries_in_org_query_scope();
-
-  refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(10));
 
   let resource =
     expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);

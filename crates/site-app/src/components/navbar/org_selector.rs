@@ -115,7 +115,7 @@ fn OrgRow(org_hook: OrgHook, active: bool) -> impl IntoView {
     })
   } else {
     Either::Right(view! {
-      <LoadingCircle {..} class="size-5 invisible" />
+      <LoadingCircle {..} class="size-5 hx-indicator" />
     })
   };
 

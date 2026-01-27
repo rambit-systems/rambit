@@ -8,15 +8,13 @@ mod input_field;
 mod item_links;
 mod navbar;
 mod popover;
-mod refetch_while_focused;
 mod store_path;
 
 use leptos::prelude::*;
 
 pub use self::{
   copy_button::*, create_button::*, data_table::*, footer::*, icons::*,
-  input_field::*, item_links::*, navbar::*, popover::*,
-  refetch_while_focused::*, store_path::*,
+  input_field::*, item_links::*, navbar::*, popover::*, store_path::*,
 };
 
 pub fn form_rejection(text: impl AsRef<str>) -> impl IntoView {
