@@ -1,8 +1,8 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_router::{
   any_nested_route::IntoAnyNestedRoute, components::Route, path,
 };
-use models::{AuthUser, Org, RecordId};
+use models::AuthUser;
 
 use crate::{
   components::{
@@ -33,10 +33,10 @@ pub fn OrgSelector() -> impl IntoView {
 fn RemovePopoverOnClickOutside() -> impl IntoView {
   const SCRIPT: &str = r##"
     document.addEventListener('click', function(e) {
-    const popover = document.querySelector('[data-popover]');
-    const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
+        const popover = document.querySelector('[data-popover]');
+        const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
     
-    if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
+        if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
             popover.remove();
         }
     });
@@ -86,55 +86,51 @@ fn OrgSelectorMenu() -> impl IntoView {
     "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
      elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
 
-  let org_hooks = Signal::stored(
-    auth_user
-      .iter_orgs()
-      .map(|o| (o, OrgHook::new(move || o)))
-      .collect::<Vec<_>>(),
-  );
   let active_org = auth_user.active_org();
-
-  let org_row_element = move |(id, oh): (RecordId<Org>, OrgHook)| {
-    let is_active = id == active_org;
-
-    let icon_element = if is_active {
-      view! {
-        <CheckHeroIcon {..} class="size-5 stroke-product-11 stroke-[2.0]" />
-      }
-      .into_any()
-    } else {
-      view! {
-        <LoadingCircle {..} class="size-5 invisible" />
-      }
-      .into_any()
-    };
-
+  let org_rows = auth_user.iter_orgs().map(|o| {
     view! {
-      <div
-        class="rounded p-2 flex flex-row gap-2 items-center transition-colors text-base-12"
-        class=("font-bold", id == active_org)
-        class=("cursor-pointer btn-link-secondary", id != active_org)
-      >
-        { icon_element }
-        <span class="flex-1 text-ellipsis">
-          <Suspense fallback=|| "[loading]">
-            { move || Suspend::new(oh.descriptor())}
-          </Suspense>
-        </span>
-      </div>
+      <OrgRow org_hook={OrgHook::new(move || o)} active={o == active_org} />
     }
-  };
+  });
 
   view! {
     <div
       data-popover
       class=POPOVER_CLASS
     >
-      { org_hooks().into_iter().map(org_row_element).collect_view() }
+      { org_rows.collect_view() }
       <div class="p-1">
         <div class="h-0 border-t-2 border-base-6/75" />
       </div>
       <ExtraRows />
+    </div>
+  }
+}
+
+#[component]
+fn OrgRow(org_hook: OrgHook, active: bool) -> impl IntoView {
+  let icon_element = if active {
+    Either::Left(view! {
+      <CheckHeroIcon {..} class="size-5 stroke-product-11 stroke-[2.0]" />
+    })
+  } else {
+    Either::Right(view! {
+      <LoadingCircle {..} class="size-5 invisible" />
+    })
+  };
+
+  view! {
+    <div
+      class="rounded p-2 flex flex-row gap-2 items-center transition-colors text-base-12"
+      class=("font-bold", active)
+      class=("cursor-pointer btn-link-secondary", !active)
+    >
+      { icon_element }
+      <span class="flex-1 text-ellipsis">
+        <Suspense fallback=|| "[loading]">
+          { move || Suspend::new(org_hook.descriptor())}
+        </Suspense>
+      </span>
     </div>
   }
 }
