@@ -1,51 +1,14 @@
 use leptos::prelude::*;
-use leptos_router::{
-  any_nested_route::IntoAnyNestedRoute, components::Route, path,
-};
 use models::{AuthUser, Org, RecordId};
 
 use crate::{
   components::{
     CheckHeroIcon, ChevronDownHeroIcon, Cog6ToothHeroIcon, LoadingCircle,
-    PlusHeroIcon,
+    PlusHeroIcon, Popover, PopoverContents, PopoverTrigger,
   },
   hooks::OrgHook,
+  navigation::navigate_to,
 };
-
-#[component(transparent)]
-pub fn OrgSelectorRoutes() -> impl MatchNestedRoutes + Clone {
-  view! {
-    <Route path=path!("/org_selector") view=OrgSelectorMenu />
-  }
-  .into_inner()
-  .into_any_nested_route()
-}
-
-#[component]
-pub fn OrgSelector() -> impl IntoView {
-  view! {
-    <RemovePopoverOnClickOutside />
-    <OrgSelectorTrigger />
-  }
-}
-
-#[component]
-fn RemovePopoverOnClickOutside() -> impl IntoView {
-  const SCRIPT: &str = r##"
-    document.addEventListener('click', function(e) {
-    const popover = document.querySelector('[data-popover]');
-    const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
-    
-    if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
-            popover.remove();
-        }
-    });
-  "##;
-
-  view! {
-    <script>{ SCRIPT }</script>
-  }
-}
 
 #[component]
 fn OrgSelectorTrigger() -> impl IntoView {
@@ -54,15 +17,10 @@ fn OrgSelectorTrigger() -> impl IntoView {
 
   const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
                        cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
-                       text-sm leading-none items-end gap-0 relative";
+                       text-sm leading-none items-end gap-0";
 
   view! {
-    <div
-      class=CLASS
-      hx-get="/org_selector"
-      hx-target="#org-selector-popover-contents"
-      hx-swap="innerHTML transition:true"
-    >
+    <div class=CLASS>
       <p class="text-base/[1] text-base-12">
         <Suspense fallback=|| "[loading]">
           { move || Suspend::new(active_org_descriptor) }
@@ -72,9 +30,22 @@ fn OrgSelectorTrigger() -> impl IntoView {
         <p>"Switch Orgs"</p>
         <ChevronDownHeroIcon {..} class="size-3 stroke-[3.0] stroke-base-11" />
       </div>
-
-      <div id="org-selector-popover-contents" class="contents" />
     </div>
+  }
+}
+
+#[island]
+pub(super) fn OldOrgSelector() -> impl IntoView {
+  view! {
+    <Popover>
+      <PopoverTrigger slot>
+        <OrgSelectorTrigger />
+      </PopoverTrigger>
+
+      <PopoverContents slot>
+        <OrgSelectorMenu />
+      </PopoverContents>
+    </Popover>
   }
 }
 
@@ -94,8 +65,31 @@ fn OrgSelectorMenu() -> impl IntoView {
   );
   let active_org = auth_user.active_org();
 
+  let action = ServerAction::<SwitchActiveOrg>::new();
+  let selected = RwSignal::new(None::<RecordId<Org>>);
+
+  // reload on successful action
+  Effect::new(move || {
+    if let Some(Ok(new_org)) = action.value().get() {
+      let org_hook = org_hooks
+        .get()
+        .into_iter()
+        .find(|(o, _)| new_org == *o)
+        .expect("failed to find new org's hook")
+        .1;
+      let new_dash_url = org_hook.dashboard_url()();
+      navigate_to(&new_dash_url)
+    }
+  });
+
   let org_row_element = move |(id, oh): (RecordId<Org>, OrgHook)| {
     let is_active = id == active_org;
+    let handler = move |_| {
+      if !is_active {
+        selected.set(Some(id));
+        action.dispatch(SwitchActiveOrg { new_active_org: id });
+      }
+    };
 
     let icon_element = if is_active {
       view! {
@@ -104,7 +98,7 @@ fn OrgSelectorMenu() -> impl IntoView {
       .into_any()
     } else {
       view! {
-        <LoadingCircle {..} class="size-5 invisible" />
+        <LoadingCircle {..} class="size-5" class:invisible=move || selected.get() != Some(id) />
       }
       .into_any()
     };
@@ -114,6 +108,7 @@ fn OrgSelectorMenu() -> impl IntoView {
         class="rounded p-2 flex flex-row gap-2 items-center transition-colors text-base-12"
         class=("font-bold", id == active_org)
         class=("cursor-pointer btn-link-secondary", id != active_org)
+        on:click=handler
       >
         { icon_element }
         <span class="flex-1 text-ellipsis">
@@ -127,7 +122,6 @@ fn OrgSelectorMenu() -> impl IntoView {
 
   view! {
     <div
-      data-popover
       class=POPOVER_CLASS
     >
       { org_hooks().into_iter().map(org_row_element).collect_view() }
@@ -158,4 +152,28 @@ fn ExtraRows() -> impl IntoView {
       </span>
     </a>
   }
+}
+
+#[server(prefix = "/api/sfn")]
+pub async fn switch_active_org(
+  new_active_org: RecordId<Org>,
+) -> Result<RecordId<Org>, ServerFnError> {
+  use domain::{DomainService, UpdateActiveOrgError};
+
+  let auth_user = crate::resources::authenticate()?;
+
+  let domain_service: DomainService = expect_context();
+
+  domain_service
+    .switch_active_org(auth_user.id, new_active_org)
+    .await
+    .map_err(|e| match e {
+      UpdateActiveOrgError::InvalidOrg(record_id) => {
+        ServerFnError::new(format!("invalid org: {record_id}"))
+      }
+      e => {
+        tracing::error!("failed to fetch org: {e}");
+        ServerFnError::new("internal error")
+      }
+    })
 }

@@ -21,7 +21,7 @@ use leptos_router::{
 };
 use site_paddle::PaddleSetup;
 
-use self::pages::*;
+use self::{components::org_selector::OrgSelectorRoutes, pages::*};
 
 const PRELOAD_FONT_PATHS: &[&str] = &[
   "/fonts/funnel_sans/OpNIno8Dg9bX6Bsp3Wq69Tpyfhg.woff2",
@@ -101,6 +101,8 @@ pub fn App() -> impl IntoView {
         <SignupPageRoutes />
         <LoginPageRoutes />
         <Route path=path!("/auth/logout") view=LogoutPage />
+
+        <OrgSelectorRoutes />
 
         <Route path=path!("/payment_link") view=PaymentLinkPage />
       </Routes>
