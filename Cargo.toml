@@ -72,7 +72,6 @@ leptos_axum = { version = "0.8", features = [  ] }
 leptos_router = { version = "0.8", features = [ "nightly" ] }
 
 console_error_panic_hook = "0.1"
-wasm-bindgen = "=0.2.100"
 
 [patch.crates-io]
 # leptos = { git = 'https://github.com/leptos-rs/leptos.git' }

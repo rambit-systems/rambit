@@ -13,7 +13,7 @@ use crate::{
   resources::entry::entries_in_org_query_scope,
 };
 
-#[island]
+#[component]
 pub(super) fn EntryTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let key_fn = org_hook.key();
@@ -22,7 +22,7 @@ pub(super) fn EntryTable() -> impl IntoView {
   refetch_while_focused(key_fn, query_scope.clone(), Duration::from_secs(10));
 
   let resource =
-    expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
+    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
 
   let body_view = move |e: Vec<Entry>| {
     match e.len() {

@@ -36,6 +36,8 @@ pub fn shell() -> impl IntoView {
   let stylesheet = app_state.serve_config.inlined_stylesheet.clone();
   let htmx_path = format!("/dist/{}", app_state.serve_config.htmx_asset_name());
 
+  QueryClient::new().provide();
+
   view! {
     <!DOCTYPE html>
     <html lang="en">
@@ -78,7 +80,9 @@ pub fn shell() -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-  QueryClient::new().provide();
+  if use_context::<QueryClient>().is_none() {
+    QueryClient::new().provide();
+  }
 
   view! {
     <Router>

@@ -45,6 +45,7 @@ pub(crate) async fn leptos_routes_handler(
 
     // all app state
     provide_context(app_state.clone());
+    provide_context(app_state.domain.clone());
 
     // paddle items
     provide_context(app_state.domain.paddle_client_secret());

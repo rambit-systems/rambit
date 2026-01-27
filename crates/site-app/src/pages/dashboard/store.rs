@@ -16,13 +16,13 @@ use crate::{
   },
 };
 
-#[island]
+#[component]
 pub(super) fn StoreTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
   let key_fn = org_hook.key();
   let query_scope = stores_in_org_query_scope();
   let resource =
-    expect_context::<QueryClient>().local_resource(query_scope.clone(), key_fn);
+    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
 
   let body_view = move |stores: Vec<PvStore>| {
     match stores.len() {
