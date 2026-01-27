@@ -45,7 +45,7 @@ fn SignupPage() -> impl IntoView {
   view! {
     <form
       class=FORM_CLASS
-      hx-post="/auth/signup/action"
+      hx-get="/auth/signup/action"
       hx-target="#form-result"
       hx-swap="innerHTML transition:true"
     >
@@ -136,10 +136,7 @@ fn SignupPage() -> impl IntoView {
 
 #[component]
 fn SignupFormAction() -> impl IntoView {
-  let form_data = use_context::<Form<HashMap<String, String>>>();
-  let Some(form_data) = form_data else {
-    return form_rejection(NOT_FORM_MESSAGE).into_any();
-  };
+  let form_data = leptos_router::hooks::use_query_map().get();
 
   let Some(name) = form_data.get(NAME_FIELD_NAME) else {
     return form_rejection(const_format::formatcp!(
@@ -207,26 +204,21 @@ fn SignupFormAction() -> impl IntoView {
   let state = expect_context::<AppState>();
   let domain = state.domain.clone();
 
-  let suspend = move || {
-    Suspend::new(
-      form_action(
-        domain.clone(),
-        auth_session.clone(),
-        name.clone(),
-        email.clone(),
-        creds.clone(),
-      )
-      .map(|r| match r {
-        Ok(t) => form_acceptance(t).into_any(),
-        Err(t) => form_rejection(t).into_any(),
-      }),
-    )
-  };
+  let future = form_action(
+    domain.clone(),
+    auth_session.clone(),
+    name.clone(),
+    email.clone(),
+    creds.clone(),
+  );
 
   view! {
-    <Suspense fallback=|| "Loading...">
-      { suspend }
-    </Suspense>
+    <Await future=future blocking=true let:data>
+      { match data {
+        Ok(t) => form_acceptance(t).into_any(),
+        Err(t) => form_rejection(t).into_any(),
+      }}
+    </Await>
   }
   .into_any()
 }
@@ -237,7 +229,7 @@ async fn form_action(
   name: HumanName,
   email: EmailAddress,
   creds: UserSubmittedAuthCredentials,
-) -> Result<&'static str, &'static str> {
+) -> Result<String, String> {
   let user = domain
     .user_signup(name, email.clone(), creds.clone())
     .await
@@ -253,13 +245,12 @@ async fn form_action(
 
   let auth_user = user.into();
 
-  match auth_session.login(&auth_user).await {
-    Ok(()) => Ok(SUCCESS_MESSAGE),
-    Err(err) => {
-      tracing::error!(
-        "encountered error while authenticating user ({email}): {err:?}"
-      );
-      Err(INTERNAL_ERROR_MESSAGE)
-    }
-  }
+  auth_session.login(&auth_user).await.map_err(|err| {
+    tracing::error!(
+      "encountered error while authenticating user ({email}): {err:?}"
+    );
+    INTERNAL_ERROR_MESSAGE
+  })?;
+
+  Ok(SUCCESS_MESSAGE.to_string())
 }

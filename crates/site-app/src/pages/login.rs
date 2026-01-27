@@ -1,8 +1,4 @@
-use std::collections::HashMap;
-
 use auth_domain::AuthSession;
-use axum::extract::Form;
-use futures::FutureExt;
 use leptos::prelude::*;
 use leptos_router::{
   any_nested_route::IntoAnyNestedRoute, components::Route, path,
@@ -30,7 +26,7 @@ fn LoginPage() -> impl IntoView {
     <div class="p-8 self-stretch sm:self-center w-auto elevation-flat">
       <form
         class="max-w-80 flex flex-col gap-6"
-        hx-post="/auth/login/action"
+        hx-get="/auth/login/action"
         hx-target="#form-result"
         hx-swap="innerHTML transition:true"
       >
@@ -86,10 +82,7 @@ fn LoginPage() -> impl IntoView {
 
 #[component]
 fn LoginFormAction() -> impl IntoView {
-  let form_data = use_context::<Form<HashMap<String, String>>>();
-  let Some(form_data) = form_data else {
-    return form_rejection(NOT_FORM_MESSAGE).into_any();
-  };
+  let form_data = leptos_router::hooks::use_query_map().get();
 
   let Some(email) = form_data.get(EMAIL_FIELD_NAME) else {
     return form_rejection(const_format::formatcp!(
@@ -126,21 +119,15 @@ fn LoginFormAction() -> impl IntoView {
 
   let auth_session = expect_context::<AuthSession>();
 
-  let suspend = move || {
-    Suspend::new(
-      form_action(auth_session.clone(), email.clone(), creds.clone()).map(
-        |r| match r {
-          Ok(t) => form_acceptance(t).into_any(),
-          Err(t) => form_rejection(t).into_any(),
-        },
-      ),
-    )
-  };
+  let future = form_action(auth_session.clone(), email.clone(), creds.clone());
 
   view! {
-    <Suspense fallback=|| "Loading...">
-      { suspend }
-    </Suspense>
+    <Await future=future blocking=true let:data>
+      { match data {
+        Ok(t) => form_acceptance(t).into_any(),
+        Err(t) => form_rejection(t).into_any(),
+      }}
+    </Await>
   }
   .into_any()
 }
@@ -149,23 +136,24 @@ async fn form_action(
   mut auth_session: AuthSession,
   email: EmailAddress,
   creds: UserSubmittedAuthCredentials,
-) -> Result<&'static str, &'static str> {
-  match auth_session.authenticate((email.clone(), creds)).await {
-    Ok(Some(user)) => match auth_session.login(&user).await {
-      Ok(()) => Ok(SUCCESS_MESSAGE),
-      Err(err) => {
-        tracing::error!(
-          "encountered error while authenticating user ({email}): {err:?}"
-        );
-        Err(INTERNAL_ERROR_MESSAGE)
-      }
-    },
-    Ok(None) => Err(UNAUTHORIZED_MESSAGE),
-    Err(err) => {
+) -> Result<String, String> {
+  let user = auth_session
+    .authenticate((email.clone(), creds))
+    .await
+    .map_err(|err| {
       tracing::error!(
         "encountered error while logging in user ({email}): {err:?}"
       );
-      Err(INTERNAL_ERROR_MESSAGE)
-    }
-  }
+      INTERNAL_ERROR_MESSAGE
+    })?
+    .ok_or(UNAUTHORIZED_MESSAGE)?;
+
+  auth_session.login(&user).await.map_err(|err| {
+    tracing::error!(
+      "encountered error while authenticating user ({email}): {err:?}"
+    );
+    INTERNAL_ERROR_MESSAGE
+  })?;
+
+  Ok(SUCCESS_MESSAGE.to_string())
 }

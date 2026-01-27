@@ -1,8 +1,6 @@
-mod extract_form;
-
 use auth_domain::AuthSession;
 use axum::{
-  self, Form, RequestExt,
+  self,
   body::Body,
   extract::{Request, State},
   handler::Handler,
@@ -34,22 +32,14 @@ fn leptos_method_from_axum_method(
   }
 }
 
-async fn context_provider_from_request(
-  app_state: State<AppState>,
-  mut request: Request<Body>,
-) -> (Request<Body>, impl Fn() + Clone + Sync + Send + 'static) {
-  let Ok(method) = request.extract_parts::<axum::http::Method>().await;
-  let auth_session = request
-    .extract_parts::<AuthSession>()
-    .await
-    .expect("failed to extract AuthSession from request");
-
-  let (request, form_data) =
-    self::extract_form::extract_form_data_from_body(request).await;
-
-  let State(app_state) = app_state;
-
-  (request, move || {
+pub(crate) async fn leptos_routes_handler(
+  State(app_state): State<AppState>,
+  HxRequest(hx_request): HxRequest,
+  auth_session: AuthSession,
+  method: axum::http::Method,
+  request: Request<Body>,
+) -> impl IntoResponse {
+  let context_provider = move || {
     // http method
     provide_context(leptos_method_from_axum_method(method.clone()));
 
@@ -65,22 +55,8 @@ async fn context_provider_from_request(
     if let Some(auth_user) = auth_session.user.clone() {
       provide_context(auth_user);
     }
+  };
 
-    // form data
-    if let Some(form_data) = form_data.clone() {
-      provide_context(Form(form_data));
-    }
-  })
-}
-
-#[axum::debug_handler]
-pub(crate) async fn leptos_routes_handler(
-  State(app_state): State<AppState>,
-  HxRequest(hx_request): HxRequest,
-  request: Request<Body>,
-) -> impl IntoResponse {
-  let (request, context_provider) =
-    context_provider_from_request(State(app_state), request).await;
   let app_fn = move || match hx_request {
     true => Either::Left(site_app::App()),
     false => Either::Right(site_app::shell()),
@@ -91,7 +67,6 @@ pub(crate) async fn leptos_routes_handler(
   handler(request).await.into_response()
 }
 
-#[axum::debug_handler]
 pub(crate) async fn leptos_fallback_handler(
   State(app_state): State<AppState>,
   request: Request<Body>,
