@@ -1,4 +1,6 @@
-use leptos::{logging, prelude::*, web_sys};
+use std::time::Duration;
+
+use leptos::{html::script, logging, prelude::*, web_sys};
 use leptos_router::location::Url;
 
 // taken from https://github.com/leptos-rs/leptos/blob/2ee4444bb44310e73e908b98ccd2b353f534da01/router/src/location/mod.rs#L87-L100
@@ -71,4 +73,21 @@ pub fn next_url_encoded_hook() -> Signal<String> {
     let next_url = next_url();
     Url::escape(&next_url)
   })
+}
+
+#[component]
+pub fn RedirectScript(
+  target: impl AsRef<str>,
+  #[prop(optional)] delay: Option<Duration>,
+) -> impl IntoView {
+  let target = target.as_ref();
+  let delay_ms = delay.map(|d| d.as_millis()).unwrap_or(0);
+
+  let script_contents = format!(
+    "setTimeout(() => {{
+      window.location.href = \"{target}\";
+    }}, {delay_ms});"
+  );
+
+  view! { <script>{ script_contents }</script> }
 }

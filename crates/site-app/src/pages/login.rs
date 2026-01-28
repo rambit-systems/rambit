@@ -1,11 +1,18 @@
+mod extract_fields;
+
+use std::time::Duration;
+
 use auth_domain::AuthSession;
 use leptos::prelude::*;
 use leptos_router::{
   any_nested_route::IntoAnyNestedRoute, components::Route, path,
 };
-use models::{EmailAddress, UserSubmittedAuthCredentials};
+use models::{AuthUser, EmailAddress, UserSubmittedAuthCredentials};
 
-use crate::{components::*, form_feedback_text::*};
+use crate::{
+  components::*, form_feedback_text::*, hooks::OrgHook,
+  navigation::RedirectScript,
+};
 
 #[component(transparent)]
 pub fn LoginPageRoutes() -> impl MatchNestedRoutes + Clone {
@@ -82,62 +89,45 @@ fn LoginPage() -> impl IntoView {
 
 #[component]
 fn LoginFormAction() -> impl IntoView {
-  let form_data = leptos_router::hooks::use_query_map().get();
-
-  let Some(email) = form_data.get(EMAIL_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The login request did not contain the \"{EMAIL_FIELD_NAME}\" field :/"
-    ))
-    .into_any();
+  let (email, creds) = match self::extract_fields::extract_fields() {
+    Ok(d) => d,
+    Err(rejection) => return form_rejection(rejection).into_any(),
   };
-  if email.is_empty() {
-    return form_rejection(EMPTY_EMAIL_MESSAGE).into_any();
-  }
-  let email = match EmailAddress::try_new(email) {
-    Ok(email) => email,
-    Err(models::EmailAddressError::InvalidEmail) => {
-      return form_rejection(MALFORMED_EMAIL_MESSAGE).into_any();
+
+  let future = form_action(email.clone(), creds.clone());
+  let future_response = move |data: &Result<AuthUser, String>| match data {
+    Ok(auth_user) => {
+      provide_context(auth_user.clone());
+      let org_hook = OrgHook::new_active();
+      let target = org_hook.dashboard_url()();
+
+      view! {
+        { form_acceptance(SUCCESS_MESSAGE) }
+        <RedirectScript
+          target=target
+          delay={Duration::from_secs_f32(0.5)}
+        />
+      }
+      .into_any()
     }
-    Err(models::EmailAddressError::TooLong) => {
-      return form_rejection(EMAIL_TOO_LONG_MESSAGE).into_any();
-    }
+    Err(t) => form_rejection(t).into_any(),
   };
-
-  let Some(password) = form_data.get(PASSWORD_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The login request did not contain the \"{PASSWORD_FIELD_NAME}\" field \
-       :/"
-    ))
-    .into_any();
-  };
-  if password.is_empty() {
-    return form_rejection(EMPTY_PASSWORD_MESSAGE).into_any();
-  }
-  let creds = UserSubmittedAuthCredentials::Password {
-    password: password.to_owned(),
-  };
-
-  let auth_session = expect_context::<AuthSession>();
-
-  let future = form_action(auth_session.clone(), email.clone(), creds.clone());
 
   view! {
     <Await future=future blocking=true let:data>
-      { match data {
-        Ok(t) => form_acceptance(t).into_any(),
-        Err(t) => form_rejection(t).into_any(),
-      }}
+      { future_response(data) }
     </Await>
   }
   .into_any()
 }
 
 async fn form_action(
-  mut auth_session: AuthSession,
   email: EmailAddress,
   creds: UserSubmittedAuthCredentials,
-) -> Result<String, String> {
-  let user = auth_session
+) -> Result<AuthUser, String> {
+  let mut auth_session = expect_context::<AuthSession>();
+
+  let auth_user = auth_session
     .authenticate((email.clone(), creds))
     .await
     .map_err(|err| {
@@ -148,12 +138,12 @@ async fn form_action(
     })?
     .ok_or(UNAUTHORIZED_MESSAGE)?;
 
-  auth_session.login(&user).await.map_err(|err| {
+  auth_session.login(&auth_user).await.map_err(|err| {
     tracing::error!(
       "encountered error while authenticating user ({email}): {err:?}"
     );
     INTERNAL_ERROR_MESSAGE
   })?;
 
-  Ok(SUCCESS_MESSAGE.to_string())
+  Ok(auth_user)
 }

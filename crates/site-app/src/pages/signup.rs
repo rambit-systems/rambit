@@ -1,17 +1,15 @@
-use std::collections::HashMap;
+mod extract_fields;
+
+use std::time::Duration;
 
 use auth_domain::AuthSession;
-use axum::Form;
-use domain::{create::CreateUserError, DomainService};
-use futures::FutureExt;
+use domain::create::CreateUserError;
 use grid_state::AppState;
 use leptos::prelude::*;
 use leptos_router::{
   any_nested_route::IntoAnyNestedRoute, components::Route, path,
 };
-use models::{
-  EmailAddress, HumanName, HumanNameError, UserSubmittedAuthCredentials,
-};
+use models::{AuthUser, EmailAddress, HumanName, UserSubmittedAuthCredentials};
 
 use crate::{
   components::{
@@ -19,6 +17,8 @@ use crate::{
     LoadingCircle, LockClosedHeroIcon, UserHeroIcon,
   },
   form_feedback_text::*,
+  hooks::OrgHook,
+  navigation::RedirectScript,
 };
 
 #[component(transparent)]
@@ -136,100 +136,47 @@ fn SignupPage() -> impl IntoView {
 
 #[component]
 fn SignupFormAction() -> impl IntoView {
-  let form_data = leptos_router::hooks::use_query_map().get();
-
-  let Some(name) = form_data.get(NAME_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The signup request did not contain the \"{NAME_FIELD_NAME}\" field :/"
-    ))
-    .into_any();
+  let (name, email, creds) = match self::extract_fields::extract_fields() {
+    Ok(d) => d,
+    Err(rejection) => return form_rejection(rejection).into_any(),
   };
-  if name.is_empty() {
-    return form_rejection(EMPTY_NAME_MESSAGE).into_any();
-  }
-  let name = match HumanName::try_new(name) {
-    Ok(name) => name,
-    Err(HumanNameError::Empty) => unreachable!(),
-    Err(HumanNameError::TooLong) => {
-      return form_rejection(NAME_TOO_LONG_MESSAGE).into_any();
+
+  let future = form_action(name.clone(), email.clone(), creds.clone());
+  let future_response = move |data: &Result<AuthUser, String>| match data {
+    Ok(auth_user) => {
+      provide_context(auth_user.clone());
+      let org_hook = OrgHook::new_active();
+      let target = org_hook.dashboard_url()();
+
+      view! {
+        { form_acceptance(SUCCESS_MESSAGE) }
+        <RedirectScript
+          target=target
+          delay={Duration::from_secs_f32(0.5)}
+        />
+      }
+      .into_any()
     }
+    Err(t) => form_rejection(t).into_any(),
   };
-
-  let Some(email) = form_data.get(EMAIL_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The signup request did not contain the \"{EMAIL_FIELD_NAME}\" field :/"
-    ))
-    .into_any();
-  };
-  if email.is_empty() {
-    return form_rejection(EMPTY_EMAIL_MESSAGE).into_any();
-  }
-  let email = match EmailAddress::try_new(email) {
-    Ok(email) => email,
-    Err(models::EmailAddressError::InvalidEmail) => {
-      return form_rejection(MALFORMED_EMAIL_MESSAGE).into_any();
-    }
-    Err(models::EmailAddressError::TooLong) => {
-      return form_rejection(EMAIL_TOO_LONG_MESSAGE).into_any();
-    }
-  };
-
-  let Some(password) = form_data.get(PASSWORD_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The signup request did not contain the \"{PASSWORD_FIELD_NAME}\" field \
-       :/"
-    ))
-    .into_any();
-  };
-  if password.is_empty() {
-    return form_rejection(EMPTY_PASSWORD_MESSAGE).into_any();
-  }
-
-  let Some(confirm_password) = form_data.get(CONFIRM_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The signup request did not contain the \"{CONFIRM_FIELD_NAME}\" field \
-       :/"
-    ))
-    .into_any();
-  };
-  if confirm_password != password {
-    return form_rejection(PASSWORD_CONFIRM_MISMATCH_MESSAGE).into_any();
-  }
-
-  let creds = UserSubmittedAuthCredentials::Password {
-    password: password.to_owned(),
-  };
-
-  let auth_session = expect_context::<AuthSession>();
-  let state = expect_context::<AppState>();
-  let domain = state.domain.clone();
-
-  let future = form_action(
-    domain.clone(),
-    auth_session.clone(),
-    name.clone(),
-    email.clone(),
-    creds.clone(),
-  );
 
   view! {
     <Await future=future blocking=true let:data>
-      { match data {
-        Ok(t) => form_acceptance(t).into_any(),
-        Err(t) => form_rejection(t).into_any(),
-      }}
+      { future_response(data) }
     </Await>
   }
   .into_any()
 }
 
 async fn form_action(
-  domain: DomainService,
-  mut auth_session: AuthSession,
   name: HumanName,
   email: EmailAddress,
   creds: UserSubmittedAuthCredentials,
-) -> Result<String, String> {
+) -> Result<AuthUser, String> {
+  let mut auth_session = expect_context::<AuthSession>();
+  let state = expect_context::<AppState>();
+  let domain = state.domain.clone();
+
   let user = domain
     .user_signup(name, email.clone(), creds.clone())
     .await
@@ -252,5 +199,5 @@ async fn form_action(
     INTERNAL_ERROR_MESSAGE
   })?;
 
-  Ok(SUCCESS_MESSAGE.to_string())
+  Ok(auth_user)
 }

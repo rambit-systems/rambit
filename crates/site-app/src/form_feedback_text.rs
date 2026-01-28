@@ -1,11 +1,9 @@
 pub const INTERNAL_ERROR_MESSAGE: &str = "Oops! This is embarrasing... looks \
                                           like we're having trouble logging \
                                           you in :/";
-pub const SUCCESS_MESSAGE: &str = "Success! Redirecting :)";
+pub const SUCCESS_MESSAGE: &str = "Success! Redirecting...";
 pub const UNAUTHORIZED_MESSAGE: &str =
   "Oops! Looks like those aren't the right credentials :/";
-pub const NOT_FORM_MESSAGE: &str =
-  "The login request did not contain form data :/";
 pub const EMPTY_EMAIL_MESSAGE: &str =
   "Looks like you forgot to put in your email :/";
 pub const EMPTY_NAME_MESSAGE: &str =
