@@ -1,14 +1,19 @@
+use axum::http::{header, HeaderValue, StatusCode};
+use domain::{DomainService, UpdateActiveOrgError};
 use leptos::{either::Either, prelude::*};
+use leptos_axum::ResponseOptions;
 use leptos_router::{
-  any_nested_route::IntoAnyNestedRoute, components::Route, path,
+  any_nested_route::IntoAnyNestedRoute, components::Route,
+  hooks::use_params_map, path,
 };
-use models::AuthUser;
+use models::{AuthUser, Org, RecordId};
 
 use crate::{
   components::{
-    CheckHeroIcon, ChevronDownHeroIcon, Cog6ToothHeroIcon, LoadingCircle,
+    form_rejection, CheckHeroIcon, ChevronDownHeroIcon, Cog6ToothHeroIcon,
     PlusHeroIcon,
   },
+  form_feedback_text::*,
   hooks::OrgHook,
 };
 
@@ -16,6 +21,7 @@ use crate::{
 pub fn OrgSelectorRoutes() -> impl MatchNestedRoutes + Clone {
   view! {
     <Route path=path!("/org_selector") view=OrgSelectorMenu />
+    <Route path=path!("/org_selector/action/:id") view=OrgSelectorAction />
   }
   .into_inner()
   .into_any_nested_route()
@@ -115,15 +121,18 @@ fn OrgRow(org_hook: OrgHook, active: bool) -> impl IntoView {
     })
   } else {
     Either::Right(view! {
-      <LoadingCircle {..} class="size-5 hx-indicator" />
+      <div class="size-5" />
     })
   };
+  let action_href = format!("/org_selector/action/{}", org_hook.key()());
 
   view! {
-    <div
+    <a
       class="rounded p-2 flex flex-row gap-2 items-center transition-colors text-base-12"
       class=("font-bold", active)
       class=("cursor-pointer btn-link-secondary", !active)
+
+      href=action_href
     >
       { icon_element }
       <span class="flex-1 text-ellipsis">
@@ -131,7 +140,7 @@ fn OrgRow(org_hook: OrgHook, active: bool) -> impl IntoView {
           { move || Suspend::new(org_hook.descriptor())}
         </Suspense>
       </span>
-    </div>
+    </a>
   }
 }
 
@@ -154,4 +163,59 @@ fn ExtraRows() -> impl IntoView {
       </span>
     </a>
   }
+}
+
+#[component]
+fn OrgSelectorAction() -> impl IntoView {
+  let params = use_params_map();
+  let requested_org_param = params().get("id").expect("missing org path param");
+
+  // fail if ID can't be parsed
+  let Ok(requested_org) = requested_org_param.parse::<RecordId<_>>() else {
+    return form_rejection("Could not parse requested org ID").into_any();
+  };
+
+  let future = action(requested_org);
+  let future_response = move |data: &Result<RecordId<Org>, String>| match data {
+    Ok(new_org) => {
+      let new_org = *new_org;
+      let org_hook = OrgHook::new(move || new_org);
+      let target = org_hook.dashboard_url()();
+
+      let response_options = expect_context::<ResponseOptions>();
+      response_options.set_status(StatusCode::SEE_OTHER);
+      response_options.insert_header(
+        header::LOCATION,
+        HeaderValue::from_str(&target).unwrap(),
+      );
+
+      ().into_any()
+    }
+    Err(t) => form_rejection(t).into_any(),
+  };
+
+  view! {
+    <Await future=future blocking=true let:data>
+      { future_response(data) }
+    </Await>
+  }
+  .into_any()
+}
+
+async fn action(requested_org: RecordId<Org>) -> Result<RecordId<Org>, String> {
+  let auth_user = use_context::<AuthUser>().ok_or(UNAUTHENTICATED_MESSAGE)?;
+  let domain_service: DomainService = expect_context();
+
+  Ok(
+    domain_service
+      .switch_active_org(auth_user.id, requested_org)
+      .await
+      .map_err(|e| match e {
+        UpdateActiveOrgError::InvalidOrg(_) => "Could not switch to this org",
+        e => {
+          tracing::error!("failed to fetch org: {e}");
+          INTERNAL_ERROR_MESSAGE
+        }
+      })?,
+  )
 }
