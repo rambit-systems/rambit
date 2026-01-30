@@ -1,14 +1,10 @@
 mod account_menu;
-mod old_org_selector;
 pub mod org_selector;
 
 use leptos::{either::Either, prelude::*};
 use models::AuthUser;
 
-use self::{
-  account_menu::AccountMenu, old_org_selector::OldOrgSelector,
-  org_selector::OrgSelector,
-};
+use self::{account_menu::AccountMenu, org_selector::OrgSelector};
 use crate::{hooks::OrgHook, navigation::next_url_encoded_hook};
 
 #[component]
@@ -72,9 +68,7 @@ fn LoggedInUserAuthActions() -> impl IntoView {
 
   view! {
     <a href=active_org_dashboard_url class="btn-link btn-link-primary">"Dashboard"</a>
-    <OldOrgSelector />
     <OrgSelector />
     <AccountMenu />
-    // <a href="/auth/logout" class="btn-link btn-link-secondary">"Log Out"</a>
   }
 }
