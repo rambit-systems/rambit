@@ -1,13 +1,23 @@
 mod validate;
 
+use std::time::Duration;
+
+use domain::DomainService;
 use leptos::prelude::*;
 use leptos_router::{
   any_nested_route::IntoAnyNestedRoute, components::Route, path,
 };
+use models::{AuthUser, EntityName, Org, RecordId};
 
 use self::validate::OrgNameValidation;
 use crate::{
-  components::{form_layout::*, BuildingOffice2HeroIcon, LoadingCircle},
+  components::{
+    form_acceptance, form_layout::*, form_rejection, BuildingOffice2HeroIcon,
+    LoadingCircle,
+  },
+  form_feedback_text::*,
+  hooks::OrgHook,
+  navigation::RedirectScript,
   pages::protect,
 };
 
@@ -24,6 +34,7 @@ pub fn CreateOrgPageRoutes() -> impl MatchNestedRoutes + Clone {
   view! {
     <Route path=path!("/org/create_org") view=protect(CreateOrgPage) />
     <Route path=path!("/org/create_org/validate") view=protect(OrgNameValidation) />
+    <Route path=path!("/org/create_org/action") view=protect(CreateOrgFormAction) />
   }
   .into_inner()
   .into_any_nested_route()
@@ -38,7 +49,12 @@ fn CreateOrgPage() -> impl IntoView {
                             md:grid-cols-form gap-x-8 gap-y-12";
 
   view! {
-    <form class=FORM_CLASS>
+    <form
+      class=FORM_CLASS
+      hx-get="/org/create_org/action"
+      hx-target="#form-result"
+      hx-swap="innerHTML transition:true"
+    >
       <GridRowFull>
         <div class="flex flex-col gap-2">
           <p class="title">"Create an Organization"</p>
@@ -96,4 +112,62 @@ fn CreateOrgPage() -> impl IntoView {
       </GridRow>
     </form>
   }
+}
+
+#[component]
+fn CreateOrgFormAction() -> impl IntoView {
+  let form_data = leptos_router::hooks::use_query_map().get();
+  let Some(name) = form_data.get(NAME_FIELD_NAME) else {
+    return form_rejection(const_format::formatcp!(
+      "The validation request did not contain the \"{NAME_FIELD_NAME}\" field \
+       :/"
+    ))
+    .into_any();
+  };
+
+  if name.is_empty() {
+    return form_rejection(EMPTY_NAME_MESSAGE).into_any();
+  }
+  let name = EntityName::new(name);
+
+  let future = form_action(name.clone());
+  let future_response = move |data: &Result<RecordId<Org>, String>| match data {
+    Ok(new_org) => {
+      let new_org = *new_org;
+      let org_hook = OrgHook::new(move || new_org);
+      let target = org_hook.dashboard_url()();
+
+      view! {
+        { form_acceptance(SUCCESS_MESSAGE) }
+        <RedirectScript
+          target=target
+          delay={Duration::from_secs_f32(0.5)}
+        />
+      }
+      .into_any()
+    }
+    Err(t) => form_rejection(t).into_any(),
+  };
+
+  view! {
+    <Await future=future blocking=true let:data>
+      { future_response(data) }
+    </Await>
+  }
+  .into_any()
+}
+
+async fn form_action(name: EntityName) -> Result<RecordId<Org>, String> {
+  let auth_user = use_context::<AuthUser>().ok_or(UNAUTHENTICATED_MESSAGE)?;
+  let domain_service: DomainService = expect_context();
+
+  let org = domain_service
+    .create_named_org_with_user(auth_user.id, name)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to create named org with user: {e:#?}");
+      INTERNAL_ERROR_MESSAGE
+    })?;
+
+  Ok(org.id)
 }

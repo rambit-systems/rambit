@@ -18,3 +18,5 @@ pub const EMPTY_PASSWORD_MESSAGE: &str =
   "Looks like you forgot to put in your password :/";
 pub const PASSWORD_CONFIRM_MISMATCH_MESSAGE: &str =
   "Looks like your passwords don't match :/";
+pub const UNAUTHENTICATED_MESSAGE: &str =
+  "You need to be logged in to do this :/";

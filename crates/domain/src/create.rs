@@ -28,7 +28,7 @@ impl DomainService {
     self.mutate.create_store(store).await
   }
 
-  /// Creates an [`Org`].
+  /// Creates an [`Org`], and sets it as active.
   #[tracing::instrument(skip(self))]
   pub async fn create_named_org_with_user(
     &self,
