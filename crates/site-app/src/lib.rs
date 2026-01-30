@@ -99,7 +99,7 @@ pub fn App() -> impl IntoView {
         </ParentRoute>
 
         <CreateOrgPageRoutes />
-        <Route path=path!("/org/:org/create_cache") view=protect_by_org(CreateCachePage) />
+        <CreateCachePageRoutes />
         <Route path=path!("/org/:org/create_store") view=protect_by_org(CreateStorePage) />
 
         <SignupPageRoutes />

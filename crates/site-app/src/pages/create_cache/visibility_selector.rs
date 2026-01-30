@@ -1,5 +1,6 @@
 use leptos::prelude::*;
 
+use super::VISIBILITY_FIELD_NAME;
 use crate::hooks::OrgHook;
 
 #[component]
@@ -9,7 +10,7 @@ pub(super) fn VisibilitySelector() -> impl IntoView {
 
   view! {
     <fieldset class="flex flex-col gap-4">
-      <Option name="Private" input_name="visibility" value="private" default=true>
+      <Option name="Private" input_name=VISIBILITY_FIELD_NAME value="private" default=true>
         "Your entries are only available to users in your organization: "
         <span class="text-base-12">
           <Transition fallback=|| "loading">{ move || Suspend::new(org_descriptor) }</Transition>
@@ -17,7 +18,7 @@ pub(super) fn VisibilitySelector() -> impl IntoView {
         "."
       </Option>
 
-      <Option name="Public" input_name="visibility" value="public">
+      <Option name="Public" input_name=VISIBILITY_FIELD_NAME value="public">
         "Your entries are available for everyone to use."
       </Option>
     </fieldset>

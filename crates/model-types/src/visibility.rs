@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +16,18 @@ impl fmt::Display for Visibility {
     match self {
       Visibility::Public => write!(f, "Public"),
       Visibility::Private => write!(f, "Private"),
+    }
+  }
+}
+
+impl FromStr for Visibility {
+  type Err = ();
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s.trim().to_lowercase().as_ref() {
+      "public" => Ok(Visibility::Public),
+      "private" => Ok(Visibility::Private),
+      _ => Err(()),
     }
   }
 }

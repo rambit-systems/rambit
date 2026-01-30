@@ -124,6 +124,16 @@ impl OrgHook {
     Memo::new(move |_| format!("{}/create_cache", base_url()))
   }
 
+  pub fn create_cache_validation_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/create_cache/validate", base_url()))
+  }
+
+  pub fn create_cache_action_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/create_cache/action", base_url()))
+  }
+
   /// The URL for the org's "create store" page, relative to the site root.
   pub fn create_store_url(&self) -> Memo<String> {
     let base_url = self.base_url();
