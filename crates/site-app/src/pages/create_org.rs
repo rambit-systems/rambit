@@ -68,6 +68,10 @@ fn CreateOrgPage() -> impl IntoView {
               hx-target="#name-hint"
               hx-swap="innerHTML transition:true"
               hx-trigger="input throttle:0.25s"
+              hx-indicator="next svg"
+            />
+            <LoadingCircle {..}
+              class="size-6 transition-opacity htmx-indicator"
             />
           </label>
           <div id="name-hint" class="contents" />
