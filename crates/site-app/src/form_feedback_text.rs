@@ -1,6 +1,5 @@
-pub const INTERNAL_ERROR_MESSAGE: &str = "Oops! This is embarrasing... looks \
-                                          like we're having trouble logging \
-                                          you in :/";
+pub const INTERNAL_ERROR_MESSAGE: &str =
+  "Oops! This is embarrasing... looks like something unexpected went wrong :/";
 pub const SUCCESS_MESSAGE: &str = "Success! Redirecting...";
 pub const UNAUTHORIZED_MESSAGE: &str =
   "Oops! Looks like those aren't the right credentials :/";
