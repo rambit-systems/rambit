@@ -19,6 +19,7 @@ pub fn DashboardPageRoutes() -> impl MatchNestedRoutes + Clone {
   view! {
     <Route path=path!("/org/:org/dash") view=protect_by_org(DashboardPage) />
     <Route path=path!("/org/:org/dash/entry_table") view=protect_by_org(self::entry::EntryTableInfill) />
+    <Route path=path!("/org/:org/dash/cache_table") view=protect_by_org(self::cache::CacheTableInfill) />
   }
   .into_inner()
   .into_any_nested_route()

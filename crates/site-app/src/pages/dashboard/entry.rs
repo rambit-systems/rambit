@@ -5,6 +5,7 @@ use models::Entry;
 use crate::{
   components::{
     CacheItemLink, LoadingCircle, StorePathAbbreviated, StorePathCopyButton,
+    TableEmptyBody,
   },
   hooks::OrgHook,
   resources::entry::entries_in_org_query_scope,
@@ -61,7 +62,7 @@ pub(super) fn EntryTableInfill() -> impl IntoView {
     Suspend::new(async move {
       match resource.await {
         Ok(entries) => view! {
-          <EntryTableBodyData entries=entries />
+          <EntryTableBody entries=entries />
         }
         .into_any(),
         Err(e) => format!("Error: {e}").into_any(),
@@ -77,9 +78,25 @@ pub(super) fn EntryTableInfill() -> impl IntoView {
 }
 
 #[component]
-fn EntryTableBodyData(entries: Vec<Entry>) -> impl IntoView {
+fn EntryTableBody(entries: Vec<Entry>) -> impl IntoView {
+  const OUTER_CLASS: &str = "animate-fade-in h-20 relative";
+  const INNER_CLASS: &str = "absolute inset-0 flex flex-col items-center \
+                             justify-center border-[2px] box-border \
+                             border-t-0 border-base-6 border-dashed rounded-b";
+
   if entries.is_empty() {
-    return view! { <EntryTableEmptyBody /> }.into_any();
+    return view! {
+      <tbody class=OUTER_CLASS>
+        <tr>
+          <td /> <td /> <td /> <td />
+        </tr>
+        <div class=INNER_CLASS>
+        //   <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
+        //   <p class="text-sm">"Upload some entries from the CLI to see them here."</p>
+        </div>
+      </tbody>
+    }
+    .into_any();
   }
 
   view! {
@@ -87,17 +104,6 @@ fn EntryTableBodyData(entries: Vec<Entry>) -> impl IntoView {
       <For each=move || entries.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
     </tbody>
   }.into_any()
-}
-
-#[component]
-fn EntryTableEmptyBody() -> impl IntoView {
-  "empty"
-  // view! {
-  //   <TableEmptyBody>
-  //     <p class="text-base-12 text-lg">"Looks like you don't have any
-  // entries."</p>     <p class="text-sm">"Upload some entries from the CLI to
-  // see them here."</p>   </TableEmptyBody>
-  // }
 }
 
 #[component]

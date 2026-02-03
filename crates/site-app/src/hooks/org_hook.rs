@@ -118,6 +118,11 @@ impl OrgHook {
     Memo::new(move |_| format!("{}/dash/entry_table", base_url()))
   }
 
+  pub fn dashboard_cache_table_infill_url(&self) -> Memo<String> {
+    let base_url = self.base_url();
+    Memo::new(move |_| format!("{}/dash/cache_table", base_url()))
+  }
+
   /// The URL for the org's "create cache" page, relative to the site root.
   pub fn create_cache_url(&self) -> Memo<String> {
     let base_url = self.base_url();

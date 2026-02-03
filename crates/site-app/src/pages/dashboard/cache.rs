@@ -4,7 +4,7 @@ use models::{PvCache, Visibility};
 
 use crate::{
   components::{
-    CacheItemLink, CreateCacheButton, DataTableRefreshButton,
+    CacheItemLink, CreateCacheButton, DataTableRefreshButton, LoadingCircle,
     LockClosedHeroIcon, TableEmptyBody,
   },
   formatting_utils::ThousandsSeparated,
@@ -17,40 +17,23 @@ use crate::{
 #[component]
 pub(super) fn CacheTable() -> impl IntoView {
   let org_hook = OrgHook::new_requested();
-  let key_fn = org_hook.key();
-  let query_scope = caches_in_org_query_scope();
-
-  let resource =
-    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
-
-  let body_view = move |caches: Vec<PvCache>| {
-    match caches.len() {
-    0 => view! {
-      <CacheTableEmptyBody />
-    }.into_any(),
-    _ => view! {
-      <tbody class="animate-fade-in min-h-10">
-        <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
-      </tbody>
-    }.into_any()
-  }
-  };
-  let suspend = move || {
-    Suspend::new(async move {
-      match resource.await {
-        Ok(caches) => body_view(caches).into_any(),
-        Err(e) => format!("Error: {e}").into_any(),
-      }
-    })
-  };
+  let table_infill_url = org_hook.dashboard_cache_table_infill_url();
 
   view! {
     <div class="flex flex-row items-center gap-2">
       <p class="title">"Caches"</p>
       <div class="flex-1" />
-      <DataTableRefreshButton
-        key_fn=key_fn query_scope=query_scope.clone()
-      />
+
+      <button
+        class="btn btn-secondary relative overflow-hidden"
+        hx-get={ table_infill_url }
+        hx-target="#cache-table"
+      >
+        "Refresh"
+        <div class="absolute inset-0 flex flex-row justify-center items-center btn-secondary htmx-indicator">
+          <LoadingCircle {..} class="size-5" />
+        </div>
+      </button>
       <CreateCacheButton text="Create..." />
     </div>
 
@@ -61,11 +44,48 @@ pub(super) fn CacheTable() -> impl IntoView {
           <th>"Visibility"</th>
           <th>"Entry Count"</th>
         </thead>
-        <Transition fallback=|| ()>
-          { suspend }
-        </Transition>
+        <div id="cache-table" class="contents">
+          <CacheTableInfill />
+        </div>
       </table>
     </div>
+  }
+}
+
+#[component]
+pub(super) fn CacheTableInfill() -> impl IntoView {
+  let org_hook = OrgHook::new_requested();
+  let key_fn = org_hook.key();
+  let query_scope = caches_in_org_query_scope();
+
+  let resource =
+    expect_context::<QueryClient>().resource(query_scope.clone(), key_fn);
+
+  let suspend = move || {
+    Suspend::new(async move {
+      match resource.await {
+        Ok(caches) => view! {
+          <CacheTableBodyData caches=caches />
+        }
+        .into_any(),
+        Err(e) => format!("Error: {e}").into_any(),
+      }
+    })
+  };
+
+  view! {
+    <Suspense fallback=|| "[loading]">
+      { suspend }
+    </Suspense>
+  }
+}
+
+#[component]
+pub(super) fn CacheTableBodyData(caches: Vec<PvCache>) -> impl IntoView {
+  view! {
+    <tbody class="animate-fade-in min-h-10">
+      <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
+    </tbody>
   }
 }
 
