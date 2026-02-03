@@ -1,7 +1,8 @@
+mod extract_fields;
 mod validate;
 mod visibility_selector;
 
-use std::{str::FromStr, time::Duration};
+use std::time::Duration;
 
 use domain::DomainService;
 use leptos::prelude::*;
@@ -134,36 +135,14 @@ fn CreateCachePage() -> impl IntoView {
   }
 }
 
+#[component]
 fn CreateCacheFormAction() -> impl IntoView {
-  let form_data = leptos_router::hooks::use_query_map().get();
-
-  let Some(name) = form_data.get(NAME_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The validation request did not contain the \"{NAME_FIELD_NAME}\" field \
-       :/"
-    ))
-    .into_any();
-  };
-  if name.is_empty() {
-    return form_rejection(EMPTY_NAME_MESSAGE).into_any();
-  }
-  let name = EntityName::new(name);
-
-  let Some(visibility) = form_data.get(VISIBILITY_FIELD_NAME) else {
-    return form_rejection(const_format::formatcp!(
-      "The validation request did not contain the \"{VISIBILITY_FIELD_NAME}\" \
-       field :/"
-    ))
-    .into_any();
-  };
-  let Ok(visibility) = Visibility::from_str(&visibility) else {
-    return form_rejection(const_format::formatcp!(
-      "Failed to parse the value of the \"{VISIBILITY_FIELD_NAME}\" field :/"
-    ))
-    .into_any();
-  };
-
   let requested_org = OrgHook::new_requested().key()();
+
+  let (name, visibility) = match self::extract_fields::extract_fields() {
+    Ok(d) => d,
+    Err(rejection) => return form_rejection(rejection).into_any(),
+  };
 
   let future = form_action(name.clone(), visibility, requested_org);
   let future_response = move |data: &Result<RecordId<Cache>, String>| match data
