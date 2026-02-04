@@ -4783,7 +4783,6 @@ dependencies = [
  "css-minify-macro",
  "domain",
  "futures",
- "gloo-net",
  "grid-state",
  "leptos",
  "leptos-fetch",

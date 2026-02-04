@@ -24,7 +24,6 @@ serde.workspace = true
 tracing.workspace = true
 
 const_base = "0.2.0"
-gloo-net = { version = "0.6", default-features = false, features = [ "http", "json" ] }
 leptos-fetch = { version = "0.4", features = [ "ssr" ] }
 leptos-use = { version = "0.16", default-features = false, features = [
   "on_click_outside",
