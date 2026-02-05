@@ -11,7 +11,7 @@ grid-endpoints = { path = "../grid-endpoints" }
 grid-state = { path = "../grid-state" }
 site-app = { path = "../site-app" }
 
-leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos.workspace = true
 leptos_axum.workspace = true
 leptos_router.workspace = true
 

@@ -7,7 +7,7 @@ license-file.workspace = true
 publish = false
 
 [dependencies]
-leptos = { workspace = true, features = [ "ssr", "tracing" ] }
+leptos.workspace = true
 
 models = { path = "../models", default-features = false }
 
