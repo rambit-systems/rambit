@@ -71,38 +71,38 @@ pub(super) fn EntryTableInfill() -> impl IntoView {
   };
 
   view! {
-    <Suspense fallback=|| "[loading]">
-      { suspend }
-    </Suspense>
+    <tbody class="animate-fade-in min-h-10 relative">
+      <Transition fallback=|| "[loading]">
+        { suspend }
+      </Transition>
+    </tbody>
+  }
+}
+
+#[component]
+fn EntryTableEmptyBody() -> impl IntoView {
+  const INNER_CLASS: &str = "absolute inset-0 flex flex-col items-center \
+                             justify-center border-[2px] box-border \
+                             border-t-0 border-base-6 border-dashed rounded-b";
+
+  view! {
+    <tr> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> </tr>
+    <div class=INNER_CLASS>
+      <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
+      <p class="text-sm">"Upload some entries from the CLI to see them here."</p>
+    </div>
   }
 }
 
 #[component]
 fn EntryTableBody(entries: Vec<Entry>) -> impl IntoView {
-  const OUTER_CLASS: &str = "animate-fade-in h-20 relative";
-  const INNER_CLASS: &str = "absolute inset-0 flex flex-col items-center \
-                             justify-center border-[2px] box-border \
-                             border-t-0 border-base-6 border-dashed rounded-b";
-
-  if entries.is_empty() {
-    return view! {
-      <tbody class=OUTER_CLASS>
-        <tr>
-          <td /> <td /> <td /> <td />
-        </tr>
-        <div class=INNER_CLASS>
-        //   <p class="text-base-12 text-lg">"Looks like you don't have any entries."</p>
-        //   <p class="text-sm">"Upload some entries from the CLI to see them here."</p>
-        </div>
-      </tbody>
-    }
-    .into_any();
-  }
+  // if entries.is_empty() {
+  //   return view! { <EntryTableEmptyBody /> }.into_any();
+  // };
 
   view! {
-    <tbody class="animate-fade-in min-h-10">
-      <For each=move || entries.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
-    </tbody>
+    <For each=move || entries.clone() key=|e| e.id children=|e| view! { <EntryDataRow entry=e /> } />
   }.into_any()
 }
 

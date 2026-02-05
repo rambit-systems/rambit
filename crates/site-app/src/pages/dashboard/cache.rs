@@ -74,18 +74,18 @@ pub(super) fn CacheTableInfill() -> impl IntoView {
   };
 
   view! {
-    <Suspense fallback=|| "[loading]">
-      { suspend }
-    </Suspense>
+    <tbody class="animate-fade-in min-h-10">
+      <Transition fallback=|| "[loading]">
+        { suspend }
+      </Transition>
+    </tbody>
   }
 }
 
 #[component]
 pub(super) fn CacheTableBodyData(caches: Vec<PvCache>) -> impl IntoView {
   view! {
-    <tbody class="animate-fade-in min-h-10">
-      <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
-    </tbody>
+    <For each=move || caches.clone() key=|r| r.id children=|r| view! { <CacheDataRow cache=r /> } />
   }
 }
 
