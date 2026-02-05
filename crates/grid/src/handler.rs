@@ -58,14 +58,23 @@ pub(crate) async fn leptos_routes_handler(
     }
   };
 
-  let app_fn = move || match hx_request {
-    true => Either::Left(site_app::App()),
-    false => Either::Right(site_app::shell()),
-  };
-  let handler =
-    leptos_axum::render_app_to_stream_with_context(context_provider, app_fn);
-
-  handler(request).await.into_response()
+  match hx_request {
+    true => {
+      // render just the app without the shell, and without suspense
+      let handler = leptos_axum::render_app_async_with_context(
+        context_provider,
+        site_app::App,
+      );
+      handler(request).await.into_response()
+    }
+    false => {
+      let handler = leptos_axum::render_app_to_stream_with_context(
+        context_provider,
+        site_app::shell,
+      );
+      handler(request).await.into_response()
+    }
+  }
 }
 
 pub(crate) async fn leptos_fallback_handler(
