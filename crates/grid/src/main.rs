@@ -4,7 +4,7 @@
 
 mod handler;
 
-use axum::{self, Router, routing::get};
+use axum::{self};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
 use miette::{Context, IntoDiagnostic};
@@ -14,7 +14,7 @@ use tower_sessions::{
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
-use self::handler::{leptos_fallback_handler, leptos_routes_handler};
+use self::handler::static_asset_handler;
 
 fn setup_tracing() -> miette::Result<()> {
   let env_filter = EnvFilter::builder()
@@ -37,30 +37,15 @@ fn setup_tracing() -> miette::Result<()> {
 async fn main() -> miette::Result<()> {
   setup_tracing()?;
 
-  let routes = leptos_axum::generate_route_list(site_app::App);
-
   let app_state = AppState::build()
     .await
     .context("failed to build app state")?;
 
-  // route API
-  let mut router = Router::new().nest("/api/v1", grid_endpoints::router());
-
-  // route leptos routes
-  for route_listing in routes {
-    router = router.route(
-      route_listing.path(),
-      get(leptos_routes_handler)
-        .post(leptos_routes_handler)
-        .put(leptos_routes_handler)
-        .patch(leptos_routes_handler)
-        .delete(leptos_routes_handler),
-    );
-  }
+  let router = grid_endpoints::router();
 
   // add fallback and state
   let router = router
-    .fallback(leptos_fallback_handler)
+    .fallback(static_asset_handler)
     .with_state(app_state.clone());
 
   let session_layer = tower_sessions::SessionManagerLayer::new(

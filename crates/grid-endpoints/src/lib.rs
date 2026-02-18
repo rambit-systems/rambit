@@ -39,12 +39,16 @@ async fn root() -> impl IntoResponse {
 async fn health() -> impl IntoResponse { Json(true) }
 
 #[axum::debug_handler]
-async fn fallback() -> impl IntoResponse {
+async fn api_fallback() -> impl IntoResponse {
   (StatusCode::NOT_FOUND, "endpoint not found")
 }
 
 /// Builds the grid router.
 pub fn router() -> Router<AppState> {
+  axum::Router::new().nest("/api/v1", api_router())
+}
+
+fn api_router() -> Router<AppState> {
   axum::Router::new()
     .route("/", get(root))
     .route("/health", get(health).post(health))
@@ -55,5 +59,5 @@ pub fn router() -> Router<AppState> {
     .route("/c/{cache_name}/nix-cache-info", get(nix_cache_info))
     .route("/c/{cache_name}/download/{store_path}", get(download))
     .route("/c/{cache_name}/{digest_with_suffix}", get(narinfo))
-    .fallback(fallback)
+    .fallback(api_fallback)
 }

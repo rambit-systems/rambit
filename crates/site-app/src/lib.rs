@@ -27,7 +27,7 @@ const PRELOAD_FONT_PATHS: &[&str] = &[
   "/fonts/funnel_sans/OpNIno8Dg9bX6Bsp3Wq69Tpyfhg.woff2",
   "/fonts/funnel_display/B50WF7FGv37QNVWgE0ga--4Pbb6dDYs.woff2",
 ];
-const FAVICON_SVG: &str = include_str!("../public/favicon.svg");
+const FAVICON_SVG: &str = include_str!("../../app/public/favicon.svg");
 const FAVICON_SVG_BASE64: &str =
   const_base::encode_as_str!(FAVICON_SVG, const_base::Config::B64);
 
@@ -53,9 +53,8 @@ pub fn shell() -> impl IntoView {
 
         <style>{ stylesheet.as_ref() }</style>
 
-        <style>{include_css!("style/fonts/funnel_sans.css")}</style>
-        <style>{include_css!("style/fonts/funnel_display.css")}</style>
-        <style>{include_css!("style/fonts/jetbrains_mono.css")}</style>
+        <style>{include_css!("../app/style/fonts/funnel_sans.css")}</style>
+        <style>{include_css!("../app/style/fonts/funnel_display.css")}</style>
 
         <title>"Rambit Labs — Never waste another build"</title>
 

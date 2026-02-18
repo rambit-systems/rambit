@@ -6,10 +6,10 @@ edition = "2024"
 license-file.workspace = true
 
 [dependencies]
+app = { path = "../app" }
 auth-domain = { path = "../auth-domain" }
 grid-endpoints = { path = "../grid-endpoints" }
 grid-state = { path = "../grid-state" }
-site-app = { path = "../site-app" }
 
 leptos.workspace = true
 leptos_axum.workspace = true
