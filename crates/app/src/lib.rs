@@ -5,11 +5,16 @@ mod extractors;
 mod hooks;
 mod internal_error;
 mod page_wrapper;
+mod pages;
 
-use axum::response::IntoResponse;
+use axum::{Router, response::IntoResponse};
+use grid_state::AppState;
 use maud::html;
 
 use self::{ctx::ResponseSeed, page_wrapper::page_wrapper};
+
+/// The prefix for all the app pages.
+pub const APP_PREFIX: &str = "/app";
 
 /// The fallback handler.
 pub async fn fallback_handler(
@@ -20,4 +25,13 @@ pub async fn fallback_handler(
   };
   let document = page_wrapper(page, ctx);
   resp.into_stream(document)
+}
+
+/// Builds the app router.
+pub fn router() -> Router<AppState> {
+  Router::new().nest(APP_PREFIX, app_router())
+}
+
+fn app_router() -> Router<AppState> {
+  Router::new().route("/", pages::home_page::sub_router())
 }

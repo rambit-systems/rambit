@@ -43,7 +43,7 @@ async fn api_fallback() -> impl IntoResponse {
   (StatusCode::NOT_FOUND, "endpoint not found")
 }
 
-/// Builds the grid router.
+/// Builds the grid API router.
 pub fn router() -> Router<AppState> {
   axum::Router::new().nest("/api/v1", api_router())
 }

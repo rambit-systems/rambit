@@ -3,18 +3,24 @@
 #![feature(unwrap_infallible)]
 
 mod handler;
+mod rewrite_root_to_app_root;
 
-use axum::{self};
+use axum::{self, Router, middleware};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
 use miette::{Context, IntoDiagnostic};
+use tower::ServiceBuilder;
+use tower_http::{normalize_path::NormalizePathLayer, trace::TraceLayer};
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
 };
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
-use self::handler::static_asset_handler;
+use self::{
+  handler::static_asset_handler,
+  rewrite_root_to_app_root::rewrite_root_to_app_root,
+};
 
 fn setup_tracing() -> miette::Result<()> {
   let env_filter = EnvFilter::builder()
@@ -41,12 +47,18 @@ async fn main() -> miette::Result<()> {
     .await
     .context("failed to build app state")?;
 
-  let router = grid_endpoints::router();
-
-  // add fallback and state
-  let router = router
+  // compose, add fallback, and add state
+  let inner_router = app::router()
+    .merge(grid_endpoints::router())
     .fallback(static_asset_handler)
     .with_state(app_state.clone());
+  // normalize routing (has to happen outside router)
+  let router = Router::new().fallback_service(
+    ServiceBuilder::new()
+      .layer(NormalizePathLayer::trim_trailing_slash())
+      .layer(middleware::from_fn(rewrite_root_to_app_root))
+      .service(inner_router),
+  );
 
   let session_layer = tower_sessions::SessionManagerLayer::new(
     CachingSessionStore::new(MemoryStore::default(), app_state.session_store),
@@ -55,7 +67,10 @@ async fn main() -> miette::Result<()> {
   let auth_layer =
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
 
-  let service = router.layer(auth_layer);
+  let layer_stack = ServiceBuilder::new()
+    .layer(TraceLayer::new_for_http())
+    .layer(auth_layer);
+  let service = router.layer(layer_stack);
 
   let addr = "[::]:3000";
   let listener = tokio::net::TcpListener::bind(&addr)
