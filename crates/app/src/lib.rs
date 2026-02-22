@@ -21,7 +21,7 @@ pub async fn fallback_handler(
   ResponseSeed(ctx, resp): ResponseSeed,
 ) -> impl IntoResponse {
   let page = html! {
-    h1 { "We couldn't find that page :/" }
+    h1 { "Page not found." }
   };
   let document = page_wrapper(page, ctx);
   resp.into_stream(document)
