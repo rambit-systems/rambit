@@ -1,5 +1,6 @@
 
 [workspace]
+exclude = [ "crates/site-app" ]
 members = [ "crates/*" ]
 resolver = "3"
 
@@ -10,27 +11,12 @@ license-file = "LICENSE.md"
 missing_docs = "deny"
 
 [workspace.dependencies]
-# # # app-core
-# belt = { git = "https://github.com/johnbchron/app-core" }
-# db = { git = "https://github.com/johnbchron/app-core" }
-# dvf = { git = "https://github.com/johnbchron/app-core" }
-# kv = { git = "https://github.com/johnbchron/app-core" }
-# kv-redb-impl = { git = "https://github.com/johnbchron/app-core" }
-# kv-tikv-impl = { git = "https://github.com/johnbchron/app-core" }
-# model = { git = "https://github.com/johnbchron/app-core" }
-# storage = { git = "https://github.com/johnbchron/app-core" }
-
 # palin-core
 belt = { git = "https://github.com/rambit-systems/palin-core" }
 db = { git = "https://github.com/rambit-systems/palin-core" }
 model = { git = "https://github.com/rambit-systems/palin-core" }
 slug = { git = "https://github.com/rambit-systems/palin-core" }
 storage = { git = "https://github.com/rambit-systems/palin-core" }
-# belt = { path = "../palin-core/crates/belt" }
-# db = { path = "../palin-core/crates/db" }
-# model = { path = "../palin-core/crates/model" }
-# slug = { path = "../palin-core/crates/slug" }
-# storage = { path = "../palin-core/crates/storage" }
 
 # essentials
 bytes = { version = "1" }
@@ -62,54 +48,3 @@ axum-login = { version = "0.18" }
 tower = { version = "0.5" }
 tower-http = { version = "0.6" }
 tower-sessions = { version = "0.14" }
-
-# # # # # # # # # # # 
-### leptos config ###
-# # # # # # # # # # #
-
-leptos = { version = "0.8", features = [ "nightly", "ssr", "tracing" ] }
-leptos_axum = { version = "0.8", features = [  ] }
-leptos_router = { version = "0.8", features = [ "nightly", "ssr" ] }
-
-[patch.crates-io]
-# leptos = { git = 'https://github.com/leptos-rs/leptos.git' }
-# leptos_axum = { git = 'https://github.com/leptos-rs/leptos.git' }
-# leptos_meta = { git = 'https://github.com/leptos-rs/leptos.git' }
-# leptos_router = { git = 'https://github.com/leptos-rs/leptos.git' }
-
-[profile.wasm-release]
-codegen-units = 1
-inherits = "release"
-lto = true
-opt-level = 'z'
-
-[[workspace.metadata.leptos]]
-hash-files = false
-name = "site"
-
-bin-package = "grid"
-lib-package = "site-frontend"
-
-site-pkg-dir = "pkg"
-site-root = "target/site"
-
-assets-dir = "crates/site-app/public"
-# style-file = "crates/site-app/style/src/main.css"
-
-reload-port = 3001
-site-addr = "0.0.0.0:3000"
-
-browserquery = "defaults"
-
-tailwind-input-file = "crates/site-app/style/src/main.css"
-
-# set by cargo-leptos
-env = "DEV"
-watch = false
-
-bin-default-features = true
-bin-features = [  ]
-# bin-profile-dev = "dev"
-lib-default-features = true
-lib-features = [  ]
-lib-profile-release = "wasm-release"

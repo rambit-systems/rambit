@@ -7,8 +7,6 @@ license-file.workspace = true
 publish = false
 
 [dependencies]
-leptos.workspace = true
+# models = { path = "../models", default-features = false }
 
-models = { path = "../models", default-features = false }
-
-serde_json.workspace = true
+# serde_json.workspace = true

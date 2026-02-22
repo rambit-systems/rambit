@@ -13,7 +13,7 @@ belt.workspace = true
 
 nix-compat.workspace = true
 
-miette.workspace = true
+# miette.workspace = true
 
 hex = "0.4.3"
 nix-nar.workspace = true

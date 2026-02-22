@@ -14,11 +14,9 @@ tower-sessions-db-store = { path = "../tower-sessions-db-store" }
 db = { workspace = true }
 
 axum.workspace = true
-leptos = { workspace = true, features = [ "ssr", "tracing" ] }
 
 gethostname = { version = "1.1" }
 miette.workspace = true
-tokio = { workspace = true, features = [ "macros" ] }
 tracing.workspace = true
 
 [lints]

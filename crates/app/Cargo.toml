@@ -11,18 +11,18 @@ css-minify-macro = { path = "../css-minify-macro" }
 domain = { path = "../domain" }
 grid-state = { path = "../grid-state" }
 models = { path = "../models" }
-site-paddle = { path = "../site-paddle" }
+# site-paddle = { path = "../site-paddle" }
 
 columbo = { version = "0.2" }
 maud = { version = "0.27" }
 
-async-trait.workspace = true
+# async-trait.workspace = true
 axum.workspace = true
-futures.workspace = true
+# futures.workspace = true
 miette.workspace = true
-tokio.workspace = true
+# tokio.workspace = true
 
-serde.workspace = true
+# serde.workspace = true
 tracing.workspace = true
 
 const_base = "0.2"

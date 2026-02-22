@@ -9,11 +9,14 @@ use std::{sync::Arc, time::Duration};
 
 use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
-use domain::{DomainService, authenticate::AuthenticationError};
-use miette::IntoDiagnostic;
-use models::{
-  AuthUser, EmailAddress, User, UserSubmittedAuthCredentials, model::RecordId,
+use domain::{
+  DomainService,
+  authenticate::AuthenticationError,
+  models::{
+    AuthUser, EmailAddress, User, UserSubmittedAuthCredentials, model::RecordId,
+  },
 };
+use miette::IntoDiagnostic;
 use tracing::debug;
 
 use self::cache::ExpiringCache;
