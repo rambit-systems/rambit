@@ -13,6 +13,7 @@ mod user;
 pub use model::{self, RecordId};
 pub use model_types::*;
 pub use nix_compat;
+pub use ulid;
 
 #[cfg(feature = "session")]
 pub use self::session::*;

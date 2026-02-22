@@ -4,13 +4,18 @@
 
 mod handler;
 mod rewrite_root_to_app_root;
+mod ulid_request_id;
 
 use axum::{self, Router, middleware};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
 use miette::{Context, IntoDiagnostic};
 use tower::ServiceBuilder;
-use tower_http::{normalize_path::NormalizePathLayer, trace::TraceLayer};
+use tower_http::{
+  normalize_path::NormalizePathLayer,
+  request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
+  trace::TraceLayer,
+};
 use tower_sessions::{
   CachingSessionStore, MemoryStore, cookie::time::Duration,
 };
@@ -20,6 +25,7 @@ use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 use self::{
   handler::static_asset_handler,
   rewrite_root_to_app_root::rewrite_root_to_app_root,
+  ulid_request_id::MakeRequestUlid,
 };
 
 fn setup_tracing() -> miette::Result<()> {
@@ -68,7 +74,9 @@ async fn main() -> miette::Result<()> {
     AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
 
   let layer_stack = ServiceBuilder::new()
+    .layer(SetRequestIdLayer::x_request_id(MakeRequestUlid))
     .layer(TraceLayer::new_for_http())
+    .layer(PropagateRequestIdLayer::x_request_id())
     .layer(auth_layer);
   let service = router.layer(layer_stack);
 

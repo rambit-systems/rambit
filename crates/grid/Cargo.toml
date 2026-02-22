@@ -8,6 +8,7 @@ license-file.workspace = true
 [dependencies]
 app = { path = "../app" }
 auth-domain = { path = "../auth-domain" }
+domain = { path = "../domain" }
 grid-endpoints = { path = "../grid-endpoints" }
 grid-state = { path = "../grid-state" }
 
