@@ -1,6 +1,7 @@
+use const_format::concatcp;
 use maud::{Markup, html};
 
-use crate::ctx::Ctx;
+use crate::{APP_PREFIX, ctx::Ctx};
 
 pub(super) fn header(ctx: Ctx) -> Markup {
   const CLASS: &str = "elevation-navbar flex flex-row px-4 gap-2 items-center \
@@ -42,8 +43,8 @@ fn header_user_area(ctx: Ctx) -> Markup {
       }
     }
     None => {
-      const LOGIN_URL: &str = "/auth/login";
-      const SIGNUP_URL: &str = "/auth/signup";
+      const LOGIN_URL: &str = concatcp!(APP_PREFIX, "/auth/login");
+      const SIGNUP_URL: &str = concatcp!(APP_PREFIX, "/auth/signup");
       html! {
         div class="flex flex-row gap-1 items-center" {
           a href=(LOGIN_URL) class="btn-link btn-link-secondary" {

@@ -1,5 +1,6 @@
 //! Contains the app code for the Rambit app.
 
+mod components;
 mod ctx;
 mod extractors;
 mod hooks;
@@ -33,5 +34,8 @@ pub fn router() -> Router<AppState> {
 }
 
 fn app_router() -> Router<AppState> {
-  Router::new().route("/", pages::home_page::sub_router())
+  Router::new().merge(pages::home_page::sub_router()).nest(
+    "/auth",
+    Router::new().nest("/signup", pages::signup_page::sub_router()),
+  )
 }

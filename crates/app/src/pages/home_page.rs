@@ -1,17 +1,10 @@
-use std::convert::Infallible;
-
-use axum::{
-  response::IntoResponse,
-  routing::{MethodRouter, get},
-};
+use axum::{Router, response::IntoResponse, routing::get};
 use grid_state::AppState;
 use maud::html;
 
 use crate::{ctx::ResponseSeed, page_wrapper::page_wrapper};
 
-pub async fn home_page(
-  ResponseSeed(ctx, resp): ResponseSeed,
-) -> impl IntoResponse {
+async fn home_page(ResponseSeed(ctx, resp): ResponseSeed) -> impl IntoResponse {
   let page = html! {
     div class="elevation-flat text-base-12" {
       div class="p-6 sm:p-20 font-semibold flex flex-col gap-2" {
@@ -36,4 +29,6 @@ pub async fn home_page(
   resp.into_stream(document)
 }
 
-pub fn sub_router() -> MethodRouter<AppState, Infallible> { get(home_page) }
+pub fn sub_router() -> Router<AppState> {
+  Router::new().route("/", get(home_page))
+}
