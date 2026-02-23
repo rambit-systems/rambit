@@ -9,7 +9,7 @@
       url = "https://github.com/canva-public/js2nix";
       hash = "sha256-udsxrWLtAaBkh++pqal3u5+hI0YhWI06O2UaC6IS5lY=";
     }) { };
-    style-root = ../../crates/site-app/style;
+    style-root = ../../crates/app/style;
     style-node-env = (js2nix {
       package-json = style-root + "/package.json";
       yarn-lock = style-root + "/yarn.lock";
@@ -22,7 +22,7 @@
       inherit src;
 
       buildPhase = ''
-        cd crates/site-app/style/
+        cd crates/app/style/
 
         ln -s -T ${style-node-env} node_modules
 
@@ -46,7 +46,7 @@
         mkdir -p $out/bin
         cp target/release/grid $out/bin/grid
         cp ${css} $out/bin/styles.css
-        cp -r crates/site-app/public $out/bin/public
+        cp -r crates/app/public $out/bin/public
 
         # supply env variable defaults from leptos options
         wrapProgram $out/bin/grid \
