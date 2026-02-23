@@ -20,7 +20,7 @@ fn header_logo(ctx: Ctx) -> Markup {
   const CLASS: &str =
     "cursor-pointer font-display font-bold text-xl text-product-11";
 
-  let href = match ctx.active_org() {
+  let href = match ctx.active_org_url_hook() {
     Some(ao) => ao.dashboard_url(),
     None => "/".to_owned(),
   };

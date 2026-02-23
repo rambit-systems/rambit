@@ -7,7 +7,8 @@ use domain::{DomainService, models::AuthUser};
 use miette::IntoDiagnostic;
 
 use crate::{
-  extractors::PathRequestedOrgId, hooks::OrgHook,
+  extractors::PathRequestedOrgId,
+  hooks::{OrgHook, OrgUrlHook},
   internal_error::InternalErrorRejection,
 };
 
@@ -15,12 +16,12 @@ use crate::{
 #[derive(Clone)]
 pub struct AuthenticatedState {
   /// The authenticated user.
-  pub auth_user:     AuthUser,
+  pub auth_user:       AuthUser,
   /// The authenticated user's active org.
-  pub active_org:    OrgHook,
+  pub active_org_hook: (OrgUrlHook, OrgHook),
   /// The org that the user requested with the route's `org` param. Option will
   /// be `None` if user does not belong to the requested org.
-  pub requested_org: Option<OrgHook>,
+  pub requested_org:   Option<(OrgUrlHook, OrgHook)>,
 }
 
 impl<S> OptionalFromRequestParts<S> for AuthenticatedState
@@ -46,7 +47,7 @@ where
     let domain_service = DomainService::from_ref(state);
     let meta = domain_service.meta();
     let active_org_id = auth_user.active_org();
-    tracing::error!(%active_org_id, "fetching active org for user");
+    tracing::debug!(%active_org_id, "fetching active org for user");
     let active_org = meta
       .fetch_org_by_id(active_org_id)
       .await
@@ -61,7 +62,10 @@ where
          exist",
         user = auth_user.id
       ))?;
-    let active_org = OrgHook::new(active_org, auth_user.clone());
+    let active_org = (
+      OrgUrlHook::new(active_org_id),
+      OrgHook::new(active_org, auth_user.clone()),
+    );
 
     let requested_org_id = PathRequestedOrgId::from_request_parts(parts, state)
       .await
@@ -76,17 +80,22 @@ where
           );
         })
         .into_diagnostic()?
-        .map(|ro| OrgHook::new(ro, auth_user.clone()))
+        .map(|ro| {
+          (
+            OrgUrlHook::new(requested_org_id.0),
+            OrgHook::new(ro, auth_user.clone()),
+          )
+        })
     } else {
       None
     };
     // return None if user is not a part of the org they're requesting.
     let requested_org =
-      requested_org.filter(|ro| auth_user.belongs_to_org(ro.id()));
+      requested_org.filter(|ro| auth_user.belongs_to_org(ro.1.id()));
 
     Ok(Some(AuthenticatedState {
       auth_user,
-      active_org,
+      active_org_hook: active_org,
       requested_org,
     }))
   }

@@ -1,3 +1,3 @@
 mod org_hook;
 
-pub use self::org_hook::OrgHook;
+pub use self::org_hook::*;

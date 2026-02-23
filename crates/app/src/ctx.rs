@@ -1,5 +1,6 @@
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
+use auth_domain::AuthSession;
 use axum::{
   extract::{FromRef, FromRequestParts, OptionalFromRequestParts},
   http::request::Parts,
@@ -10,7 +11,8 @@ use grid_state::AppState;
 use models::AuthUser;
 
 use crate::{
-  extractors::AuthenticatedState, hooks::OrgHook,
+  extractors::AuthenticatedState,
+  hooks::{OrgHook, OrgUrlHook},
   internal_error::InternalErrorRejection,
 };
 
@@ -20,6 +22,20 @@ pub struct Ctx(Arc<CtxInner>);
 impl Ctx {
   pub fn state(&self) -> &AppState { &self.0.app_state }
 
+  pub fn suspend<F, Fut, M>(
+    &self,
+    f: F,
+    placeholder: impl Into<columbo::Html>,
+  ) -> columbo::Suspense
+  where
+    F: FnOnce(Ctx) -> Fut,
+    Fut: Future<Output = M> + Send + 'static,
+    M: Into<columbo::Html> + 'static,
+  {
+    let fut = f(self.clone());
+    self.0.suspense_ctx.suspend(fut, placeholder)
+  }
+
   pub fn auth_user(&self) -> Option<AuthUser> {
     self
       .0
@@ -28,25 +44,30 @@ impl Ctx {
       .map(|a| a.auth_user.clone())
   }
 
-  pub fn active_org(&self) -> Option<OrgHook> {
+  pub fn active_org_url_hook(&self) -> Option<OrgUrlHook> {
     self
       .0
       .authenticated_state
       .as_ref()
-      .map(|a| a.active_org.clone())
+      .map(|a| a.active_org_hook.0.clone())
   }
-}
 
-impl Deref for Ctx {
-  type Target = SuspenseContext;
+  pub fn active_org_hook(&self) -> Option<OrgHook> {
+    self
+      .0
+      .authenticated_state
+      .as_ref()
+      .map(|a| a.active_org_hook.1.clone())
+  }
 
-  fn deref(&self) -> &Self::Target { &self.0.suspense_ctx }
+  pub fn auth_session(&self) -> AuthSession { self.0.auth_session.clone() }
 }
 
 struct CtxInner {
   app_state:           AppState,
   suspense_ctx:        SuspenseContext,
   authenticated_state: Option<AuthenticatedState>,
+  auth_session:        AuthSession,
 }
 
 pub struct ResponseSeed(pub Ctx, pub SuspendedResponse);
@@ -73,10 +94,20 @@ where
       )
       .await?;
 
+    let auth_session = AuthSession::from_request_parts(parts, state)
+      .await
+      .map_err(|(s, e)| {
+        miette::miette!(
+          "failed to extract AuthSession with status code {s} and error \
+           message: {e}"
+        )
+      })?;
+
     let ctx_inner = CtxInner {
       app_state,
       suspense_ctx,
       authenticated_state,
+      auth_session,
     };
 
     Ok(ResponseSeed(Ctx(Arc::new(ctx_inner)), resp))

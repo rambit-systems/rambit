@@ -8,7 +8,7 @@ pub struct OrgHook {
 }
 
 impl OrgHook {
-  /// Creates a new [`OrgHook`]. Requires [`AuthUser`] in context.
+  /// Creates a new [`OrgHook`]. Requires [`AuthUser`].
   pub fn new(org: Org, user: AuthUser) -> Self {
     Self {
       org: org.into(),
@@ -18,8 +18,29 @@ impl OrgHook {
 
   pub fn id(&self) -> RecordId<Org> { self.org.id }
 
+  /// The canonical user-facing org name/descriptor.
+  pub fn descriptor(&self) -> String {
+    self
+      .org
+      .user_facing_title(&self.user)
+      .unwrap_or("[unknown-org]".to_owned())
+  }
+}
+
+/// A hook that provides URLs relating to an [`Org`].
+#[derive(Clone)]
+pub struct OrgUrlHook {
+  id: RecordId<Org>,
+}
+
+impl OrgUrlHook {
+  /// Creates a new [`OrgUrlHook`].
+  pub fn new(id: RecordId<Org>) -> Self { Self { id } }
+
+  pub fn id(&self) -> RecordId<Org> { self.id }
+
   /// The base URL for the org. No page exists here.
-  fn base_url(&self) -> String { format!("/org/{id}", id = self.org.id) }
+  fn base_url(&self) -> String { format!("/org/{id}", id = self.id) }
 
   /// The URL for the org's dashboard page, relative to the site root.
   pub fn dashboard_url(&self) -> String { format!("{}/dash", self.base_url()) }
@@ -59,13 +80,5 @@ impl OrgHook {
   /// The URL for the org's setting page, relative to the site root.
   pub fn settings_url(&self) -> String {
     format!("{}/settings", self.base_url())
-  }
-
-  /// The canonical user-facing org name/descriptor.
-  pub fn descriptor(&self) -> String {
-    self
-      .org
-      .user_facing_title(&self.user)
-      .unwrap_or("[unknown-org]".to_owned())
   }
 }
