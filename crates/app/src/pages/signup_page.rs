@@ -1,8 +1,16 @@
-use axum::{Router, response::IntoResponse, routing::get};
+mod action;
+
+use axum::{
+  Router,
+  response::IntoResponse,
+  routing::{get, post},
+};
+use const_format::concatcp;
 use grid_state::AppState;
 use maud::html;
 
 use crate::{
+  APP_PREFIX,
   components::{form_layout::*, icons::*},
   ctx::ResponseSeed,
   page_wrapper::page_wrapper,
@@ -19,10 +27,12 @@ async fn signup_page(
   const FORM_CLASS: &str = "p-8 self-stretch md:self-center md:w-2xl \
                             elevation-flat flex flex-col md:grid \
                             md:grid-cols-form gap-x-8 gap-y-12";
+  const ACTION_URL: &str = concatcp!(APP_PREFIX, "/auth/signup/action");
+
   let page = html! {
     form
       class=(FORM_CLASS)
-      hx-get="/auth/signup/action"
+      hx-post=(ACTION_URL)
       hx-target="#form-result"
       hx-swap="innerHTML transition:true"
     {
@@ -54,7 +64,7 @@ async fn signup_page(
       (grid_row(html! {
         (grid_row_label(
           "Your email",
-          "What do you like to be called?"
+          "What is your point of contact?"
         ))
 
         label class="input-field" {
@@ -68,7 +78,7 @@ async fn signup_page(
       (grid_row(html! {
         (grid_row_label(
           "Pick a password",
-          "[Helpful description goes here]"
+          "Make sure not to share it."
         ))
 
         div class="flex flex-col gap-1" {
@@ -111,5 +121,7 @@ async fn signup_page(
 }
 
 pub fn sub_router() -> Router<AppState> {
-  Router::new().route("/", get(signup_page))
+  Router::new()
+    .route("/", get(signup_page))
+    .route("/action", post(self::action::signup_action))
 }
