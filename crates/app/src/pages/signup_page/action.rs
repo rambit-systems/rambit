@@ -25,7 +25,7 @@ pub(super) async fn signup_action(
     Ok(r) => r,
     Err(message) => {
       let document = form_rejection(message);
-      return resp.into_stream(document).into_response();
+      return resp.into_stream(document);
     }
   };
 
@@ -45,7 +45,7 @@ pub(super) async fn signup_action(
     Err(e) => form_rejection(e),
   };
 
-  resp.into_stream(feedback).into_response()
+  resp.into_stream(feedback)
 }
 
 async fn form_action(
