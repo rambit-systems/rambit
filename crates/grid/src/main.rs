@@ -85,7 +85,10 @@ async fn main() -> miette::Result<()> {
     .await
     .into_diagnostic()
     .context(format!("failed to bind listener to `{addr}`"))?;
-  tracing::info!("bound to http://{}", &addr);
+  let addr = listener.local_addr().into_diagnostic().with_context(|| {
+    format!("failed to read local_addr of listener (requested {addr:?})")
+  })?;
+  tracing::info!("bound to http://{addr}");
 
   axum::serve(listener, service)
     .await
