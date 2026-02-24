@@ -1,7 +1,7 @@
 use const_format::concatcp;
 use maud::{Markup, html};
 
-use crate::{APP_PREFIX, ctx::Ctx};
+use crate::{APP_PREFIX, components::org_selector::org_selector, ctx::Ctx};
 
 pub(super) fn header(ctx: Ctx) -> Markup {
   const CLASS: &str = "elevation-navbar flex flex-row px-4 gap-2 items-center \
@@ -35,11 +35,12 @@ fn header_logo(ctx: Ctx) -> Markup {
 fn header_user_area(ctx: Ctx) -> Markup {
   match ctx.auth_state() {
     Some(auth_state) => {
+      let dashboard_url = auth_state.active_org_url_hook().dashboard_url();
       html! {
-        div class="flex flex-col" {
-          p { "This still needs to be filled in" }
-          p { "User: " (auth_state.auth_user().id) }
+        a href=(dashboard_url) class="btn-link btn-link-primary" {
+          "Dashboard"
         }
+        (org_selector(ctx))
       }
     }
     None => {

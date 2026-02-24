@@ -8,12 +8,9 @@ use axum::{
 use columbo::{SuspendedResponse, SuspenseContext};
 use domain::DomainService;
 use grid_state::AppState;
-use models::AuthUser;
 
 use crate::{
-  extractors::AuthenticatedState,
-  hooks::{OrgHook, OrgUrlHook},
-  internal_error::InternalErrorRejection,
+  extractors::AuthenticatedState, internal_error::InternalErrorRejection,
 };
 
 #[derive(Clone)]

@@ -13,7 +13,7 @@ async fn dashboard_page(
   let Some(auth_state) = ctx.auth_state() else {
     return resp.into_stream(unauthorized_page(ctx));
   };
-  let Some((requested_org_url_hook, requested_org_hook)) =
+  let Some((requested_org_url_hook, _requested_org_hook)) =
     auth_state.requested_org
   else {
     return resp.into_stream(unauthorized_page(ctx));
