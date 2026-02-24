@@ -37,6 +37,8 @@ pub fn router() -> Router<AppState> {
 fn app_router() -> Router<AppState> {
   Router::new().merge(pages::home_page::sub_router()).nest(
     "/auth",
-    Router::new().nest("/signup", pages::signup_page::sub_router()),
+    Router::new()
+      .nest("/signup", pages::signup_page::sub_router())
+      .nest("/login", pages::login_page::sub_router()),
   )
 }
