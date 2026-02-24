@@ -32,7 +32,9 @@ pub(super) async fn signup_action(
   // we're running this inline (not suspended) because we need it to finish and
   // set the auth cookie before the body starts. If we run this after the body
   // starts, the cookie header can't be modified, and the user isn't logged in.
-  let action_result = match form_action(ctx, name, email, creds).await {
+  let result = form_action(ctx, name, email, creds).await;
+
+  let feedback = match result {
     Ok(au) => {
       let target = OrgUrlHook::new(au.active_org()).dashboard_url();
       html! {
@@ -40,10 +42,10 @@ pub(super) async fn signup_action(
         (redirect_script(target, Some(Duration::from_millis(500))))
       }
     }
-    Err(e) => html! { (form_rejection(e)) },
+    Err(e) => form_rejection(e),
   };
 
-  resp.into_stream(html! { (action_result) }).into_response()
+  resp.into_stream(feedback).into_response()
 }
 
 async fn form_action(
