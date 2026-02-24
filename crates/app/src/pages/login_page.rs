@@ -1,4 +1,10 @@
-use axum::{Router, response::IntoResponse, routing::get};
+mod action;
+
+use axum::{
+  Router,
+  response::IntoResponse,
+  routing::{get, post},
+};
 use const_format::concatcp;
 use grid_state::AppState;
 use maud::html;
@@ -14,15 +20,15 @@ const PASSWORD_FIELD_NAME: &str = "password";
 async fn login_page(
   ResponseSeed(ctx, resp): ResponseSeed,
 ) -> impl IntoResponse {
-  const FORM_CLASS: &str =
+  const OUTER_CLASS: &str =
     "p-8 self-stretch sm:self-center w-auto elevation-flat";
   const ACTION_URL: &str = concatcp!(APP_PREFIX, "/auth/login/action");
 
   let page = html! {
-    div class="p-8 self-stretch sm:self-center w-auto elevation-flat" {
+    div class=(OUTER_CLASS) {
       form
         class="max-w-80 flex flex-col gap-6"
-        hx-get="/auth/login/action"
+        hx-post=(ACTION_URL)
         hx-target="#form-result"
         hx-swap="innerHTML transition:true"
       {
@@ -78,6 +84,7 @@ async fn login_page(
 }
 
 pub fn sub_router() -> Router<AppState> {
-  Router::new().route("/", get(login_page))
-  // .route("/action", post(self::action::signup_action))
+  Router::new()
+    .route("/", get(login_page))
+    .route("/action", post(self::action::login_action))
 }
