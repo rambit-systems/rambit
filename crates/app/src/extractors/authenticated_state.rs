@@ -24,6 +24,16 @@ pub struct AuthenticatedState {
   pub requested_org:   Option<(OrgUrlHook, OrgHook)>,
 }
 
+impl AuthenticatedState {
+  pub fn auth_user(&self) -> AuthUser { self.auth_user.clone() }
+
+  pub fn active_org_url_hook(&self) -> OrgUrlHook {
+    self.active_org_hook.0.clone()
+  }
+
+  pub fn active_org_hook(&self) -> OrgHook { self.active_org_hook.1.clone() }
+}
+
 impl<S> OptionalFromRequestParts<S> for AuthenticatedState
 where
   S: Send + Sync,

@@ -36,28 +36,8 @@ impl Ctx {
     self.0.suspense_ctx.suspend(fut, placeholder)
   }
 
-  pub fn auth_user(&self) -> Option<AuthUser> {
-    self
-      .0
-      .authenticated_state
-      .as_ref()
-      .map(|a| a.auth_user.clone())
-  }
-
-  pub fn active_org_url_hook(&self) -> Option<OrgUrlHook> {
-    self
-      .0
-      .authenticated_state
-      .as_ref()
-      .map(|a| a.active_org_hook.0.clone())
-  }
-
-  pub fn active_org_hook(&self) -> Option<OrgHook> {
-    self
-      .0
-      .authenticated_state
-      .as_ref()
-      .map(|a| a.active_org_hook.1.clone())
+  pub fn auth_state(&self) -> Option<AuthenticatedState> {
+    self.0.authenticated_state.clone()
   }
 
   pub fn auth_session(&self) -> AuthSession { self.0.auth_session.clone() }

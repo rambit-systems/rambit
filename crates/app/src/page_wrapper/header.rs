@@ -20,8 +20,8 @@ fn header_logo(ctx: Ctx) -> Markup {
   const CLASS: &str =
     "cursor-pointer font-display font-bold text-xl text-product-11";
 
-  let href = match ctx.active_org_url_hook() {
-    Some(ao) => ao.dashboard_url(),
+  let href = match ctx.auth_state() {
+    Some(a) => a.active_org_url_hook().dashboard_url(),
     None => "/".to_owned(),
   };
 
@@ -33,12 +33,12 @@ fn header_logo(ctx: Ctx) -> Markup {
 }
 
 fn header_user_area(ctx: Ctx) -> Markup {
-  match ctx.auth_user() {
-    Some(auth_user) => {
+  match ctx.auth_state() {
+    Some(auth_state) => {
       html! {
         div class="flex flex-col" {
           p { "This still needs to be filled in" }
-          p { "User: " (auth_user.id) }
+          p { "User: " (auth_state.auth_user().id) }
         }
       }
     }
