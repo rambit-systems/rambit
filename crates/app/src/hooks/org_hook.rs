@@ -1,5 +1,7 @@
 use models::{AuthUser, Entry, Org, PvOrg, RecordId};
 
+use crate::APP_PREFIX;
+
 /// A hook that provides data on an [`Org`].
 #[derive(Clone)]
 pub struct OrgHook {
@@ -40,7 +42,9 @@ impl OrgUrlHook {
   pub fn id(&self) -> RecordId<Org> { self.id }
 
   /// The base URL for the org. No page exists here.
-  fn base_url(&self) -> String { format!("/org/{id}", id = self.id) }
+  fn base_url(&self) -> String {
+    format!("{APP_PREFIX}/org/{id}", id = self.id)
+  }
 
   /// The URL for the org's dashboard page, relative to the site root.
   pub fn dashboard_url(&self) -> String { format!("{}/dash", self.base_url()) }
