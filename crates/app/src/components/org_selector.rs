@@ -39,12 +39,16 @@ pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
 fn remove_popover_on_click_outside() -> Markup {
   const SCRIPT: &str = r##"
     document.addEventListener('click', function(e) {
-        const popover = document.querySelector('[data-popover]');
-        const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
-    
-        if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
-            popover.remove();
+      const popover = document.querySelector('[data-popover]');
+      const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
+  
+      if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
+        if (document.startViewTransition) {
+          document.startViewTransition(() => popover.remove());
+        } else {
+          popover.remove();
         }
+      }
     });
   "##;
 
