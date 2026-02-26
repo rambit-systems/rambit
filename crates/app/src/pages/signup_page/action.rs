@@ -1,8 +1,6 @@
-mod extract;
-
 use std::{collections::HashMap, time::Duration};
 
-use axum::{Form, response::IntoResponse};
+use axum::response::IntoResponse;
 use domain::create::CreateUserError;
 use maud::html;
 use models::{AuthUser, EmailAddress, HumanName, UserSubmittedAuthCredentials};
@@ -13,21 +11,32 @@ use crate::{
     scripts::redirect_script,
   },
   ctx::{Ctx, ResponseSeed},
+  extractors::{FromFormMap, FromValidatedForm, ValidatedForm},
   form_feedback_text::*,
   hooks::OrgUrlHook,
 };
 
+pub(super) struct SignupParams {
+  name:  HumanName,
+  email: EmailAddress,
+  creds: UserSubmittedAuthCredentials,
+}
+
+impl FromValidatedForm for SignupParams {
+  fn from_form_map(map: &HashMap<String, String>) -> Result<Self, String> {
+    Ok(Self {
+      name:  FromFormMap::from_form_map(map)?,
+      email: FromFormMap::from_form_map(map)?,
+      creds: FromFormMap::from_form_map(map)?,
+    })
+  }
+}
+
 pub(super) async fn signup_action(
   ResponseSeed(ctx, resp): ResponseSeed,
-  Form(map): Form<HashMap<String, String>>,
+  ValidatedForm(params): ValidatedForm<SignupParams>,
 ) -> impl IntoResponse {
-  let (name, email, creds) = match self::extract::extract_fields(map) {
-    Ok(r) => r,
-    Err(message) => {
-      let document = form_rejection(message);
-      return resp.into_stream(document);
-    }
-  };
+  let SignupParams { name, email, creds } = params;
 
   // we're running this inline (not suspended) because we need it to finish and
   // set the auth cookie before the body starts. If we run this after the body

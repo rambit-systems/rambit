@@ -1,3 +1,5 @@
+mod extract;
+
 use std::{collections::HashMap, time::Duration};
 
 use axum::{Form, response::IntoResponse};
@@ -10,23 +12,30 @@ use crate::{
     scripts::redirect_script,
   },
   ctx::{Ctx, ResponseSeed},
+  extractors::{FromFormMap, FromValidatedForm, ValidatedForm},
   form_feedback_text::*,
   hooks::OrgUrlHook,
 };
 
-mod extract;
+pub(super) struct LoginParams {
+  email: EmailAddress,
+  creds: UserSubmittedAuthCredentials,
+}
+
+impl FromValidatedForm for LoginParams {
+  fn from_form_map(map: &HashMap<String, String>) -> Result<Self, String> {
+    Ok(Self {
+      email: FromFormMap::from_form_map(map)?,
+      creds: FromFormMap::from_form_map(map)?,
+    })
+  }
+}
 
 pub(super) async fn login_action(
   ResponseSeed(ctx, resp): ResponseSeed,
-  Form(map): Form<HashMap<String, String>>,
+  ValidatedForm(params): ValidatedForm<LoginParams>,
 ) -> impl IntoResponse {
-  let (email, creds) = match self::extract::extract_fields(map) {
-    Ok(r) => r,
-    Err(message) => {
-      let document = form_rejection(message);
-      return resp.into_stream(document);
-    }
-  };
+  let LoginParams { email, creds } = params;
 
   let result = form_action(ctx, email.clone(), creds.clone()).await;
   let feedback = match result {
