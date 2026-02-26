@@ -20,6 +20,7 @@ hero_icons! {
   check_hero_icon => "check.svg",
   cog_6_tooth_hero_icon => "cog_6_tooth.svg",
   plus_hero_icon => "plus.svg",
+  building_office_2 => "building_office_2.svg",
 }
 
 pub fn loading_circle() -> Markup {

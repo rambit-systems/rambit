@@ -45,7 +45,12 @@ fn app_router() -> Router<AppState> {
     )
     .nest("/org_selector", components::org_selector::sub_router())
     .nest(
-      "/org/{org}",
-      Router::new().nest("/dash", pages::dashboard_page::sub_router()),
+      "/org",
+      Router::new()
+        .nest("/create_org", pages::create_org_page::sub_router())
+        .nest(
+          "/{org}",
+          Router::new().nest("/dash", pages::dashboard_page::sub_router()),
+        ),
     )
 }
