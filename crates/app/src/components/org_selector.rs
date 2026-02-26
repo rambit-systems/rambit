@@ -61,8 +61,9 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
   let active_org_id = ctx.active_org_url_hook().id();
 
   const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
-                       cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
-                       text-sm leading-none items-end gap-0 relative";
+                       button-squish cursor-pointer px-2 py-1 rounded flex \
+                       flex-col gap-0.5 text-sm leading-none items-end gap-0 \
+                       relative";
   const ORG_SELECTOR_URL: &str = concatcp!(APP_PREFIX, "/org_selector");
 
   html! {

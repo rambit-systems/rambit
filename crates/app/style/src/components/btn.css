@@ -3,8 +3,7 @@
 @layer components {
   .btn {
     /* behavior */
-    @apply cursor-pointer transition select-none;
-    @apply active:scale-[0.98] ease-out;
+    @apply cursor-pointer transition select-none button-squish;
 
     /* appearance */
     @apply rounded-md outline-offset-2;

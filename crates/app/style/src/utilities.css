@@ -4,3 +4,7 @@
     @apply mx-4 sm:container sm:mx-auto;
   }
 }
+
+@utility button-squish {
+  @apply active:scale-[0.98] ease-out;
+}
