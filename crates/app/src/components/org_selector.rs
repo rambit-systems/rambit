@@ -15,10 +15,12 @@ use models::{Org, RecordId};
 
 use crate::{
   APP_PREFIX,
-  components::{form_result::form_rejection, icons::*},
+  components::{
+    form_result::form_rejection, icons::*, text_data::org_descriptor,
+  },
   ctx::{Ctx, RequireAuth, ResponseSeed},
   form_feedback_text::INTERNAL_ERROR_MESSAGE,
-  hooks::{OrgHook, OrgUrlHook},
+  hooks::OrgUrlHook,
 };
 
 pub fn sub_router() -> Router<AppState> {
@@ -52,19 +54,7 @@ fn remove_popover_on_click_outside() -> Markup {
 }
 
 fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
-  let auth_user = ctx.auth_user();
   let active_org_id = ctx.active_org_url_hook().id();
-
-  let descriptor_suspense = ctx.suspend(
-    move |ctx| async move {
-      match ctx.fetch_org(active_org_id).await {
-        Ok(Some(org)) => PreEscaped(OrgHook::new(org, auth_user).descriptor()),
-        Ok(None) => html! { "[unknown]" },
-        Err(_) => html! { "[error]" },
-      }
-    },
-    html! { "[loading]" },
-  );
 
   const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
                        cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
@@ -78,7 +68,7 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
       hx-target="#org-selector-popover-contents"
     {
       p class="text-base/[1] text-base-12" {
-        (descriptor_suspense)
+        (org_descriptor(ctx, active_org_id))
       }
       div class="flex flex-row items-end gap-0.5" {
         div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (chevron_down_hero_icon()) }
@@ -141,24 +131,11 @@ fn org_row(
     }
   );
 
-  let descriptor_suspense = ctx.suspend(
-    move |ctx| async move {
-      match ctx.fetch_org(org_id).await {
-        Ok(Some(org)) => {
-          PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
-        }
-        Ok(None) => html! { "[unknown]" },
-        Err(_) => html! { "[error]" },
-      }
-    },
-    html! { "[loading]" },
-  );
-
   html! {
     a href=(action_href) class=(class) {
       (icon_element)
       span class="flex-1 text-ellipsis" {
-        (descriptor_suspense)
+        (org_descriptor(ctx, org_id))
       }
     }
   }

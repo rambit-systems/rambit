@@ -1,10 +1,10 @@
 use const_format::concatcp;
-use maud::{Markup, PreEscaped, html};
+use maud::{Markup, html};
 
 use crate::{
   APP_PREFIX,
+  components::text_data::org_descriptor,
   ctx::{Ctx, RequireRequestedOrg},
-  hooks::OrgHook,
 };
 
 pub(super) fn requested_org_tile(
@@ -17,18 +17,6 @@ pub(super) fn requested_org_tile(
   let class = [CLASS, class].join(" ");
 
   let requested_org_id = ctx.requested_org_url_hook().id();
-  let descriptor_suspense = ctx.suspend(
-    move |ctx| async move {
-      match ctx.fetch_org(requested_org_id).await {
-        Ok(Some(org)) => {
-          PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
-        }
-        Ok(None) => html! { "[unknown]" },
-        Err(_) => html! { "[error]" },
-      }
-    },
-    html! { "[loading]" },
-  );
 
   const CREATE_ORG_URL: &str = concatcp!(APP_PREFIX, "/org/create_org");
 
@@ -43,7 +31,7 @@ pub(super) fn requested_org_tile(
           { "Create Org..." }
         }
         p class="text-3xl text-base-12" {
-          (descriptor_suspense)
+          (org_descriptor(ctx.into(), requested_org_id))
         }
       }
     }

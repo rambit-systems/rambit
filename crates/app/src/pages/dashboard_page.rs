@@ -15,18 +15,6 @@ async fn dashboard_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,
 ) -> impl IntoResponse {
   let org_id = ctx.requested_org_url_hook().id();
-  let descriptor_suspense = ctx.suspend(
-    move |ctx| async move {
-      match ctx.fetch_org(org_id).await {
-        Ok(Some(org)) => {
-          PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
-        }
-        Ok(None) => html! { "[unknown]" },
-        Err(_) => html! { "[error]" },
-      }
-    },
-    html! { "[loading]" },
-  );
 
   const OUTER_CLASS: &str = "flex flex-col md:grid \
                              xl:grid-cols-[320px_minmax(0,_1fr)] gap-4 \
