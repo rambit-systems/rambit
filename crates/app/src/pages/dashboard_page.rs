@@ -3,20 +3,19 @@ use grid_state::AppState;
 use maud::html;
 
 use crate::{
-  ctx::ResponseSeed, page_wrapper::page_wrapper,
+  ctx::{RequireAuth, ResponseSeed},
+  page_wrapper::page_wrapper,
   pages::util_pages::unauthorized_page,
 };
 
 async fn dashboard_page(
-  ResponseSeed(ctx, resp): ResponseSeed,
+  ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
 ) -> impl IntoResponse {
-  let Some(auth_state) = ctx.auth_state() else {
-    return resp.into_stream(unauthorized_page(ctx));
-  };
+  let auth_state = ctx.auth_state();
   let Some((requested_org_url_hook, _requested_org_hook)) =
     auth_state.requested_org
   else {
-    return resp.into_stream(unauthorized_page(ctx));
+    return resp.into_stream(unauthorized_page(ctx.into()));
   };
 
   let page = html! {
@@ -24,7 +23,7 @@ async fn dashboard_page(
     p { "Requested org: " (requested_org_url_hook.id()) }
   };
 
-  let document = page_wrapper(page, ctx);
+  let document = page_wrapper(page, ctx.into());
   resp.into_stream(document)
 }
 
