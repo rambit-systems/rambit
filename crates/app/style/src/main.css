@@ -86,16 +86,6 @@
   }
 }
 
-/* disregard leptos internal components */
-@layer base {
-  leptos-island {
-    display: contents;
-  }
-  leptos-children {
-    display: contents;
-  }
-}
-
 /* configure view transition */
 ::view-transition-old(root),
 ::view-transition-new(root) {
