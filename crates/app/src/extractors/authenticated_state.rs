@@ -1,14 +1,12 @@
 use auth_domain::AuthSession;
 use axum::{
-  extract::{FromRef, FromRequestParts, OptionalFromRequestParts},
+  extract::{FromRequestParts, OptionalFromRequestParts},
   http::request::Parts,
 };
-use domain::{DomainService, models::AuthUser};
-use miette::IntoDiagnostic;
+use domain::models::AuthUser;
 
 use crate::{
-  extractors::PathRequestedOrgId,
-  hooks::{OrgHook, OrgUrlHook},
+  extractors::PathRequestedOrgId, hooks::OrgUrlHook,
   internal_error::InternalErrorRejection,
 };
 
@@ -16,28 +14,29 @@ use crate::{
 #[derive(Clone)]
 pub struct AuthenticatedState {
   /// The authenticated user.
-  pub auth_user:       AuthUser,
+  auth_user:              AuthUser,
   /// The authenticated user's active org.
-  pub active_org_hook: (OrgUrlHook, OrgHook),
+  active_org_url_hook:    OrgUrlHook,
   /// The org that the user requested with the route's `org` param. Option will
   /// be `None` if user does not belong to the requested org.
-  pub requested_org:   Option<(OrgUrlHook, OrgHook)>,
+  requested_org_url_hook: Option<OrgUrlHook>,
 }
 
 impl AuthenticatedState {
   pub fn auth_user(&self) -> AuthUser { self.auth_user.clone() }
 
   pub fn active_org_url_hook(&self) -> OrgUrlHook {
-    self.active_org_hook.0.clone()
+    self.active_org_url_hook.clone()
   }
 
-  pub fn active_org_hook(&self) -> OrgHook { self.active_org_hook.1.clone() }
+  pub fn requested_org_url_hook(&self) -> Option<OrgUrlHook> {
+    self.requested_org_url_hook.clone()
+  }
 }
 
 impl<S> OptionalFromRequestParts<S> for AuthenticatedState
 where
   S: Send + Sync,
-  DomainService: FromRef<S>,
 {
   type Rejection = InternalErrorRejection;
 
@@ -54,59 +53,23 @@ where
     };
 
     // fetch the active org
-    let domain_service = DomainService::from_ref(state);
-    let meta = domain_service.meta();
     let active_org_id = auth_user.active_org();
-    tracing::debug!(%active_org_id, "fetching active org for user");
-    let active_org = meta
-      .fetch_org_by_id(active_org_id)
-      .await
-      .inspect_err(|e| {
-        tracing::error!(
-          "failed to fetch user's active org for request state: {e}"
-        );
-      })
-      .into_diagnostic()?
-      .ok_or(miette::miette!(
-        "user {user} authenticated but active org {active_org_id} doesn't \
-         exist",
-        user = auth_user.id
-      ))?;
-    let active_org = (
-      OrgUrlHook::new(active_org_id),
-      OrgHook::new(active_org, auth_user.clone()),
-    );
+    let active_org_url_hook = OrgUrlHook::new(active_org_id);
 
     let requested_org_id = PathRequestedOrgId::from_request_parts(parts, state)
       .await
-      .expect("failed to extract path");
-    let requested_org = if let Some(requested_org_id) = requested_org_id {
-      meta
-        .fetch_org_by_id(requested_org_id.0)
-        .await
-        .inspect_err(|e| {
-          tracing::error!(
-            "failed to fetch user's requested org for request state: {e}"
-          );
-        })
-        .into_diagnostic()?
-        .map(|ro| {
-          (
-            OrgUrlHook::new(requested_org_id.0),
-            OrgHook::new(ro, auth_user.clone()),
-          )
-        })
-    } else {
-      None
-    };
+      .expect("failed to extract path")
+      .map(|ro| ro.0);
+
     // return None if user is not a part of the org they're requesting.
-    let requested_org =
-      requested_org.filter(|ro| auth_user.belongs_to_org(ro.1.id()));
+    let requested_org_url_hook = requested_org_id
+      .filter(|ro| auth_user.belongs_to_org(*ro))
+      .map(OrgUrlHook::new);
 
     Ok(Some(AuthenticatedState {
       auth_user,
-      active_org_hook: active_org,
-      requested_org,
+      active_org_url_hook,
+      requested_org_url_hook,
     }))
   }
 }

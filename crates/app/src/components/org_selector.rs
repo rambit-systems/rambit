@@ -55,9 +55,20 @@ fn org_selector_trigger(ctx: Ctx) -> Markup {
   let Some(auth_state) = ctx.auth_state() else {
     return form_rejection(UNAUTHENTICATED_MESSAGE);
   };
+  let auth_user = auth_state.auth_user();
+  let active_org_id = auth_state.active_org_url_hook().id();
 
-  let active_org_hook = auth_state.active_org_hook();
-  let active_org_descriptor = active_org_hook.descriptor();
+  let descriptor_suspense = ctx.suspend(
+    move |ctx| async move {
+      let meta = ctx.state().domain.meta();
+      match meta.fetch_org_by_id(active_org_id).await {
+        Ok(Some(org)) => PreEscaped(OrgHook::new(org, auth_user).descriptor()),
+        Ok(None) => html! { "[unknown]" },
+        Err(_) => html! { "[error]" },
+      }
+    },
+    html! { "[loading]" },
+  );
 
   const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
                        cursor-pointer px-2 py-1 rounded flex flex-col gap-0.5 \
@@ -71,7 +82,7 @@ fn org_selector_trigger(ctx: Ctx) -> Markup {
       hx-target="#org-selector-popover-contents"
     {
       p class="text-base/[1] text-base-12" {
-        (PreEscaped(active_org_descriptor))
+        (descriptor_suspense)
       }
       div class="flex flex-row items-end gap-0.5" {
         div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (chevron_down_hero_icon()) }
@@ -208,7 +219,7 @@ async fn org_selector_action(
       .into_response();
   };
 
-  let result = action(ctx, auth_state.auth_user.clone(), requested_org).await;
+  let result = action(ctx, auth_state.auth_user(), requested_org).await;
   match result {
     Ok(new_org) => {
       let new_org_url_hook = OrgUrlHook::new(new_org);

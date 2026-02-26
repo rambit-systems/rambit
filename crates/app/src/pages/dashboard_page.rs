@@ -12,9 +12,7 @@ async fn dashboard_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
 ) -> impl IntoResponse {
   let auth_state = ctx.auth_state();
-  let Some((requested_org_url_hook, _requested_org_hook)) =
-    auth_state.requested_org
-  else {
+  let Some(requested_org_url_hook) = auth_state.requested_org_url_hook() else {
     return resp.into_stream(unauthorized_page(ctx.into()));
   };
 
