@@ -11,6 +11,7 @@ use columbo::{SuspendedResponse, SuspenseContext};
 use domain::{DomainService, db::DatabaseError};
 use grid_state::AppState;
 use models::{AuthUser, Org, RecordId};
+use nanorand::Rng;
 use tokio::sync::Mutex;
 
 use crate::{
@@ -82,7 +83,17 @@ impl<Auth> Ctx<Auth> {
     M: Into<columbo::Html> + 'static,
   {
     let fut = f(self.clone());
-    self.0.shared.suspense_ctx.suspend(fut, placeholder)
+
+    let dev_env = self.state().node_meta.environment == "dev";
+    let delayed_fut = async move {
+      if dev_env {
+        let delay_ms = nanorand::tls_rng().generate_range(1000..2000);
+        tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
+      }
+      fut.await
+    };
+
+    self.0.shared.suspense_ctx.suspend(delayed_fut, placeholder)
   }
 
   pub async fn fetch_org(

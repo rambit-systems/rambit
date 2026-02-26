@@ -145,6 +145,7 @@ dependencies = [
  "maud",
  "miette",
  "models",
+ "nanorand",
  "serde_json",
  "tokio",
  "tracing",
@@ -1386,7 +1387,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2534,6 +2535,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "nanorand"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e3d189da485332e96ba8a5ef646a311871abd7915bf06ac848a9117f19cf6e4"
+
+[[package]]
 name = "nix-compat"
 version = "0.1.0"
 source = "git+https://github.com/johnbchron/tvix#74a4e282e7cb1bb9575b1191a0c80cc5af4a3f9e"
@@ -3119,7 +3126,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3492,7 +3499,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
