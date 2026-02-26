@@ -30,7 +30,6 @@ async fn login_page(
         class="max-w-80 flex flex-col gap-6"
         hx-post=(ACTION_URL)
         hx-target="#form-result"
-        hx-swap="innerHTML transition:true"
       {
         p class="title" { "Login" }
         p class="max-w-prose" {

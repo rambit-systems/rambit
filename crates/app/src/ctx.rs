@@ -213,7 +213,12 @@ where
     parts: &mut Parts,
     state: &S,
   ) -> Result<Self, Self::Rejection> {
-    let (suspense_ctx, resp) = columbo::new();
+    let (suspense_ctx, resp) =
+      columbo::new_with_opts(columbo::ColumboOptions {
+        panic_renderer: None,
+        auto_cancel:    None,
+        include_script: Some(false),
+      });
 
     let app_state = AppState::from_ref(state);
 

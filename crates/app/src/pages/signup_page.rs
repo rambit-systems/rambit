@@ -34,7 +34,6 @@ async fn signup_page(
       class=(FORM_CLASS)
       hx-post=(ACTION_URL)
       hx-target="#form-result"
-      hx-swap="innerHTML transition:true"
     {
       (grid_row_full(html! {
         div class="flex flex-col gap-2" {

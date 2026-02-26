@@ -18,6 +18,10 @@ pub(crate) fn page_wrapper(children: Markup, ctx: Ctx) -> Markup {
   let stylesheet = ctx.state().serve_config.inlined_stylesheet.clone();
   let htmx_asset_path =
     format!("/dist/{}", ctx.state().serve_config.htmx_asset_name());
+  let htmx_config = serde_json::json!({
+    "globalViewTransitions": true
+  })
+  .to_string();
   let svg_href = format!("data:image/svg+xml;base64,{FAVICON_SVG_BASE64}");
 
   let preload_fonts = PRELOAD_FONT_PATHS.iter().map(|p| html! {
@@ -33,19 +37,28 @@ pub(crate) fn page_wrapper(children: Markup, ctx: Ctx) -> Markup {
         meta charset="utf-8";
         meta name="viewport" content="width=device-width, initial-scale=1";
 
+        // load htmx
         script src=(htmx_asset_path) { }
+        meta name="htmx-config" content=(htmx_config);
 
+        // include columbo swap script
+        script { (PreEscaped(columbo::GLOBAL_SCRIPT_CONTENTS)) }
+
+        // preload fonts
         @for preload_font in preload_fonts {
           (preload_font)
         }
 
+        // main stylesheet
         style { (PreEscaped(stylesheet)) }
 
+        // font stylesheets
         style { (PreEscaped(include_css!("style/fonts/funnel_sans.css"))) }
         style { (PreEscaped(include_css!("style/fonts/funnel_display.css"))) }
 
         title { "Rambit by Porridge Co - Never waste another build" }
 
+        // icon
         link rel="icon" type="image/svg+xml" href=(svg_href);
       }
       body {
