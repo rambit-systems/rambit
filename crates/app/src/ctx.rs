@@ -10,16 +10,32 @@ use axum::{
 use columbo::{SuspendedResponse, SuspenseContext};
 use domain::DomainService;
 use grid_state::AppState;
+use models::AuthUser;
 
 use crate::{
-  extractors::AuthenticatedState, internal_error::InternalErrorRejection,
-  pages::util_pages::unauthorized_page,
+  extractors::PathRequestedOrgId, hooks::OrgUrlHook,
+  internal_error::InternalErrorRejection, pages::util_pages::unauthorized_page,
 };
 
 /// Ctx marker type for collecting auth info.
-pub struct MaybeAuth(Option<AuthenticatedState>);
+#[derive(Clone)]
+pub struct MaybeAuth(Option<RequireAuth>);
+
 /// Ctx marker type for requiring authentication.
-pub struct RequireAuth(AuthenticatedState);
+#[derive(Clone)]
+pub struct RequireAuth {
+  auth_user:           AuthUser,
+  active_org_url_hook: OrgUrlHook,
+  requested_org:       Option<OrgUrlHook>,
+}
+
+/// Ctx marker type for requiring authentication and a requested org.
+#[derive(Clone)]
+pub struct RequireRequestedOrg {
+  auth_user:           AuthUser,
+  active_org_url_hook: OrgUrlHook,
+  requested_org:       OrgUrlHook,
+}
 
 /// The context struct that every handler and most components use.
 pub struct Ctx<A = MaybeAuth>(Arc<CtxTyped<A>>);
@@ -69,24 +85,93 @@ impl<Auth> Ctx<Auth> {
 }
 
 impl Ctx<MaybeAuth> {
-  /// Returns the auth state if the user is logged in.
-  pub fn auth_state(&self) -> Option<AuthenticatedState> {
-    self.0.auth.0.clone()
+  /// Returns the [`AuthUser`], if it's populated.
+  pub fn auth_user(&self) -> Option<AuthUser> {
+    self.0.auth.0.as_ref().map(|ra| ra.auth_user.clone())
+  }
+
+  /// Returns a [`OrgUrlHook`] of the user's active org.
+  pub fn active_org_url_hook(&self) -> Option<OrgUrlHook> {
+    self
+      .0
+      .auth
+      .0
+      .as_ref()
+      .map(|ra| ra.active_org_url_hook.clone())
+  }
+
+  /// Converts to a `Ctx<Required>` for use with components that an
+  /// authenticated context.
+  pub fn into_require_auth(self) -> Option<Ctx<RequireAuth>> {
+    Some(Ctx(Arc::new(CtxTyped {
+      shared: self.0.shared.clone(),
+      auth:   self.0.auth.0.clone()?,
+    })))
   }
 }
 
 impl Ctx<RequireAuth> {
-  /// Returns the logged-in user's auth state.
-  pub fn auth_state(&self) -> AuthenticatedState { self.0.auth.0.clone() }
+  /// Returns the [`AuthUser`].
+  pub fn auth_user(&self) -> AuthUser { self.0.auth.auth_user.clone() }
+
+  /// Returns a [`OrgUrlHook`] of the user's active org.
+  pub fn active_org_url_hook(&self) -> OrgUrlHook {
+    self.0.auth.active_org_url_hook.clone()
+  }
+
+  /// Returns a [`OrgUrlHook`] of the requested org, if it exists.
+  pub fn requested_org_url_hook(&self) -> Option<OrgUrlHook> {
+    self.0.auth.requested_org.clone()
+  }
 
   /// Converts to a `Ctx<MaybeAuth>` for use with components that accept
   /// either authenticated or unauthenticated contexts.
   pub fn into_maybe_auth(self) -> Ctx<MaybeAuth> {
     Ctx(Arc::new(CtxTyped {
       shared: self.0.shared.clone(),
-      auth:   MaybeAuth(Some(self.0.auth.0.clone())),
+      auth:   MaybeAuth(Some(self.0.auth.clone())),
     }))
   }
+}
+
+impl Ctx<RequireRequestedOrg> {
+  /// Returns the [`AuthUser`].
+  pub fn auth_user(&self) -> AuthUser { self.0.auth.auth_user.clone() }
+
+  /// Returns a [`OrgUrlHook`] of the user's active org.
+  pub fn active_org_url_hook(&self) -> OrgUrlHook {
+    self.0.auth.active_org_url_hook.clone()
+  }
+
+  /// Returns a [`OrgUrlHook`] of the requested org.
+  pub fn requested_org_url_hook(&self) -> OrgUrlHook {
+    self.0.auth.requested_org.clone()
+  }
+
+  /// Converts to a `Ctx<RequireAuth>`.
+  pub fn into_require_auth(self) -> Ctx<RequireAuth> {
+    Ctx(Arc::new(CtxTyped {
+      shared: self.0.shared.clone(),
+      auth:   RequireAuth {
+        auth_user:           self.0.auth.auth_user.clone(),
+        active_org_url_hook: self.0.auth.active_org_url_hook.clone(),
+        requested_org:       Some(self.0.auth.requested_org.clone()),
+      },
+    }))
+  }
+
+  /// Converts to a `Ctx<MaybeAuth>`.
+  pub fn into_maybe_auth(self) -> Ctx<MaybeAuth> {
+    self.into_require_auth().into_maybe_auth()
+  }
+}
+
+impl From<Ctx<RequireRequestedOrg>> for Ctx<RequireAuth> {
+  fn from(value: Ctx<RequireRequestedOrg>) -> Self { value.into_require_auth() }
+}
+
+impl From<Ctx<RequireRequestedOrg>> for Ctx<MaybeAuth> {
+  fn from(value: Ctx<RequireRequestedOrg>) -> Self { value.into_maybe_auth() }
 }
 
 impl From<Ctx<RequireAuth>> for Ctx<MaybeAuth> {
@@ -109,12 +194,6 @@ where
 
     let app_state = AppState::from_ref(state);
 
-    let authenticated_state =
-      <AuthenticatedState as OptionalFromRequestParts<AppState>>::from_request_parts(
-        parts, &app_state,
-      )
-      .await?;
-
     let auth_session = AuthSession::from_request_parts(parts, state)
       .await
       .map_err(|(s, e)| {
@@ -124,16 +203,32 @@ where
         )
       })?;
 
+    let auth = match auth_session.user.clone() {
+      Some(au) => {
+        let requested_org =
+          PathRequestedOrgId::from_request_parts(parts, state)
+            .await
+            .expect("failed to extract path")
+            .map(|ro| ro.0)
+            .filter(|ro| au.belongs_to_org(*ro))
+            .map(OrgUrlHook::new);
+
+        MaybeAuth(Some(RequireAuth {
+          auth_user: au.clone(),
+          active_org_url_hook: OrgUrlHook::new(au.active_org()),
+          requested_org,
+        }))
+      }
+      None => MaybeAuth(None),
+    };
+
     let shared = Arc::new(CtxShared {
       app_state,
       suspense_ctx,
       auth_session,
     });
 
-    let ctx = Ctx(Arc::new(CtxTyped {
-      shared,
-      auth: MaybeAuth(authenticated_state),
-    }));
+    let ctx = Ctx(Arc::new(CtxTyped { shared, auth }));
 
     Ok(ResponseSeed(ctx, resp))
   }
@@ -158,8 +253,8 @@ where
       .await
       .map_err(|e| e.into_response())?;
 
-    let require_auth = match maybe_ctx.auth_state() {
-      Some(auth_state) => RequireAuth(auth_state),
+    let require_auth = match maybe_ctx.0.auth.0.clone() {
+      Some(ra) => ra,
       None => {
         let response = resp
           .into_stream(unauthorized_page(maybe_ctx))
@@ -171,6 +266,48 @@ where
     let ctx = Ctx(Arc::new(CtxTyped {
       shared: maybe_ctx.0.shared.clone(),
       auth:   require_auth,
+    }));
+
+    Ok(ResponseSeed(ctx, resp))
+  }
+}
+
+impl<S> FromRequestParts<S> for ResponseSeed<RequireRequestedOrg>
+where
+  S: Send + Sync,
+  AppState: FromRef<S>,
+  DomainService: FromRef<AppState>,
+{
+  type Rejection = Response<Body>;
+
+  async fn from_request_parts(
+    parts: &mut Parts,
+    state: &S,
+  ) -> Result<Self, Self::Rejection> {
+    let ResponseSeed(require_ctx, resp) =
+      <ResponseSeed<RequireAuth> as FromRequestParts<S>>::from_request_parts(
+        parts, state,
+      )
+      .await?;
+
+    let requested_org = match require_ctx.0.auth.requested_org.clone() {
+      Some(org) => org,
+      None => {
+        // No requested org in the path — redirect or show error.
+        let response = resp
+          .into_stream(unauthorized_page(require_ctx.into_maybe_auth()))
+          .into_response();
+        return Err(response);
+      }
+    };
+
+    let ctx = Ctx(Arc::new(CtxTyped {
+      shared: require_ctx.0.shared.clone(),
+      auth:   RequireRequestedOrg {
+        auth_user: require_ctx.0.auth.auth_user.clone(),
+        active_org_url_hook: require_ctx.0.auth.active_org_url_hook.clone(),
+        requested_org,
+      },
     }));
 
     Ok(ResponseSeed(ctx, resp))

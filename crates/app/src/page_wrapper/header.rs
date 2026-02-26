@@ -20,8 +20,8 @@ fn header_logo(ctx: Ctx) -> Markup {
   const CLASS: &str =
     "cursor-pointer font-display font-bold text-xl text-product-11";
 
-  let href = match ctx.auth_state() {
-    Some(a) => a.active_org_url_hook().dashboard_url(),
+  let href = match ctx.active_org_url_hook() {
+    Some(hook) => hook.dashboard_url(),
     None => "/".to_owned(),
   };
 
@@ -33,9 +33,9 @@ fn header_logo(ctx: Ctx) -> Markup {
 }
 
 fn header_user_area(ctx: Ctx) -> Markup {
-  match ctx.auth_state() {
-    Some(auth_state) => {
-      let dashboard_url = auth_state.active_org_url_hook().dashboard_url();
+  match ctx.into_require_auth() {
+    Some(ctx) => {
+      let dashboard_url = ctx.active_org_url_hook().dashboard_url();
       html! {
         a href=(dashboard_url) class="btn-link btn-link-primary" {
           "Dashboard"

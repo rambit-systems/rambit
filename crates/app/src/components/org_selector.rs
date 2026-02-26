@@ -11,13 +11,13 @@ use const_format::concatcp;
 use domain::UpdateActiveOrgError;
 use grid_state::AppState;
 use maud::{Markup, PreEscaped, html};
-use models::{AuthUser, Org, RecordId};
+use models::{Org, RecordId};
 
 use crate::{
   APP_PREFIX,
   components::{form_result::form_rejection, icons::*},
-  ctx::{Ctx, ResponseSeed},
-  form_feedback_text::{INTERNAL_ERROR_MESSAGE, UNAUTHENTICATED_MESSAGE},
+  ctx::{Ctx, RequireAuth, ResponseSeed},
+  form_feedback_text::INTERNAL_ERROR_MESSAGE,
   hooks::{OrgHook, OrgUrlHook},
 };
 
@@ -27,7 +27,7 @@ pub fn sub_router() -> Router<AppState> {
     .route("/action/{id}", get(org_selector_action))
 }
 
-pub fn org_selector(ctx: Ctx) -> Markup {
+pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
   html! {
     (remove_popover_on_click_outside())
     (org_selector_trigger(ctx))
@@ -51,12 +51,9 @@ fn remove_popover_on_click_outside() -> Markup {
   }
 }
 
-fn org_selector_trigger(ctx: Ctx) -> Markup {
-  let Some(auth_state) = ctx.auth_state() else {
-    return form_rejection(UNAUTHENTICATED_MESSAGE);
-  };
-  let auth_user = auth_state.auth_user();
-  let active_org_id = auth_state.active_org_url_hook().id();
+fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
+  let auth_user = ctx.auth_user();
+  let active_org_id = ctx.active_org_url_hook().id();
 
   let descriptor_suspense = ctx.suspend(
     move |ctx| async move {
@@ -95,25 +92,17 @@ fn org_selector_trigger(ctx: Ctx) -> Markup {
 }
 
 async fn org_selector_menu(
-  ResponseSeed(ctx, resp): ResponseSeed,
+  ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
 ) -> impl IntoResponse {
   const POPOVER_CLASS: &str =
     "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
      elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
 
-  let Some(auth_state) = ctx.auth_state() else {
-    return resp.into_stream(html! {
-      div data-popover class=(POPOVER_CLASS) {
-        (form_rejection(UNAUTHENTICATED_MESSAGE))
-      }
-    });
-  };
-  let auth_user = auth_state.auth_user();
-
+  let auth_user = ctx.auth_user();
   let active_org = auth_user.active_org();
   let org_rows = auth_user
     .iter_orgs()
-    .map(|o| org_row(ctx.clone(), auth_user.clone(), o, o == active_org))
+    .map(|o| org_row(ctx.clone(), o, o == active_org))
     .collect::<Vec<_>>();
 
   resp.into_stream(html! {
@@ -124,14 +113,13 @@ async fn org_selector_menu(
       div class="p-1" {
         div class="h-0 border-t-2 border-base-6/75" {}
       }
-      (extra_rows(auth_state.active_org_url_hook()))
+      (extra_rows(ctx))
     }
   })
 }
 
 fn org_row(
-  ctx: Ctx,
-  auth_user: AuthUser,
+  ctx: Ctx<RequireAuth>,
   org_id: RecordId<Org>,
   active: bool,
 ) -> Markup {
@@ -158,7 +146,9 @@ fn org_row(
     move |ctx| async move {
       let meta = ctx.state().domain.meta();
       match meta.fetch_org_by_id(org_id).await {
-        Ok(Some(org)) => PreEscaped(OrgHook::new(org, auth_user).descriptor()),
+        Ok(Some(org)) => {
+          PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
+        }
         Ok(None) => html! { "[unknown]" },
         Err(_) => html! { "[error]" },
       }
@@ -176,7 +166,8 @@ fn org_row(
   }
 }
 
-fn extra_rows(active: OrgUrlHook) -> Markup {
+fn extra_rows(ctx: Ctx<RequireAuth>) -> Markup {
+  let active = ctx.active_org_url_hook();
   let active_org_settings_url = active.settings_url();
   const CREATE_ORG_URL: &str = concatcp!(APP_PREFIX, "/org/create_org");
 
@@ -200,15 +191,9 @@ fn extra_rows(active: OrgUrlHook) -> Markup {
 // navigates the user by redirecting them with a status redirect and location
 // header, after the mutation is complete.
 async fn org_selector_action(
-  ResponseSeed(ctx, resp): ResponseSeed,
+  ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
   Path(path_map): Path<HashMap<String, String>>,
 ) -> impl IntoResponse {
-  let Some(auth_state) = ctx.auth_state() else {
-    return resp
-      .into_stream(form_rejection(UNAUTHENTICATED_MESSAGE))
-      .into_response();
-  };
-
   let requested_org_param =
     path_map.get("id").expect("missing action id path param");
 
@@ -219,7 +204,7 @@ async fn org_selector_action(
       .into_response();
   };
 
-  let result = action(ctx, auth_state.auth_user(), requested_org).await;
+  let result = action(ctx, requested_org).await;
   match result {
     Ok(new_org) => {
       let new_org_url_hook = OrgUrlHook::new(new_org);
@@ -240,14 +225,13 @@ async fn org_selector_action(
 }
 
 async fn action(
-  ctx: Ctx,
-  auth_user: AuthUser,
+  ctx: Ctx<RequireAuth>,
   requested_org: RecordId<Org>,
 ) -> Result<RecordId<Org>, &'static str> {
   let domain_service = ctx.state().domain.clone();
 
   domain_service
-    .switch_active_org(auth_user.id, requested_org)
+    .switch_active_org(ctx.auth_user().id, requested_org)
     .await
     .map_err(|e| match e {
       UpdateActiveOrgError::InvalidOrg(_) => "Could not switch to this org",
