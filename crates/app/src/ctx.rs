@@ -22,17 +22,21 @@ pub struct MaybeAuth(Option<AuthenticatedState>);
 pub struct RequireAuth(AuthenticatedState);
 
 /// The context struct that every handler and most components use.
-pub struct Ctx<A = MaybeAuth>(Arc<CtxInner<A>>);
+pub struct Ctx<A = MaybeAuth>(Arc<CtxTyped<A>>);
 
 impl<A> Clone for Ctx<A> {
   fn clone(&self) -> Self { Self(self.0.clone()) }
 }
 
-struct CtxInner<A> {
+struct CtxTyped<A> {
+  shared: Arc<CtxShared>,
+  auth:   A,
+}
+
+struct CtxShared {
   app_state:    AppState,
   suspense_ctx: SuspenseContext,
   auth_session: AuthSession,
-  auth:         A,
 }
 
 /// The extractor that begins every page. Automatically starts columbo context.
@@ -40,10 +44,12 @@ pub struct ResponseSeed<Auth = MaybeAuth>(pub Ctx<Auth>, pub SuspendedResponse);
 
 impl<Auth> Ctx<Auth> {
   /// Returns the [`AppState`].
-  pub fn state(&self) -> &AppState { &self.0.app_state }
+  pub fn state(&self) -> &AppState { &self.0.shared.app_state }
 
   /// Returns the [`AuthSession`].
-  pub fn auth_session(&self) -> AuthSession { self.0.auth_session.clone() }
+  pub fn auth_session(&self) -> AuthSession {
+    self.0.shared.auth_session.clone()
+  }
 
   /// Suspends a future with columbo.
   pub fn suspend<F, Fut, M>(
@@ -58,7 +64,7 @@ impl<Auth> Ctx<Auth> {
     M: Into<columbo::Html> + 'static,
   {
     let fut = f(self.clone());
-    self.0.suspense_ctx.suspend(fut, placeholder)
+    self.0.shared.suspense_ctx.suspend(fut, placeholder)
   }
 }
 
@@ -72,6 +78,19 @@ impl Ctx<MaybeAuth> {
 impl Ctx<RequireAuth> {
   /// Returns the logged-in user's auth state.
   pub fn auth_state(&self) -> AuthenticatedState { self.0.auth.0.clone() }
+
+  /// Converts to a `Ctx<MaybeAuth>` for use with components that accept
+  /// either authenticated or unauthenticated contexts.
+  pub fn into_maybe_auth(self) -> Ctx<MaybeAuth> {
+    Ctx(Arc::new(CtxTyped {
+      shared: self.0.shared.clone(),
+      auth:   MaybeAuth(Some(self.0.auth.0.clone())),
+    }))
+  }
+}
+
+impl From<Ctx<RequireAuth>> for Ctx<MaybeAuth> {
+  fn from(value: Ctx<RequireAuth>) -> Self { value.into_maybe_auth() }
 }
 
 impl<S> FromRequestParts<S> for ResponseSeed<MaybeAuth>
@@ -105,14 +124,18 @@ where
         )
       })?;
 
-    let ctx_inner = CtxInner {
+    let shared = Arc::new(CtxShared {
       app_state,
       suspense_ctx,
       auth_session,
-      auth: MaybeAuth(authenticated_state),
-    };
+    });
 
-    Ok(ResponseSeed(Ctx(Arc::new(ctx_inner)), resp))
+    let ctx = Ctx(Arc::new(CtxTyped {
+      shared,
+      auth: MaybeAuth(authenticated_state),
+    }));
+
+    Ok(ResponseSeed(ctx, resp))
   }
 }
 
@@ -128,7 +151,6 @@ where
     parts: &mut Parts,
     state: &S,
   ) -> Result<Self, Self::Rejection> {
-    // extract the context as normal
     let ResponseSeed(maybe_ctx, resp) =
       <ResponseSeed<MaybeAuth> as FromRequestParts<S>>::from_request_parts(
         parts, state,
@@ -136,7 +158,6 @@ where
       .await
       .map_err(|e| e.into_response())?;
 
-    // produce unauthorized rejection if auth_state is None
     let require_auth = match maybe_ctx.auth_state() {
       Some(auth_state) => RequireAuth(auth_state),
       None => {
@@ -147,16 +168,11 @@ where
       }
     };
 
-    // reconstruct the new state
-    let maybe_inner_ctx =
-      Arc::<_>::into_inner(maybe_ctx.0).expect("unreachable: arc cloned early");
-    let ctx_inner = CtxInner {
-      app_state:    maybe_inner_ctx.app_state,
-      suspense_ctx: maybe_inner_ctx.suspense_ctx,
-      auth_session: maybe_inner_ctx.auth_session,
-      auth:         require_auth,
-    };
+    let ctx = Ctx(Arc::new(CtxTyped {
+      shared: maybe_ctx.0.shared.clone(),
+      auth:   require_auth,
+    }));
 
-    Ok(ResponseSeed(Ctx(Arc::new(ctx_inner)), resp))
+    Ok(ResponseSeed(ctx, resp))
   }
 }
