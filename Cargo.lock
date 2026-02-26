@@ -145,6 +145,7 @@ dependencies = [
  "maud",
  "miette",
  "models",
+ "tokio",
  "tracing",
 ]
 

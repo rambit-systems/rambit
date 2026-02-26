@@ -11,13 +11,10 @@ use crate::{
 async fn dashboard_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,
 ) -> impl IntoResponse {
+  let org_id = ctx.requested_org_url_hook().id();
   let descriptor_suspense = ctx.suspend(
     move |ctx| async move {
-      let meta = ctx.state().domain.meta();
-      match meta
-        .fetch_org_by_id(ctx.requested_org_url_hook().id())
-        .await
-      {
+      match ctx.fetch_org(org_id).await {
         Ok(Some(org)) => {
           PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
         }

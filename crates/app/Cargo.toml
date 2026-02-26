@@ -20,7 +20,7 @@ maud = { version = "0.27" }
 axum.workspace = true
 # futures.workspace = true
 miette.workspace = true
-# tokio.workspace = true
+tokio = { workspace = true, features = [ "sync" ] }
 
 # serde.workspace = true
 tracing.workspace = true

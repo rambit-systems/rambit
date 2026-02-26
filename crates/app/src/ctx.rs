@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use auth_domain::AuthSession;
 use axum::{
@@ -8,9 +8,10 @@ use axum::{
   response::IntoResponse,
 };
 use columbo::{SuspendedResponse, SuspenseContext};
-use domain::DomainService;
+use domain::{DomainService, db::DatabaseError};
 use grid_state::AppState;
-use models::AuthUser;
+use models::{AuthUser, Org, RecordId};
+use tokio::sync::Mutex;
 
 use crate::{
   extractors::PathRequestedOrgId, hooks::OrgUrlHook,
@@ -50,9 +51,10 @@ struct CtxTyped<A> {
 }
 
 struct CtxShared {
-  app_state:    AppState,
-  suspense_ctx: SuspenseContext,
-  auth_session: AuthSession,
+  app_state:       AppState,
+  suspense_ctx:    SuspenseContext,
+  auth_session:    AuthSession,
+  org_fetch_cache: Mutex<HashMap<RecordId<Org>, Option<Org>>>,
 }
 
 /// The extractor that begins every page. Automatically starts columbo context.
@@ -81,6 +83,27 @@ impl<Auth> Ctx<Auth> {
   {
     let fut = f(self.clone());
     self.0.shared.suspense_ctx.suspend(fut, placeholder)
+  }
+
+  pub async fn fetch_org(
+    &self,
+    id: RecordId<Org>,
+  ) -> Result<Option<Org>, DatabaseError> {
+    {
+      let lock = self.0.shared.org_fetch_cache.lock().await;
+      if let Some(org) = lock.get(&id).cloned() {
+        return Ok(org);
+      }
+    }
+
+    let org = self.state().domain.meta().fetch_org_by_id(id).await?;
+
+    {
+      let mut lock = self.0.shared.org_fetch_cache.lock().await;
+      lock.insert(id, org.clone());
+    }
+
+    Ok(org)
   }
 }
 
@@ -226,6 +249,7 @@ where
       app_state,
       suspense_ctx,
       auth_session,
+      org_fetch_cache: Mutex::new(HashMap::new()),
     });
 
     let ctx = Ctx(Arc::new(CtxTyped { shared, auth }));

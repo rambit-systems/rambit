@@ -57,8 +57,7 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
 
   let descriptor_suspense = ctx.suspend(
     move |ctx| async move {
-      let meta = ctx.state().domain.meta();
-      match meta.fetch_org_by_id(active_org_id).await {
+      match ctx.fetch_org(active_org_id).await {
         Ok(Some(org)) => PreEscaped(OrgHook::new(org, auth_user).descriptor()),
         Ok(None) => html! { "[unknown]" },
         Err(_) => html! { "[error]" },
@@ -144,8 +143,7 @@ fn org_row(
 
   let descriptor_suspense = ctx.suspend(
     move |ctx| async move {
-      let meta = ctx.state().domain.meta();
-      match meta.fetch_org_by_id(org_id).await {
+      match ctx.fetch_org(org_id).await {
         Ok(Some(org)) => {
           PreEscaped(OrgHook::new(org, ctx.auth_user()).descriptor())
         }
