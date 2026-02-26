@@ -1,7 +1,10 @@
+mod requested_org_tile;
+
 use axum::{Router, response::IntoResponse, routing::get};
 use grid_state::AppState;
 use maud::{PreEscaped, html};
 
+use self::requested_org_tile::requested_org_tile;
 use crate::{
   ctx::{RequireRequestedOrg, ResponseSeed},
   hooks::OrgHook,
@@ -25,14 +28,14 @@ async fn dashboard_page(
     html! { "[loading]" },
   );
 
+  const OUTER_CLASS: &str = "flex flex-col md:grid \
+                             xl:grid-cols-[320px_minmax(0,_1fr)] gap-4 \
+                             md:place-items-start";
+
   let page = html! {
-    div class="flex flex-col gap-2" {
-      p class="title" { "You found the dashboard" }
-      p { "Requested org" }
-      ul class="list-disc list-inside" {
-        li { "ID: " (ctx.requested_org_url_hook().id()) }
-        li { "Descriptor: " (descriptor_suspense) }
-      }
+    div class=(OUTER_CLASS) {
+      p class="title xl:col-start-2" { "Dashboard" }
+      (requested_org_tile(ctx.clone(), Some("md:place-self-end xl:place-self-auto md:w-80")))
     }
   };
 
