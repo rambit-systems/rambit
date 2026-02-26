@@ -2,20 +2,17 @@ mod requested_org_tile;
 
 use axum::{Router, response::IntoResponse, routing::get};
 use grid_state::AppState;
-use maud::{PreEscaped, html};
+use maud::html;
 
 use self::requested_org_tile::requested_org_tile;
 use crate::{
   ctx::{RequireRequestedOrg, ResponseSeed},
-  hooks::OrgHook,
   page_wrapper::page_wrapper,
 };
 
 async fn dashboard_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,
 ) -> impl IntoResponse {
-  let org_id = ctx.requested_org_url_hook().id();
-
   const OUTER_CLASS: &str = "flex flex-col md:grid \
                              xl:grid-cols-[320px_minmax(0,_1fr)] gap-4 \
                              md:place-items-start";
