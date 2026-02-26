@@ -15,12 +15,17 @@
     @apply whitespace-nowrap;
   }
 
-  .table thead {
+  .table-header-group {
     /* border */
     @apply border-b-base-6 border-b;
+
+    .table-cell {
+      /* text */
+      @apply text-start font-bold;
+    }
   }
 
-  .table tbody > tr {
+  .table-row {
     /* behavior */
     /* @apply transition-colors; */
 
@@ -31,18 +36,7 @@
     @apply border-b-base-6 border-b last:border-b-0;
   }
 
-  .table th {
-    /* text */
-    @apply text-start leading-normal font-bold;
-
-    /* color */
-    @apply text-base-12;
-
-    /* spacing */
-    @apply h-10 px-3;
-  }
-
-  .table td {
+  .table-cell {
     /* text */
     @apply leading-normal;
 
