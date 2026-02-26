@@ -14,10 +14,10 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct Ctx(Arc<CtxInner>);
+pub struct Ctx(Arc<(CtxInner, Option<AuthenticatedState>)>);
 
 impl Ctx {
-  pub fn state(&self) -> &AppState { &self.0.app_state }
+  pub fn state(&self) -> &AppState { &self.0.0.app_state }
 
   pub fn suspend<F, Fut, M>(
     &self,
@@ -30,21 +30,18 @@ impl Ctx {
     M: Into<columbo::Html> + 'static,
   {
     let fut = f(self.clone());
-    self.0.suspense_ctx.suspend(fut, placeholder)
+    self.0.0.suspense_ctx.suspend(fut, placeholder)
   }
 
-  pub fn auth_state(&self) -> Option<AuthenticatedState> {
-    self.0.authenticated_state.clone()
-  }
+  pub fn auth_state(&self) -> Option<AuthenticatedState> { self.0.1.clone() }
 
-  pub fn auth_session(&self) -> AuthSession { self.0.auth_session.clone() }
+  pub fn auth_session(&self) -> AuthSession { self.0.0.auth_session.clone() }
 }
 
 struct CtxInner {
-  app_state:           AppState,
-  suspense_ctx:        SuspenseContext,
-  authenticated_state: Option<AuthenticatedState>,
-  auth_session:        AuthSession,
+  app_state:    AppState,
+  suspense_ctx: SuspenseContext,
+  auth_session: AuthSession,
 }
 
 pub struct ResponseSeed(pub Ctx, pub SuspendedResponse);
@@ -83,10 +80,12 @@ where
     let ctx_inner = CtxInner {
       app_state,
       suspense_ctx,
-      authenticated_state,
       auth_session,
     };
 
-    Ok(ResponseSeed(Ctx(Arc::new(ctx_inner)), resp))
+    Ok(ResponseSeed(
+      Ctx(Arc::new((ctx_inner, authenticated_state))),
+      resp,
+    ))
   }
 }
