@@ -18,8 +18,8 @@ use crate::{
   components::{
     form_result::form_rejection, icons::*, text_data::org_descriptor,
   },
-  ctx::{Ctx, RequireAuth, ResponseSeed},
-  form_feedback_text::INTERNAL_ERROR_MESSAGE,
+  ctx::{Ctx, MaybeAuth, RequireAuth, ResponseSeed},
+  form_feedback_text::{INTERNAL_ERROR_MESSAGE, UNAUTHENTICATED_MESSAGE},
   hooks::OrgUrlHook,
 };
 
@@ -85,12 +85,25 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
   }
 }
 
-async fn org_selector_menu(
-  ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
-) -> impl IntoResponse {
+fn popover_wrapper(children: Markup) -> Markup {
   const POPOVER_CLASS: &str =
     "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
      elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
+  html! {
+    div data-popover class=(POPOVER_CLASS) {
+      (children)
+    }
+  }
+}
+
+async fn org_selector_menu(
+  ResponseSeed(ctx, resp): ResponseSeed<MaybeAuth>,
+) -> impl IntoResponse {
+  // upgrade to RequireAuth with custom error
+  let Some(ctx) = ctx.into_require_auth() else {
+    return resp
+      .into_stream(popover_wrapper(form_rejection(UNAUTHENTICATED_MESSAGE)));
+  };
 
   let auth_user = ctx.auth_user();
   let active_org = auth_user.active_org();
@@ -100,7 +113,7 @@ async fn org_selector_menu(
     .collect::<Vec<_>>();
 
   resp.into_stream(html! {
-    div data-popover class=(POPOVER_CLASS) {
+    (popover_wrapper(html! {
       @ for org_row in org_rows {
         (org_row)
       }
@@ -108,7 +121,7 @@ async fn org_selector_menu(
         div class="h-0 border-t-2 border-base-6/75" {}
       }
       (extra_rows(ctx))
-    }
+    }))
   })
 }
 
