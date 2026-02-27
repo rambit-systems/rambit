@@ -5,7 +5,7 @@ use axum::{
   response::{Html, IntoResponse, Response},
 };
 use models::{
-  EmailAddress, EmailAddressError, HumanName, HumanNameError,
+  EmailAddress, EmailAddressError, EntityName, HumanName, HumanNameError,
   UserSubmittedAuthCredentials,
 };
 
@@ -37,6 +37,17 @@ impl FromFormField for HumanName {
       HumanNameError::Empty => unreachable!(),
       HumanNameError::TooLong => NAME_TOO_LONG_MESSAGE.to_owned(),
     })
+  }
+}
+
+impl FromFormField for EntityName {
+  const FIELD_NAME: &'static str = NAME_FIELD_NAME;
+
+  fn from_field(value: &str) -> Result<Self, String> {
+    if value.is_empty() {
+      return Err(EMPTY_ENTITY_NAME_MESSAGE.to_owned());
+    }
+    Ok(EntityName::new(value))
   }
 }
 

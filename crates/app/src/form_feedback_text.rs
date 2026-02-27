@@ -7,6 +7,8 @@ pub const EMPTY_EMAIL_MESSAGE: &str =
   "Looks like you forgot to put in your email :/";
 pub const EMPTY_NAME_MESSAGE: &str =
   "Looks like you forgot to put in your name :/";
+pub const EMPTY_ENTITY_NAME_MESSAGE: &str =
+  "Looks like you forgot to put in the name :/";
 pub const MALFORMED_EMAIL_MESSAGE: &str =
   "Sorry but that doesn't really look like an email address :/";
 pub const EMAIL_ALREADY_USED_MESSAGE: &str =

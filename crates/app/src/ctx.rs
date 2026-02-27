@@ -87,7 +87,7 @@ impl<Auth> Ctx<Auth> {
     let dev_env = self.state().node_meta.environment == "dev";
     let delayed_fut = async move {
       if dev_env {
-        let delay_ms = nanorand::tls_rng().generate_range(1000..2000);
+        let delay_ms = nanorand::tls_rng().generate_range(0..500);
         tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
       }
       fut.await

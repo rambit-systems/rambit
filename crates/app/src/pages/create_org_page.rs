@@ -1,7 +1,11 @@
 mod action;
 mod validate;
 
-use axum::{Router, response::IntoResponse, routing::get};
+use axum::{
+  Router,
+  response::IntoResponse,
+  routing::{get, post},
+};
 use const_format::concatcp;
 use grid_state::AppState;
 use maud::html;
@@ -77,50 +81,22 @@ async fn create_org_page(
         }
       }))
 
-      // <GridRow>
-      //   <GridRowLabel
-      //     title="Org name"
-      //     desc="Think of it like a username."
-      //   />
-
-      //   <div class="flex flex-col gap-1">
-      //     <label class="input-field">
-      //       <BuildingOffice2HeroIcon {..} class="size-6 shrink-0" />
-      //       <input
-      //         class="w-full py-2 focus-visible:outline-none"
-      //         type="text" autofocus=true required
-      //         placeholder="Org Name" name=NAME_FIELD_NAME
-
-      //         hx-get="/org/create_org/validate"
-      //         hx-target="#name-hint"
-      //         hx-swap="innerHTML transition:true"
-      //         hx-trigger="input throttle:0.25s"
-      //         hx-indicator="next svg"
-      //       />
-      //       <LoadingCircle {..}
-      //         class="size-6 transition-opacity htmx-indicator"
-      //       />
-      //     </label>
-      //     <div id="name-hint" class="contents" />
-      //   </div>
-      // </GridRow>
-
-      // <GridRow>
-      //   <div />
-      //   <div class="flex flex-col gap-4">
-      //     <label>
-      //       <input type="submit" class="hidden" />
-      //       <button class="btn btn-primary w-full max-w-80 justify-between">
-      //         <div class="size-4" />
-      //         "Create Org"
-      //         <LoadingCircle {..}
-      //           class="size-4 transition-opacity htmx-indicator"
-      //         />
-      //       </button>
-      //     </label>
-      //     <div id="form-result" class="contents" />
-      //   </div>
-      // </GridRow>
+      (grid_row(html! {
+        div {}
+        div class="flex flex-col gap-4" {
+          label {
+            input type="submit" class="hidden";
+            button class="btn btn-primary w-full max-w-80 justify-between" {
+              div class="size-4" {}
+              "Create Org"
+              div class="size-4 transition-opacity htmx-indicator" {
+                (loading_circle())
+              }
+            }
+          }
+          div id="form-result" class="contents" {}
+        }
+      }))
     }
   };
 
@@ -132,4 +108,5 @@ pub fn sub_router() -> Router<AppState> {
   Router::new()
     .route("/", get(create_org_page))
     .route("/validate", get(self::validate::validate_org_name))
+    .route("/action", post(self::action::signup_action))
 }
