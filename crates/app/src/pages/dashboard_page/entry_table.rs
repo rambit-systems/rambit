@@ -134,7 +134,7 @@ fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
 }
 
 fn entry_row(
-  ctx: Ctx<RequireRequestedOrg>,
+  _ctx: Ctx<RequireRequestedOrg>,
   entry_id: RecordId<Entry>,
 ) -> Markup {
   html! {

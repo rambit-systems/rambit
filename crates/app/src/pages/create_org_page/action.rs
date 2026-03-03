@@ -47,7 +47,10 @@ pub(super) async fn signup_action(
         (redirect_script(target, Some(Duration::from_millis(500))))
       }
     }
-    Err(e) => form_rejection(INTERNAL_ERROR_MESSAGE),
+    Err(e) => {
+      tracing::error!("failed to execute signup action: {e:?}");
+      form_rejection(INTERNAL_ERROR_MESSAGE)
+    }
   };
 
   resp.into_stream(feedback)

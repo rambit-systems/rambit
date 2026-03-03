@@ -1,8 +1,6 @@
-mod extract;
-
 use std::{collections::HashMap, time::Duration};
 
-use axum::{Form, response::IntoResponse};
+use axum::response::IntoResponse;
 use maud::html;
 use models::{AuthUser, EmailAddress, UserSubmittedAuthCredentials};
 

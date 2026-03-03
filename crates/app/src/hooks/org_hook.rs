@@ -18,6 +18,7 @@ impl OrgHook {
     }
   }
 
+  #[allow(dead_code)]
   pub fn id(&self) -> RecordId<Org> { self.org.id }
 
   /// The canonical user-facing org name/descriptor.
