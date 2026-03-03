@@ -23,11 +23,14 @@ http-body-util = { version = "0.1" }
 tokio = { workspace = true, features = [ "rt-multi-thread", "macros", "signal" ] }
 tower.workspace = true
 tower-http = { workspace = true, features = [
-  "trace",
   "compression-full",
-  "request-id",
-  "normalize-path",
   "fs",
+  "map-request-body",
+  "map-response-body",
+  "normalize-path",
+  "request-id",
+  "trace",
+  "util",
 ] }
 tower-sessions.workspace = true
 

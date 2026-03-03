@@ -6,12 +6,13 @@ mod handler;
 mod rewrite_root_to_app_root;
 mod ulid_request_id;
 
-use axum::{self, Router, middleware};
+use axum::{self, ServiceExt, middleware};
 use axum_login::AuthManagerLayerBuilder;
 use grid_state::AppState;
 use miette::{Context, IntoDiagnostic};
 use tower::ServiceBuilder;
 use tower_http::{
+  ServiceBuilderExt,
   normalize_path::NormalizePathLayer,
   request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
   trace::TraceLayer,
@@ -53,32 +54,37 @@ async fn main() -> miette::Result<()> {
     .await
     .context("failed to build app state")?;
 
-  // compose, add fallback, and add state
-  let inner_router = app::router()
-    .merge(grid_endpoints::router())
-    .fallback(static_asset_handler)
-    .with_state(app_state.clone());
-  // normalize routing (has to happen outside router)
-  let router = Router::new().fallback_service(
-    ServiceBuilder::new()
-      .layer(NormalizePathLayer::trim_trailing_slash())
-      .layer(middleware::from_fn(rewrite_root_to_app_root))
-      .service(inner_router),
-  );
-
-  let session_layer = tower_sessions::SessionManagerLayer::new(
-    CachingSessionStore::new(MemoryStore::default(), app_state.session_store),
-  )
-  .with_expiry(tower_sessions::Expiry::OnInactivity(Duration::weeks(1)));
+  let session_layer =
+    tower_sessions::SessionManagerLayer::new(CachingSessionStore::new(
+      MemoryStore::default(),
+      app_state.session_store.clone(),
+    ))
+    .with_expiry(tower_sessions::Expiry::OnInactivity(Duration::weeks(1)));
   let auth_layer =
-    AuthManagerLayerBuilder::new(app_state.auth_domain, session_layer).build();
+    AuthManagerLayerBuilder::new(app_state.auth_domain.clone(), session_layer)
+      .build();
 
-  let layer_stack = ServiceBuilder::new()
+  let middleware_stack = ServiceBuilder::new()
+    // unify types
+    .map_request_body(axum::body::Body::new)
+    .map_response_body(axum::body::Body::new)
+    // normalize paths and routing
+    .layer(NormalizePathLayer::trim_trailing_slash())
+    .layer(middleware::from_fn(rewrite_root_to_app_root))
+    // tracing
     .layer(SetRequestIdLayer::x_request_id(MakeRequestUlid))
     .layer(TraceLayer::new_for_http())
     .layer(PropagateRequestIdLayer::x_request_id())
+    // auth
     .layer(auth_layer);
-  let service = router.layer(layer_stack);
+
+  // compose, add fallback, and add state
+  let router = app::router()
+    .merge(grid_endpoints::router())
+    .fallback(static_asset_handler)
+    .with_state(app_state);
+
+  let service = middleware_stack.service(router);
 
   let addr = "[::]:3000";
   let listener = tokio::net::TcpListener::bind(&addr)
@@ -90,7 +96,7 @@ async fn main() -> miette::Result<()> {
   })?;
   tracing::info!("bound to http://{addr}");
 
-  axum::serve(listener, service)
+  axum::serve(listener, service.into_make_service())
     .await
     .expect("failed to serve axum server");
 
