@@ -1,10 +1,11 @@
+use axum::response::IntoResponse;
 use domain::db::DatabaseError;
 use maud::{Markup, PreEscaped, html};
 use models::{Entry, RecordId};
 
 use crate::{
   components::icons::loading_circle,
-  ctx::{Ctx, RequireRequestedOrg},
+  ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
 };
 
 pub(super) fn entry_table(ctx: Ctx<RequireRequestedOrg>) -> Markup {
@@ -82,6 +83,12 @@ async fn fetch_entry_ids_for_org(
   })?;
 
   Ok(ids)
+}
+
+pub(super) async fn entry_table_infill(
+  ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,
+) -> impl IntoResponse {
+  resp.into_stream(entry_table_data(ctx))
 }
 
 fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {

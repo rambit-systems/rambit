@@ -38,5 +38,7 @@ async fn dashboard_page(
 }
 
 pub fn sub_router() -> Router<AppState> {
-  Router::new().route("/", get(dashboard_page))
+  Router::new()
+    .route("/", get(dashboard_page))
+    .route("/entry_table", get(self::entry_table::entry_table_infill))
 }
