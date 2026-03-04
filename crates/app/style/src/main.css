@@ -22,7 +22,7 @@
   /* fonts */
   --font-sans: Funnel Sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-display: Funnel Display, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono: IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* disable larger breakpoints */
   --breakpoint-2xl: initial;
@@ -58,6 +58,14 @@
   :root {
     font-size: inherit;
   }
+}
+
+/* adjust IBM plex mono settings */
+code, kbd, samp, pre, .font-mono {
+  font-size: 0.92em;
+  letter-spacing: -0.02em;
+  font-weight: inherit;
+  font-feature-settings: "ss01", "ss02";
 }
 
 /* custom grid template columns */

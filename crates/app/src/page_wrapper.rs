@@ -55,6 +55,7 @@ pub(crate) fn page_wrapper(children: Markup, ctx: Ctx) -> Markup {
         // font stylesheets
         style { (PreEscaped(include_css!("style/fonts/funnel_sans.css"))) }
         style { (PreEscaped(include_css!("style/fonts/funnel_display.css"))) }
+        style { (PreEscaped(include_css!("style/fonts/ibm_plex_mono.css"))) }
 
         title { "Rambit by Porridge Co - Never waste another build" }
 
