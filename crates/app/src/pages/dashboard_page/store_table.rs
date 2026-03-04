@@ -37,7 +37,7 @@ pub(super) fn store_table(ctx: Ctx<RequireRequestedOrg>) -> Markup {
         }
       }
 
-      a href=(create_url) class="btn btn-secondary" { "Create..." }
+      a href=(create_url) class="btn btn-primary-subtle" { "Create..." }
     }
 
     div class="w-full overflow-x-auto" {
