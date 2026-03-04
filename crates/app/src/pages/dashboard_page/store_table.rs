@@ -40,18 +40,16 @@ pub(super) fn store_table(ctx: Ctx<RequireRequestedOrg>) -> Markup {
       a href=(create_url) class="btn btn-primary-subtle" { "Create..." }
     }
 
-    div class="w-full overflow-x-auto" {
-      div class="table w-full" {
-        div class="table-header-group" {
-          div class="table-row" {
-            div class="table-cell" { "Name" }
-            div class="table-cell" { "Entry Count" }
-            div class="table-cell" { "Storage Type" }
-          }
+    div class="table" {
+      div class="table-header-group" {
+        div class="table-row" {
+          div class="table-cell" { "Name" }
+          div class="table-cell" { "Entry Count" }
+          div class="table-cell" { "Storage Type" }
         }
-        div id="store-table-body" class="table-row-group" {
-          (store_table_data(ctx))
-        }
+      }
+      div id="store-table-body" class="table-row-group" {
+        (store_table_data(ctx))
       }
     }
   }

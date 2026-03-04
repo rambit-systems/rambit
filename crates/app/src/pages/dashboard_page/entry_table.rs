@@ -37,19 +37,17 @@ pub(super) fn entry_table(ctx: Ctx<RequireRequestedOrg>) -> Markup {
       }
     }
 
-    div class="w-full overflow-x-auto" {
-      div class="table w-full" {
-        div class="table-header-group" {
-          div class="table-row" {
-            div class="table-cell" { "Store Path" }
-            div class="table-cell" { "Caches" }
-            div class="table-cell" { "File Size" }
-            div class="table-cell" { "Ref Count" }
-          }
+    div class="table" {
+      div class="table-header-group" {
+        div class="table-row" {
+          div class="table-cell" { "Store Path" }
+          div class="table-cell" { "Caches" }
+          div class="table-cell" { "File Size" }
+          div class="table-cell" { "Ref Count" }
         }
-        div id="entry-table-body" class="table-row-group min-h-10 relative" {
-          (entry_table_data(ctx))
-        }
+      }
+      div id="entry-table-body" class="table-row-group min-h-10" {
+        (entry_table_data(ctx))
       }
     }
   }

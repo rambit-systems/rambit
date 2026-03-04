@@ -1,12 +1,13 @@
 /* based off https://orbit.kiwi/components/structure/table/ */
 
 @layer components {
+  /* the table container */
   .table {
     /* table-specific */
     @apply border-collapse border-spacing-0;
 
     /* appearance */
-    @apply rounded;
+    @apply rounded overflow-hidden;
 
     /* spacing */
     @apply w-full;
@@ -15,20 +16,17 @@
     @apply whitespace-nowrap;
   }
 
-  .table-header-group {
+  /* header section */
+  .table > :is(thead, .table-header-group) {
     /* border */
     @apply border-b-base-6 border-b;
 
-    .table-cell {
-      /* text */
-      @apply text-start font-bold;
-    }
+    /* text */
+    @apply font-bold;
   }
 
-  .table-row {
-    /* behavior */
-    /* @apply transition-colors; */
-
+  /* body rows */
+  .table > :is(tbody, .table-row-group) :is(tr, .table-row) {
     /* color */
     @apply bg-base-1 even:bg-base-3 hover:bg-base-4;
 
@@ -36,9 +34,10 @@
     @apply border-b-base-6 border-b last:border-b-0;
   }
 
-  .table-cell {
+  /* shared cell styles */
+  .table :is(th, td, .table-cell) {
     /* text */
-    @apply leading-normal;
+    @apply leading-normal align-middle;
 
     /* color */
     @apply text-base-12;
