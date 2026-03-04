@@ -15,6 +15,7 @@ use maud::html;
 use crate::{
   components::{form_layout::*, icons::*},
   ctx::{RequireRequestedOrg, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
   page_wrapper::page_wrapper,
 };
 
@@ -26,8 +27,6 @@ const STORE_DESCRIPTION: &str =
    Stores are immutable aside from their entry list. To change a store's \
    credentials or encoding configuration, you will need to create a new store \
    and migrate the old store's entries to it. This incurs compute costs.";
-
-const NAME_FIELD_NAME: &str = "name";
 
 async fn create_store_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,

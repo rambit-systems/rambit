@@ -13,13 +13,11 @@ use crate::{
   APP_PREFIX,
   components::{form_layout::*, icons::*},
   ctx::ResponseSeed,
+  extractors::{
+    CONFIRM_FIELD_NAME, EMAIL_FIELD_NAME, NAME_FIELD_NAME, PASSWORD_FIELD_NAME,
+  },
   page_wrapper::page_wrapper,
 };
-
-const NAME_FIELD_NAME: &str = "name";
-const EMAIL_FIELD_NAME: &str = "email";
-const PASSWORD_FIELD_NAME: &str = "password";
-const CONFIRM_FIELD_NAME: &str = "confirm";
 
 async fn signup_page(
   ResponseSeed(ctx, resp): ResponseSeed,

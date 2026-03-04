@@ -5,17 +5,17 @@ use domain::db::DatabaseError;
 use maud::html;
 use models::{EntityName, OrgIdent};
 
-use super::NAME_FIELD_NAME;
 use crate::{
   components::form_result::*,
   ctx::{Ctx, RequireAuth, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
 };
 
 pub(super) async fn validate_org_name(
   ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,
   Query(query_map): Query<HashMap<String, String>>,
 ) -> impl IntoResponse {
-  let Some(name) = query_map.get(super::NAME_FIELD_NAME) else {
+  let Some(name) = query_map.get(NAME_FIELD_NAME) else {
     return resp.into_stream(hint_critical(const_format::formatcp!(
       "The validation request did not contain the \"{NAME_FIELD_NAME}\" field \
        :/"

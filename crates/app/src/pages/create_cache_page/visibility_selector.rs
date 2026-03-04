@@ -2,7 +2,7 @@
 
 use maud::{Markup, html};
 
-use super::VISIBILITY_FIELD_NAME;
+use crate::extractors::VISIBILITY_FIELD_NAME;
 
 pub(super) fn visibility_selector() -> Markup {
   html! {

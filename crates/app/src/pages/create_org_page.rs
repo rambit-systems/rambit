@@ -14,6 +14,7 @@ use crate::{
   APP_PREFIX,
   components::{form_layout::*, icons::*},
   ctx::{RequireAuth, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
   page_wrapper::page_wrapper,
 };
 
@@ -24,8 +25,6 @@ const ORG_DESCRIPTION: &str =
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \
    aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \
    voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
-
-const NAME_FIELD_NAME: &str = "name";
 
 async fn create_org_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireAuth>,

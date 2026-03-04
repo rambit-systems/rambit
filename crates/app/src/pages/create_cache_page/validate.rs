@@ -7,10 +7,10 @@ use domain::db::DatabaseError;
 use maud::html;
 use models::EntityName;
 
-use super::NAME_FIELD_NAME;
 use crate::{
   components::form_result::*,
   ctx::{Ctx, RequireAuth, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
 };
 
 pub(super) async fn validate_cache_name(

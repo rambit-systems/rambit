@@ -11,11 +11,11 @@ use models::{
 
 use crate::{components::form_result::form_rejection, form_feedback_text::*};
 
-const NAME_FIELD_NAME: &str = "name";
-const EMAIL_FIELD_NAME: &str = "email";
-const VISIBILITY_FIELD_NAME: &str = "visibility";
-const PASSWORD_FIELD_NAME: &str = "password";
-const CONFIRM_FIELD_NAME: &str = "confirm";
+pub const NAME_FIELD_NAME: &str = "name";
+pub const EMAIL_FIELD_NAME: &str = "email";
+pub const VISIBILITY_FIELD_NAME: &str = "visibility";
+pub const PASSWORD_FIELD_NAME: &str = "password";
+pub const CONFIRM_FIELD_NAME: &str = "confirm";
 
 /// Implement this for any type that can be extracted from a form field.
 pub trait FromFormField: Sized {
@@ -148,5 +148,18 @@ impl IntoResponse for FormRejection {
   fn into_response(self) -> Response {
     // Return a 422 with an HTML fragment your HTMX swap target can display
     Html(form_rejection(self.0).0).into_response()
+  }
+}
+
+pub fn required_oneoff_field(
+  map: &HashMap<String, String>,
+  field: &str,
+) -> Result<String, String> {
+  match map.get(field) {
+    Some(v) if !v.is_empty() => Ok(v.clone()),
+    Some(_) => Err(format!("The \"{field}\" field must not be empty :/")),
+    None => Err(format!(
+      "The action request did not contain the \"{field}\" field :/"
+    )),
   }
 }

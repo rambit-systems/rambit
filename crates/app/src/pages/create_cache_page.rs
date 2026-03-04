@@ -15,6 +15,7 @@ use maud::html;
 use crate::{
   components::{form_layout::*, icons::*},
   ctx::{RequireRequestedOrg, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
   page_wrapper::page_wrapper,
 };
 
@@ -28,9 +29,6 @@ A cache's name must be globally unique (across organizations), even if the \
 
    Generally cache names are on a first-come-first-served basis, but please \
    contact us if you have concerns.";
-
-const NAME_FIELD_NAME: &str = "name";
-const VISIBILITY_FIELD_NAME: &str = "visibility";
 
 async fn create_cache_page(
   ResponseSeed(ctx, resp): ResponseSeed<RequireRequestedOrg>,

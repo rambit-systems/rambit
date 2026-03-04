@@ -7,10 +7,10 @@ use domain::db::DatabaseError;
 use maud::html;
 use models::{EntityName, Org, RecordId};
 
-use super::NAME_FIELD_NAME;
 use crate::{
   components::form_result::*,
   ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
+  extractors::NAME_FIELD_NAME,
 };
 
 pub(super) async fn validate_store_name(

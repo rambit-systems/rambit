@@ -5,8 +5,8 @@ use std::{collections::HashMap, time::Duration};
 use axum::response::IntoResponse;
 use maud::html;
 use models::{
-  EntityName, Org, R2StorageCredentials, RecordId, Store, StoreConfiguration,
-  StorageCredentials,
+  EntityName, Org, R2StorageCredentials, RecordId, StorageCredentials, Store,
+  StoreConfiguration,
 };
 
 use super::credentials_input::{
@@ -19,41 +19,33 @@ use crate::{
     scripts::redirect_script,
   },
   ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
-  extractors::{FromFormMap, FromValidatedForm, ValidatedForm},
+  extractors::{
+    FromFormMap, FromValidatedForm, ValidatedForm, required_oneoff_field,
+  },
   form_feedback_text::*,
   hooks::OrgUrlHook,
 };
 
 pub(super) struct CreateStoreParams {
-  name:             EntityName,
-  access_key:       String,
+  name:              EntityName,
+  access_key:        String,
   secret_access_key: String,
-  bucket:           String,
-  endpoint:         String,
+  bucket:            String,
+  endpoint:          String,
 }
 
 impl FromValidatedForm for CreateStoreParams {
   fn from_form_map(map: &HashMap<String, String>) -> Result<Self, String> {
     Ok(Self {
-      name:             FromFormMap::from_form_map(map)?,
-      access_key:       required_field(map, ACCESS_KEY_FIELD_NAME)?,
-      secret_access_key: required_field(map, SECRET_ACCESS_KEY_FIELD_NAME)?,
-      bucket:           required_field(map, BUCKET_FIELD_NAME)?,
-      endpoint:         required_field(map, ENDPOINT_FIELD_NAME)?,
+      name:              FromFormMap::from_form_map(map)?,
+      access_key:        required_oneoff_field(map, ACCESS_KEY_FIELD_NAME)?,
+      secret_access_key: required_oneoff_field(
+        map,
+        SECRET_ACCESS_KEY_FIELD_NAME,
+      )?,
+      bucket:            required_oneoff_field(map, BUCKET_FIELD_NAME)?,
+      endpoint:          required_oneoff_field(map, ENDPOINT_FIELD_NAME)?,
     })
-  }
-}
-
-fn required_field(
-  map: &HashMap<String, String>,
-  field: &str,
-) -> Result<String, String> {
-  match map.get(field) {
-    Some(v) if !v.is_empty() => Ok(v.clone()),
-    Some(_) => Err(format!("The \"{field}\" field must not be empty :/")),
-    None => Err(format!(
-      "The action request did not contain the \"{field}\" field :/"
-    )),
   }
 }
 
@@ -70,8 +62,16 @@ pub(super) async fn create_store_action(
   } = params;
   let org_id = ctx.requested_org_url_hook().id();
 
-  let result =
-    form_action(ctx, name, access_key, secret_access_key, bucket, endpoint, org_id).await;
+  let result = form_action(
+    ctx,
+    name,
+    access_key,
+    secret_access_key,
+    bucket,
+    endpoint,
+    org_id,
+  )
+  .await;
 
   let feedback = match result {
     Ok(_) => {
@@ -107,7 +107,7 @@ async fn form_action(
   let domain_service = ctx.state().domain.clone();
 
   let store = Store {
-    id:          RecordId::new(),
+    id: RecordId::new(),
     org,
     name,
     credentials: StorageCredentials::R2(R2StorageCredentials::Default {
@@ -116,13 +116,11 @@ async fn form_action(
       endpoint,
       bucket,
     }),
-    config:      StoreConfiguration {},
+    config: StoreConfiguration {},
   };
 
-  let store_id = domain_service
-    .create_store(&store)
-    .await
-    .inspect_err(|e| {
+  let store_id =
+    domain_service.create_store(&store).await.inspect_err(|e| {
       tracing::error!("failed to create store: {e:#?}");
     })?;
 
