@@ -6,13 +6,14 @@ use axum::{
 };
 use models::{
   EmailAddress, EmailAddressError, EntityName, HumanName, HumanNameError,
-  UserSubmittedAuthCredentials,
+  UserSubmittedAuthCredentials, Visibility,
 };
 
 use crate::{components::form_result::form_rejection, form_feedback_text::*};
 
 const NAME_FIELD_NAME: &str = "name";
 const EMAIL_FIELD_NAME: &str = "email";
+const VISIBILITY_FIELD_NAME: &str = "visibility";
 const PASSWORD_FIELD_NAME: &str = "password";
 const CONFIRM_FIELD_NAME: &str = "confirm";
 
@@ -62,6 +63,16 @@ impl FromFormField for EmailAddress {
       EmailAddressError::InvalidEmail => MALFORMED_EMAIL_MESSAGE.to_owned(),
       EmailAddressError::TooLong => EMAIL_TOO_LONG_MESSAGE.to_owned(),
     })
+  }
+}
+
+impl FromFormField for Visibility {
+  const FIELD_NAME: &'static str = VISIBILITY_FIELD_NAME;
+
+  fn from_field(value: &str) -> Result<Self, String> {
+    value
+      .parse()
+      .map_err(|()| format!("Invalid visibility value: \"{value}\" :/"))
   }
 }
 

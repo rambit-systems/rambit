@@ -76,6 +76,14 @@ impl OrgUrlHook {
     format!("{}/create_store", self.base_url())
   }
 
+  pub fn create_store_validation_url(&self) -> String {
+    format!("{}/create_store/validate", self.base_url())
+  }
+
+  pub fn create_store_action_url(&self) -> String {
+    format!("{}/create_store/action", self.base_url())
+  }
+
   /// The URL for the page of a given entry in the org, relative to the site
   /// root.
   pub fn entry_url(&self, entry_id: RecordId<Entry>) -> String {

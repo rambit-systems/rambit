@@ -21,6 +21,9 @@ hero_icons! {
   cog_6_tooth_hero_icon => "cog_6_tooth.svg",
   plus_hero_icon => "plus.svg",
   building_office_2 => "building_office_2.svg",
+  archive_box => "archive_box.svg",
+  globe_alt => "globe_alt.svg",
+  key_icon => "key.svg",
 }
 
 pub fn loading_circle() -> Markup {
