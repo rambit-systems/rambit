@@ -53,4 +53,5 @@ fn app_router() -> Router<AppState> {
           Router::new().nest("/dash", pages::dashboard_page::sub_router()),
         ),
     )
+    .nest("/component-zoo", pages::zoo_page::sub_router())
 }
