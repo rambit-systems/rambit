@@ -58,6 +58,10 @@ impl OrgUrlHook {
     format!("{}/dash/cache_table", self.base_url())
   }
 
+  pub fn dashboard_store_table_infill_url(&self) -> String {
+    format!("{}/dash/store_table", self.base_url())
+  }
+
   /// The URL for the org's "create cache" page, relative to the site root.
   pub fn create_cache_url(&self) -> String {
     format!("{}/create_cache", self.base_url())
