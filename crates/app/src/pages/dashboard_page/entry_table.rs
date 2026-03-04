@@ -89,10 +89,10 @@ async fn fetch_entries(
 
   let mut entries = Vec::with_capacity(entry_ids.len());
   for entry_id in entry_ids {
-    if let Some(entry) = meta
-      .fetch_entry_by_id(entry_id)
-      .await
-      .inspect_err(|e| tracing::error!("failed to fetch entry {entry_id}: {e}"))?
+    if let Some(entry) =
+      meta.fetch_entry_by_id(entry_id).await.inspect_err(|e| {
+        tracing::error!("failed to fetch entry {entry_id}: {e}")
+      })?
     {
       entries.push(entry);
     }

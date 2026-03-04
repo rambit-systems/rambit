@@ -88,10 +88,10 @@ async fn fetch_caches(
 
   let mut result = Vec::with_capacity(cache_ids.len());
   for cache_id in cache_ids {
-    let Some(cache) = meta
-      .fetch_cache_by_id(cache_id)
-      .await
-      .inspect_err(|e| tracing::error!("failed to fetch cache {cache_id}: {e}"))?
+    let Some(cache) =
+      meta.fetch_cache_by_id(cache_id).await.inspect_err(|e| {
+        tracing::error!("failed to fetch cache {cache_id}: {e}")
+      })?
     else {
       continue;
     };

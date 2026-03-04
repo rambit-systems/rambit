@@ -78,10 +78,8 @@ async fn form_action(
     visibility,
   };
 
-  let cache_id = domain_service
-    .create_cache(&cache)
-    .await
-    .inspect_err(|e| {
+  let cache_id =
+    domain_service.create_cache(&cache).await.inspect_err(|e| {
       tracing::error!("failed to create cache: {e:#?}");
     })?;
 

@@ -5,7 +5,7 @@ use domain::db::DatabaseError;
 use maud::{Markup, html};
 use models::{
   LocalStorageCredentials, MemoryStorageCredentials, PvR2StorageCredentials,
-  PvStore, PvStorageCredentials,
+  PvStorageCredentials, PvStore,
 };
 
 use crate::{
@@ -91,10 +91,10 @@ async fn fetch_stores(
 
   let mut result = Vec::with_capacity(store_ids.len());
   for store_id in store_ids {
-    let Some(store) = meta
-      .fetch_store_by_id(store_id)
-      .await
-      .inspect_err(|e| tracing::error!("failed to fetch store {store_id}: {e}"))?
+    let Some(store) =
+      meta.fetch_store_by_id(store_id).await.inspect_err(|e| {
+        tracing::error!("failed to fetch store {store_id}: {e}")
+      })?
     else {
       continue;
     };
@@ -134,7 +134,8 @@ fn store_row(store: PvStore, entry_count: u64) -> Markup {
 fn storage_type_label(creds: &PvStorageCredentials) -> String {
   match creds {
     PvStorageCredentials::R2(PvR2StorageCredentials::Default {
-      bucket, ..
+      bucket,
+      ..
     }) => format!("R2 ({bucket})"),
     PvStorageCredentials::Memory(MemoryStorageCredentials) => {
       "Memory (DEBUG)".into()
