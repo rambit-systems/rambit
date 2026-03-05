@@ -5,9 +5,11 @@ mod ctx;
 mod extractors;
 mod form_feedback_text;
 mod hooks;
+mod indicators;
 mod internal_error;
 mod page_wrapper;
 mod pages;
+mod resources;
 
 use axum::{Router, response::IntoResponse};
 use grid_state::AppState;

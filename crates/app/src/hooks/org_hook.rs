@@ -1,6 +1,7 @@
+use maud::{Markup, PreEscaped};
 use models::{AuthUser, Entry, Org, PvOrg, RecordId};
 
-use crate::APP_PREFIX;
+use crate::{APP_PREFIX, indicators};
 
 /// A hook that provides data on an [`Org`].
 #[derive(Clone)]
@@ -22,11 +23,12 @@ impl OrgHook {
   pub fn id(&self) -> RecordId<Org> { self.org.id }
 
   /// The canonical user-facing org name/descriptor.
-  pub fn descriptor(&self) -> String {
+  pub fn descriptor(&self) -> Markup {
     self
       .org
       .user_facing_title(&self.user)
-      .unwrap_or("[unknown-org]".to_owned())
+      .map(PreEscaped)
+      .unwrap_or(indicators::missing())
   }
 }
 

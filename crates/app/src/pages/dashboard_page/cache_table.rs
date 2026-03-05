@@ -1,13 +1,16 @@
 //! Cache table component and HTMX infill handler for the dashboard.
 
 use axum::response::IntoResponse;
-use domain::db::DatabaseError;
-use maud::{Markup, html};
-use models::{PvCache, Visibility};
+use maud::{Markup, Render, html};
+use models::{Cache, PvCache, RecordId, Visibility};
 
 use crate::{
   components::icons::*,
-  ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
+  ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
+  indicators,
+  resources::{
+    AuthResult, fetch_caches_for_requested_org, fetch_entry_count_for_cache,
+  },
 };
 
 /// Renders the full cache table card (shell + initial infill).
@@ -62,9 +65,9 @@ pub(super) async fn cache_table_infill(
 fn cache_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match fetch_caches(ctx).await {
+      match fetch_caches_for_requested_org(ctx.clone()).await {
         Ok(caches) if caches.is_empty() => table_empty_body(3),
-        Ok(caches) => cache_rows(caches),
+        Ok(caches) => cache_rows(ctx.clone().into(), caches),
         Err(_) => table_error_body(3),
       }
     },
@@ -74,47 +77,15 @@ fn cache_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   html! { (suspense) }
 }
 
-async fn fetch_caches(
-  ctx: Ctx<RequireRequestedOrg>,
-) -> Result<Vec<(PvCache, u64)>, DatabaseError> {
-  let org_id = ctx.requested_org_url_hook().id();
-  let meta = ctx.state().domain.meta();
-
-  let cache_ids = meta.fetch_caches_by_org(org_id).await.inspect_err(|e| {
-    tracing::error!("failed to fetch caches by org: {e}");
-  })?;
-
-  let mut result = Vec::with_capacity(cache_ids.len());
-  for cache_id in cache_ids {
-    let Some(cache) =
-      meta.fetch_cache_by_id(cache_id).await.inspect_err(|e| {
-        tracing::error!("failed to fetch cache {cache_id}: {e}")
-      })?
-    else {
-      continue;
-    };
-    let count = meta
-      .count_entries_in_cache(cache_id)
-      .await
-      .inspect_err(|e| {
-        tracing::error!("failed to count entries in cache {cache_id}: {e}");
-      })
-      .unwrap_or(0);
-    result.push((cache.into(), count));
-  }
-
-  Ok(result)
-}
-
-fn cache_rows(caches: Vec<(PvCache, u64)>) -> Markup {
+fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<PvCache>) -> Markup {
   html! {
-    @for (cache, count) in caches {
-      (cache_row(cache, count))
+    @for cache in caches {
+      (cache_row(ctx.clone(), cache))
     }
   }
 }
 
-fn cache_row(cache: PvCache, entry_count: u64) -> Markup {
+fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
   html! {
     div class="table-row" {
       div class="table-cell font-mono" { (cache.name.as_ref()) }
@@ -128,9 +99,30 @@ fn cache_row(cache: PvCache, entry_count: u64) -> Markup {
           }
         }
       }
-      div class="table-cell" { (entry_count.to_string()) }
+      div class="table-cell" {
+        (cache_entry_count(ctx, cache.id))
+      }
     }
   }
+}
+
+fn cache_entry_count(
+  ctx: Ctx<RequireAuth>,
+  cache_id: RecordId<Cache>,
+) -> Markup {
+  ctx
+    .suspend(
+      move |ctx| async move {
+        match fetch_entry_count_for_cache(ctx, cache_id).await {
+          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
+          Ok(None) => indicators::missing(),
+          Err(_) => indicators::error(),
+        }
+      },
+      indicators::loading(),
+    )
+    .render()
 }
 
 fn table_empty_body(cols: usize) -> Markup {
