@@ -1,6 +1,7 @@
 @import "tailwindcss" source("../../../../crates");
 
 @import "tailwindcss-radix-colors/dist/orange-colors-only.css";
+@import "tailwindcss-radix-colors/dist/orangea-colors-only.css";
 @import "tailwindcss-radix-colors/dist/sand-colors-only.css";
 @import "tailwindcss-radix-colors/dist/yellow-colors-only.css";
 @import "tailwindcss-radix-colors/dist/red-colors-only.css";
@@ -14,6 +15,7 @@
 
 @import "./components/btn.css";
 @import "./components/btn-link.css";
+@import "./components/code.css";
 @import "./components/input-field.css";
 @import "./components/table.css";
 @import "./components/text-link.css";

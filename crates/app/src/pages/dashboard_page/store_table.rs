@@ -122,7 +122,7 @@ fn store_row(store: PvStore, entry_count: u64) -> Markup {
 
   html! {
     div class="table-row" {
-      div class="table-cell font-mono" { (store.name.as_ref()) }
+      div class="table-cell" { code { (store.name.as_ref()) } }
       div class="table-cell" { (entry_count.to_string()) }
       div class="table-cell" { (storage_type) }
     }

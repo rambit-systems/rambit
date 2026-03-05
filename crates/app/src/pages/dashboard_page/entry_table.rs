@@ -6,8 +6,8 @@ use maud::{Markup, html};
 use models::{Abbreviate, Cache, Entry, RecordId};
 
 use crate::{
-  components::icons::loading_circle,
-  ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
+  components::{icons::loading_circle, text_data::cache_link},
+  ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
 };
 
 const ABBREVIATE_AFTER_COUNT: usize = 5;
@@ -63,9 +63,9 @@ pub(super) async fn entry_table_infill(
 fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match fetch_entries(ctx).await {
+      match fetch_entries(ctx.clone()).await {
         Ok(entries) if entries.is_empty() => table_empty_body(4),
-        Ok(entries) => entry_rows(entries),
+        Ok(entries) => entry_rows(ctx.clone().into(), entries),
         Err(_) => table_error_body(4),
       }
     },
@@ -99,15 +99,15 @@ async fn fetch_entries(
   Ok(entries)
 }
 
-fn entry_rows(entries: Vec<Entry>) -> Markup {
+fn entry_rows(ctx: Ctx<RequireAuth>, entries: Vec<Entry>) -> Markup {
   html! {
     @for entry in entries {
-      (entry_row(entry))
+      (entry_row(ctx.clone(), entry))
     }
   }
 }
 
-fn entry_row(entry: Entry) -> Markup {
+fn entry_row(ctx: Ctx<RequireAuth>, entry: Entry) -> Markup {
   let abbreviated_path = entry.store_path.abbreviate();
   let full_path = entry.store_path.to_string();
 
@@ -122,13 +122,13 @@ fn entry_row(entry: Entry) -> Markup {
 
   html! {
     div class="table-row" {
-      div class="table-cell font-mono text-sm" {
-        span title=(full_path) { (abbreviated_path) }
+      div class="table-cell" {
+        code title=(full_path) { (abbreviated_path) }
       }
-      div class="table-cell text-sm" {
+      div class="table-cell" {
         @for (i, cache_id) in visible_caches.iter().enumerate() {
           @if i > 0 { ", " }
-          span class="font-mono" { (cache_id.to_string()) }
+          (cache_link(ctx.clone(), *cache_id))
         }
         @if cache_count > ABBREVIATE_AFTER_COUNT { ", …" }
       }

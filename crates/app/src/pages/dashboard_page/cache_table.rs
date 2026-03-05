@@ -88,7 +88,7 @@ fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<PvCache>) -> Markup {
 fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
   html! {
     div class="table-row" {
-      div class="table-cell font-mono" { (cache.name.as_ref()) }
+      div class="table-cell" { code { (cache.name.as_ref()) } }
       div class="table-cell" {
         div class="flex flex-row items-center gap-1" {
           (cache.visibility.to_string())

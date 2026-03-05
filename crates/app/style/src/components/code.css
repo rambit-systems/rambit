@@ -1,0 +1,16 @@
+
+@layer components {
+  code {
+    /* behavior */
+    @apply whitespace-nowrap rounded-sm;
+
+    /* spacing */
+    @apply px-1;
+
+    /* color */
+    @apply bg-producta-2 text-producta-12;
+
+    /* border */
+    @apply border-[0.5px] border-product-7/25;
+  }
+}

@@ -13,6 +13,20 @@
   --color-product-11: var(--color-orange-11);
   --color-product-12: var(--color-orange-12);
 
+  /* product alpha colors */
+  --color-producta-1: var(--color-orangea-1);
+  --color-producta-2: var(--color-orangea-2);
+  --color-producta-3: var(--color-orangea-3);
+  --color-producta-4: var(--color-orangea-4);
+  --color-producta-5: var(--color-orangea-5);
+  --color-producta-6: var(--color-orangea-6);
+  --color-producta-7: var(--color-orangea-7);
+  --color-producta-8: var(--color-orangea-8);
+  --color-producta-9: var(--color-orangea-9);
+  --color-producta-10: var(--color-orangea-10);
+  --color-producta-11: var(--color-orangea-11);
+  --color-producta-12: var(--color-orangea-12);
+
   /* base colors */
   --color-base-1: var(--color-sand-1);
   --color-base-2: var(--color-sand-2);
