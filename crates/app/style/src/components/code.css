@@ -11,6 +11,6 @@
     @apply bg-producta-2 text-producta-12;
 
     /* border */
-    @apply border-[0.5px] border-product-7/25;
+    @apply border-[0.5px] border-product-7/75;
   }
 }
