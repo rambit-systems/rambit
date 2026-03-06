@@ -65,9 +65,13 @@ pub(super) async fn cache_table_infill(
 fn cache_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match fetch_caches_for_requested_org(ctx.clone()).await {
+      match ctx
+        .fetch_cached(fetch_caches_for_requested_org, ())
+        .await
+        .as_ref()
+      {
         Ok(caches) if caches.is_empty() => table_empty_body(3),
-        Ok(caches) => cache_rows(ctx.clone().into(), caches),
+        Ok(caches) => cache_rows(ctx.clone().into(), caches.clone()),
         Err(_) => table_error_body(3),
       }
     },
@@ -88,7 +92,10 @@ fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<PvCache>) -> Markup {
 fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
   html! {
     div class="table-row" {
+      // name
       div class="table-cell" { code { (cache.name.as_ref()) } }
+
+      // visibility
       div class="table-cell" {
         div class="flex flex-row items-center gap-1" {
           (cache.visibility.to_string())
@@ -99,6 +106,8 @@ fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
           }
         }
       }
+
+      // entry count
       div class="table-cell" {
         (cache_entry_count(ctx, cache.id))
       }
@@ -113,7 +122,11 @@ fn cache_entry_count(
   ctx
     .suspend(
       move |ctx| async move {
-        match fetch_entry_count_for_cache(ctx, cache_id).await {
+        match ctx
+          .fetch_cached(fetch_entry_count_for_cache, cache_id)
+          .await
+          .as_ref()
+        {
           Ok(Some(AuthResult::Ok(c))) => html! { (c) },
           Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
           Ok(None) => indicators::missing(),

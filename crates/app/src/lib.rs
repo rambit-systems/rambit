@@ -9,6 +9,7 @@ mod indicators;
 mod internal_error;
 mod page_wrapper;
 mod pages;
+mod request_cache;
 mod resources;
 
 use axum::{Router, response::IntoResponse};

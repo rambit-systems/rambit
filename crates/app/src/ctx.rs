@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{hash::Hash, sync::Arc};
 
 use auth_domain::AuthSession;
 use axum::{
@@ -8,15 +8,16 @@ use axum::{
   response::IntoResponse,
 };
 use columbo::{SuspendedResponse, SuspenseContext};
-use domain::{DomainService, db::DatabaseError};
+use domain::DomainService;
 use grid_state::AppState;
-use models::{AuthUser, Org, RecordId};
+use models::AuthUser;
 use nanorand::Rng;
 use tokio::sync::Mutex;
 
 use crate::{
   extractors::PathRequestedOrgId, hooks::OrgUrlHook,
   internal_error::InternalErrorRejection, pages::util_pages::unauthorized_page,
+  request_cache::RequestCache,
 };
 
 /// Ctx marker type for collecting auth info.
@@ -52,10 +53,10 @@ struct CtxTyped<A> {
 }
 
 struct CtxShared {
-  app_state:       AppState,
-  suspense_ctx:    SuspenseContext,
-  auth_session:    AuthSession,
-  org_fetch_cache: Mutex<HashMap<RecordId<Org>, Option<Org>>>,
+  app_state:     AppState,
+  suspense_ctx:  SuspenseContext,
+  auth_session:  AuthSession,
+  request_cache: Mutex<RequestCache>,
 }
 
 /// The extractor that begins every page. Automatically starts columbo context.
@@ -96,25 +97,67 @@ impl<Auth> Ctx<Auth> {
     self.0.shared.suspense_ctx.suspend(delayed_fut, placeholder)
   }
 
-  pub async fn fetch_org(
+  /// Calls `resource_fn(ctx, input)`, returning a cached result if this
+  /// `(resource_fn, input)` pair was already resolved during this request.
+  ///
+  /// The return type is fully generic — `O` may be a `Result`, `Option`,
+  /// plain value, or anything else. Outputs are cached unconditionally.
+  ///
+  /// Use `()` as `input` for zero-input resources, and a tuple `(A, B, ...)`
+  /// for multi-input resources.
+  ///
+  /// ## Cache key
+  /// Each `fn` item in Rust has a unique anonymous type, so
+  /// `TypeId::of::<F>()` is a stable discriminant per function. Two different
+  /// functions with identical signatures map to different cache slots.
+  ///
+  /// ## Closures
+  /// Avoid passing closures — all instances of the same closure expression
+  /// share a `TypeId`, so captures would collide.
+  /// Calls `resource_fn(ctx, input)`, returning a cached result if this
+  /// `(resource_fn, input)` pair was already resolved during this request.
+  ///
+  /// Returns `Arc<O>` so neither the output nor any error type within it
+  /// needs to implement `Clone`. Use `.as_ref()` to match on the inner value.
+  ///
+  /// Use `()` as `input` for zero-input resources, and a tuple `(A, B, ...)`
+  /// for multi-input resources.
+  ///
+  /// ## Cache key
+  /// Each `fn` item in Rust has a unique anonymous type, so
+  /// `TypeId::of::<F>()` is a stable discriminant per function. Two different
+  /// functions with identical signatures map to different cache slots.
+  ///
+  /// ## Closures
+  /// Avoid passing closures — all instances of the same closure expression
+  /// share a `TypeId`, so different captures would collide in the same slot.
+  pub async fn fetch_cached<F, I, O, Fut>(
     &self,
-    id: RecordId<Org>,
-  ) -> Result<Option<Org>, DatabaseError> {
+    resource_fn: F,
+    input: I,
+  ) -> Arc<O>
+  where
+    Auth: Send + Sync + 'static,
+    F: FnOnce(Self, I) -> Fut + 'static,
+    I: Hash + Eq + Clone + Send + 'static,
+    O: Send + Sync + 'static,
+    Fut: Future<Output = O> + Send,
+  {
     {
-      let lock = self.0.shared.org_fetch_cache.lock().await;
-      if let Some(org) = lock.get(&id).cloned() {
-        return Ok(org);
+      let cache = self.0.shared.request_cache.lock().await;
+      if let Some(cached) = cache.get::<F, I, O>(&input) {
+        return cached;
       }
     }
 
-    let org = self.state().domain.meta().fetch_org_by_id(id).await?;
+    let output = Arc::new(resource_fn(self.clone(), input.clone()).await);
 
     {
-      let mut lock = self.0.shared.org_fetch_cache.lock().await;
-      lock.insert(id, org.clone());
+      let mut cache = self.0.shared.request_cache.lock().await;
+      cache.insert::<F, I, O>(input, Arc::clone(&output));
     }
 
-    Ok(org)
+    output
   }
 }
 
@@ -265,7 +308,7 @@ where
       app_state,
       suspense_ctx,
       auth_session,
-      org_fetch_cache: Mutex::new(HashMap::new()),
+      request_cache: Mutex::new(RequestCache::new()),
     });
 
     let ctx = Ctx(Arc::new(CtxTyped { shared, auth }));

@@ -5,13 +5,14 @@ use crate::{
   ctx::{Ctx, RequireAuth},
   hooks::OrgHook,
   indicators,
+  resources::fetch_org,
 };
 
 pub fn org_descriptor(ctx: Ctx<RequireAuth>, org_id: RecordId<Org>) -> Markup {
   let suspend = ctx.suspend(
     move |ctx| async move {
-      let org = match ctx.fetch_org(org_id).await {
-        Ok(Some(org)) => org,
+      let org = match ctx.fetch_cached(fetch_org, org_id).await.as_ref() {
+        Ok(Some(org)) => org.clone(),
         Ok(None) => return indicators::missing(),
         Err(_) => return indicators::error(),
       };

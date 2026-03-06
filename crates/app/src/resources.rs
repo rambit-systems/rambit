@@ -1,15 +1,24 @@
 use domain::db::DatabaseError;
-use models::{Cache, PvCache, RecordId};
+use models::{Cache, Org, PvCache, RecordId};
 
 use crate::ctx::{Ctx, RequireAuth, RequireRequestedOrg};
 
+#[derive(Clone)]
 pub enum AuthResult<T> {
   Ok(T),
   Unauthorized,
 }
 
+pub async fn fetch_org(
+  ctx: Ctx<RequireAuth>,
+  id: RecordId<Org>,
+) -> Result<Option<Org>, DatabaseError> {
+  ctx.state().domain.meta().fetch_org_by_id(id).await
+}
+
 pub async fn fetch_caches_for_requested_org(
   ctx: Ctx<RequireRequestedOrg>,
+  _: (),
 ) -> Result<Vec<PvCache>, DatabaseError> {
   let org_id = ctx.requested_org_url_hook().id();
   let meta = ctx.state().domain.meta();
