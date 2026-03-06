@@ -99,38 +99,6 @@ impl<Auth> Ctx<Auth> {
 
   /// Calls `resource_fn(ctx, input)`, returning a cached result if this
   /// `(resource_fn, input)` pair was already resolved during this request.
-  ///
-  /// The return type is fully generic — `O` may be a `Result`, `Option`,
-  /// plain value, or anything else. Outputs are cached unconditionally.
-  ///
-  /// Use `()` as `input` for zero-input resources, and a tuple `(A, B, ...)`
-  /// for multi-input resources.
-  ///
-  /// ## Cache key
-  /// Each `fn` item in Rust has a unique anonymous type, so
-  /// `TypeId::of::<F>()` is a stable discriminant per function. Two different
-  /// functions with identical signatures map to different cache slots.
-  ///
-  /// ## Closures
-  /// Avoid passing closures — all instances of the same closure expression
-  /// share a `TypeId`, so captures would collide.
-  /// Calls `resource_fn(ctx, input)`, returning a cached result if this
-  /// `(resource_fn, input)` pair was already resolved during this request.
-  ///
-  /// Returns `Arc<O>` so neither the output nor any error type within it
-  /// needs to implement `Clone`. Use `.as_ref()` to match on the inner value.
-  ///
-  /// Use `()` as `input` for zero-input resources, and a tuple `(A, B, ...)`
-  /// for multi-input resources.
-  ///
-  /// ## Cache key
-  /// Each `fn` item in Rust has a unique anonymous type, so
-  /// `TypeId::of::<F>()` is a stable discriminant per function. Two different
-  /// functions with identical signatures map to different cache slots.
-  ///
-  /// ## Closures
-  /// Avoid passing closures — all instances of the same closure expression
-  /// share a `TypeId`, so different captures would collide in the same slot.
   pub async fn fetch_cached<F, I, O, Fut>(
     &self,
     resource_fn: F,

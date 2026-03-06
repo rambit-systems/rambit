@@ -1,13 +1,13 @@
 //! Entry table component and HTMX infill handler for the dashboard.
 
 use axum::response::IntoResponse;
-use domain::db::DatabaseError;
 use maud::{Markup, html};
 use models::{Abbreviate, Cache, Entry, RecordId};
 
 use crate::{
   components::{icons::loading_circle, text_data::cache_link},
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
+  resources::fetch_entries_for_requested_org,
 };
 
 const ABBREVIATE_AFTER_COUNT: usize = 5;
@@ -63,9 +63,9 @@ pub(super) async fn entry_table_infill(
 fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match fetch_entries(ctx.clone()).await {
+      match ctx.fetch_cached(fetch_entries_for_requested_org, ()).await.as_ref() {
         Ok(entries) if entries.is_empty() => table_empty_body(4),
-        Ok(entries) => entry_rows(ctx.clone().into(), entries),
+        Ok(entries) => entry_rows(ctx.clone().into(), entries.clone()),
         Err(_) => table_error_body(4),
       }
     },
@@ -73,30 +73,6 @@ fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   );
 
   html! { (suspense) }
-}
-
-async fn fetch_entries(
-  ctx: Ctx<RequireRequestedOrg>,
-) -> Result<Vec<Entry>, DatabaseError> {
-  let org_id = ctx.requested_org_url_hook().id();
-  let meta = ctx.state().domain.meta();
-
-  let entry_ids = meta.fetch_entries_by_org(org_id).await.inspect_err(|e| {
-    tracing::error!("failed to fetch entries by org: {e}");
-  })?;
-
-  let mut entries = Vec::with_capacity(entry_ids.len());
-  for entry_id in entry_ids {
-    if let Some(entry) =
-      meta.fetch_entry_by_id(entry_id).await.inspect_err(|e| {
-        tracing::error!("failed to fetch entry {entry_id}: {e}")
-      })?
-    {
-      entries.push(entry);
-    }
-  }
-
-  Ok(entries)
 }
 
 fn entry_rows(ctx: Ctx<RequireAuth>, entries: Vec<Entry>) -> Markup {

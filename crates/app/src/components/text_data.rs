@@ -5,7 +5,7 @@ use crate::{
   ctx::{Ctx, RequireAuth},
   hooks::OrgHook,
   indicators,
-  resources::fetch_org,
+  resources::{fetch_cache, fetch_org},
 };
 
 pub fn org_descriptor(ctx: Ctx<RequireAuth>, org_id: RecordId<Org>) -> Markup {
@@ -28,7 +28,7 @@ pub fn org_descriptor(ctx: Ctx<RequireAuth>, org_id: RecordId<Org>) -> Markup {
 pub fn cache_link(ctx: Ctx<RequireAuth>, cache_id: RecordId<Cache>) -> Markup {
   let suspend = ctx.suspend(
     move |ctx| async move {
-      match ctx.state().domain.meta().fetch_cache_by_id(cache_id).await {
+      match ctx.fetch_cached(fetch_cache, cache_id).await.as_ref() {
         Ok(Some(c)) => html! {
           a class="text-link text-link-primary" {
             (c.name.to_string())

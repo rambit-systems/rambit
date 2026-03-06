@@ -1,16 +1,17 @@
 //! Store table component and HTMX infill handler for the dashboard.
 
 use axum::response::IntoResponse;
-use domain::db::DatabaseError;
-use maud::{Markup, html};
+use maud::{Markup, Render, html};
 use models::{
   LocalStorageCredentials, MemoryStorageCredentials, PvR2StorageCredentials,
-  PvStorageCredentials, PvStore,
+  PvStorageCredentials, PvStore, RecordId, Store,
 };
 
 use crate::{
   components::icons::loading_circle,
-  ctx::{Ctx, RequireRequestedOrg, ResponseSeed},
+  ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
+  indicators,
+  resources::{AuthResult, fetch_entry_count_for_store, fetch_stores_for_requested_org},
 };
 
 /// Renders the full store table card (shell + initial infill).
@@ -65,9 +66,9 @@ pub(super) async fn store_table_infill(
 fn store_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match fetch_stores(ctx).await {
+      match ctx.fetch_cached(fetch_stores_for_requested_org, ()).await.as_ref() {
         Ok(stores) if stores.is_empty() => table_empty_body(3),
-        Ok(stores) => store_rows(stores),
+        Ok(stores) => store_rows(ctx.clone().into(), stores.clone()),
         Err(_) => table_error_body(3),
       }
     },
@@ -77,56 +78,40 @@ fn store_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   html! { (suspense) }
 }
 
-async fn fetch_stores(
-  ctx: Ctx<RequireRequestedOrg>,
-) -> Result<Vec<(PvStore, u64)>, DatabaseError> {
-  let org_id = ctx.requested_org_url_hook().id();
-  let meta = ctx.state().domain.meta();
-
-  let store_ids = meta.fetch_stores_by_org(org_id).await.inspect_err(|e| {
-    tracing::error!("failed to fetch stores by org: {e}");
-  })?;
-
-  let mut result = Vec::with_capacity(store_ids.len());
-  for store_id in store_ids {
-    let Some(store) =
-      meta.fetch_store_by_id(store_id).await.inspect_err(|e| {
-        tracing::error!("failed to fetch store {store_id}: {e}")
-      })?
-    else {
-      continue;
-    };
-    let count = meta
-      .count_entries_in_store(store_id)
-      .await
-      .inspect_err(|e| {
-        tracing::error!("failed to count entries in store {store_id}: {e}");
-      })
-      .unwrap_or(0);
-    result.push((store.into(), count));
-  }
-
-  Ok(result)
-}
-
-fn store_rows(stores: Vec<(PvStore, u64)>) -> Markup {
+fn store_rows(ctx: Ctx<RequireAuth>, stores: Vec<PvStore>) -> Markup {
   html! {
-    @for (store, count) in stores {
-      (store_row(store, count))
+    @for store in stores {
+      (store_row(ctx.clone(), store))
     }
   }
 }
 
-fn store_row(store: PvStore, entry_count: u64) -> Markup {
+fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
   let storage_type = storage_type_label(&store.credentials);
 
   html! {
     div class="table-row" {
       div class="table-cell" { code { (store.name.as_ref()) } }
-      div class="table-cell" { (entry_count.to_string()) }
+      div class="table-cell" { (store_entry_count(ctx, store.id)) }
       div class="table-cell" { (storage_type) }
     }
   }
+}
+
+fn store_entry_count(ctx: Ctx<RequireAuth>, store_id: RecordId<Store>) -> Markup {
+  ctx
+    .suspend(
+      move |ctx| async move {
+        match ctx.fetch_cached(fetch_entry_count_for_store, store_id).await.as_ref() {
+          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
+          Ok(None) => indicators::missing(),
+          Err(_) => indicators::error(),
+        }
+      },
+      indicators::loading(),
+    )
+    .render()
 }
 
 fn storage_type_label(creds: &PvStorageCredentials) -> String {
