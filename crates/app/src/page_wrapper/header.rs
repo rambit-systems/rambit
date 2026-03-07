@@ -1,7 +1,11 @@
 use const_format::concatcp;
 use maud::{Markup, html};
 
-use crate::{APP_PREFIX, components::org_selector::org_selector, ctx::Ctx};
+use crate::{
+  APP_PREFIX,
+  components::{account_menu::account_menu, org_selector::org_selector},
+  ctx::Ctx,
+};
 
 pub(super) fn header(ctx: Ctx) -> Markup {
   const CLASS: &str = "elevation-navbar flex flex-row px-4 gap-2 items-center \
@@ -40,7 +44,8 @@ fn header_user_area(ctx: Ctx) -> Markup {
         a href=(dashboard_url) class="btn-link btn-link-primary" {
           "Dashboard"
         }
-        (org_selector(ctx))
+        (org_selector(ctx.clone()))
+        (account_menu(ctx))
       }
     }
     None => {

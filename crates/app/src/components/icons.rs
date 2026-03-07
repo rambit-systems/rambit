@@ -25,6 +25,7 @@ hero_icons! {
   globe_alt_hero_icon => "globe_alt.svg",
   key_hero_icon => "key.svg",
   document_duplicate_hero_icon => "document_duplicate.svg",
+  arrow_right_start_on_rectangle_hero_icon => "arrow_right_start_on_rectangle.svg",
 }
 
 pub fn loading_circle() -> Markup {
