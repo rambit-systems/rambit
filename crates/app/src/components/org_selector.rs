@@ -30,20 +30,23 @@ pub fn sub_router() -> Router<AppState> {
 pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
   let active_org_id = ctx.active_org_url_hook().id();
 
-  const BUTTON_CLASS: &str = "transition-colors hover:bg-base-3 \
-                              active:bg-base-4 button-squish cursor-pointer \
-                              px-2 py-1 rounded flex flex-col gap-0.5 text-sm \
-                              leading-none gap-0";
-  const BUTTON_ANCHOR_CLASS: &str = "[anchor-name:--org-selector-anchor]";
-  const POPOVER_CLASS: &str =
-    "min-w-56 elevation-lv1 p-2 rounded transition transition-discrete \
-     duration-200 opacity-0 scale-97 [&:popover-open]:opacity-100 \
-     [&:popover-open]:scale-100 [@starting-style]:[&:popover-open]:opacity-0 \
-     [@starting-style]:[&:popover-open]:scale-97";
-  const POPOVER_ANCHOR_CLASS: &str = "[position-anchor:--org-selector-anchor] \
-                                      top-[anchor(bottom)] \
-                                      left-[anchor(right)] -translate-x-full \
-                                      translate-y-[calc(var(--spacing)*4)]";
+  const BUTTON_CLASS: &str = concatcp!(
+    " transition-colors hover:bg-base-3 active:bg-base-4",
+    " button-squish cursor-pointer rounded",
+    " px-2 py-1 flex flex-col gap-0.5",
+    " text-sm leading-none",
+    " [anchor-name:--org-selector-anchor]"
+  );
+  const POPOVER_CLASS: &str = concatcp!(
+    " min-w-56 elevation-lv1 p-2 rounded",
+    " transition transition-discrete duration-200 opacity-0 scale-97",
+    " [&:popover-open]:opacity-100 [&:popover-open]:scale-100",
+    " [@starting-style]:[&:popover-open]:opacity-0 \
+     [@starting-style]:[&:popover-open]:scale-97",
+    " [position-anchor:--org-selector-anchor]",
+    " top-[anchor(bottom)] left-[anchor(right)]",
+    " -translate-x-full translate-y-[calc(var(--spacing)*4)]"
+  );
 
   let menu_suspense = ctx.suspend(org_selector_menu, html! {
     div class="py-3 w-full flex flex-row gap-2 items-center justify-center text-base-11" {
@@ -53,10 +56,7 @@ pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
   });
 
   html! {
-    button
-      class=([BUTTON_CLASS, BUTTON_ANCHOR_CLASS].join(" "))
-      popovertarget="org-selector-popover"
-    {
+    button class=(BUTTON_CLASS) popovertarget="org-selector-popover" {
       p class="text-base/[1] text-base-12" {
         (org_descriptor(ctx, active_org_id))
       }
@@ -66,11 +66,7 @@ pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
       }
     }
 
-    div
-      popover
-      id="org-selector-popover"
-      class=([POPOVER_CLASS, POPOVER_ANCHOR_CLASS].join(" "))
-    {
+    div popover id="org-selector-popover" class=(POPOVER_CLASS) {
       (menu_suspense)
     }
   }
