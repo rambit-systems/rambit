@@ -44,7 +44,8 @@ fn app_router() -> Router<AppState> {
       "/auth",
       Router::new()
         .nest("/signup", pages::signup_page::sub_router())
-        .nest("/login", pages::login_page::sub_router()),
+        .nest("/login", pages::login_page::sub_router())
+        .nest("/logout", pages::logout_page::sub_router()),
     )
     .nest("/org_selector", components::org_selector::sub_router())
     .nest(
