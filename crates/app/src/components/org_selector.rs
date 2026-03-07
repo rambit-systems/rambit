@@ -66,7 +66,7 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
   const ORG_SELECTOR_URL: &str = concatcp!(APP_PREFIX, "/org_selector");
 
   html! {
-    div
+    button
       class=(CLASS)
       hx-get=(ORG_SELECTOR_URL)
       hx-target="#org-selector-popover-contents"
