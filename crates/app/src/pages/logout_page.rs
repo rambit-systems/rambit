@@ -9,40 +9,50 @@ use maud::html;
 
 use crate::{
   APP_PREFIX,
-  components::{form_result::form_rejection, scripts::redirect_script},
+  components::{
+    form_result::form_rejection, icons::loading_circle,
+    scripts::redirect_script,
+  },
   ctx::{Ctx, ResponseSeed},
   page_wrapper::page_wrapper,
 };
 
 const ACTION_URL: &str = concatcp!(APP_PREFIX, "/auth/logout/action");
 
+const DESCRIPTION: &str = "Are you sure you want to log out? We're sad to see \
+                           you go but excited for you to come back.";
+
 async fn logout_page(
   ResponseSeed(ctx, resp): ResponseSeed,
 ) -> impl IntoResponse {
+  const OUTER_CLASS: &str =
+    "p-8 self-stretch sm:self-center w-auto elevation-flat";
+  const FORM_CLASS: &str = "max-w-80 flex flex-col gap-6";
+
   let page = html! {
-    div class="p-8 self-stretch md:self-center md:w-xl elevation-flat flex flex-col gap-8" {
-      p class="title" { "Log out" }
+    div class=(OUTER_CLASS) {
+      form
+        class=(FORM_CLASS)
+        hx-post=(ACTION_URL)
+        hx-target="#form-result"
+      {
+        p class="title" { "Log Out" }
+        p class="max-w-prose" { (DESCRIPTION) }
 
-      p class="max-w-prose" {
-        "Are you sure you want to log out? We're sad to see you go but excited for you to come back."
-      }
-
-      div class="flex flex-row" {
-        form
-          hx-post=(ACTION_URL)
-          hx-target="#logout-result"
-        {
-          button class="btn btn-critical-subtle w-full max-w-80 justify-between" {
-            div class="size-4" {}
-            "Log out"
-            div class="size-4 transition-opacity htmx-indicator" {
-              (crate::components::icons::loading_circle())
+        div class="flex flex-col gap-4" {
+          label {
+            input type="submit" class="hidden";
+            button class="btn btn-critical-subtle w-full max-w-80 justify-between" {
+              div class="size-4" {}
+              "Log Out"
+              div class="size-4 transition-opacity htmx-indicator" {
+                (loading_circle())
+              }
             }
           }
+          div id="form-result" class="contents" {}
         }
       }
-
-      div id="logout-result" class="contents" {}
     }
   };
 
