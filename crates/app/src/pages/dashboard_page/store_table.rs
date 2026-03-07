@@ -11,7 +11,9 @@ use crate::{
   components::icons::loading_circle,
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
   indicators,
-  resources::{AuthResult, fetch_entry_count_for_store, fetch_stores_for_requested_org},
+  resources::{
+    AuthResult, fetch_entry_count_for_store, fetch_stores_for_requested_org,
+  },
 };
 
 /// Renders the full store table card (shell + initial infill).
@@ -66,7 +68,11 @@ pub(super) async fn store_table_infill(
 fn store_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match ctx.fetch_cached(fetch_stores_for_requested_org, ()).await.as_ref() {
+      match ctx
+        .fetch_cached(fetch_stores_for_requested_org, ())
+        .await
+        .as_ref()
+      {
         Ok(stores) if stores.is_empty() => table_empty_body(3),
         Ok(stores) => store_rows(ctx.clone().into(), stores.clone()),
         Err(_) => table_error_body(3),
@@ -98,11 +104,18 @@ fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
   }
 }
 
-fn store_entry_count(ctx: Ctx<RequireAuth>, store_id: RecordId<Store>) -> Markup {
+fn store_entry_count(
+  ctx: Ctx<RequireAuth>,
+  store_id: RecordId<Store>,
+) -> Markup {
   ctx
     .suspend(
       move |ctx| async move {
-        match ctx.fetch_cached(fetch_entry_count_for_store, store_id).await.as_ref() {
+        match ctx
+          .fetch_cached(fetch_entry_count_for_store, store_id)
+          .await
+          .as_ref()
+        {
           Ok(Some(AuthResult::Ok(c))) => html! { (c) },
           Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
           Ok(None) => indicators::missing(),

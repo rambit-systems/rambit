@@ -6,8 +6,7 @@ use models::{Entry, RecordId};
 
 use crate::{
   components::{
-    form_result::form_rejection,
-    icons::loading_circle,
+    form_result::form_rejection, icons::loading_circle,
     scripts::redirect_script,
   },
   ctx::{RequireRequestedOrg, ResponseSeed},
@@ -65,10 +64,7 @@ pub async fn delete_entry_action(
   let org_id = ctx.requested_org_url_hook().id();
   let auth_ctx = ctx.clone().into_require_auth();
 
-  let entry = match auth_ctx
-    .fetch_cached(fetch_entry, entry_id)
-    .await
-    .as_ref()
+  let entry = match auth_ctx.fetch_cached(fetch_entry, entry_id).await.as_ref()
   {
     Ok(Some(e)) => e.clone(),
     Ok(None) => {
@@ -85,8 +81,7 @@ pub async fn delete_entry_action(
 
   match ctx.state().domain.delete_entry(entry_id).await {
     Ok(_) => {
-      let dashboard_url =
-        OrgUrlHook::new(org_id).dashboard_url();
+      let dashboard_url = OrgUrlHook::new(org_id).dashboard_url();
       resp.into_stream(redirect_script(dashboard_url, None))
     }
     Err(e) => {

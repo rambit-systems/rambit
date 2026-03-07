@@ -48,9 +48,7 @@ fn cache_row(
     .suspend(
       move |ctx| async move {
         match ctx.fetch_cached(fetch_cache, cache_id).await.as_ref() {
-          Ok(Some(cache)) => {
-            cache_data_row(cache.clone(), store_path)
-          }
+          Ok(Some(cache)) => cache_data_row(cache.clone(), store_path),
           Ok(None) => indicators::missing(),
           Err(_) => indicators::error(),
         }
@@ -66,7 +64,10 @@ fn cache_row(
     .render()
 }
 
-fn cache_data_row(cache: models::Cache, store_path: StorePath<String>) -> Markup {
+fn cache_data_row(
+  cache: models::Cache,
+  store_path: StorePath<String>,
+) -> Markup {
   let download_url = format!(
     "/api/v1/c/{cache_name}/download/{store_path}",
     cache_name = cache.name,

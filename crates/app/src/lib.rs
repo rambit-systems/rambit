@@ -57,10 +57,7 @@ fn app_router() -> Router<AppState> {
             .nest("/dash", pages::dashboard_page::sub_router())
             .nest("/create_cache", pages::create_cache_page::sub_router())
             .nest("/create_store", pages::create_store_page::sub_router())
-            .nest(
-              "/entry/{entry}",
-              pages::entry_page::sub_router(),
-            ),
+            .nest("/entry/{entry}", pages::entry_page::sub_router()),
         ),
     )
     .nest("/component-zoo", pages::zoo_page::sub_router())
