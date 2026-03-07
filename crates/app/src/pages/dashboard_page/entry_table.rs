@@ -7,6 +7,7 @@ use models::{Abbreviate, Cache, Entry, RecordId};
 use crate::{
   components::{icons::loading_circle, text_data::cache_link},
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
+  hooks::OrgUrlHook,
   resources::fetch_entries_for_requested_org,
 };
 
@@ -63,7 +64,11 @@ pub(super) async fn entry_table_infill(
 fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   let suspense = ctx.suspend(
     move |ctx| async move {
-      match ctx.fetch_cached(fetch_entries_for_requested_org, ()).await.as_ref() {
+      match ctx
+        .fetch_cached(fetch_entries_for_requested_org, ())
+        .await
+        .as_ref()
+      {
         Ok(entries) if entries.is_empty() => table_empty_body(4),
         Ok(entries) => entry_rows(ctx.clone().into(), entries.clone()),
         Err(_) => table_error_body(4),
@@ -87,6 +92,8 @@ fn entry_row(ctx: Ctx<RequireAuth>, entry: Entry) -> Markup {
   let abbreviated_path = entry.store_path.abbreviate();
   let full_path = entry.store_path.to_string();
 
+  let entry_href = OrgUrlHook::new(entry.org).entry_url(entry.id);
+
   let cache_count = entry.caches.len();
   let mut caches: Vec<RecordId<Cache>> = entry.caches.clone();
   caches.sort_unstable();
@@ -99,7 +106,9 @@ fn entry_row(ctx: Ctx<RequireAuth>, entry: Entry) -> Markup {
   html! {
     div class="table-row" {
       div class="table-cell" {
-        code title=(full_path) { (abbreviated_path) }
+        a href=(entry_href) class="text-link" {
+          code title=(full_path) { (abbreviated_path) }
+        }
       }
       div class="table-cell" {
         @for (i, cache_id) in visible_caches.iter().enumerate() {

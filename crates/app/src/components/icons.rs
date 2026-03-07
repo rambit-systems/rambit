@@ -24,6 +24,7 @@ hero_icons! {
   archive_box => "archive_box.svg",
   globe_alt => "globe_alt.svg",
   key_icon => "key.svg",
+  document_duplicate_hero_icon => "document_duplicate.svg",
 }
 
 pub fn loading_circle() -> Markup {

@@ -96,6 +96,11 @@ impl OrgUrlHook {
     format!("{base}/entry/{entry_id}", base = self.base_url())
   }
 
+  /// The URL to delete a given entry in the org.
+  pub fn entry_delete_url(&self, entry_id: RecordId<Entry>) -> String {
+    format!("{}/delete", self.entry_url(entry_id))
+  }
+
   /// The URL for the org's setting page, relative to the site root.
   pub fn settings_url(&self) -> String {
     format!("{}/settings", self.base_url())

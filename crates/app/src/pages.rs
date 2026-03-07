@@ -1,4 +1,5 @@
 pub mod create_cache_page;
+pub mod entry_page;
 pub mod create_org_page;
 pub mod create_store_page;
 pub mod dashboard_page;
