@@ -69,7 +69,7 @@ async fn create_org_page(
 
               hx-get=(VALIDATION_URL)
               hx-target="#name-hint"
-              hx-trigger="input throttle:0.25s"
+              hx-trigger="input"
               hx-indicator="next div";
 
             div class="size-6 shrink-0 transition-opacity htmx-indicator" {

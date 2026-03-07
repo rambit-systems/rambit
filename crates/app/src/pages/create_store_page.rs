@@ -73,7 +73,7 @@ async fn create_store_page(
 
               hx-get=(validation_url)
               hx-target="#name-hint"
-              hx-trigger="input throttle:0.25s"
+              hx-trigger="input"
               hx-indicator="next div";
 
             div class="size-6 shrink-0 transition-opacity htmx-indicator" {
