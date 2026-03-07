@@ -20,10 +20,10 @@ hero_icons! {
   check_hero_icon => "check.svg",
   cog_6_tooth_hero_icon => "cog_6_tooth.svg",
   plus_hero_icon => "plus.svg",
-  building_office_2 => "building_office_2.svg",
-  archive_box => "archive_box.svg",
-  globe_alt => "globe_alt.svg",
-  key_icon => "key.svg",
+  building_office_2_hero_icon => "building_office_2.svg",
+  archive_box_hero_icon => "archive_box.svg",
+  globe_alt_hero_icon => "globe_alt.svg",
+  key_hero_icon => "key.svg",
   document_duplicate_hero_icon => "document_duplicate.svg",
 }
 

@@ -16,25 +16,25 @@ pub(super) fn credentials_input() -> Markup {
         ACCESS_KEY_FIELD_NAME,
         "Access Key",
         "text",
-        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (key_icon()) } },
+        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (key_hero_icon()) } },
       ))
       (credentials_field(
         SECRET_ACCESS_KEY_FIELD_NAME,
         "Secret Access Key",
         "password",
-        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (key_icon()) } },
+        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (key_hero_icon()) } },
       ))
       (credentials_field(
         BUCKET_FIELD_NAME,
         "Bucket",
         "text",
-        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (archive_box()) } },
+        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (archive_box_hero_icon()) } },
       ))
       (credentials_field(
         ENDPOINT_FIELD_NAME,
         "Endpoint",
         "text",
-        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (globe_alt()) } },
+        html! { div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (globe_alt_hero_icon()) } },
       ))
     }
   }

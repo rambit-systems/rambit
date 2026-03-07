@@ -67,7 +67,7 @@ async fn create_cache_page(
 
         div class="flex flex-col gap-1" {
           label class="input-field" {
-            div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (archive_box()) }
+            div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (archive_box_hero_icon()) }
             input
               class="w-full py-2 focus-visible:outline-none"
               type="text" autofocus="true" required

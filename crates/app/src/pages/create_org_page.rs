@@ -61,7 +61,7 @@ async fn create_org_page(
 
         div class="flex flex-col gap-1" {
           label class="input-field" {
-            div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (building_office_2()) }
+            div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (building_office_2_hero_icon()) }
             input
               class="w-full py-2 focus-visible:outline-none"
               type="text" autofocus="true" required
