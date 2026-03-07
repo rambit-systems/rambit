@@ -151,7 +151,7 @@ fn org_row(
   html! {
     a href=(action_href) class=(class) {
       (icon_element)
-      span class="flex-1 text-ellipsis" {
+      span class="text-ellipsis" {
         (org_descriptor(ctx, org_id))
       }
     }
@@ -159,20 +159,23 @@ fn org_row(
 }
 
 fn extra_rows(ctx: Ctx<RequireAuth>) -> Markup {
+  const CLASS: &str = "btn-link btn-link-secondary btn-link-tight";
+  const ICON_CLASS: &str = "size-5 shrink-0 stroke-base-11 stroke-[2.0]";
+
   let active = ctx.active_org_url_hook();
   let active_org_settings_url = active.settings_url();
   const CREATE_ORG_URL: &str = concatcp!(APP_PREFIX, "/org/create_org");
 
   html! {
-    a href=(active_org_settings_url) class="btn-link btn-link-secondary btn-link-tight" {
-      div class="size-5 shrink-0 stroke-base-11 stroke-[2.0]" { (cog_6_tooth_hero_icon()) }
-      span class="flex-1 text-ellipsis" {
+    a href=(active_org_settings_url) class=(CLASS) {
+      div class=(ICON_CLASS) { (cog_6_tooth_hero_icon()) }
+      span class="text-ellipsis" {
         "Org Settings"
       }
     }
-    a href=(CREATE_ORG_URL) class="btn-link btn-link-secondary btn-link-tight" {
-      div class="size-5 shrink-0 stroke-base-11 stroke-[2.0]" { (plus_hero_icon()) }
-      span class="flex-1 text-ellipsis" {
+    a href=(CREATE_ORG_URL) class=(CLASS) {
+      div class=(ICON_CLASS) { (plus_hero_icon()) }
+      span class="text-ellipsis" {
         "Create Org"
       }
     }
