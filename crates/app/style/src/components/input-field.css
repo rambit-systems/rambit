@@ -3,7 +3,7 @@
 @layer components {
   .input-field {
     /* behavior */
-    @apply transition;
+    @apply transition-all;
 
     /* appearance */
     @apply text-base-12 rounded;
