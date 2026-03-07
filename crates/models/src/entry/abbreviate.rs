@@ -14,7 +14,7 @@ impl<S: AsRef<str>> Abbreviate for StorePath<S> {
       string.find('-').expect("no separator found in store path");
     let (digest, rest) = string.split_at(separator_index);
     format!(
-      "{first}…{last}{rest}",
+      "{first}...{last}{rest}",
       first = &digest[0..COUNT],
       last = &digest[ENCODED_DIGEST_SIZE - COUNT..ENCODED_DIGEST_SIZE]
     )
