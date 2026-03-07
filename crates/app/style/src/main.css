@@ -99,5 +99,5 @@ code, kbd, samp, pre, .font-mono {
 /* configure view transition */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 200ms;
+  animation-duration: 150ms;
 }
