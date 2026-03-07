@@ -5,6 +5,9 @@
     /* behavior */
     @apply cursor-pointer transition select-none button-squish;
 
+    /* disabled */
+    @apply disabled:saturate-50 disabled:opacity-60 disabled:cursor-not-allowed;
+
     /* appearance */
     @apply rounded-md outline-offset-2;
 

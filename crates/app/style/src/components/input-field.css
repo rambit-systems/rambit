@@ -5,6 +5,14 @@
     /* behavior */
     @apply transition-all;
 
+    /* disabled */
+    @apply has-[:disabled]:bg-base-3 has-[:disabled]:opacity-60 has-[:disabled]:cursor-not-allowed;
+
+    /* propagated disabled */
+    input {
+      @apply disabled:cursor-not-allowed;
+    }
+
     /* appearance */
     @apply text-base-12 rounded;
 

@@ -53,6 +53,13 @@ fn buttons_section() -> Markup {
       button class="btn btn-tight btn-critical" { "Critical" }
       button class="btn btn-tight btn-critical-subtle" { "Critical subtle" }
     }))
+    (tile("Disabled", html! {
+      button class="btn btn-primary" disabled? { "Primary" }
+      button class="btn btn-primary-subtle" disabled? { "Primary subtle" }
+      button class="btn btn-secondary" disabled? { "Secondary" }
+      button class="btn btn-critical" disabled? { "Critical" }
+      button class="btn btn-critical-subtle" disabled? { "Critical subtle" }
+    }))
   })
 }
 
@@ -88,6 +95,15 @@ fn input_field_section() -> Markup {
           class="w-full py-2 focus-visible:outline-none"
           type="email"
           placeholder="you@example.com";
+      }
+    }))
+    (tile("Disabled", html! {
+      div class="input-field" {
+        input
+          class="w-full py-2 focus-visible:outline-none"
+          type="text"
+          placeholder="Placeholder text"
+          disabled?;
       }
     }))
   })
