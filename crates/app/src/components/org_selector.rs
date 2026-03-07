@@ -30,46 +30,24 @@ pub fn sub_router() -> Router<AppState> {
 }
 
 pub fn org_selector(ctx: Ctx<RequireAuth>) -> Markup {
-  html! {
-    (remove_popover_on_click_outside())
-    (org_selector_trigger(ctx))
-  }
-}
-
-fn remove_popover_on_click_outside() -> Markup {
-  const SCRIPT: &str = r##"
-    document.addEventListener('click', function(e) {
-      const popover = document.querySelector('[data-popover]');
-      const trigger = document.querySelector('[hx-target="#org-selector-popover-contents"]');
-  
-      if (popover && !popover.contains(e.target) && !trigger.contains(e.target)) {
-        if (document.startViewTransition) {
-          document.startViewTransition(() => popover.remove());
-        } else {
-          popover.remove();
-        }
-      }
-    });
-  "##;
-
-  html! {
-    script { (PreEscaped(SCRIPT)) }
-  }
-}
-
-fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
   let active_org_id = ctx.active_org_url_hook().id();
 
-  const CLASS: &str = "transition-colors hover:bg-base-3 active:bg-base-4 \
-                       button-squish cursor-pointer px-2 py-1 rounded flex \
-                       flex-col gap-0.5 text-sm leading-none gap-0 relative";
+  const BUTTON_CLASS: &str = "transition-colors hover:bg-base-3 \
+                              active:bg-base-4 button-squish cursor-pointer \
+                              px-2 py-1 rounded flex flex-col gap-0.5 text-sm \
+                              leading-none gap-0";
+  const BUTTON_ANCHOR_CLASS: &str = "[anchor-name:--org-selector-anchor]";
+  const POPOVER_CLASS: &str = "min-w-56 elevation-lv1 p-2 rounded";
+  const POPOVER_ANCHOR_CLASS: &str = "[position-anchor:--org-selector-anchor] \
+                                      top-[anchor(bottom)] \
+                                      left-[anchor(right)] -translate-x-full \
+                                      translate-y-[calc(var(--spacing)*4)]";
   const ORG_SELECTOR_URL: &str = concatcp!(APP_PREFIX, "/org_selector");
 
   html! {
     button
-      class=(CLASS)
-      hx-get=(ORG_SELECTOR_URL)
-      hx-target="#org-selector-popover-contents"
+      class=([BUTTON_CLASS, BUTTON_ANCHOR_CLASS].join(" "))
+      popovertarget="org-selector-popover"
     {
       p class="text-base/[1] text-base-12" {
         (org_descriptor(ctx, active_org_id))
@@ -78,19 +56,24 @@ fn org_selector_trigger(ctx: Ctx<RequireAuth>) -> Markup {
         div class="size-4 shrink-0 stroke-base-11 stroke-[2.0]" { (chevron_down_hero_icon()) }
         p { "Switch Orgs" }
       }
-
-      div id="org-selector-popover-contents" class="contents" {}
     }
-  }
-}
 
-fn popover_wrapper(children: Markup) -> Markup {
-  const POPOVER_CLASS: &str =
-    "absolute right-0 top-[calc(100%+(var(--spacing)*4))] min-w-56 \
-     elevation-lv1 z-50 p-2 flex flex-col gap-1 leading-none";
-  html! {
-    div data-popover class=(POPOVER_CLASS) {
-      (children)
+    div
+      popover
+      id="org-selector-popover"
+      class=([POPOVER_CLASS, POPOVER_ANCHOR_CLASS].join(" "))
+
+      hx-get=(ORG_SELECTOR_URL)
+      hx-target="#org-selector-popover-contents"
+      hx-trigger="toggle"
+      hx-sync="this:replace"
+    {
+      div id="org-selector-popover-contents" class="flex flex-col gap-1 leading-none" {
+        div class="py-3 w-full flex flex-row gap-2 items-center justify-center text-base-11" {
+          "Loading"
+          div class="size-4" { (loading_circle()) }
+        }
+      }
     }
   }
 }
@@ -100,8 +83,7 @@ async fn org_selector_menu(
 ) -> impl IntoResponse {
   // upgrade to RequireAuth with custom error
   let Some(ctx) = ctx.into_require_auth() else {
-    return resp
-      .into_stream(popover_wrapper(form_rejection(UNAUTHENTICATED_MESSAGE)));
+    return resp.into_stream(form_rejection(UNAUTHENTICATED_MESSAGE));
   };
 
   let auth_user = ctx.auth_user();
@@ -112,15 +94,13 @@ async fn org_selector_menu(
     .collect::<Vec<_>>();
 
   resp.into_stream(html! {
-    (popover_wrapper(html! {
-      @ for org_row in org_rows {
-        (org_row)
-      }
-      div class="p-1" {
-        div class="h-0 border-t-2 border-base-6/75" {}
-      }
-      (extra_rows(ctx))
-    }))
+    @ for org_row in org_rows {
+      (org_row)
+    }
+    div class="p-1" {
+      div class="h-0 border-t-2 border-base-6/75" {}
+    }
+    (extra_rows(ctx))
   })
 }
 
