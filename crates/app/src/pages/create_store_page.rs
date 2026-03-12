@@ -70,6 +70,7 @@ async fn create_store_page(
               class="w-full py-2 focus-visible:outline-none"
               type="text" autofocus="true" required
               placeholder="Store Name" name=(NAME_FIELD_NAME)
+              autocorrect="off" spellcheck="false" autocomplete="off"
 
               hx-get=(validation_url)
               hx-target="#name-hint"

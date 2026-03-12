@@ -66,6 +66,7 @@ async fn create_org_page(
               class="w-full py-2 focus-visible:outline-none"
               type="text" autofocus="true" required
               placeholder="Org Name" name=(NAME_FIELD_NAME)
+              autocorrect="off" spellcheck="false" autocomplete="off"
 
               hx-get=(VALIDATION_URL)
               hx-target="#name-hint"
