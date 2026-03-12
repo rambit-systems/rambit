@@ -1,8 +1,8 @@
 //! Cache table component and HTMX infill handler for the dashboard.
 
 use axum::response::IntoResponse;
-use maud::{Markup, Render, html};
-use models::{Cache, PvCache, RecordId, Visibility};
+use maud::{Markup, html};
+use models::{PvCache, Visibility};
 
 use crate::{
   components::{
@@ -11,12 +11,10 @@ use crate::{
       overlaid_critical_message_table_body, overlaid_loading_table_body,
       overlaid_message_table_body,
     },
+    text_data::cache_entry_count,
   },
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
-  indicators,
-  resources::{
-    AuthResult, fetch_caches_for_requested_org, fetch_entry_count_for_cache,
-  },
+  resources::fetch_caches_for_requested_org,
 };
 
 /// Renders the full cache table card (shell + initial infill).
@@ -119,29 +117,6 @@ fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
       }
     }
   }
-}
-
-fn cache_entry_count(
-  ctx: Ctx<RequireAuth>,
-  cache_id: RecordId<Cache>,
-) -> Markup {
-  ctx
-    .suspend(
-      move |ctx| async move {
-        match ctx
-          .fetch_cached(fetch_entry_count_for_cache, cache_id)
-          .await
-          .as_ref()
-        {
-          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
-          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
-          Ok(None) => indicators::missing(),
-          Err(_) => indicators::error(),
-        }
-      },
-      indicators::loading(),
-    )
-    .render()
 }
 
 fn empty_body(ctx: Ctx<RequireRequestedOrg>) -> Markup {

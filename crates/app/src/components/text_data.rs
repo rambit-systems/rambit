@@ -1,11 +1,14 @@
 use maud::{Markup, Render, html};
-use models::{Cache, Org, RecordId};
+use models::{Cache, Org, RecordId, Store};
 
 use crate::{
   ctx::{Ctx, RequireAuth},
   hooks::OrgHook,
   indicators,
-  resources::{fetch_cache, fetch_org},
+  resources::{
+    AuthResult, fetch_cache, fetch_entry_count_for_cache,
+    fetch_entry_count_for_store, fetch_org,
+  },
 };
 
 pub fn org_descriptor(ctx: Ctx<RequireAuth>, org_id: RecordId<Org>) -> Markup {
@@ -41,4 +44,50 @@ pub fn cache_link(ctx: Ctx<RequireAuth>, cache_id: RecordId<Cache>) -> Markup {
     indicators::loading(),
   );
   suspend.render()
+}
+
+pub fn cache_entry_count(
+  ctx: Ctx<RequireAuth>,
+  cache_id: RecordId<Cache>,
+) -> Markup {
+  ctx
+    .suspend(
+      move |ctx| async move {
+        match ctx
+          .fetch_cached(fetch_entry_count_for_cache, cache_id)
+          .await
+          .as_ref()
+        {
+          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
+          Ok(None) => indicators::missing(),
+          Err(_) => indicators::error(),
+        }
+      },
+      indicators::loading(),
+    )
+    .render()
+}
+
+pub fn store_entry_count(
+  ctx: Ctx<RequireAuth>,
+  store_id: RecordId<Store>,
+) -> Markup {
+  ctx
+    .suspend(
+      move |ctx| async move {
+        match ctx
+          .fetch_cached(fetch_entry_count_for_store, store_id)
+          .await
+          .as_ref()
+        {
+          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
+          Ok(None) => indicators::missing(),
+          Err(_) => indicators::error(),
+        }
+      },
+      indicators::loading(),
+    )
+    .render()
 }

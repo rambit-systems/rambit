@@ -1,10 +1,10 @@
 //! Store table component and HTMX infill handler for the dashboard.
 
 use axum::response::IntoResponse;
-use maud::{Markup, Render, html};
+use maud::{Markup, html};
 use models::{
   LocalStorageCredentials, MemoryStorageCredentials, PvR2StorageCredentials,
-  PvStorageCredentials, PvStore, RecordId, Store,
+  PvStorageCredentials, PvStore,
 };
 
 use crate::{
@@ -14,12 +14,10 @@ use crate::{
       overlaid_critical_message_table_body, overlaid_loading_table_body,
       overlaid_message_table_body,
     },
+    text_data::store_entry_count,
   },
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
-  indicators,
-  resources::{
-    AuthResult, fetch_entry_count_for_store, fetch_stores_for_requested_org,
-  },
+  resources::fetch_stores_for_requested_org,
 };
 
 /// Renders the full store table card (shell + initial infill).
@@ -108,29 +106,6 @@ fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
       div class="table-cell" { (store_entry_count(ctx, store.id)) }
     }
   }
-}
-
-fn store_entry_count(
-  ctx: Ctx<RequireAuth>,
-  store_id: RecordId<Store>,
-) -> Markup {
-  ctx
-    .suspend(
-      move |ctx| async move {
-        match ctx
-          .fetch_cached(fetch_entry_count_for_store, store_id)
-          .await
-          .as_ref()
-        {
-          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
-          Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
-          Ok(None) => indicators::missing(),
-          Err(_) => indicators::error(),
-        }
-      },
-      indicators::loading(),
-    )
-    .render()
 }
 
 fn storage_type_label(creds: &PvStorageCredentials) -> String {
