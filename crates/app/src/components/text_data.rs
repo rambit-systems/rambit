@@ -2,6 +2,7 @@ use maud::{Markup, Render, html};
 use models::{Cache, Org, RecordId, Store};
 
 use crate::{
+  components::misc_text::singular_or_plural,
   ctx::{Ctx, RequireAuth},
   hooks::OrgHook,
   indicators,
@@ -58,7 +59,9 @@ pub fn cache_entry_count(
           .await
           .as_ref()
         {
-          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Ok(c))) => html! {
+            (c) " " (singular_or_plural(*c as usize, "entry", "entries"))
+          },
           Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
           Ok(None) => indicators::missing(),
           Err(_) => indicators::error(),
@@ -81,7 +84,9 @@ pub fn store_entry_count(
           .await
           .as_ref()
         {
-          Ok(Some(AuthResult::Ok(c))) => html! { (c) },
+          Ok(Some(AuthResult::Ok(c))) => html! {
+            (c) " " (singular_or_plural(*c as usize, "entry", "entries"))
+          },
           Ok(Some(AuthResult::Unauthorized)) => indicators::unauthorized(),
           Ok(None) => indicators::missing(),
           Err(_) => indicators::error(),

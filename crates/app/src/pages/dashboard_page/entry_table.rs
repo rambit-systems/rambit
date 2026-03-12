@@ -7,6 +7,7 @@ use models::{Abbreviate, Cache, Entry, RecordId};
 use crate::{
   components::{
     icons::loading_circle,
+    misc_text::singular_or_plural,
     table::{
       overlaid_critical_message_table_body, overlaid_loading_table_body,
       overlaid_message_table_body,
@@ -108,7 +109,10 @@ fn entry_row(ctx: Ctx<RequireAuth>, entry: Entry) -> Markup {
     caches.into_iter().take(ABBREVIATE_AFTER_COUNT).collect();
 
   let file_size = entry.intrensic_data.nar_size.to_string();
-  let ref_count = entry.intrensic_data.references.len().to_string();
+  let ref_count = entry.intrensic_data.references.len();
+  let ref_count = html! {
+    (ref_count) " " (singular_or_plural(ref_count, "ref", "refs"))
+  };
 
   html! {
     div class="table-row" {

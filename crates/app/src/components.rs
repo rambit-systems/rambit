@@ -2,6 +2,7 @@ pub mod account_menu;
 pub mod form_layout;
 pub mod form_result;
 pub mod icons;
+pub mod misc_text;
 pub mod org_selector;
 pub mod scripts;
 pub mod table;
