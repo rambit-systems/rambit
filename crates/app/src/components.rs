@@ -4,4 +4,5 @@ pub mod form_result;
 pub mod icons;
 pub mod org_selector;
 pub mod scripts;
+pub mod table;
 pub mod text_data;

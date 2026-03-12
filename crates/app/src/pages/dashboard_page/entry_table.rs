@@ -5,7 +5,14 @@ use maud::{Markup, html};
 use models::{Abbreviate, Cache, Entry, RecordId};
 
 use crate::{
-  components::{icons::loading_circle, text_data::cache_link},
+  components::{
+    icons::loading_circle,
+    table::{
+      overlaid_critical_message_table_body, overlaid_loading_table_body,
+      overlaid_message_table_body,
+    },
+    text_data::cache_link,
+  },
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
   hooks::OrgUrlHook,
   resources::fetch_entries_for_requested_org,
@@ -69,12 +76,12 @@ fn entry_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
         .await
         .as_ref()
       {
-        Ok(entries) if entries.is_empty() => table_empty_body(4),
+        Ok(entries) if entries.is_empty() => empty_body(),
         Ok(entries) => entry_rows(ctx.clone().into(), entries.clone()),
-        Err(_) => table_error_body(4),
+        Err(_) => error_body(),
       }
     },
-    table_placeholder_rows(4, 3),
+    overlaid_loading_table_body(),
   );
 
   html! { (suspense) }
@@ -123,38 +130,18 @@ fn entry_row(ctx: Ctx<RequireAuth>, entry: Entry) -> Markup {
   }
 }
 
-fn table_empty_body(cols: usize) -> Markup {
-  html! {
-    div class="table-row" {
-      div class="table-cell py-4 text-center text-base-11"
-          colspan=(cols.to_string())
-      {
-        "No entries yet. Upload some from the CLI to see them here."
-      }
-    }
-  }
+fn empty_body() -> Markup {
+  overlaid_message_table_body(
+    html! { "Looks like you don't have any entries." },
+    html! { "Upload an entry from the CLI to get started." },
+  )
 }
 
-fn table_error_body(cols: usize) -> Markup {
-  html! {
-    div class="table-row" {
-      div class="table-cell py-4 text-center text-critical-11"
-          colspan=(cols.to_string())
-      {
-        "Failed to load entries."
-      }
-    }
-  }
-}
-
-fn table_placeholder_rows(cols: usize, n: usize) -> Markup {
-  html! {
-    @for _ in 0..n {
-      div class="table-row" {
-        div class="table-cell py-2" colspan=(cols.to_string()) {
-          div class="h-4 rounded bg-base-4 animate-pulse" {}
-        }
-      }
-    }
-  }
+fn error_body() -> Markup {
+  overlaid_critical_message_table_body(
+    html! {
+      "Failed to load entries."
+    },
+    html! {},
+  )
 }

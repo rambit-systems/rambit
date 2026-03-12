@@ -28,7 +28,7 @@
   /* body rows */
   .table > :is(tbody, .table-row-group) :is(tr, .table-row) {
     /* color */
-    @apply bg-base-1 even:bg-base-3 hover:bg-base-4;
+    @apply bg-base-1 even:bg-base-3;
 
     /* border */
     @apply border-b-base-6 border-b last:border-b-0;

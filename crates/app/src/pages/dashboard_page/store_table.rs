@@ -8,7 +8,13 @@ use models::{
 };
 
 use crate::{
-  components::icons::loading_circle,
+  components::{
+    icons::loading_circle,
+    table::{
+      overlaid_critical_message_table_body, overlaid_loading_table_body,
+      overlaid_message_table_body,
+    },
+  },
   ctx::{Ctx, RequireAuth, RequireRequestedOrg, ResponseSeed},
   indicators,
   resources::{
@@ -73,12 +79,12 @@ fn store_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
         .await
         .as_ref()
       {
-        Ok(stores) if stores.is_empty() => table_empty_body(3),
+        Ok(stores) if stores.is_empty() => empty_body(ctx),
         Ok(stores) => store_rows(ctx.clone().into(), stores.clone()),
-        Err(_) => table_error_body(3),
+        Err(_) => error_body(),
       }
     },
-    table_placeholder_rows(3, 3),
+    overlaid_loading_table_body(),
   );
 
   html! { (suspense) }
@@ -142,38 +148,23 @@ fn storage_type_label(creds: &PvStorageCredentials) -> String {
   }
 }
 
-fn table_empty_body(cols: usize) -> Markup {
-  html! {
-    div class="table-row" {
-      div class="table-cell py-4 text-center text-base-11"
-          colspan=(cols.to_string())
-      {
-        "No stores yet."
-      }
-    }
-  }
+fn empty_body(ctx: Ctx<RequireRequestedOrg>) -> Markup {
+  let create_url = ctx.requested_org_url_hook().create_cache_url();
+
+  overlaid_message_table_body(
+    html! { "Looks like you don't have any caches." },
+    html! {
+      a href=(create_url) class="text-link text-link-primary" { "Create one" }
+      " to get started."
+    },
+  )
 }
 
-fn table_error_body(cols: usize) -> Markup {
-  html! {
-    div class="table-row" {
-      div class="table-cell py-4 text-center text-critical-11"
-          colspan=(cols.to_string())
-      {
-        "Failed to load stores."
-      }
-    }
-  }
-}
-
-fn table_placeholder_rows(cols: usize, n: usize) -> Markup {
-  html! {
-    @for _ in 0..n {
-      div class="table-row" {
-        div class="table-cell py-2" colspan=(cols.to_string()) {
-          div class="h-4 rounded bg-base-4 animate-pulse" {}
-        }
-      }
-    }
-  }
+fn error_body() -> Markup {
+  overlaid_critical_message_table_body(
+    html! {
+      "Failed to load caches."
+    },
+    html! {},
+  )
 }
