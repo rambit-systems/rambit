@@ -53,8 +53,8 @@ pub(super) fn store_table(ctx: Ctx<RequireRequestedOrg>) -> Markup {
       div class="table-header-group" {
         div class="table-row" {
           div class="table-cell" { "Name" }
-          div class="table-cell" { "Entry Count" }
           div class="table-cell" { "Storage Type" }
+          div class="table-cell" { "Entry Count" }
         }
       }
       div id="store-table-body" class="table-row-group" {
@@ -104,8 +104,8 @@ fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
   html! {
     div class="table-row" {
       div class="table-cell" { code { (store.name.as_ref()) } }
-      div class="table-cell" { (store_entry_count(ctx, store.id)) }
       div class="table-cell" { (storage_type) }
+      div class="table-cell" { (store_entry_count(ctx, store.id)) }
     }
   }
 }
