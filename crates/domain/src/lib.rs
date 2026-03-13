@@ -3,7 +3,7 @@
 pub mod authenticate;
 mod billing;
 pub mod create;
-mod delete_entry;
+pub mod delete_entry;
 pub mod download;
 pub mod mutate_user;
 pub mod narinfo;
