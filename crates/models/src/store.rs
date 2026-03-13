@@ -41,33 +41,6 @@ impl Store {
   }
 }
 
-/// The public view of [`Store`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PvStore {
-  /// The store's ID.
-  pub id:          RecordId<Store>,
-  /// The store's org.
-  pub org:         RecordId<Org>,
-  /// The store's credentials.
-  pub credentials: PvStorageCredentials,
-  /// The store's configuration.
-  pub config:      StoreConfiguration,
-  /// The store's nickname.
-  pub name:        EntityName,
-}
-
-impl From<Store> for PvStore {
-  fn from(value: Store) -> Self {
-    PvStore {
-      id:          value.id,
-      org:         value.org,
-      credentials: value.credentials.into(),
-      config:      value.config,
-      name:        value.name,
-    }
-  }
-}
-
 /// The configuration for a [`Store`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StoreConfiguration {}

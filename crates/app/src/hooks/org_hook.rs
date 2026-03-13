@@ -1,23 +1,18 @@
 use maud::{Markup, PreEscaped};
-use models::{AuthUser, Entry, Org, PvOrg, RecordId};
+use models::{AuthUser, Entry, Org, RecordId};
 
 use crate::{APP_PREFIX, indicators};
 
 /// A hook that provides data on an [`Org`].
 #[derive(Clone)]
 pub struct OrgHook {
-  org:  PvOrg,
+  org:  Org,
   user: AuthUser,
 }
 
 impl OrgHook {
   /// Creates a new [`OrgHook`]. Requires [`AuthUser`].
-  pub fn new(org: Org, user: AuthUser) -> Self {
-    Self {
-      org: org.into(),
-      user,
-    }
-  }
+  pub fn new(org: Org, user: AuthUser) -> Self { Self { org, user } }
 
   #[allow(dead_code)]
   pub fn id(&self) -> RecordId<Org> { self.org.id }

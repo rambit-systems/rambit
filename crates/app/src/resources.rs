@@ -1,5 +1,5 @@
 use domain::db::DatabaseError;
-use models::{Cache, Entry, Org, PvCache, PvStore, RecordId, Store};
+use models::{Cache, Entry, Org, RecordId, Store};
 
 use crate::ctx::{Ctx, RequireAuth, RequireRequestedOrg};
 
@@ -40,7 +40,7 @@ pub async fn fetch_entry(
 pub async fn fetch_caches_for_requested_org(
   ctx: Ctx<RequireRequestedOrg>,
   _: (),
-) -> Result<Vec<PvCache>, DatabaseError> {
+) -> Result<Vec<Cache>, DatabaseError> {
   let org_id = ctx.requested_org_url_hook().id();
   let auth_ctx = ctx.clone().into_require_auth();
 
@@ -55,7 +55,7 @@ pub async fn fetch_caches_for_requested_org(
   let mut result = Vec::with_capacity(cache_ids.len());
   for id in cache_ids {
     match auth_ctx.fetch_cached(fetch_cache, id).await.as_ref() {
-      Ok(Some(cache)) => result.push(cache.clone().into()),
+      Ok(Some(cache)) => result.push(cache.clone()),
       Ok(None) => {}
       Err(e) => tracing::error!("failed to fetch cache {id}: {e}"),
     }
@@ -67,7 +67,7 @@ pub async fn fetch_caches_for_requested_org(
 pub async fn fetch_stores_for_requested_org(
   ctx: Ctx<RequireRequestedOrg>,
   _: (),
-) -> Result<Vec<PvStore>, DatabaseError> {
+) -> Result<Vec<Store>, DatabaseError> {
   let org_id = ctx.requested_org_url_hook().id();
   let auth_ctx = ctx.clone().into_require_auth();
 
@@ -82,7 +82,7 @@ pub async fn fetch_stores_for_requested_org(
   let mut result = Vec::with_capacity(store_ids.len());
   for id in store_ids {
     match auth_ctx.fetch_cached(fetch_store, id).await.as_ref() {
-      Ok(Some(store)) => result.push(store.clone().into()),
+      Ok(Some(store)) => result.push(store.clone()),
       Ok(None) => {}
       Err(e) => tracing::error!("failed to fetch store {id}: {e}"),
     }

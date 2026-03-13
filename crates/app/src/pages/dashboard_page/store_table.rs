@@ -3,8 +3,8 @@
 use axum::response::IntoResponse;
 use maud::{Markup, html};
 use models::{
-  LocalStorageCredentials, MemoryStorageCredentials, PvR2StorageCredentials,
-  PvStorageCredentials, PvStore,
+  LocalStorageCredentials, MemoryStorageCredentials, R2StorageCredentials,
+  StorageCredentials, Store,
 };
 
 use crate::{
@@ -88,7 +88,7 @@ fn store_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   html! { (suspense) }
 }
 
-fn store_rows(ctx: Ctx<RequireAuth>, stores: Vec<PvStore>) -> Markup {
+fn store_rows(ctx: Ctx<RequireAuth>, stores: Vec<Store>) -> Markup {
   html! {
     @for store in stores {
       (store_row(ctx.clone(), store))
@@ -96,7 +96,7 @@ fn store_rows(ctx: Ctx<RequireAuth>, stores: Vec<PvStore>) -> Markup {
   }
 }
 
-fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
+fn store_row(ctx: Ctx<RequireAuth>, store: Store) -> Markup {
   let storage_type = storage_type_label(&store.credentials);
 
   html! {
@@ -108,16 +108,15 @@ fn store_row(ctx: Ctx<RequireAuth>, store: PvStore) -> Markup {
   }
 }
 
-fn storage_type_label(creds: &PvStorageCredentials) -> String {
+fn storage_type_label(creds: &StorageCredentials) -> String {
   match creds {
-    PvStorageCredentials::R2(PvR2StorageCredentials::Default {
-      bucket,
-      ..
+    StorageCredentials::R2(R2StorageCredentials::Default {
+      bucket, ..
     }) => format!("R2 ({bucket})"),
-    PvStorageCredentials::Memory(MemoryStorageCredentials) => {
+    StorageCredentials::Memory(MemoryStorageCredentials) => {
       "Memory (DEBUG)".into()
     }
-    PvStorageCredentials::Local(LocalStorageCredentials(path)) => {
+    StorageCredentials::Local(LocalStorageCredentials(path)) => {
       format!("Local (DEBUG, \"{}\")", path.display())
     }
   }

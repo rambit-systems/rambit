@@ -2,7 +2,7 @@
 
 use axum::response::IntoResponse;
 use maud::{Markup, html};
-use models::{PvCache, Visibility};
+use models::{Cache, Visibility};
 
 use crate::{
   components::{
@@ -85,7 +85,7 @@ fn cache_table_data(ctx: Ctx<RequireRequestedOrg>) -> Markup {
   html! { (suspense) }
 }
 
-fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<PvCache>) -> Markup {
+fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<Cache>) -> Markup {
   html! {
     @for cache in caches {
       (cache_row(ctx.clone(), cache))
@@ -93,7 +93,7 @@ fn cache_rows(ctx: Ctx<RequireAuth>, caches: Vec<PvCache>) -> Markup {
   }
 }
 
-fn cache_row(ctx: Ctx<RequireAuth>, cache: PvCache) -> Markup {
+fn cache_row(ctx: Ctx<RequireAuth>, cache: Cache) -> Markup {
   html! {
     div class="table-row" {
       // name
