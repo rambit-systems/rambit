@@ -21,23 +21,27 @@ use crate::Org;
 pub struct User {
   /// The user's ID.
   #[model(id)]
-  pub id:               RecordId<User>,
+  pub id: RecordId<User>,
+
   /// The user's personal org.
-  pub personal_org:     RecordId<Org>,
+  pub personal_org: RecordId<Org>,
   /// The user's named orgs.
-  pub orgs:             Vec<RecordId<Org>>,
+  pub orgs:         Vec<RecordId<Org>>,
+
   /// The user's name.
-  pub name:             HumanName,
+  pub name:      HumanName,
   /// An abbreviated form of the user's name.
-  pub name_abbr:        HumanName,
+  pub name_abbr: HumanName,
   /// The user's email address.
-  pub email:            EmailAddress,
+  pub email:     EmailAddress,
+
   /// The user's authentication secrets.
   pub auth:             UserAuthCredentials,
   /// The index of the [`Org`] that the user is currently operating as.
   pub active_org_index: u8,
+
   /// The customer ID for this org in Paddle.
-  pub customer_id:      PaddleCustomerId,
+  pub customer_id: PaddleCustomerId,
 }
 
 impl User {
@@ -100,23 +104,27 @@ pub enum UserAuthCredentials {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthUser {
   /// The user's ID.
-  pub id:               RecordId<User>,
+  pub id: RecordId<User>,
+
   /// The user's personal org.
-  pub personal_org:     RecordId<Org>,
+  pub personal_org: RecordId<Org>,
   /// The user's named orgs.
-  pub orgs:             Vec<RecordId<Org>>,
+  pub orgs:         Vec<RecordId<Org>>,
+
   /// The user's name.
-  pub name:             HumanName,
+  pub name:      HumanName,
   /// An abbreviated form of the user's name.
-  pub name_abbr:        HumanName,
+  pub name_abbr: HumanName,
   /// The user's email address.
-  pub email:            EmailAddress,
+  pub email:     EmailAddress,
+
   /// The hash of the user's authentication secrets.
   pub auth_hash_bytes:  Box<[u8]>,
   /// The index of the [`Org`] that the user is currently operating as.
   pub active_org_index: u8,
+
   /// The customer ID for this org in Paddle.
-  pub customer_id:      PaddleCustomerId,
+  pub customer_id: PaddleCustomerId,
 }
 
 impl From<User> for AuthUser {
