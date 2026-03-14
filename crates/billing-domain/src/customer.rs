@@ -32,6 +32,7 @@ impl BillingService {
     };
 
     // extract the ID if it's a duplicate customer error
+    // error string from this page: https://developer.paddle.com/build/customers/create-update-customers
     let id = match err {
       paddle_rust_sdk::Error::PaddleApi(ErrorResponse {
         error: PaddleApiError { code, detail, .. },
