@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub const INTERNAL_ERROR_MESSAGE: &str =
   "Oops! This is embarrasing... looks like something unexpected went wrong :/";
 pub const SUCCESS_MESSAGE: &str = "Success! Redirecting...";
