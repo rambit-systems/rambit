@@ -8,6 +8,7 @@ mod org;
 #[cfg(feature = "session")]
 mod session;
 mod store;
+mod usage;
 mod user;
 
 pub use model::{self, RecordId};
